@@ -17129,6 +17129,221 @@ table.lxp-t{width:100%;border-collapse:collapse;font-size:14px}
   if (!boot()) { var n = 0, iv = setInterval(function () { if (boot() || ++n > 60) clearInterval(iv); }, 250); }
 })();
 </script>
+    <!-- ===== YAMAQ 2: Fənn panelləri, çoxlu qapaq, qiymət, redaktə =====
+     Yalnız BİR DƏFƏ, «İmtahan Qeydiyyatı» yamağının ALTINA, </body>-dən əvvələ yapışdır. Heç nə silmə. -->
+<style id="lq-css">
+/* portalın səliqəsi: kəsilən düymə və sınan «Növ» nişanı düzəlir */
+.lxp-ct{white-space:nowrap}.lxp-t{min-width:880px}.lxp-t th,.lxp-t td{padding:12px 10px}
+.lxp-bt{min-width:0;padding:11px 15px;white-space:nowrap}.lxp-hero{background:linear-gradient(120deg,#0b1f45,#1d4f91 70%,#a98531 150%)}
+@media(max-width:760px){.lxp-t{min-width:0}.lxp-t th,.lxp-t td{padding:9px 0}}
+/* ana səhifə */
+#lq-home{max-width:960px;margin:26px auto 0;padding:0 14px}
+.lq-h{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:14px}
+.lq-h h2{margin:0;font-size:22px;color:#0b1f45;font-weight:900}.lq-h small{display:block;color:#64748b;font-size:13px;margin-top:3px}
+.lq-all{border:1px solid #cddcf5;background:#fff;color:#0a2f7a;border-radius:99px;padding:9px 15px;font:800 13px inherit;font-family:inherit;cursor:pointer;white-space:nowrap}
+.lq-sg{margin-bottom:26px}.lq-sh{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px;padding-left:10px;border-left:4px solid #c9a24f}
+.lq-sh b{font-size:17px;color:#0f2147}.lq-sh button{border:0;background:none;color:#1d4f91;font:800 13px inherit;font-family:inherit;cursor:pointer}
+.lq-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.lq-c{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 18px rgba(10,47,122,.1);border:1px solid #e3ebf8;display:flex;flex-direction:column;cursor:pointer;transition:box-shadow .15s}
+.lq-c:hover{box-shadow:0 10px 24px rgba(10,47,122,.18)}.lq-c.off{cursor:default;filter:saturate(.5)}
+.lq-ss{position:relative;aspect-ratio:16/9;background:#0b1f45;overflow:hidden}
+.lq-ss img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .9s ease}.lq-ss img.on{opacity:1}
+.lq-bg{position:absolute;left:8px;top:8px;background:#ea580c;color:#fff;border-radius:9px;padding:5px 9px;font-weight:800;font-size:11px;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+.lq-bg.pd{background:#0a2f7a}.lq-st{position:absolute;right:8px;top:8px;background:rgba(15,23,42,.8);color:#fff;border-radius:9px;padding:5px 9px;font-size:11px;font-weight:800}
+.lq-dts{position:absolute;left:0;right:0;bottom:7px;display:flex;justify-content:center;gap:5px}
+.lq-dts i{width:16px;height:3px;border-radius:2px;background:rgba(255,255,255,.45);transition:background .4s}.lq-dts i.on{background:#fff}
+.lq-cb{padding:12px 13px 14px;display:flex;flex-direction:column;gap:9px;flex:1}
+.lq-cb h4{margin:0;font-size:15px;line-height:1.3;color:#0f2147}
+.lq-cb ul{list-style:none;margin:0;padding:0;font-size:12.5px;color:#475569;display:grid;gap:5px}
+.lq-cb button{margin-top:auto;border:0;border-radius:99px;padding:10px;font:800 13px inherit;font-family:inherit;color:#fff;background:linear-gradient(135deg,#1d4f91,#0a2f7a);cursor:pointer}
+#lq-pn{position:fixed;inset:0;z-index:99991;background:#eef2f9;overflow-y:auto}
+#lq-pn .lq-w{max-width:960px;margin:0 auto;padding:14px}
+.lq-chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 14px}
+.lq-chips button{flex:none;border:1px solid #cddcf5;background:#fff;color:#0a2f7a;border-radius:99px;padding:9px 15px;font:800 13px inherit;font-family:inherit;cursor:pointer}
+.lq-chips button.on{background:#0a2f7a;color:#fff;border-color:#0a2f7a}
+/* admin */
+.lq-box{border:1.5px dashed #c9a24f;border-radius:14px;padding:12px;margin-top:12px;background:#fffdf7}
+.lq-bt{display:block;color:#0a2f7a;margin-bottom:8px}.lq-ck{display:flex;gap:8px;align-items:center;font-weight:800;font-size:13px;color:#0a2f7a;margin:10px 0}
+.lq-th{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}.lq-tm{position:relative;width:96px;height:54px;border-radius:10px;overflow:hidden;border:1px solid #cbd5e1}
+.lq-tm img{width:100%;height:100%;object-fit:cover}.lq-tm button{position:absolute;top:2px;right:2px;border:0;border-radius:50%;width:20px;height:20px;background:rgba(15,23,42,.8);color:#fff;font-size:11px;cursor:pointer}
+.lq-tm button.f{right:auto;left:2px}.lq-tm i{position:absolute;left:3px;bottom:3px;background:#c9a24f;color:#fff;font-size:10px;font-style:normal;font-weight:800;border-radius:6px;padding:1px 5px}
+.lq-ab{display:flex;gap:8px;flex-wrap:wrap}.lq-fb{border:1px solid #cbd5e1;background:#fff;border-radius:99px;padding:9px 14px;font:800 13px inherit;font-family:inherit;color:#0a2f7a;cursor:pointer}
+.lq-ar{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #e8eef8}.lq-ar img{width:64px;height:36px;border-radius:8px;object-fit:cover;flex:none}
+.lq-ar div{flex:1;min-width:0;font-size:13px}.lq-ar b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lq-ar small{color:#64748b}
+@media(prefers-reduced-motion:reduce){.lq-ss img{transition:none}}
+</style>
+<script>
+(function () {
+  function boot() {
+    var LX = window.LX;
+    if (!LX || !window.LXP || !LX.adminHtml || typeof V2 === 'undefined') return false;
+    if (window.LQ) return true;
+    var LQ = window.LQ = { cv: {} }, $ = function (i) { return document.getElementById(i); }, E = function (s) { return V2.esc(s); };
+    var p2 = function (n) { return String(n).padStart(2, '0'); };
+    function dmy(d) { return p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear(); }
+    function hm(d) { return p2(d.getHours()) + ':' + p2(d.getMinutes()); }
+    function money(v) { var n = Math.round(parseFloat(v) * 100) / 100; return isNaN(n) ? '' : n + ' ₼'; }
+    function pay(x) { var p = x && x.pay; return p && typeof p === 'object' ? p : null; }
+    function subj(x) { return (x.subject || x.cat || 'Digər') + ''; }
+    function ended(x) { return x.status === 'Bitib' || LX.endOf(x).getTime() <= Date.now(); }
+    function toast(t) { try { V2.toast(t); } catch (e) { alert(t); } }
+    function toLocal(d) { return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()) + 'T' + p2(d.getHours()) + ':' + p2(d.getMinutes()); }
+    function hash(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
+    function xml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    /* ---------- hazır qapaq: fənn adı + DQ Platform ---------- */
+    var PAL = [['#0b1f45', '#1d4f91'], ['#14532d', '#15803d'], ['#4c1d95', '#7c3aed'], ['#7c2d12', '#ea580c'], ['#134e4a', '#0d9488'], ['#831843', '#db2777']];
+    function gen(s, v) {
+      v = v || 0; var a = PAL[hash(String(s)) % PAL.length], t = String(s).slice(0, 26);
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + a[0] + '"/><stop offset="1" stop-color="' + a[1] + '"/></linearGradient></defs><rect width="800" height="450" fill="url(#g)"/>' +
+        (v % 2 ? '<g fill="none" stroke="#c9a24f" stroke-opacity=".55" stroke-width="2"><circle cx="650" cy="120" r="70"/><circle cx="650" cy="120" r="110"/><circle cx="650" cy="120" r="150"/></g>'
+          : '<g fill="#fff" fill-opacity=".07"><path d="M520 0h280v450H420z"/><path d="M650 0h150v450H590z"/></g><circle cx="650" cy="130" r="64" fill="none" stroke="#c9a24f" stroke-width="4"/>') +
+        '<rect x="48" y="44" width="46" height="46" rx="23" fill="#fff" fill-opacity=".16"/><text x="71" y="76" font-size="22" text-anchor="middle" fill="#fff" font-family="Arial" font-weight="800">DQ</text><text x="108" y="76" font-size="26" fill="#fff" font-family="Arial" font-weight="700">DQ Platform</text>' +
+        '<rect x="48" y="296" width="64" height="5" fill="#c9a24f"/><text x="48" y="356" font-size="' + (t.length > 14 ? 42 : 56) + '" fill="#fff" font-family="Arial" font-weight="800">' + xml(t) + '</text><text x="48" y="400" font-size="22" fill="#fff" fill-opacity=".8" font-family="Arial">Fənn üzrə sınaq</text></svg>';
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+    LQ.gen = gen;
+
+    /* ---------- admin sahələri ---------- */
+    function qFields(pre, x) {
+      x = x || {}; var p = pay(x) || {}; LQ.cv[pre] = (x.covers || []).slice();
+      setTimeout(function () { LQ.th(pre); }, 60);
+      return '<div class="lq-box"><b class="lq-bt">🎨 Fənn, qiymət və qapaqlar</b>' +
+        '<div class="v2-f"><label>Fənn (qrup)</label><input class="v2-in" id="' + pre + 'sub" placeholder="Məsələn: Məntiq, İnformatika" value="' + E(x.subject || '') + '"></div>' +
+        '<label class="lq-ck"><input type="checkbox" id="' + pre + 'pon"' + (p.on ? ' checked' : '') + ' onchange="document.getElementById(\'' + pre + 'prc\').disabled=!this.checked"> Ödənişli sınaq</label>' +
+        '<div class="v2-f"><label>Qiymət (₼)</label><input class="v2-in" id="' + pre + 'prc" type="number" min="0" step="0.5" inputmode="decimal" value="' + E(p.price != null ? p.price : '') + '"' + (p.on ? '' : ' disabled') + '></div>' +
+        '<div class="v2-f"><label>Qapaq şəkilləri (ardıcıl dəyişir)</label><div class="lq-th" id="' + pre + 'th"></div><div class="lq-ab"><label class="lq-fb">＋ Şəkil yüklə<input type="file" accept="image/*" multiple hidden onchange="LQ.add(this,\'' + pre + '\')"></label><button type="button" class="lq-fb" onclick="LQ.auto(\'' + pre + '\')">✨ Hazır qapaq</button></div><small class="v2-sub">Şəkil əlavə etməsəniz, fənnə uyğun «DQ Platform» qapağı avtomatik qoyulur.</small></div></div>';
+    }
+    LQ.th = function (pre) {
+      var el = $(pre + 'th'); if (!el) return; var c = LQ.cv[pre] || [];
+      el.innerHTML = c.length ? c.map(function (u, i) { return '<div class="lq-tm"><img src="' + u + '" alt="">' + (i ? '<button type="button" class="f" title="Əsas et" onclick="LQ.first(' + i + ',\'' + pre + '\')">‹</button>' : '<i>Əsas</i>') + '<button type="button" onclick="LQ.rm(' + i + ',\'' + pre + '\')">✕</button></div>'; }).join('') : '<small class="v2-sub">Hələ şəkil yoxdur</small>';
+    };
+    LQ.rm = function (i, pre) { LQ.cv[pre].splice(i, 1); LQ.th(pre); };
+    LQ.first = function (i, pre) { var c = LQ.cv[pre]; c.unshift(c.splice(i, 1)[0]); LQ.th(pre); };
+    LQ.auto = function (pre) { var s = ($(pre + 'sub').value || '').trim() || 'Sınaq', c = LQ.cv[pre]; if (c.length > 4) { toast('Maksimum 6 şəkil.'); return; } c.push(gen(s, 0), gen(s, 1)); LQ.th(pre); };
+    function shrink(f) {
+      return new Promise(function (ok) {
+        var r = new FileReader(); r.onload = function () {
+          var im = new Image(); im.onload = function () {
+            var W = 900, H = 506, c = document.createElement('canvas'); c.width = W; c.height = H; var g = c.getContext('2d'), k = Math.max(W / im.width, H / im.height), w = im.width * k, h = im.height * k;
+            g.drawImage(im, (W - w) / 2, (H - h) / 2, w, h); ok(c.toDataURL('image/jpeg', .72));
+          }; im.onerror = function () { ok(null); }; im.src = r.result;
+        }; r.onerror = function () { ok(null); }; r.readAsDataURL(f);
+      });
+    }
+    LQ.add = async function (inp, pre) {
+      var fs = Array.prototype.slice.call(inp.files || []); inp.value = '';
+      for (var i = 0; i < fs.length; i++) { if (LQ.cv[pre].length >= 6) { toast('Maksimum 6 şəkil.'); break; } var u = await shrink(fs[i]); if (u) LQ.cv[pre].push(u); }
+      LQ.th(pre);
+    };
+    function qRead(pre, x) {
+      var sub = $(pre + 'sub').value.trim(), on = $(pre + 'pon').checked, prc = parseFloat(String($(pre + 'prc').value).replace(',', '.'));
+      if (on && !(prc > 0)) return { err: 'Ödənişli sınaq üçün qiymət yazın.' };
+      var old = pay(x) || {}, np = {}; for (var k in old) np[k] = old[k]; np.on = on; if (!isNaN(prc)) np.price = prc; else if (!on) np.price = np.price || 0;
+      return { o: { subject: sub, covers: (LQ.cv[pre] || []).slice(), pay: np } };
+    }
+
+    /* ---------- admin: yeni sınaq formu + siyahı ---------- */
+    var oA = LX.adminHtml;
+    LX.adminHtml = function () {
+      var h = oA.apply(LX, arguments), a = '<div class="v2-f mt-3"><label>Qapaq şəkli</label>', blk = '<div class="mt-3">' + qFields('lq-', null) + '</div>';
+      if (h.indexOf(a) > -1) h = h.replace(a, function () { return blk + a.replace('Qapaq şəkli', 'Tək qapaq şəkli (köhnə üsul)'); }); else h += blk;
+      var rows = (LX.cache || []).slice().sort(function (x, y) { return String(y.created || y.start).localeCompare(String(x.created || x.start)); }).map(function (x) {
+        var p = pay(x), c = (x.covers && x.covers[0]) || gen(subj(x), 0);
+        return '<div class="lq-ar"><img src="' + c + '" alt=""><div><b>' + E(x.title) + '</b><small>' + E(subj(x)) + ' · ' + E(x.cat) + ' · ' + dmy(new Date(x.start)) + ' · ' + (p && p.on ? E(money(p.price)) : 'Pulsuz') + '</small></div><button class="v2-b o s" onclick="LQ.edit(\'' + x._id + '\')">✏️</button><button class="v2-b r s" onclick="LQ.del(\'' + x._id + '\')">🗑️</button></div>';
+      }).join('');
+      return h + '<div class="v2-card" style="max-width:640px;border:2px solid #c9a24f"><h3 style="font-size:20px">🗂️ Paylaşılmış sınaqlar</h3>' + (rows || '<div class="v2-empty">Hələ sınaq paylaşılmayıb.</div>') + '</div>';
+    };
+    var oS = LX.start;
+    LX.start = async function () {
+      var r = qRead('lq-', null); if (r.err) { alert(r.err); return; }
+      var before = {}; (await V2.list('liveexams')).forEach(function (x) { before[x._id] = 1; });
+      await oS.apply(LX, arguments);
+      var nw = (await V2.list('liveexams')).filter(function (x) { return !before[x._id]; }).sort(function (a, b) { return String(b.created).localeCompare(String(a.created)); })[0];
+      if (nw) { var o = {}; for (var k in nw) if (k !== '_id') o[k] = nw[k]; for (var k2 in r.o) o[k2] = r.o[k2]; if (!o.covers.length) delete o.covers; await V2.put('liveexams', o, nw._id); await LX.load(); home(true); try { V2.go('start'); } catch (e) {} }
+    };
+    function exam(id) { return (LX.cache || []).filter(function (x) { return String(x._id) === String(id); })[0]; }
+    LQ.edit = function (id) {
+      var x = exam(id); if (!x) return;
+      var d = document.createElement('div'); d.id = 'lq-ed'; d.className = 'lxp-ov'; d.onclick = function (e) { if (e.target === d) d.remove(); };
+      d.innerHTML = '<div class="lxp-bx" style="width:min(100%,460px)"><h3>✏️ Sınağı redaktə et</h3><div class="sb">' + E(x.cat) + ' · ' + dmy(new Date(x.start)) + '</div>' +
+        '<label>Ad</label><input id="lqe-t" value="' + E(x.title) + '"><label>İmtahan yeri</label><input id="lqe-p" value="' + E(x.place || '') + '">' +
+        '<label>Yerlərin sayı (0 — limitsiz)</label><input id="lqe-c" type="number" min="0" value="' + E(x.cap || 0) + '"><label>Qeydiyyat bitmə vaxtı</label><input id="lqe-r" type="datetime-local" value="' + (x.regEnd ? toLocal(new Date(x.regEnd)) : '') + '">' +
+        qFields('le-', x) + '<div class="lxp-m" id="lqe-m"></div><div class="lxp-row"><button type="button" class="lxp-sb x" onclick="document.getElementById(\'lq-ed\').remove()">Ləğv et</button><button type="button" class="lxp-sb" onclick="LQ.save(\'' + x._id + '\')">💾 Saxla</button></div></div>';
+      document.body.appendChild(d);
+    };
+    LQ.save = async function (id) {
+      var x = exam(id), m = $('lqe-m'); if (!x) return;
+      var t = $('lqe-t').value.trim(), re = $('lqe-r').value, r = qRead('le-', x);
+      if (!t) { m.textContent = 'Ad boş ola bilməz.'; return; } if (r.err) { m.textContent = r.err; return; }
+      var rd = re ? new Date(re) : null; if (rd && (isNaN(rd) || rd.getTime() > LX.endOf(x).getTime())) { m.textContent = 'Qeydiyyat bitmə vaxtı düzgün deyil (imtahan bitməsindən sonra ola bilməz).'; return; }
+      var o = {}; for (var k in x) if (k !== '_id') o[k] = x[k];
+      o.title = t; o.place = $('lqe-p').value.trim() || 'Rəsmi internet saytında'; o.cap = parseInt($('lqe-c').value) || 0; o.regEnd = rd ? rd.toISOString() : '';
+      for (var k2 in r.o) o[k2] = r.o[k2]; if (!o.covers.length) delete o.covers;
+      await V2.put('liveexams', o, x._id); $('lq-ed').remove(); await LX.load(); home(true); toast('Yeniləndi ✅'); try { V2.go('start'); } catch (e) {}
+    };
+    LQ.del = async function (id) {
+      var x = exam(id); if (!x || !confirm('«' + x.title + '» silinsin?')) return;
+      await V2.probe();
+      if (V2.mode === 'cloud') await _supabase.from('dq_v2_store').delete().eq('id', id);
+      else localStorage.setItem('dq_v2_liveexams', JSON.stringify((await V2.list('liveexams')).filter(function (r) { return r._id != id; })));
+      await LX.load(); home(true); try { V2.go('start'); } catch (e) {}
+    };
+
+    /* ---------- ana səhifə: fənlər üzrə son 3 sınaq ---------- */
+    function card(x) {
+      var s = new Date(x.start), p = pay(x), sb = subj(x), cv = x.covers && x.covers.length ? x.covers : [gen(sb, 0)], off = ended(x), cap = parseInt(x.cap) > 0 ? parseInt(x.cap) : 0;
+      return '<article class="lq-c' + (off ? ' off' : '') + '"' + (off ? '' : ' onclick="LXP.open()"') + '><div class="lq-ss">' + cv.map(function (u, i) { return '<img alt="" loading="lazy" src="' + E(u) + '"' + (i ? '' : ' class="on"') + '>'; }).join('') +
+        (p && p.on ? '<span class="lq-bg pd">' + E(money(p.price)) + '</span>' : '<span class="lq-bg">Ödənişsiz sınaq</span>') + (off ? '<span class="lq-st">Bitib</span>' : '') +
+        (cv.length > 1 ? '<div class="lq-dts">' + cv.map(function (u, i) { return '<i' + (i ? '' : ' class="on"') + '></i>'; }).join('') + '</div>' : '') + '</div>' +
+        '<div class="lq-cb"><h4>' + E(x.title) + '</h4><ul><li>🗓 ' + dmy(s) + ' · ' + hm(s) + '</li><li>📚 ' + E(sb) + ' · ' + E(x.cat) + '</li><li>👥 ' + (cap ? cap + ' yer' : 'Limitsiz') + '</li></ul>' + (off ? '' : '<button type="button">Qeydiyyatdan keç</button>') + '</div></article>';
+    }
+    function groups() {
+      var m = {}, o = [], key = function (x) { return String(x.created || x.start); };
+      (LX.cache || []).forEach(function (x) { if (!x.start) return; var k = subj(x); if (!m[k]) { m[k] = []; o.push(k); } m[k].push(x); });
+      o.forEach(function (k) { m[k].sort(function (a, b) { return key(b).localeCompare(key(a)); }); });
+      o.sort(function (a, b) { return key(m[b][0]).localeCompare(key(m[a][0])); }); return { m: m, o: o };
+    }
+    function home(force) {
+      var h = $('v3-home'), hero = h && h.querySelector('.v3-hero'), g = groups(), el = $('lq-home');
+      if (!hero || !g.o.length) { if (el) el.remove(); return; }
+      var sig = JSON.stringify(g.o.map(function (k) { return g.m[k].slice(0, 3).map(function (x) { return [x._id, x.title, x.status, x.cap, (x.covers || []).length, pay(x) && pay(x).price, pay(x) && pay(x).on]; }); }));
+      if (el && el.isConnected && el.getAttribute('data-sig') === sig && !force) return;
+      if (!el || !el.isConnected) { el = document.createElement('section'); el.id = 'lq-home'; var ban = $('lxp-ban'); (ban || hero).parentNode.insertBefore(el, (ban || hero).nextSibling); }
+      el.setAttribute('data-sig', sig);
+      el.innerHTML = '<div class="lq-h"><div><h2>Fənlər üzrə sınaqlar</h2><small>Hər fəndən ən son 3 sınaq</small></div><button type="button" class="lq-all" onclick="LQ.panel()">Fənlər paneli</button></div>' +
+        g.o.map(function (k) { var l = g.m[k]; return '<div class="lq-sg"><div class="lq-sh"><b>' + E(k) + '</b>' + (l.length > 3 ? '<button type="button" onclick="LQ.panel(\'' + E(k).replace(/'/g, '') + '\')">Hamısı (' + l.length + ')</button>' : '') + '</div><div class="lq-g">' + l.slice(0, 3).map(card).join('') + '</div></div>'; }).join('');
+    }
+    /* ---------- fənlər paneli ---------- */
+    LQ.panel = function (k) {
+      var d = $('lq-pn'); if (!d) { d = document.createElement('div'); d.id = 'lq-pn'; document.body.appendChild(d); document.body.style.overflow = 'hidden'; }
+      var g = groups(), cur = k && g.m[k] ? k : '';
+      var l = cur ? g.m[cur] : [].concat.apply([], g.o.map(function (z) { return g.m[z]; }));
+      d.innerHTML = '<div class="lxp-top"><div class="lxp-br"><div class="lxp-lg">🎓</div><div><b>DQ Platform</b><small>Fənlər paneli</small></div></div><button type="button" class="lxp-back" onclick="LQ.shut()">‹ Ana səhifə</button></div><div class="lq-w"><div class="lq-chips"><button type="button" class="' + (cur ? '' : 'on') + '" onclick="LQ.panel()">Hamısı</button>' +
+        g.o.map(function (z) { return '<button type="button" class="' + (z === cur ? 'on' : '') + '" data-k="' + E(z) + '" onclick="LQ.panel(this.getAttribute(\'data-k\'))">' + E(z) + ' (' + g.m[z].length + ')</button>'; }).join('') + '</div><div class="lq-g">' + l.map(card).join('') + '</div></div>';
+    };
+    LQ.shut = function () { var d = $('lq-pn'); if (d) d.remove(); document.body.style.overflow = ''; };
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('lq-pn') && !$('lxp')) LQ.shut(); });
+
+    /* ---------- ardıcıl qapaq dəyişmə ---------- */
+    var rm = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if (!rm) setInterval(function () {
+      document.querySelectorAll('.lq-ss').forEach(function (b) {
+        var im = b.querySelectorAll('img'); if (im.length < 2) return; var dt = b.querySelectorAll('.lq-dts i'), n = 0;
+        im.forEach(function (z, i) { if (z.classList.contains('on')) n = i; }); var nx = (n + 1) % im.length;
+        im[n].classList.remove('on'); im[nx].classList.add('on'); if (dt.length) { dt[n].classList.remove('on'); dt[nx].classList.add('on'); }
+      });
+    }, 3600);
+
+    var oM = LX.mount; LX.mount = function () { var r = oM.apply(LX, arguments); try { home(); } catch (e) {} return r; };
+    setInterval(function () { try { home(); } catch (e) {} }, 3000);
+    home();
+    return true;
+  }
+  if (!boot()) { var n = 0, iv = setInterval(function () { if (boot() || ++n > 80) clearInterval(iv); }, 250); }
+})();
+</script>
+
 
 </body>
 </html>
