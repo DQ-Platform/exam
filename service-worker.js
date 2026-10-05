@@ -1,8 +1,8 @@
-const C = 'dq-v3';
+const C = 'dq-v4';
 const CDN = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 self.addEventListener('install', e => {
   self.skipWaiting();
-  e.waitUntil(caches.open(C).then(c => c.addAll(['./', 'favicon.png'])).catch(() => {}));
+  e.waitUntil(caches.open(C).then(c => c.addAll(['./', 'icon-192.png', 'icon-512.png'])).catch(() => {}));
 });
 self.addEventListener('activate', e => e.waitUntil(
   caches.keys().then(k => Promise.all(k.filter(x => x !== C).map(x => caches.delete(x)))).then(() => clients.claim())
