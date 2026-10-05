@@ -20224,6 +20224,127 @@ wait(admQuiz,function(){});
   setInterval(tune,400);tune();
 })();
 </script>
+    <!-- ===== YAMAQ 13: M10 / kart kodu ödənişi · dərs materiallarında 🎓 qapaq · quraşdırma bannerı · rejim + parlaqlıq ===== -->
+<style id="dq13-css">
+/* --- ödəniş --- */
+.dq13-pay{margin:10px 0;padding:12px;border-radius:14px;background:#f4f7ff;border:1px solid #d9e3fb}
+.dq13-pay .dq13-t{font-weight:800;font-size:13px;color:#0a2f7a;margin-bottom:8px}
+.dq13-pay .dq13-s{font-size:12px;color:#64748b;margin:6px 2px 10px;line-height:1.4}
+/* --- dərs materialları: 🎓 qapaq üz qabığı --- */
+.dq13-sj{display:flex!important;flex-direction:column;align-items:center;gap:6px;padding:0 0 12px!important;overflow:hidden;border-radius:16px!important}
+.dq13-sj b{font-size:14px;padding:0 8px;line-height:1.3}.dq13-sj small{opacity:.7}
+.dq13-cv{display:flex;align-items:center;justify-content:center;width:100%;height:78px;font-size:38px;background:linear-gradient(135deg,#0a2f7a,#2f63bd);box-shadow:inset 0 -18px 30px rgba(0,0,0,.18)}
+.dq13-fc{font-style:normal;flex:none;width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,#0a2f7a,#2f63bd);box-shadow:0 4px 10px rgba(10,47,122,.25)}
+.dqpdf-row>span{display:flex;align-items:center;gap:10px;min-width:0}.dqpdf-row>span em{font-style:normal;min-width:0;overflow-wrap:anywhere}
+/* --- rejim / parlaqlıq --- */
+#dq13-fab{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:99995;width:46px;height:46px;border:0;border-radius:50%;font-size:21px;cursor:pointer;background:#fff;color:#0a2f7a;box-shadow:0 6px 18px rgba(10,47,122,.3)}
+#dq13-pn{position:fixed;left:14px;bottom:calc(70px + env(safe-area-inset-bottom,0px));z-index:99996;width:min(270px,calc(100vw - 28px));padding:14px;border-radius:18px;background:#fff;color:#0f172a;box-shadow:0 14px 40px rgba(10,47,122,.3);border:1px solid #e3e8f5;font-family:inherit}
+#dq13-pn[hidden]{display:none}
+#dq13-pn .h{font-weight:800;margin-bottom:10px}
+#dq13-pn .seg{display:flex;gap:6px;background:#eef2fb;border-radius:12px;padding:4px}
+#dq13-pn .seg button{flex:1;border:0;border-radius:9px;padding:9px 6px;font:700 13px inherit;font-family:inherit;background:transparent;color:#334155;cursor:pointer}
+#dq13-pn .seg button.on{background:#0a2f7a;color:#fff}
+#dq13-pn .lb{display:flex;justify-content:space-between;margin:14px 2px 4px;font-size:13px;color:#475569}
+#dq13-pn .rg{display:flex;align-items:center;gap:8px}#dq13-pn input{flex:1;accent-color:#0a2f7a}
+#dq13-pn .rs{width:100%;margin-top:12px;border:1px solid #cbd5e1;background:#fff;border-radius:10px;padding:8px;font:600 12.5px inherit;font-family:inherit;color:#334155;cursor:pointer}
+html.dq13-dark img,html.dq13-dark video,html.dq13-dark canvas,html.dq13-dark iframe,html.dq13-dark .dq13-cv,html.dq13-dark .dq13-fc,html.dq13-dark [style*="background-image"]{filter:invert(1) hue-rotate(180deg)}
+</style>
+<script id="dq13-js">
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var WA13 = '994504305162';
+
+  /* ───── 1) Ödəniş: M10 nömrəsi + kart kodunu WhatsApp-da istə ───── */
+  function payExtra(id) {
+    var bx = $('#lxp-m .lxp-bx'); if (!bx || $('.dq13-pay', bx)) return;
+    var h = ($('h3', bx) || {}).textContent || '', cat = h.replace(/^.*—\s*/, '').trim();
+    var title = (($('.sb', bx) || {}).textContent || '').trim();
+    var price = (($('.lxp-am', bx) || {}).textContent || '').replace(/\s+/g, '');
+    var my = {}; try { my = (JSON.parse(localStorage.getItem('lx_my_regs') || '{}') || {})[id] || {}; } catch (e) {}
+    try { if (!my.name && YQ2 && YQ2.me) my.name = YQ2.me.name; } catch (e) {}
+    var msg = 'Salam, ' + title + ' - ' + cat + (price ? '(' + price + ')' : '') + ' kateqoriyası üçün qeydiyyatdan keçmək istəyirəm.\nKart kodu göndərə bilərsizmi?' +
+      ((my.name || my.fin) ? '\nAd: ' + (my.name || '') + ', FİN: ' + (my.fin || '') + '.' : '');
+    var d = document.createElement('div'); d.className = 'dq13-pay';
+    d.innerHTML = '<div class="dq13-t">Ödəniş üsulları</div>' +
+      '<div class="lxp-cr"><b>📲 M10 · 050 667 15 57</b><button type="button" class="lxp-sb" style="padding:8px 12px;flex:none" onclick="LXP.copy(\'0506671557\',this)">Kopyala</button></div>' +
+      '<div class="dq13-s">M10 ilə məbləği bu nömrəyə köçürə bilərsiniz. Və ya kart kodunu birbaşa WhatsApp-da istəyin:</div>' +
+      '<button type="button" class="lxp-sb wa" style="width:100%">💬 Kart kodunu WhatsApp-da istə</button>';
+    d.querySelector('.wa').onclick = function () { window.open('https://wa.me/' + WA13 + '?text=' + encodeURIComponent(msg), '_blank'); };
+    var row = $('.lxp-row', bx); if (row) row.parentNode.insertBefore(d, row); else bx.appendChild(d);
+  }
+  function wrapPay() {
+    if (!window.LXP || !LXP.pay) return false; if (LXP.pay.__13) return true;
+    var o = LXP.pay; LXP.pay = function (id) { var r = o.apply(this, arguments); try { payExtra(id); } catch (e) {} return r; }; LXP.pay.__13 = 1; return true;
+  }
+
+  /* ───── 2) Dərs materialları: 🎓 qapaq ───── */
+  function covers() {
+    document.querySelectorAll('#yq-m [data-i], #dq-pdfbox [data-i]').forEach(function (b) {
+      if (b.__c13) return; b.__c13 = 1;
+      var sm = b.querySelector('small'), cnt = sm ? sm.textContent : '';
+      var nm = ((b.childNodes[0] && b.childNodes[0].textContent) || '').replace('📘', '').trim();
+      b.classList.add('dq13-sj'); b.innerHTML = '<span class="dq13-cv">🎓</span><b>' + esc(nm) + '</b><small>' + esc(cnt) + '</small>';
+    });
+    document.querySelectorAll('.dqpdf-row>span').forEach(function (s) {
+      if (s.__c13) return; s.__c13 = 1;
+      s.innerHTML = '<i class="dq13-fc">🎓</i><em>' + esc(s.textContent.replace('📄', '').trim()) + '</em>';
+    });
+    document.querySelectorAll('#yq-m h3, #dq-pdfbox h3, .dm-sub').forEach(function (h) {
+      if (h.firstChild && h.firstChild.nodeType === 3 && h.firstChild.nodeValue.indexOf('📘') > -1) h.firstChild.nodeValue = h.firstChild.nodeValue.replace('📘', '🎓');
+    });
+  }
+
+  /* ───── 3) «Ekranına Quraşdır» banneri → DQ Platform ───── */
+  function fixBanner(root) {
+    var w = document.createTreeWalker(root || document.body, NodeFilter.SHOW_TEXT, null), n, hit = [];
+    while ((n = w.nextNode())) if (/Dövlət qulluğu portalını/i.test(n.nodeValue)) hit.push(n);
+    hit.forEach(function (t) {
+      t.nodeValue = t.nodeValue.replace(/Dövlət qulluğu portalını/i, 'DQ Platform');
+      var p = t.parentNode, k = 0, lg = $('#v3-home .v3-hd h1 img');
+      while (p && k++ < 5) { var im = p.querySelector && p.querySelector('img'); if (im && lg && lg.src) { im.src = lg.src; im.style.objectFit = 'contain'; break; } p = p.parentNode; }
+    });
+  }
+  new MutationObserver(function (ms) {
+    ms.forEach(function (m) { m.addedNodes.forEach(function (a) { if (a.nodeType === 1 && /Dövlət qulluğu portalını/i.test(a.textContent || '')) fixBanner(a); }); });
+  }).observe(document.body, { childList: true, subtree: true });
+  [800, 3000, 7000].forEach(function (ms) { setTimeout(function () { fixBanner(); }, ms); });
+
+  /* ───── 4) Gündüz/Gecə rejimi + parlaqlıq ───── */
+  var LS = 'dq13_ui', S = { dark: 0, br: 100 };
+  try { Object.assign(S, JSON.parse(localStorage.getItem(LS) || '{}') || {}); } catch (e) {}
+  function apply() {
+    var r = document.documentElement, f = [];
+    r.classList.toggle('dq13-dark', !!S.dark);
+    if (S.dark) f.push('invert(1) hue-rotate(180deg)');
+    if (+S.br !== 100) f.push('brightness(' + (S.br / 100) + ')');
+    r.style.filter = f.join(' ');
+    try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {}
+  }
+  function ui() {
+    if ($('#dq13-fab')) return;
+    var f = document.createElement('button'); f.id = 'dq13-fab'; f.type = 'button'; f.setAttribute('aria-label', 'Görünüş'); f.textContent = '🌓';
+    var p = document.createElement('div'); p.id = 'dq13-pn'; p.hidden = true;
+    p.innerHTML = '<div class="h">Görünüş</div><div class="seg"><button type="button" data-m="0">☀️ Gündüz</button><button type="button" data-m="1">🌙 Gecə</button></div>' +
+      '<div class="lb"><span>Parlaqlıq</span><b id="dq13-v"></b></div><div class="rg"><span>🔅</span><input type="range" min="40" max="130" step="5"><span>🔆</span></div><button type="button" class="rs">Sıfırla</button>';
+    document.body.appendChild(f); document.body.appendChild(p);
+    var rg = $('input', p), v = $('#dq13-v', p);
+    function sync() { rg.value = S.br; v.textContent = S.br + '%'; p.querySelectorAll('.seg button').forEach(function (b) { b.classList.toggle('on', +b.dataset.m === +S.dark); }); apply(); }
+    f.onclick = function (e) { e.stopPropagation(); p.hidden = !p.hidden; };
+    p.onclick = function (e) { e.stopPropagation(); };
+    document.addEventListener('click', function () { p.hidden = true; });
+    p.querySelectorAll('.seg button').forEach(function (b) { b.onclick = function () { S.dark = +b.dataset.m; sync(); }; });
+    rg.oninput = function () { S.br = +rg.value; sync(); };
+    $('.rs', p).onclick = function () { S.dark = 0; S.br = 100; sync(); };
+    sync();
+  }
+  apply(); ui();
+
+  setInterval(function () { try { wrapPay(); covers(); } catch (e) {} }, 500);
+})();
+</script>
+
 
 </body>
 </html>
