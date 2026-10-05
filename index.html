@@ -20065,5 +20065,166 @@ function admQuiz(){
 wait(admQuiz,function(){});
 })();
 </script>
+    <!-- ===== DQ FINAL v3: yalnız Gmail · hər kabinet girişində kod · WhatsApp · PWA · Quiz ===== -->
+<style>
+#dq-otp-box{text-align:center}#dq-otp-box input{width:100%;text-align:center;font-size:26px;letter-spacing:10px;font-weight:800;padding:12px;border:2px solid #cbd5e1;border-radius:12px;margin:10px 0;box-sizing:border-box}
+#dq-otp-box small{color:#64748b;display:block;margin:4px 0}#dq-otp-err{color:#dc2626;font-weight:700;min-height:20px;font-size:14px}
+#dq-otp-ov{z-index:100000!important}
+</style>
+<script id="dq-final-v3">
+(function(){'use strict';
+var SB='https://cpzwliqlgaplroscvduo.supabase.co',KEY='sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF';
+var $=function(i){return document.getElementById(i)};
+function wait(t,f,n){n=n||0;var r;try{r=t()}catch(e){}if(r)f(r);else if(n<400)setTimeout(function(){wait(t,f,n+1)},100)}
+var GM=/^[^\s@]+@gmail\.com$/i, otpOk=false, gating=false;
+
+/* ---------- Kod göndər / yoxla (yalnız e-poçt) ---------- */
+async function auth(p,b){try{var r=await fetch(SB+'/auth/v1/'+p,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(b)});var j={};try{j=await r.json()}catch(e){}return{ok:r.ok,j:j}}catch(e){return{ok:false,j:{msg:'Şəbəkə xətası'}}}}
+function overlay(html){var o=document.createElement('div');o.className='v3-md';o.id='dq-otp-ov';o.innerHTML='<div>'+html+'</div>';document.body.appendChild(o);return o}
+function mask(e){var p=e.split('@');return p[0].slice(0,2)+'***@'+p[1]}
+function askCode(email){return new Promise(async function(res){
+  var tries=0,last=0;
+  async function send(){var r=await auth('otp',{email:email,create_user:true});last=Date.now();return r}
+  var r0=await send();
+  if(!r0.ok){alert('Kod göndərilmədi: '+(r0.j.msg||r0.j.error_description||r0.j.message||'xəta')+'. Bir az sonra yenidən cəhd edin.');return res(false)}
+  var o=overlay('<div id="dq-otp-box"><h3>Doğrulama kodu</h3><small>Kod <b>'+mask(email)+'</b> ünvanına göndərildi</small><input id="dq-otp" inputmode="numeric" maxlength="8" autocomplete="one-time-code" placeholder="••••••"><div id="dq-otp-err"></div><button class="v3-bt" style="width:100%" id="dq-otp-ok">Təsdiqlə</button><button class="v3-bt o" style="width:100%;margin-top:8px" id="dq-otp-re">Kodu yenidən göndər</button><button class="v3-bt o" style="width:100%;margin-top:8px" id="dq-otp-no">Ləğv et</button></div>');
+  var er=function(t,g){var x=$('dq-otp-err');x.style.color=g?'#16a34a':'#dc2626';x.textContent=t};
+  $('dq-otp').focus();
+  $('dq-otp-no').onclick=function(){o.remove();res(false)};
+  $('dq-otp-re').onclick=async function(){var s=45-Math.floor((Date.now()-last)/1e3);if(s>0)return er(s+' san. gözləyin');var r=await send();er(r.ok?'Yeni kod göndərildi':'Göndərilmədi',r.ok)};
+  $('dq-otp-ok').onclick=async function(){
+    var code=$('dq-otp').value.replace(/\D/g,'');if(code.length<6)return er('Kodu tam yazın');
+    if(tries>=5)return er('Çox səhv cəhd. Kodu yenidən göndərin.');
+    var r=await auth('verify',{type:'email',email:email,token:code});
+    if(!r.ok){tries++;return er('Kod yanlışdır və ya vaxtı bitib')}
+    o.remove();res(true)};
+})}
+
+/* ---------- Gmail formu ---------- */
+function wrapDraw(){
+  if(typeof YQ==='undefined'||!YQ.draw||YQ.draw.__g)return false;
+  var od=YQ.draw;
+  YQ.draw=function(){var r=od.apply(this,arguments),m=$('yq-m');
+    if(m){var c=$('yq-c');if(c){c.placeholder='ad@gmail.com';c.type='email';c.setAttribute('autocapitalize','none')}
+      var w=document.createTreeWalker(m,NodeFilter.SHOW_TEXT),n;while(n=w.nextNode())n.nodeValue=n.nodeValue.replace('Gmail və ya telefon nömrəsi','Gmail ünvanı')}
+    return r};
+  YQ.draw.__g=1;return true}
+wait(wrapDraw,function(){});
+
+/* ---------- Qeydiyyat + Giriş: yalnız Gmail + kod ---------- */
+function wrapReg(){
+  if(typeof YQ==='undefined'||!YQ.register||!YQ.login||!YQ.__waWrapped||YQ.__otp)return false;YQ.__otp=1;
+  var prev=YQ.register,pl=YQ.login;
+  YQ.register=async function(){
+    var name=$('yq-n')&&$('yq-n').value.trim(),fin=$('yq-f')?$('yq-f').value:'',c=$('yq-c')&&$('yq-c').value.trim();
+    var f=YQ.cleanFin?YQ.cleanFin(fin):fin;
+    if(!name||name.length<3||(YQ.validFin&&!YQ.validFin(f))||!c)return prev.apply(this,arguments);
+    if(!GM.test(c))return alert('Yalnız Gmail ünvanı ilə qeydiyyat mümkündür (məsələn: ad@gmail.com).');
+    try{var ex=await YQ.find(YQ.key(c));if(ex)return prev.apply(this,arguments)}catch(e){}
+    if(!(await askCode(c.toLowerCase())))return;
+    return prev.apply(this,arguments)};
+  YQ.login=async function(){
+    var c=$('yq-c')&&$('yq-c').value.trim();
+    if(!c||!GM.test(c))return alert('Gmail ünvanınızı daxil edin (məsələn: ad@gmail.com).');
+    var r=null;try{r=await YQ.find(YQ.key(c))}catch(e){}
+    if(r&&r.status==='approved'){if(!(await askCode(c.toLowerCase())))return;otpOk=true}
+    return pl.apply(this,arguments)};
+  return true}
+wait(wrapReg,function(){});
+
+/* ---------- Kabinet: hər girişdə kod ---------- */
+function askEmail(rec){return new Promise(function(res){
+  var o=overlay('<div id="dq-otp-box"><h3>Kabinetə giriş</h3><small>Qeydiyyatdakı Gmail ünvanınızı yazın</small><input id="dq-em" type="email" autocapitalize="none" style="font-size:16px;letter-spacing:0" placeholder="ad@gmail.com"><div id="dq-otp-err"></div><button class="v3-bt" style="width:100%" id="dq-em-ok">Kod göndər</button><button class="v3-bt o" style="width:100%;margin-top:8px" id="dq-em-no">Ləğv et</button></div>');
+  $('dq-em-no').onclick=function(){o.remove();res(null)};
+  $('dq-em-ok').onclick=async function(){
+    var e=$('dq-em').value.trim().toLowerCase(),x=$('dq-otp-err');x.textContent='';
+    if(!GM.test(e)){x.textContent='Düzgün Gmail yazın';return}
+    var r=null;try{r=await YQ.find(YQ.key(e))}catch(er){}
+    var c=null;try{c=DQ.cabinet()}catch(er){}
+    if(!r||r.status!=='approved'||(c&&c.fin&&r.fin&&String(r.fin).toUpperCase()!==String(c.fin).toUpperCase())){x.textContent='Bu Gmail ilə təsdiqlənmiş qeydiyyat tapılmadı';return}
+    o.remove();res(e)}})}
+async function emailFor(){
+  var k=null,r=null;try{k=YQ2.sess()}catch(e){}
+  if(k){try{r=await YQ.find(k)}catch(e){}}
+  if(r&&GM.test(r.contact||''))return r.contact.toLowerCase();
+  if(k&&GM.test(k))return k.toLowerCase();
+  return askEmail(r)}
+async function ensure(){
+  if(otpOk)return true;if(gating)return false;gating=true;
+  try{var e=await emailFor();if(!e)return false;if(!(await askCode(e)))return false;otpOk=true;return true}
+  finally{gating=false}}
+function openCab(){
+  var c=null;try{c=DQ.cabinet()}catch(e){}
+  return Promise.resolve(DQ.openCabinet()).then(function(){
+    if(!$('dq-cab')&&c&&c.name){YQ2.me=YQ2.me||{name:c.name,fin:c.fin,key:'fin:'+c.fin,contact:'',status:'approved',local:true};var d=document.createElement('div');d.id='dq-cab';document.body.appendChild(d);YQ2.go('home')}})}
+function wrapKab(){
+  if(typeof V3==='undefined'||typeof YQ2==='undefined'||typeof YQ==='undefined'||typeof DQ==='undefined'||!V3.go||V3.go.__f3||!DQ.openCabinet)return false;
+  var og=V3.go,ox=YQ2.exit;
+  V3.go=function(id){
+    if(id==='kab'){var c=null;try{c=DQ.cabinet()}catch(e){}
+      if((c&&(c.fin||c.name))||YQ2.sess()){ensure().then(function(ok){if(ok)openCab()});return}}
+    return og.apply(this,arguments)};
+  V3.go.__f3=1;
+  YQ2.exit=function(){otpOk=false;return ox.apply(this,arguments)};
+  /* kabinet kodsuz açılsa (səhifə bərpası, başqa düymələr) → bağla və kod istə */
+  new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){
+    if(n.id==='dq-cab'&&!otpOk){n.remove();ensure().then(function(ok){if(ok)openCab()})}})})}).observe(document.body,{childList:true});
+  return true}
+wait(wrapKab,function(){});
+
+/* ---------- WhatsApp mesajı ---------- */
+function fixMsg(t){
+  var fin=(t.match(/FİN:\s*([A-Za-z0-9]{5,})/)||[])[1],nm=(t.match(/Ad:\s*([^,\n]+)/)||[])[1],head=null,m;
+  if(m=t.match(/Salam mən (.+?) kateqoriyası üçün qeydiyyatdan keçmək istəyirəm/))head='Salam mən '+m[1]+' kateqoriyası üçün qeydiyyatdan keçmək istəyirəm.';
+  else if(m=t.match(/Salam, "(.+?)" \((.+?)\) imtahanına qeydiyyatdan keçdim/))head='Salam mən '+m[1]+' - '+m[2]+' kateqoriyası üçün qeydiyyatdan keçmək istəyirəm.';
+  if(!head)return t;
+  return head+'\nÖdəniş üçün kart kodu qeyd edə bilərsizmi zəhmət olmasa.'+(nm?'\nAd: '+nm.trim()+(fin?', FİN: '+fin:''):(fin?'\nFİN: '+fin:''));
+}
+function fixUrl(u){try{if(!/wa\.me|t\.me|whatsapp/.test(u))return u;var a=new URL(u),t=a.searchParams.get('text');if(t){a.searchParams.set('text',fixMsg(t));return a.toString()}}catch(e){}return u}
+var ow=window.open;window.open=function(u){if(typeof u==='string')arguments[0]=fixUrl(u);return ow.apply(this,arguments)};
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href*="wa.me"],a[href*="t.me"]');if(a)a.href=fixUrl(a.href)},true);
+
+/* ---------- Telefona yüklə: manifest + ikon ---------- */
+(function(){try{
+  var c=document.createElement('canvas');c.width=c.height=512;var x=c.getContext('2d');
+  var g=x.createLinearGradient(0,0,512,512);g.addColorStop(0,'#2f63bd');g.addColorStop(1,'#0a2f7a');x.fillStyle=g;x.fillRect(0,0,512,512);
+  x.fillStyle='#fff';x.font='bold 220px Arial,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('DQ',256,270);
+  c.toBlob(function(b){var ic=URL.createObjectURL(b),o=location.origin+'/';
+    var mf={name:'DQ Platform',short_name:'DQ Platform',id:o,start_url:o,scope:o,display:'standalone',background_color:'#0a2f7a',theme_color:'#0a2f7a',lang:'az',
+      icons:[{src:ic,sizes:'512x512',type:'image/png',purpose:'any'},{src:ic,sizes:'512x512',type:'image/png',purpose:'maskable'},{src:ic,sizes:'192x192',type:'image/png'}]};
+    var url=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));
+    document.querySelectorAll('link[rel=manifest]').forEach(function(l){l.remove()});
+    var l=document.createElement('link');l.rel='manifest';l.href=url;document.head.appendChild(l);
+    var t=document.querySelector('meta[name=theme-color]')||document.head.appendChild(Object.assign(document.createElement('meta'),{name:'theme-color'}));t.content='#0a2f7a';
+    var a=document.querySelector('link[rel=apple-touch-icon]')||document.head.appendChild(Object.assign(document.createElement('link'),{rel:'apple-touch-icon'}));a.href=ic;
+  },'image/png')}catch(e){}})();
+
+/* ---------- Admin: Quiz modulu ---------- */
+function admQuiz(){
+  if(typeof V7==='undefined'||typeof V2==='undefined'||!V7.go||V7.go.__q)return false;
+  var E=function(s){return V2.esc(s)},og=V7.go;
+  async function rows(){try{return (await V2.list('quizzes'))||[]}catch(e){return[]}}
+  V7.t_quiz=async function(){
+    var q=await rows();
+    return '<div class="v2-card"><h3>🧩 Yeni Quiz</h3><div class="v2-grid"><div class="v2-f"><label>Ad</label><input class="v2-in" id="qz-t"></div><div class="v2-f"><label>Müddət (dəq)</label><input class="v2-in" id="qz-d" type="number" value="10"></div></div>'+
+    '<div class="v2-f"><label>Suallar (hər sətir: Sual | A | B | C | D | Düzgün hərf)</label><textarea class="v2-in" id="qz-q" rows="6" placeholder="2+2 neçədir? | 3 | 4 | 5 | 6 | B"></textarea></div><button class="v2-b g" onclick="V7.qzSave()">💾 Yarat</button></div>'+
+    '<div class="v2-card"><h3>Quizlər ('+q.length+')</h3>'+(q.map(function(x){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid #e2e8f0"><span><b>'+E(x.title)+'</b> · '+(x.qs||[]).length+' sual · '+E(x.dur)+' dəq · '+(x.on?'🟢 aktiv':'⚪ passiv')+'</span><span><button class="v2-b o s" onclick="V7.qzTog(\''+x._id+'\')">'+(x.on?'Dayandır':'Aktiv et')+'</button> <button class="v2-b o s" onclick="V7.qzDel(\''+x._id+'\')">🗑</button></span></div>'}).join('')||'<div class="v2-empty">Quiz yoxdur</div>')+'</div>'};
+  V7.qzSave=async function(){
+    var t=$('qz-t').value.trim(),qs=[];
+    $('qz-q').value.split('\n').forEach(function(l){var p=l.split('|').map(function(s){return s.trim()});if(p.length>=6&&p[0]&&'ABCD'.indexOf(p[5].toUpperCase())>-1)qs.push({q:p[0],o:p.slice(1,5),a:p[5].toUpperCase()})});
+    if(!t||!qs.length)return alert('Ad və ən azı bir düzgün formatlı sual daxil edin.');
+    await V2.put('quizzes',{title:t,dur:+$('qz-d').value||10,qs:qs,on:false,ts:new Date().toISOString()});V7.go('quiz')};
+  async function mut(){await V2.probe();return _supabase}
+  V7.qzDel=async function(id){if(!confirm('Silinsin?'))return;var s=await mut();await s.from('dq_v2_store').delete().eq('id',id);V7.go('quiz')};
+  V7.qzTog=async function(id){var s=await mut(),r=(await rows()).find(function(x){return String(x._id)===String(id)});if(!r)return;var d=Object.assign({},r);delete d._id;d.on=!r.on;await s.from('dq_v2_store').update({data:d}).eq('id',id);V7.go('quiz')};
+  V7.go=async function(t){
+    var r=await og.apply(this,arguments),n=document.querySelector('#v7 .q7-tabs');
+    if(n){var b=n.querySelector('[data-qz]');if(!b){b=document.createElement('button');b.setAttribute('data-qz',1);b.onclick=function(){V7.eid=null;V7.go('quiz')};n.appendChild(b)}
+      b.className='v2-b '+(t==='quiz'?'':'o ')+'s';b.innerHTML='<i class="fa-solid fa-puzzle-piece"></i> Quiz'}
+    return r};
+  V7.go.__q=1;return true}
+wait(admQuiz,function(){});
+})();
+</script>
 </body>
 </html>
