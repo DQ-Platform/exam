@@ -19008,6 +19008,60 @@ input[type=file]::file-selector-button{border:0;background:#1e1b4b;color:#fff;bo
   window.DQ10 = { fix: fix, logged: logged };
 })();
 </script>
+    <!-- ===== YAMAQ: Xəbər mətnində linklər kliklənən olsun =====
+     Yalnız BİR DƏFƏ, </body>-dən əvvələ yapışdır. Heç nə silmə. -->
+<style id="dqlink-css">
+.dq-lnk{color:#1d4ed8!important;font-weight:600;text-decoration:underline!important;text-underline-offset:2px;word-break:break-all;cursor:pointer}
+.dq-lnk:hover{color:#0a2f7a!important}
+</style>
+<script id="dqlink-js">
+(function () {
+  'use strict';
+  var URL_RE = /((?:https?:\/\/|www\.)[^\s<>"'«»]+)/gi;
+  var SEL = '#nw-det .nw-dc p, .nw-dc p, .dq-modal p, #nw-pub p';
+
+  function split(url) {                       /* sondakı durğu işarələrini linkdən ayır */
+    var tail = '';
+    var m = url.match(/[.,;:!?)\]}»"']+$/);
+    if (m) { tail = m[0]; url = url.slice(0, -tail.length); }
+    return [url, tail];
+  }
+  function linkify(root) {
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        if (!n.nodeValue || !/(https?:\/\/|www\.)/i.test(n.nodeValue)) return NodeFilter.FILTER_REJECT;
+        return n.parentNode && n.parentNode.closest && n.parentNode.closest('a,button,script,style,textarea')
+          ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    }), nodes = [], n;
+    while ((n = w.nextNode())) nodes.push(n);
+    nodes.forEach(function (t) {
+      var s = t.nodeValue, frag = document.createDocumentFragment(), last = 0, m;
+      URL_RE.lastIndex = 0;
+      while ((m = URL_RE.exec(s))) {
+        var p = split(m[1]), href = /^www\./i.test(p[0]) ? 'https://' + p[0] : p[0];
+        if (m.index > last) frag.appendChild(document.createTextNode(s.slice(last, m.index)));
+        var a = document.createElement('a');
+        a.href = href; a.textContent = p[0]; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.className = 'dq-lnk';
+        a.addEventListener('click', function (e) { e.stopPropagation(); });
+        frag.appendChild(a);
+        if (p[1]) frag.appendChild(document.createTextNode(p[1]));
+        last = m.index + m[1].length;
+      }
+      if (last < s.length) frag.appendChild(document.createTextNode(s.slice(last)));
+      t.parentNode.replaceChild(frag, t);
+    });
+  }
+  function scan() { try { document.querySelectorAll(SEL).forEach(linkify); } catch (e) {} }
+
+  var pend = 0;
+  new MutationObserver(function () {
+    if (pend) return; pend = setTimeout(function () { pend = 0; scan(); }, 60);
+  }).observe(document.body, { childList: true, subtree: true });
+  scan();
+})();
+</script>
+
 
 </body>
 </html>
