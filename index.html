@@ -19518,6 +19518,14 @@ input[type=file]::file-selector-button{border:0;background:#1e1b4b;color:#fff;bo
   if (ready()) boot(); else { var n = 0, iv = setInterval(function () { if (ready()) { clearInterval(iv); boot(); } else if (++n > 200) clearInterval(iv); }, 150); }
 })();
 </script>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a2f7a">
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js').catch(function(){});
+}
+</script>
+
 
 </body>
 </html>
