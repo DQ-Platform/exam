@@ -1,38 +1,23 @@
-/* DQ Platform – service worker. Versiyanı dəyişəndə köhnə keş silinir. */
-const VERSION = 'dq-v1';
-const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
-
+const C = 'dq-v3';
+const CDN = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).catch(() => {}));
   self.skipWaiting();
+  e.waitUntil(caches.open(C).then(c => c.addAll(['./', 'favicon.png'])).catch(() => {}));
 });
-
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
-});
-
+self.addEventListener('activate', e => e.waitUntil(
+  caches.keys().then(k => Promise.all(k.filter(x => x !== C).map(x => caches.delete(x)))).then(() => clients.claim())
+));
+/* Səhifə və CDN faylları: keşdən dərhal, arxa planda yenilə. Supabase sorğularına toxunmur. */
 self.addEventListener('fetch', e => {
-  const req = e.request;
-  if (req.method !== 'GET') return;
-  const url = new URL(req.url);
-  if (url.origin !== location.origin) return;           /* Supabase, CDN və s. toxunulmaz */
-
-  /* Səhifə: əvvəl şəbəkə (həmişə yeni), internet yoxdursa keş */
-  if (req.mode === 'navigate') {
-    e.respondWith(
-      fetch(req).then(r => { const cp = r.clone(); caches.open(VERSION).then(c => c.put('./index.html', cp)); return r; })
-        .catch(() => caches.match('./index.html'))
-    );
-    return;
-  }
-  /* Statik fayllar: keş, arxada yenilə */
-  e.respondWith(
-    caches.match(req).then(hit => {
-      const net = fetch(req).then(r => { if (r.ok) { const cp = r.clone(); caches.open(VERSION).then(c => c.put(req, cp)); } return r; }).catch(() => hit);
-      return hit || net;
-    })
-  );
+  const r = e.request, u = new URL(r.url);
+  if (r.method !== 'GET') return;
+  const page = r.mode === 'navigate', cdn = CDN.includes(u.hostname);
+  if (!page && !cdn) return;
+  const key = page ? './' : r;
+  e.respondWith(caches.open(C).then(async c => {
+    const hit = await c.match(key);
+    const net = fetch(r).then(res => { if (res && (res.ok || res.type === 'opaque')) c.put(key, res.clone()); return res; }).catch(() => hit);
+    if (hit) { e.waitUntil(net); return hit; }
+    return net;
+  }));
 });
