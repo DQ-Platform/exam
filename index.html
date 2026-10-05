@@ -19624,7 +19624,108 @@ if ('serviceWorker' in navigator) {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 </script>
-<!-- ===== /DQ ===== -->
+    <!-- DÜYMƏLƏR HİSSƏSİ (İkinci şəkildəki kimi tənzimlənmiş struktur) -->
+<div class="login-topbar" id="login-topbar">
+    <a href="#" id="feed-news-btn" class="feed-btn feed-btn-news" style="display: none;">
+        <i class="fa-solid fa-bullhorn"></i> Elanlar
+    </a>
+    <a href="#" id="exam-reg-btn" class="feed-btn feed-btn-reg" style="display: none;">
+        <i class="fa-solid fa-pen-to-square"></i> Sınaq Qeydiyyatı
+    </a>
+</div>
+
+<style>
+/* ── SINAQ QEYDİYYATI VƏ ELAN DÜYMƏLƏRİ STİLİ ── */
+.login-topbar {
+    display: flex;
+    justify-content: space-between; /* Qeydiyyat olduqda: solda və sağda yerləşir */
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+    gap: 12px;
+}
+
+/* Sınaq qeydiyyatı olmadıqda elan düyməsini mərkəzə gətirən class */
+.login-topbar.centered-single {
+    justify-content: center !important;
+}
+
+.feed-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.25s ease-in-out;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.feed-btn-news {
+    background-color: #d97706; /* Elanlar - narıncı/qızılı tone */
+    color: #ffffff;
+}
+
+.feed-btn-news:hover {
+    background-color: #b45309;
+    transform: translateY(-2px);
+}
+
+.feed-btn-reg {
+    background-color: #0284c7; /* Qeydiyyat - göy tone */
+    color: #ffffff;
+}
+
+.feed-btn-reg:hover {
+    background-color: #0369a1;
+    transform: translateY(-2px);
+}
+</style>
+
+<script>
+/**
+ * Professional dinamik idarəetmə funksiyası:
+ * @param {boolean} isRegistrationActive - Sınaq qeydiyyatının varlığını bildirir (true/false)
+ * @param {boolean} hasNews - Elanların varlığını bildirir (true/false)
+ */
+function updateHeaderButtons(isRegistrationActive, hasNews = true) {
+    const topbar = document.getElementById('login-topbar');
+    const newsBtn = document.getElementById('feed-news-btn');
+    const regBtn = document.getElementById('exam-reg-btn');
+
+    if (!topbar || !newsBtn || !regBtn) return;
+
+    // Elan düyməsinin görünməsi
+    if (hasNews) {
+        newsBtn.style.display = 'inline-flex';
+    } else {
+        newsBtn.style.display = 'none';
+    }
+
+    // Sınaq qeydiyyatının vəziyyətinə görə tənzimləmə
+    if (isRegistrationActive) {
+        regBtn.style.display = 'inline-flex';
+        topbar.classList.remove('centered-single'); // 2-ci şəkildəki kimi solda və sağda
+    } else {
+        regBtn.style.display = 'none';
+        topbar.classList.add('centered-single');    // Qeydiyyat yoxdursa -> Elanlar mərkəzə keçir
+    }
+}
+
+// -------------------------------------------------------------
+// İSTİFADƏ MİSALI:
+// Verilənlər bazasından və ya Supabase-dən gələn statusa görə çağırın:
+
+// 1. Sınaq qeydiyyatı AKTİV olduqda (2-ci şəkildəki kimi nizamlanaacaq):
+updateHeaderButtons(true, true);
+
+// 2. Sınaq qeydiyyatı BAĞLI olduqda (Elan düyməsi tək qalıb mərkəzə keçəcək):
+// updateHeaderButtons(false, true);
+</script>
+
+
 
 </body>
 </html>
