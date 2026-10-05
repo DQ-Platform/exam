@@ -19061,6 +19061,221 @@ input[type=file]::file-selector-button{border:0;background:#1e1b4b;color:#fff;bo
   scan();
 })();
 </script>
+    <!-- ═══ YAMAQ 11: sabit ana səhifə · Testə başla düzəlişi · test nəticəsi → qeydiyyat → kabinet · sinxron ═══ -->
+<style id="dq11-css">
+#v3-home.dq11-noex>#dt-grid{display:none!important}
+#v3-home.dq11-noex.active>#dt-home{width:min(100% - 28px,640px)!important;margin-left:auto!important;margin-right:auto!important}
+.dq11-box{margin-top:16px;border-radius:20px;padding:18px;text-align:center;border:1px solid #e3e8f5;background:#fff;box-shadow:0 12px 30px rgba(30,27,75,.12)}
+.dq11-box.ok{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-color:#a7f3d0;color:#065f46}
+.dq11-box.ex{background:linear-gradient(135deg,#1e1b4b,#312e81);color:#fff;border:0}
+.dq11-box b{display:block;font-size:17px;margin-bottom:4px}
+.dq11-box small{display:block;opacity:.85;margin-bottom:10px;font-size:13px;line-height:1.45}
+.dq11-bt{border:0;border-radius:99px;padding:12px 22px;font:800 14px inherit;font-family:inherit;cursor:pointer;margin:4px;background:#16a34a;color:#fff}
+.dq11-bt.l{background:#fff;color:#1e1b4b;border:1.5px solid #cbd5e1}
+#dq11-tr{margin:6px 0 22px}
+#dq11-tr .dc-tbl table{min-width:520px}
+</style>
+<script id="dq11-js">
+(function () {
+  'use strict';
+  var $ = function (i) { return document.getElementById(i); };
+  var E = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var PK = 'dq_pend_tests';
+
+  function ready() { return window.LX && window.DT && typeof V3 !== 'undefined' && typeof V2 !== 'undefined' && typeof YQ !== 'undefined' && typeof YQ2 !== 'undefined' && typeof DQ !== 'undefined' && V3.openTest && V3.check; }
+
+  function boot() {
+    if (window.DQ11) return;
+    var DQ11 = window.DQ11 = {};
+
+    /* ───── 1) Ana səhifə həmişə eyni: sınaq kartı keşlənir ───── */
+    function saveLx() {
+      try {
+        var s = JSON.stringify(LX.cache || []);
+        if (s.length > 1500000) s = JSON.stringify((LX.cache || []).map(function (x) { var y = Object.assign({}, x); delete y.cover; delete y.covers; return y; }));
+        localStorage.setItem('dq_lx_cache', s);
+      } catch (e) {}
+    }
+    try { var c0 = JSON.parse(localStorage.getItem('dq_lx_cache') || 'null'); if (c0 && c0.length && (!LX.cache || !LX.cache.length)) { LX.cache = c0; LX.__ld = 1; } } catch (e) {}
+    var oL = LX.load;
+    LX.load = async function () { var r = await oL.apply(this, arguments); LX.__ld = 1; saveLx(); return r; };
+
+    function guard() {
+      var h = $('v3-home'); if (!h) return;
+      var hero = h.querySelector('.v3-hero'), cur = null; try { cur = LX.cur(); } catch (e) {}
+      h.classList.toggle('dq11-noex', !!LX.__ld && !cur);
+      if (!hero) return;
+      if (cur) {
+        var r = hero.querySelector('.lx-right');
+        if (!hero.classList.contains('lx-on') || !r || !r.querySelector('.lx-card')) { if (r) r.removeAttribute('data-id'); try { LX.mount(); } catch (e) {} }
+      } else if (!LX.cache || !LX.cache.length) {
+        if (!guard.t || Date.now() - guard.t > 3000) { guard.t = Date.now(); LX.load().then(function () { try { LX.mount(); } catch (e) {} }).catch(function () {}); }
+      }
+    }
+    setInterval(guard, 500); guard();
+
+    /* ───── 2) İdentifikasiya (kabinet / təsdiqli sessiya / gözləyən qeydiyyat) ───── */
+    async function who() {
+      try {
+        var k = YQ2.sess && YQ2.sess();
+        if (k) {
+          if (!YQ2.me || YQ2.me.key !== k) { var r = await YQ.find(k); if (r && r.status === 'approved') YQ2.me = r; }
+          if (YQ2.me && YQ2.me.fin) return { fin: String(YQ2.me.fin).toUpperCase(), name: YQ2.me.name, ok: 1, noTests: !!(YQ2.me.perms && YQ2.me.perms.tests === false) };
+        }
+      } catch (e) {}
+      try { var c = DQ.cabinet(); if (c && c.fin) return { fin: String(c.fin).toUpperCase(), name: c.name, ok: 1 }; } catch (e) {}
+      try {
+        var pk = localStorage.getItem('dq_pend_key');
+        if (pk) { var r2 = await YQ.find(pk); if (r2 && r2.fin) return { fin: String(r2.fin).toUpperCase(), name: r2.name, ok: r2.status === 'approved' ? 1 : 0, pend: r2.status !== 'approved' }; }
+      } catch (e) {}
+      return null;
+    }
+    DQ11.who = who;
+
+    /* ───── 3) Testə başla: dərhal testə keçir (id tip uyğunsuzluğu düzəldildi) ───── */
+    var busy = false;
+    DT.start = async function (id) {
+      if (busy) return; busy = true;
+      try {
+        try { await V3.loadTests(); } catch (e) {}
+        var list = V3.tests || [], i = list.findIndex(function (t) { return String(t._id) === String(id); });
+        if (i < 0) { alert('Test tapılmadı. Səhifəni yeniləyib yenidən cəhd edin.'); return; }
+        DT.list = list; DT.viaDaily = true; showScreen('v3-tests'); V3.openTest(i);
+      } finally { busy = false; }
+    };
+    var oOpen = V3.openTest;
+    V3.openTest = function () {
+      var d = DT.viaDaily; DT.viaDaily = false; var r = oOpen.apply(this, arguments);
+      if (V3.cur) V3.cur.daily = !!d; return r;
+    };
+
+    /* Testlər həm qeydiyyatlı, həm qonaq üçün açıqdır (yalnız admin bağlayıbsa bloklanır) */
+    V3.showTests = async function (subj) {
+      var w = await who();
+      if (w && w.noTests) { alert('🔒 Fənn testlərinə icazəniz yoxdur. Administrator ilə əlaqə saxlayın.'); return; }
+      DT.stop(); showScreen('v3-tests');
+      var el = $('v3-tests'); el.innerHTML = '<div class="dt-w"><div class="dt-empty">Yüklənir...</div></div>';
+      try { await V3.loadTests(); } catch (e) { V3.tests = []; }
+      DT.list = V3.tests; DT.at = Date.now(); DT.sub = typeof subj === 'string' ? subj : (DT.sub || '');
+      DT.paint(); scrollTo(0, 0);
+    };
+    var og = V3.go;
+    V3.go = function (id) {
+      var it = V3.D && V3.D.items && V3.D.items[id];
+      if (it && it.a === 'tests') return V3.showTests();
+      return og.apply(this, arguments);
+    };
+    V3.go.__dq10 = 1;
+
+    /* ───── 4) Test bitəndə: nəticə yazılır / qeydiyyat təklifi ───── */
+    function pend() { try { return JSON.parse(localStorage.getItem(PK) || '[]'); } catch (e) { return []; } }
+    function setPend(a) { try { localStorage.setItem(PK, JSON.stringify(a.slice(-30))); } catch (e) {} }
+    async function flush(fin, name) {
+      var l = pend(); if (!l.length || !fin) return 0; var left = [], n = 0;
+      for (var i = 0; i < l.length; i++) {
+        var r = l[i]; r.fin = fin; r.name = name || r.name || '';
+        try { await V2.put('testres', r); n++; } catch (e) { left.push(r); }
+      }
+      setPend(left); if (n) { CR.rows = null; } return n;
+    }
+    DQ11.flush = flush;
+
+    function examInfo() {
+      var x = null; try { x = LX.cur(); } catch (e) {}
+      if (x) { var d = new Date(x.start); return { title: x.title + (x.cat ? ' (' + x.cat + ')' : ''), when: d.toLocaleString('az-AZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }; }
+      try {
+        var ex = ((window.HOME && HOME.all) || window.DQ_NEWS || []).filter(function (n) { return /mtahan/i.test(n.kind || ''); })[0];
+        if (ex) return { title: ex.title, when: String(ex.pub || ex.date || '') };
+      } catch (e) {}
+      return null;
+    }
+    DQ11.reg = function () { YQ.open('reg'); YQ.stay = true; };
+    DQ11.login = function () { YQ.open('in'); YQ.stay = true; };
+
+    var chk = V3.check;
+    V3.check = function () {
+      var c = V3.cur; if (!c || c.done) return chk.apply(this, arguments);
+      var spent = DT.t0 ? Math.min(DT.total || 1e9, Math.round((Date.now() - DT.t0) / 1000)) : 0;
+      var r = chk.apply(this, arguments);
+      try { after(c, spent); } catch (e) { console.warn('dq11', e); }
+      return r;
+    };
+    async function after(c, spent) {
+      var t = c.t, a = c.a, ok = 0, bos = 0, n = t.ans.length;
+      t.ans.split('').forEach(function (k, i) { if (a[i] === k) ok++; else if (!a[i]) bos++; });
+      var rec = { fin: '', name: '', tid: String(t._id), title: t.title, subject: t.subject || 'Digər', daily: !!c.daily, ok: ok, wrong: n - ok - bos, blank: bos, total: n, pct: Math.round(ok / n * 100), spent: spent, ts: new Date().toISOString() };
+      var host = $('v3-res'); if (!host) return;
+      var box = document.createElement('div'); box.id = 'dq11-nx'; box.className = 'dq11-box'; box.innerHTML = '<small>Nəticə yadda saxlanılır…</small>'; host.appendChild(box);
+      var w = await who(), saved = false;
+      if (w) { rec.fin = w.fin; rec.name = w.name; try { await V2.put('testres', rec); saved = true; CR.rows = null; } catch (e) {} }
+      if (!saved) { var p = pend(); p.push(rec); setPend(p); }
+      if (saved && w.ok) {
+        box.className = 'dq11-box ok';
+        box.innerHTML = '<b>✅ Nəticəniz kabinetinizə yazıldı</b><small>Bütün test nəticələrinizi şəxsi kabinetinizdə görə bilərsiniz.</small><button type="button" class="dq11-bt" onclick="V3.go(\'kab\')">👤 Kabinetə keç</button>';
+      } else if (saved) {
+        box.className = 'dq11-box ok';
+        box.innerHTML = '<b>✅ Nəticə qeydiyyatınıza bağlandı</b><small>Admin qeydiyyatınızı təsdiqləyən kimi nəticə kabinetinizdə görünəcək.</small>';
+      } else {
+        var ex = examInfo();
+        if (ex) {
+          box.className = 'dq11-box ex';
+          box.innerHTML = '<b>📢 Yeni sınaq elan olunub</b><small>' + E(ex.title) + (ex.when ? ' · ' + E(ex.when) : '') + '<br>Qeydiyyatdan keçin — bu nəticə də kabinetinizdə saxlanılacaq.</small><button type="button" class="dq11-bt" onclick="DQ11.reg()">📝 Qeydiyyatdan keç</button><button type="button" class="dq11-bt l" onclick="DQ11.login()">Artıq qeydiyyatlıyam — daxil ol</button>';
+        } else {
+          box.innerHTML = '<small>Nəticələrinizin avtomatik saxlanması üçün kabinetinizə daxil olun.</small><button type="button" class="dq11-bt l" onclick="DQ11.login()">Daxil ol</button>';
+        }
+      }
+    }
+
+    /* qeydiyyat göndərilən an gözləyən nəticələr həmin FİN-ə bağlanır */
+    var oSt = YQ.state;
+    YQ.state = function (r) {
+      var out = oSt.apply(this, arguments);
+      try { if (r && r.fin && r.status !== 'rejected') flush(String(r.fin).toUpperCase(), r.name); } catch (e) {}
+      return out;
+    };
+
+    /* ───── 5) Kabinetdə «Test nəticələrim» ───── */
+    var CR = { fin: '', rows: null, t: 0, busy: 0 };
+    async function cabInject() {
+      var cab = $('dq-cab'), box = $('dq11-tr');
+      if (!cab || !YQ2.me || ['home', 'res'].indexOf(YQ2.tab) < 0) { if (box) box.remove(); return; }
+      var cb = cab.querySelector('#dq-cb'); if (!cb || cb.textContent.indexOf('Yüklənir') > -1) return;
+      var fin = String(YQ2.me.fin || '').toUpperCase(); if (!fin) return;
+      if (CR.fin !== fin || !CR.rows || Date.now() - CR.t > 30000) {
+        if (CR.busy) return; CR.busy = 1;
+        try { await flush(fin, YQ2.me.name); var all = await V2.list('testres'); CR.rows = (all || []).filter(function (x) { return String(x.fin).toUpperCase() === fin; }).sort(function (a, b) { return String(b.ts).localeCompare(String(a.ts)); }); CR.fin = fin; CR.t = Date.now(); box && box.removeAttribute('data-sig'); }
+        catch (e) { CR.busy = 0; return; }
+        CR.busy = 0;
+      }
+      var rows = CR.rows || [];
+      if (!rows.length) { if (box) box.remove(); return; }
+      var lim = YQ2.tab === 'home' ? 5 : 60, sig = YQ2.tab + '|' + rows.length + '|' + rows[0].ts;
+      if (!box) { box = document.createElement('div'); box.id = 'dq11-tr'; }
+      if (box.previousElementSibling !== cb) cb.insertAdjacentElement('afterend', box);
+      if (box.getAttribute('data-sig') === sig) return; box.setAttribute('data-sig', sig);
+      var avg = Math.round(rows.reduce(function (s, x) { return s + (+x.pct || 0); }, 0) / rows.length);
+      var fm = function (iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleString('az-AZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); };
+      box.innerHTML = '<div class="dc-sec"><span><i class="fa-solid fa-pen-to-square"></i>Test nəticələrim · orta ' + avg + '%</span>' + (YQ2.tab === 'home' && rows.length > lim ? '<a onclick="YQ2.go(\'res\')">Hamısı</a>' : '') + '</div>' +
+        '<div class="dc-tbl"><table><thead><tr><th>Tarix</th><th>Test</th><th>Fənn</th><th>Düz</th><th>Səhv</th><th>Boş</th><th>%</th></tr></thead><tbody>' +
+        rows.slice(0, lim).map(function (x) { return '<tr><td class="m">' + E(fm(x.ts)) + '</td><td><b>' + E(x.title) + '</b>' + (x.daily ? ' <span class="dc-badge">⭐ günün testi</span>' : '') + '</td><td class="m">' + E(x.subject) + '</td><td class="g">' + E(x.ok) + '</td><td class="b">' + E(x.wrong) + '</td><td class="m">' + E(x.blank) + '</td><td><b>' + E(x.pct) + '%</b></td></tr>'; }).join('') + '</tbody></table></div>';
+    }
+    setInterval(function () { try { cabInject(); } catch (e) {} }, 700);
+
+    /* ───── 6) Avtomatik sinxron: giriş edilmiş cihazda hər açılışda profil, icazə və nəticələr yenilənir ───── */
+    async function sync() {
+      var w = await who(); if (!w) return;
+      if (w.ok) { try { DQ.saveCabinet({ name: w.name, fin: w.fin }); } catch (e) {} }
+      await flush(w.fin, w.name);
+      try { if (window.DQ10) DQ10.fix(); } catch (e) {}
+    }
+    setTimeout(sync, 1500);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) sync(); });
+    setInterval(function () { if (pend().length) sync(); }, 5000);
+  }
+
+  if (ready()) boot(); else { var n = 0, iv = setInterval(function () { if (ready()) { clearInterval(iv); boot(); } else if (++n > 160) clearInterval(iv); }, 250); }
+})();
+</script>
 
 
 </body>
