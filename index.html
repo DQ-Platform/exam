@@ -22064,6 +22064,134 @@ var APS_LOGIC = (function () {
 })();
 
 </script>
+    <!-- Modul 57 yamağı. Yalnız BİR DƏFƏ, ƏN SONUNCU yamağın altına, </body>-dən əvvələ yapışdır. Heç nə silmə. Əlavə SQL lazım deyil.
+     QuizMood yamağı varsa, paketlərdən birbaşa quiz yaradıla bilir. -->
+<style id="m5-css">
+#m5-ov{position:fixed;inset:0;z-index:99991;background:#f8fafc;overflow:auto;display:none;color:#0f172a}
+.m5-w{max-width:820px;margin:0 auto;padding:12px 14px 90px}
+.m5-nav{display:flex;gap:6px;overflow-x:auto;padding:8px 0;position:sticky;top:0;background:#f8fafc;z-index:2}
+.m5-nav button{white-space:nowrap;border:1px solid #e2e8f0;background:#fff;border-radius:20px;padding:8px 14px;font-weight:700;cursor:pointer}
+.m5-nav button.on{background:#2563eb;color:#fff;border-color:#2563eb}
+.m5-c{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:14px;margin-bottom:12px}
+.m5-g{display:grid;grid-template-columns:1fr 1fr;gap:10px}.m5-st{border:1px solid #e2e8f0;border-radius:12px;padding:10px;background:#fff}.m5-st b{font-size:26px;display:block}
+.m5-b{border:0;border-radius:10px;padding:9px 13px;font-weight:700;cursor:pointer;background:#2563eb;color:#fff;font-size:13px}
+.m5-b.o{background:#fff;color:#0f172a;border:1px solid #cbd5e1}.m5-b.r{background:#fff;color:#dc2626;border:1px solid #fca5a5}.m5-b.g{background:#15803d}.m5-b.d{background:#1e1b4b}
+.m5-in{width:100%;box-sizing:border-box;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;margin:4px 0 8px;background:#fff}
+.m5-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.m5-tag{font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;background:#e2e8f0}.m5-tag.ok{background:#dcfce7;color:#166534}.m5-tag.rev{background:#fef3c7;color:#92400e}.m5-tag.no{background:#fee2e2;color:#991b1b}
+.m5-o{display:flex;gap:8px;align-items:center;border:1px solid #e2e8f0;border-radius:10px;padding:9px;margin:6px 0;cursor:pointer;background:#fff}.m5-o.c{border-color:#16a34a;background:#f0fdf4}.m5-o i{font-style:normal;font-weight:800;background:#f1f5f9;border-radius:6px;padding:2px 8px}
+.m5-q img{max-width:100%;max-height:200px;border:1px solid #e2e8f0;border-radius:8px;display:block;margin:8px 0}
+.m5-drop{border:2px dashed #60a5fa;background:#eff6ff;border-radius:16px;padding:26px 12px;text-align:center}
+.m5-modal{position:fixed;inset:0;z-index:99995;background:#0008;display:flex;align-items:center;justify-content:center}.m5-modal>div{background:#fff;border-radius:20px;padding:22px;width:min(380px,90vw);text-align:center}
+.m5-bar{height:8px;background:#e2e8f0;border-radius:8px;overflow:hidden;margin:12px 0}.m5-bar i{display:block;height:100%;background:#2563eb;transition:width .4s}
+</style>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)},E=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var M=window.M57={tab:'home',B:[],P:[],T:[],QZ:[],file:null,rb:null,flt:'all',sq:'',ed:-1,sel:{}};
+function toast(t){try{V2.toast(t)}catch(e){alert(t)}}
+function rt(){var o=$('m5-ov');if(!o){o=document.createElement('div');o.id='m5-ov';document.body.appendChild(o)}return o}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+async function load(){M.B=(await V2.list('m57_batch'))||[];M.P=(await V2.list('m57_pack'))||[];M.T=(await V2.list('m57_topic'))||[];try{M.QZ=(await V2.list('qm_quiz'))||[]}catch(e){M.QZ=[]}}
+async function put(c,o){var id=o._id,d=Object.assign({},o);delete d._id;await V2.put(c,d,id)}
+async function del(c,id){if(!confirm('Silinsin?'))return false;await V2.probe();if(V2.mode==='cloud')await _supabase.from('dq_v2_store').delete().eq('id',id);else localStorage.setItem('dq_v2_'+c,JSON.stringify((await V2.list(c)).filter(function(x){return x._id!=id})));return true}
+function bank(){var a=[];M.B.forEach(function(b,bi){b.qs.forEach(function(q,qi){if(q.st==='ok')a.push({q:q,k:bi+'_'+qi,doc:b.name})})});return a}
+function js(f){return new Promise(function(ok,no){var s=document.createElement('script');s.src=f;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function crop(cv,b){var H=cv.height,W=cv.width,y1=b[0]/1000*H,x1=b[1]/1000*W,y2=b[2]/1000*H,x2=b[3]/1000*W,c=document.createElement('canvas');c.width=Math.max(10,x2-x1);c.height=Math.max(10,y2-y1);c.getContext('2d').drawImage(cv,x1,y1,c.width,c.height,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.8)}
+function fimg(f,W){return new Promise(function(ok){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var k=Math.min(1,W/im.width),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.8))};im.src=r.result};r.readAsDataURL(f)})}
+
+/* ---------- Əsas çərçivə ---------- */
+M.open=async function(){await load();M.draw()};
+M.close=function(){rt().style.display='none'};
+M.go=async function(t){M.tab=t;if(t!=='rev')M.rb=null;await load();M.draw()};
+M.draw=function(){var T=[['home','🏠 İcmal'],['bank','📄 Sual bankı'],['imp','⬆️ PDF/Word idxalı'],['pack','📦 Paketlər'],['lib','📚 Kitabxana']];
+ var h='<div class="m5-w"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:6px 0">57 · AI Sual Studiyası</h2><button class="m5-b o" onclick="M57.close()">✕</button></div><div class="m5-nav">'+T.map(function(t){return'<button class="'+(M.tab===t[0]||(M.tab==='rev'&&t[0]==='imp')?'on':'')+'" onclick="M57.go(\''+t[0]+'\')">'+t[1]+'</button>'}).join('')+'</div>'+(V[M.tab]?V[M.tab]():'')+'</div>';
+ var o=rt();o.style.display='block';var s=o.scrollTop;o.innerHTML=h;o.scrollTop=M.keep?s:0;M.keep=false};
+var V={};
+V.home=function(){var n=bank().length,tot=0;M.B.forEach(function(b){tot+=b.qs.length});
+ return'<div class="m5-g"><div class="m5-st">SUAL BANKI<b>'+n+'</b></div><div class="m5-st">SUAL PAKETLƏRİ<b>'+M.P.length+'</b></div><div class="m5-st">QUİZLƏR<b>'+M.QZ.length+'</b></div><div class="m5-st">AŞKARLANAN SUAL<b>'+tot+'</b></div></div><div class="m5-row"><button class="m5-b" onclick="M57.go(\'imp\')">⬆️ PDF-dən sual idxalı</button><button class="m5-b o" onclick="M57.go(\'pack\')">+ Paket</button>'+(window.QM?'<button class="m5-b d" onclick="QM.openAdmin()">🎲 QuizMood</button>':'')+'</div>'+hist()};
+function hist(){return'<h3>İdxal tarixçəsi <span class="m5-tag">'+M.B.length+' sənəd</span></h3>'+(M.B.length?M.B.map(function(b){var ok=b.qs.filter(function(q){return q.st==='ok'}).length;return'<div class="m5-c"><b>'+E(b.name)+'</b><div class="m5-row"><span class="m5-tag">'+b.pages+' səhifə</span><span class="m5-tag">'+b.qs.length+' sual</span><span class="m5-tag ok">'+ok+' hazır</span><span class="m5-tag">'+new Date(b.at).toLocaleDateString('az-AZ')+'</span></div><div class="m5-row"><button class="m5-b" onclick="M57.review('+b._id+')">Yoxla / Təsdiqlə</button><button class="m5-b r" onclick="M57.delB('+b._id+')">Sil</button></div></div>'}).join(''):'<div class="m5-c">Hələ heç bir sənəd idxal edilməyib.</div>')}
+M.delB=async function(id){if(await del('m57_batch',id))M.go(M.tab)};
+
+/* ---------- İdxal ---------- */
+V.imp=function(){var k=localStorage.getItem('m57_key')||'',md=localStorage.getItem('m57_model')||'gemini-2.5-flash';
+ return'<div class="m5-c"><b>Gemini API açarı</b> <small>(yalnız bu brauzerdə saxlanır)</small><input class="m5-in" type="password" id="m5-k" value="'+E(k)+'" placeholder="AIza..." onchange="localStorage.setItem(\'m57_key\',this.value.trim())"><select class="m5-in" onchange="localStorage.setItem(\'m57_model\',this.value)"><option value="gemini-2.5-flash"'+(md==='gemini-2.5-flash'?' selected':'')+'>Gemini 2.5 Flash</option><option value="gemini-2.5-pro"'+(md==='gemini-2.5-pro'?' selected':'')+'>Gemini 2.5 Pro (daha dəqiq)</option></select></div>'+
+ '<div class="m5-drop"><div style="font-size:34px">⬆️</div><b>PDF və ya Word (.docx) seçin</b><p style="font-size:13px;color:#475569">Maks. 10 MB, ilk 10 səhifə oxunur. Sual, variant, düzgün cavab və şəkillər ayrılır.</p><input type="file" id="m5-f" accept=".pdf,.docx,application/pdf" style="display:none" onchange="M57.pick(this)"><button class="m5-b o" onclick="document.getElementById(\'m5-f\').click()">Fayl seçin</button></div>'+
+ (M.file?'<div class="m5-c" style="margin-top:12px"><b>'+E(M.file.name)+'</b><div style="font-size:12px;color:#64748b">'+Math.round(M.file.size/1024)+' KB · yüklənməyə hazırdır</div><div class="m5-row"><button class="m5-b" onclick="M57.run()">✨ Yüklə və Təhlil Et</button><button class="m5-b o" onclick="M57.file=null;M57.draw()">✕</button></div></div>':'')+hist()};
+M.pick=function(i){var f=i.files[0];if(!f)return;if(f.size>10*1048576){toast('Fayl 10 MB-dan böyükdür');return}M.file=f;M.draw()};
+function modal(t,p,s){var m=$('m5-md');if(!m){m=document.createElement('div');m.id='m5-md';m.className='m5-modal';document.body.appendChild(m)}m.innerHTML='<div><h3>PDF Sənəd Təhlil Edilir</h3><p>'+t+'</p><div class="m5-bar"><i style="width:'+p+'%"></i></div><b>'+p+'%</b><p style="font-size:12px;color:#64748b">'+(s||'Təhlil bitənədək bu pəncərəni açıq saxlayın.')+'</p></div>'}
+function nomodal(){var m=$('m5-md');if(m)m.remove()}
+async function gem(parts){var k=(localStorage.getItem('m57_key')||'').trim(),md=localStorage.getItem('m57_model')||'gemini-2.5-flash';if(!k)throw new Error('Gemini API açarını yazın');
+ var P='You extract multiple-choice exam questions (Azerbaijani, may contain logic puzzles). Return ONLY a JSON array. Each item: {"text":string (""if unreadable),"options":[option texts without letter prefixes],"correct":index or null if not shown,"topic":short string,"difficulty":"Asan"|"Orta"|"Çətin","figure":[ymin,xmin,ymax,xmax] in 0-1000 of the question diagram/figure or null,"page":1-based image number}. Keep original language. If options are images, use letters "A","B"... as option texts.';
+ var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+md+':generateContent?key='+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:P}].concat(parts)}],generationConfig:{responseMimeType:'application/json',temperature:0.1}})});
+ var j=await r.json();if(!r.ok)throw new Error((j.error&&j.error.message)||'Gemini xətası');
+ var t=((j.candidates||[])[0]||{}).content;t=t&&t.parts?t.parts.map(function(p){return p.text||''}).join(''):'[]';try{return JSON.parse(t.replace(/```json|```/g,'').trim())}catch(e){return[]}}
+function mk(a,cv){var o=(a.options||[]).map(function(x){return String(x)});var c=(typeof a.correct==='number'&&a.correct>=0&&a.correct<o.length)?a.correct:null,fg='';
+ try{if(a.figure&&cv)fg=crop(cv,a.figure)}catch(e){}
+ return{t:a.text||'',o:o,c:c,topic:a.topic||'',diff:a.difficulty||'Orta',fig:fg,page:a.page||1,st:(a.text&&o.length>=2&&c!==null)?'rev':'rev'}}
+M.run=async function(){var f=M.file,qs=[],pages=1;if(!f)return;
+ try{modal('Fayl hazırlanır…',3);
+  if(/\.docx$/i.test(f.name)){if(!window.mammoth)await js('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');
+   var tx=(await mammoth.extractRawText({arrayBuffer:await f.arrayBuffer()})).value,ch=[];for(var i=0;i<tx.length&&ch.length<12;i+=7000)ch.push(tx.slice(i,i+7000));pages=ch.length;
+   for(var c=0;c<ch.length;c++){modal('Hissə '+(c+1)+' / '+ch.length+' oxunur və suallar aşkarlanır…',Math.round((c/ch.length)*95)+3);(await gem([{text:ch[c]}])).forEach(function(a){qs.push(mk(a,null))})}
+  }else{if(!window.pdfjsLib){await js('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}
+   var pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;pages=Math.min(pdf.numPages,10);
+   for(var s=1;s<=pages;s+=3){var e=Math.min(s+2,pages);modal('Səhifə '+s+'-'+e+' / '+pages+' oxunur və suallar aşkarlanır…',Math.round(((s-1)/pages)*95)+3);
+    var cvs=[],parts=[];for(var p=s;p<=e;p++){var pg=await pdf.getPage(p),vp=pg.getViewport({scale:1.6}),cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;cvs.push(cv);parts.push({inline_data:{mime_type:'image/jpeg',data:cv.toDataURL('image/jpeg',.8).split(',')[1]}})}
+    (await gem(parts)).forEach(function(a){var q=mk(a,cvs[Math.min(Math.max((a.page||1)-1,0),cvs.length-1)]);q.page=s+(Math.min(Math.max((a.page||1)-1,0),cvs.length-1));qs.push(q)})}}
+  qs.forEach(function(q){q.st=(q.t&&q.o.length>=2&&q.c!==null)?'auto':'rev'});
+  var b={name:f.name,pages:pages,qs:qs,at:Date.now()};await V2.put('m57_batch',b);await load();var nb=M.B.find(function(x){return x.at===b.at});nomodal();M.file=null;toast(qs.length+' sual aşkarlandı');if(nb)M.review(nb._id);else M.go('imp')
+ }catch(err){nomodal();alert('Xəta: '+err.message)}};
+
+/* ---------- Yoxlanış ---------- */
+M.review=async function(id){await load();M.rb=id;M.tab='rev';M.flt='all';M.sq='';M.ed=-1;M.draw()};
+function cur(){return M.B.find(function(b){return b._id==M.rb})}
+function stOf(q){return q.st==='ok'?'ok':q.st==='no'?'no':'rev'}
+V.rev=function(){var b=cur();if(!b)return'';var Q=b.qs,cnt={ok:0,rev:0,no:0};Q.forEach(function(q){cnt[stOf(q)]++});
+ var L=Q.map(function(q,i){return[q,i]}).filter(function(x){return(M.flt==='all'||stOf(x[0])===M.flt)&&(!M.sq||(x[0].t+' '+x[0].o.join(' ')).toLowerCase().indexOf(M.sq.toLowerCase())>-1)});
+ return'<div class="m5-c" style="border-left:4px solid #15803d">Sənəd təhlil edildi. '+Q.length+' sual aşkarlandı. Zəhmət olmasa nəticələri nəzərdən keçirin.</div><div class="m5-row"><button class="m5-b o" onclick="M57.go(\'imp\')">← İdxal siyahısı</button><span class="m5-tag">'+E(b.name)+'</span></div><h2>Sual yoxlanışı və təsdiqi</h2><div class="m5-row"><button class="m5-b g" onclick="M57.bulk()">✓ Düzgünləri toplu təsdiqlə</button></div>'+
+ '<div class="m5-g" style="margin-top:10px"><div class="m5-st">Aşkar edildi<b>'+Q.length+'</b></div><div class="m5-st">Hazırdır<b>'+cnt.ok+'</b></div><div class="m5-st">Yoxlanmalıdır<b>'+cnt.rev+'</b></div><div class="m5-st">Rədd edildi<b>'+cnt.no+'</b></div></div>'+
+ '<div class="m5-row">'+[['all','Hamısı',Q.length],['rev','Yoxlanılmalıdır',cnt.rev],['ok','Hazırdır',cnt.ok],['no','Rədd edilib',cnt.no]].map(function(f){return'<button class="m5-b '+(M.flt===f[0]?'':'o')+'" onclick="M57.f(\''+f[0]+'\')">'+f[1]+' '+f[2]+'</button>'}).join('')+'</div><input class="m5-in" placeholder="Sual mətni üzrə axtarış…" value="'+E(M.sq)+'" oninput="M57.sq=this.value" onchange="M57.draw()" style="margin-top:10px">'+
+ L.map(function(x){var q=x[0],i=x[1],s=stOf(q),ed=M.ed===i;
+  return'<div class="m5-c m5-q"><div class="m5-row" style="margin:0"><span class="m5-tag" style="background:#dbeafe">Sual #'+(i+1)+'</span><span class="m5-tag">Səh. '+q.page+'</span><span class="m5-tag '+s+'">'+(s==='ok'?'✓ Hazırdır':s==='no'?'Rədd edilib':'! Yoxlanmalıdır')+'</span><span class="m5-tag">'+E(q.topic||'Fənn')+' · '+E(q.diff)+'</span></div>'+
+  (ed?'<textarea class="m5-in" rows="3" onchange="M57.set('+i+',\'t\',this.value)">'+E(q.t)+'</textarea>':'<p style="font-size:16px;font-weight:600;'+(q.t?'':'color:#b91c1c;font-style:italic')+'">'+(q.t?E(q.t):'[Sual mətni oxunmadı]')+'</p>')+
+  (q.fig?'<img src="'+q.fig+'"><button class="m5-b o" onclick="M57.set('+i+',\'fig\',\'\')">Şəkli sil</button>':'')+' <label class="m5-b o" style="display:inline-block">Şəkil əlavə et<input type="file" accept="image/*" style="display:none" onchange="M57.addImg('+i+',this)"></label>'+
+  (q.c===null?'<div style="background:#fffbeb;border-left:3px solid #d97706;padding:8px;margin:8px 0;font-size:13px">Düzgün cavab müəyyən edilmədi — variantlardan birinə klikləyin.</div>':'')+
+  q.o.map(function(o,k){return ed?'<div class="m5-o"><i>'+'ABCDEF'[k]+'</i><input class="m5-in" style="margin:0" value="'+E(o)+'" onchange="M57.setO('+i+','+k+',this.value)"></div>':'<div class="m5-o '+(q.c===k?'c':'')+'" onclick="M57.setC('+i+','+k+')"><i>'+'ABCDEF'[k]+'</i>'+E(o)+'</div>'}).join('')+
+  '<div class="m5-row"><button class="m5-b" onclick="M57.ok('+i+')">✓ Təsdiqlə</button><button class="m5-b o" onclick="M57.edit('+i+')">'+(ed?'💾 Bitir':'✏️ Redaktə et')+'</button><button class="m5-b r" onclick="M57.no('+i+')">✕ Rədd et</button></div></div>'}).join('')};
+M.f=function(f){M.flt=f;M.draw()};
+async function sv(){M.keep=true;await put('m57_batch',cur());M.draw()}
+M.set=function(i,k,v){cur().qs[i][k]=v;sv()};M.setO=function(i,k,v){cur().qs[i].o[k]=v;M.keep=true;put('m57_batch',cur())};
+M.setC=function(i,k){var q=cur().qs[i];q.c=k;if(q.st==='no')q.st='rev';sv()};
+M.ok=function(i){var q=cur().qs[i];if(!q.t||q.o.length<2)return toast('Sual mətni və variantlar lazımdır');if(q.c===null)return toast('Düzgün cavabı seçin');q.st='ok';sv()};
+M.no=function(i){cur().qs[i].st='no';sv()};
+M.edit=function(i){M.ed=M.ed===i?-1:i;M.keep=true;M.draw()};
+M.addImg=async function(i,el){if(el.files[0]){cur().qs[i].fig=await fimg(el.files[0],900);sv()}};
+M.bulk=function(){var n=0;cur().qs.forEach(function(q){if(q.st!=='no'&&q.st!=='ok'&&q.t&&q.o.length>=2&&q.c!==null){q.st='ok';n++}});toast(n+' sual təsdiqləndi');sv()};
+
+/* ---------- Bank / Paket / Kitabxana ---------- */
+V.bank=function(){var A=bank(),to=M.T.map(function(t){return'<option>'+E(t.name)+'</option>'}).join('');
+ return'<h3>Sual bankı <span class="m5-tag ok">'+A.length+'</span></h3>'+(A.length?'<div class="m5-c"><input class="m5-in" id="m5-pn" placeholder="Paket adı"><div class="m5-g"><input class="m5-in" id="m5-ps" placeholder="Fənn (məs: Məntiq)"><select class="m5-in" id="m5-pt"><option value="">Mövzu seç</option>'+to+'</select></div><button class="m5-b g" onclick="M57.mkPack()">📦 Seçilmişlərdən paket yarat</button> <button class="m5-b o" onclick="M57.selAll()">Hamısını seç</button></div>':'<div class="m5-c">Hələ təsdiqlənmiş sual yoxdur. PDF idxal edib təsdiqləyin.</div>')+
+ A.map(function(a,n){return'<div class="m5-c m5-q"><label class="m5-row" style="margin:0"><input type="checkbox" '+(M.sel[a.k]?'checked':'')+' onchange="M57.sel[\''+a.k+'\']=this.checked"> <b>'+(n+1)+'. '+E(a.q.t)+'</b></label>'+(a.q.fig?'<img src="'+a.q.fig+'">':'')+'<div style="font-size:13px;color:#15803d">✓ '+'ABCDEF'[a.q.c]+') '+E(a.q.o[a.q.c])+'</div><small style="color:#64748b">'+E(a.doc)+'</small></div>'}).join('')};
+M.selAll=function(){bank().forEach(function(a){M.sel[a.k]=true});M.keep=true;M.draw()};
+M.mkPack=async function(){var A=bank().filter(function(a){return M.sel[a.k]}),n=$('m5-pn').value.trim();if(!A.length)return toast('Sual seçin');if(!n)return toast('Paket adı yazın');
+ await V2.put('m57_pack',{name:n,subject:$('m5-ps').value.trim()||'Digər',topic:$('m5-pt').value,qs:A.map(function(a){return{t:a.q.t,img:a.q.fig,o:a.q.o,c:a.q.c}}),at:Date.now()});M.sel={};toast('Paket yaradıldı');M.go('pack')};
+V.pack=function(){return'<h3>Sual paketləri <span class="m5-tag">'+M.P.length+'</span></h3>'+(M.P.length?M.P.map(function(p){return'<div class="m5-c"><b>'+E(p.name)+'</b><div class="m5-row"><span class="m5-tag">'+E(p.subject)+'</span><span class="m5-tag">'+p.qs.length+' sual</span>'+(p.topic?'<span class="m5-tag">📚 '+E(p.topic)+'</span>':'')+'</div><div class="m5-row"><button class="m5-b d" onclick="M57.quiz('+p._id+')">🎲 Quiz yarat</button><button class="m5-b r" onclick="M57.delP('+p._id+')">Sil</button></div></div>'}).join(''):'<div class="m5-c">Hələ sual paketi yoxdur. «Sual bankı» bölməsində yaradın.</div>')};
+M.delP=async function(id){if(await del('m57_pack',id))M.go('pack')};
+M.quiz=async function(id){var p=M.P.find(function(x){return x._id==id}),t=prompt('Quiz adı:',p.name);if(!t)return;var s=+prompt('Sual başına saniyə:','30')||30;
+ await V2.put('qm_quiz',{title:t,subject:p.subject,sec:s,cover:'',startAt:'',hide:false,keep:true,status:'draft',qs:p.qs});toast(window.QM?'Quiz yaradıldı — QuizMood-da Start verin':'Quiz yaradıldı (QuizMood yamağını da quraşdırın)');await load();M.draw()};
+V.lib=function(){return'<div class="m5-c"><b>Quizlərinizi mövzulara ayırın</b><div class="m5-row"><input class="m5-in" id="m5-tn" placeholder="Yeni mövzu adı" style="flex:1;margin:0"><button class="m5-b" onclick="M57.addT()">+ Yeni mövzu</button></div></div>'+
+ (M.T.length?M.T.map(function(t){var n=M.P.filter(function(p){return p.topic===t.name}).length;return'<div class="m5-c"><b>📚 '+E(t.name)+'</b> <span class="m5-tag">'+n+' paket</span><div class="m5-row"><button class="m5-b r" onclick="M57.delT('+t._id+')">Sil</button></div>'+M.P.filter(function(p){return p.topic===t.name}).map(function(p){return'<div style="font-size:13px;margin-top:6px">• '+E(p.name)+' ('+p.qs.length+')</div>'}).join('')+'</div>'}).join(''):'<p style="color:#64748b">Kitabxanada hələ mövzu yoxdur.</p>')};
+M.addT=async function(){var n=$('m5-tn').value.trim();if(!n)return;await V2.put('m57_topic',{name:n});M.go('lib')};
+M.delT=async function(id){if(await del('m57_topic',id))M.go('lib')};
+
+/* ---------- admin kartı ---------- */
+function mount(){var g=document.querySelector('#admin-panel .admin-nav-grid');
+ if(g&&!$('m5-card')){var d=document.createElement('div');d.id='m5-card';d.className='admin-nav-card';d.style.cssText='background:linear-gradient(135deg,#2563eb,#0f766e);color:#fff';d.onclick=M.open;d.innerHTML='<span class="icon">✨</span> 57 · AI Sual Studiyası';g.insertBefore(d,g.firstChild)}}
+setInterval(mount,1500);mount();
+})();
+</script>
+
 
 </body>
 </html>
