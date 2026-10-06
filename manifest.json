@@ -2,14 +2,23 @@
   "name": "DQ Platform",
   "short_name": "DQ Platform",
   "description": "Dövlət qulluğu sınaq və fənn testləri onlayn.",
-  "id": "/",
-  "start_url": "/",
-  "scope": "/",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait",
   "lang": "az",
+  "dir": "ltr",
   "background_color": "#ffffff",
   "theme_color": "#0a2f7a",
+  "categories": [
+    "education"
+  ],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icon-192.png",
