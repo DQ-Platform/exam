@@ -22191,6 +22191,141 @@ function mount(){var g=document.querySelector('#admin-panel .admin-nav-grid');
 setInterval(mount,1500);mount();
 })();
 </script>
+    <!-- QuizMood yamağı. Yalnız BİR DƏFƏ, ƏN SONUNCU yamağın altına, </body>-dən əvvələ yapışdır. Heç nə silmə. Əlavə SQL lazım deyil (mövcud dq_v2_store istifadə olunur). -->
+<style id="qm-css">
+#qm-fab{position:fixed;left:12px;bottom:78px;z-index:9000;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border:0;border-radius:30px;padding:11px 16px;font-weight:800;box-shadow:0 6px 18px #0004;cursor:pointer}
+#qm-ov{position:fixed;inset:0;z-index:99990;background:#f1f5f9;overflow:auto;display:none;font-family:inherit;color:#0f172a}
+.qm-w{max-width:760px;margin:0 auto;padding:14px 14px 90px}
+.qm-top{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}.qm-top h2{margin:0;font-size:19px}
+.qm-b{border:0;border-radius:10px;padding:9px 13px;font-weight:700;cursor:pointer;background:#1e1b4b;color:#fff;font-size:13px}
+.qm-b.g{background:#15803d}.qm-b.r{background:#dc2626}.qm-b.o{background:#e2e8f0;color:#0f172a}.qm-b.p{background:#7c3aed}.qm-b.y{background:#d97706}
+.qm-c{background:#fff;border-radius:16px;box-shadow:0 2px 10px #0001;margin-bottom:12px;overflow:hidden}
+.qm-cv{height:110px;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:10px;color:#fff;font-weight:800;text-shadow:0 1px 4px #0008;font-size:17px}
+.qm-bd{padding:12px}.qm-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.qm-tag{font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;background:#e2e8f0}.qm-tag.live{background:#dcfce7;color:#166534}.qm-tag.sch{background:#fef3c7;color:#92400e}.qm-tag.fin{background:#fee2e2;color:#991b1b}
+.qm-in{width:100%;box-sizing:border-box;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;margin:4px 0 8px;background:#fff}
+.qm-l{font-size:12px;font-weight:800;color:#475569}.qm-g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qm-q{border:1px solid #e2e8f0;border-radius:12px;padding:10px;margin-bottom:8px;background:#fafafa}.qm-q img{max-width:100%;max-height:140px;border-radius:8px;display:block;margin:6px 0}
+.qm-opt{display:block;width:100%;text-align:left;padding:13px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;margin:8px 0;font:inherit;font-weight:600;cursor:pointer}
+.qm-opt.ok{border-color:#16a34a;background:#dcfce7}.qm-opt.no{border-color:#dc2626;background:#fee2e2}
+.qm-bar{height:8px;background:#e2e8f0;border-radius:8px;overflow:hidden}.qm-bar i{display:block;height:100%;background:#7c3aed;transition:width 1s linear}
+.qm-rk{display:flex;gap:10px;align-items:center;padding:9px 4px;border-bottom:1px solid #e2e8f0}.qm-rk b:first-child{width:28px}.qm-rk span{margin-left:auto;font-weight:800}
+.qm-ck{display:flex;gap:8px;align-items:center;font-weight:700;font-size:14px;margin:6px 0}
+</style>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)},E=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var QM=window.QM={Q:[],R:[],cur:null,draft:null,admin:false,play:null};
+var SUBJ=['Konstitusiya hüququ','Dövlət qulluğu haqqında qanun','İnformasiya texnologiyaları','Məntiq','Milli Məclis','Digər'];
+var ICON={'Konstitusiya hüququ':'⚖️','Dövlət qulluğu haqqında qanun':'📜','İnformasiya texnologiyaları':'💻','Məntiq':'🧠','Milli Məclis':'🏛️'};
+var COL=['#7c3aed','#2563eb','#0f766e','#b45309','#be123c','#1e1b4b'];
+function toast(t){try{V2.toast(t)}catch(e){alert(t)}}
+function root(){var o=$('qm-ov');if(!o){o=document.createElement('div');o.id='qm-ov';document.body.appendChild(o)}return o}
+function show(h){var o=root();o.style.display='block';o.innerHTML='<div class="qm-w">'+h+'</div>';o.scrollTop=0}
+QM.close=function(){clearInterval(QM.tm);root().style.display='none'};
+function cover(q){if(q.cover)return 'url('+q.cover+')';var i=SUBJ.indexOf(q.subject);var c=COL[(i<0?5:i)%6];
+ var s='<svg xmlns="http://www.w3.org/2000/svg" width="600" height="220"><defs><linearGradient id="g"><stop offset="0" stop-color="'+c+'"/><stop offset="1" stop-color="#0f172a"/></linearGradient></defs><rect width="600" height="220" fill="url(#g)"/><text x="480" y="150" font-size="110" opacity=".9">'+(ICON[q.subject]||'🎲')+'</text></svg>';
+ return 'url("data:image/svg+xml;utf8,'+encodeURIComponent(s)+'")'}
+function eff(q){if(q.status==='finished')return'fin';if(q.status==='live')return'live';if(q.startAt&&Date.now()>=new Date(q.startAt).getTime()&&q.status==='scheduled')return'live';return q.startAt&&q.status!=='draft'?'sch':'draft'}
+var LBL={live:'🟢 Davam edir',sch:'⏰ Planlanıb',fin:'🏁 Bitib',draft:'📝 Qaralama'};
+function link(id){return location.origin+location.pathname+'?quiz='+id}
+async function load(){QM.Q=((await V2.list('qm_quiz'))||[]).map(function(x){return x});QM.R=(await V2.list('qm_res'))||[]}
+async function del(c,id){if(!confirm('Silinsin?'))return;await V2.probe();if(V2.mode==='cloud')await _supabase.from('dq_v2_store').delete().eq('id',id);else localStorage.setItem('dq_v2_'+c,JSON.stringify((await V2.list(c)).filter(function(x){return x._id!=id})))}
+function img(f,W,q){return new Promise(function(ok){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var k=Math.min(1,W/im.width),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',q||.75))};im.src=r.result};r.readAsDataURL(f)})}
+function rank(id){var m={};QM.R.filter(function(r){return r.qid==id}).forEach(function(r){var p=m[r.name];if(!p||r.score>p.score||(r.score==p.score&&r.time<p.time))m[r.name]=r});
+ return Object.keys(m).map(function(k){return m[k]}).sort(function(a,b){return b.score-a.score||a.time-b.time})}
+function rankHtml(id,me){var L=rank(id);if(!L.length)return'<p style="color:#64748b">Hələ nəticə yoxdur.</p>';
+ return L.map(function(r,i){return'<div class="qm-rk" style="'+(r.name===me?'background:#ede9fe;border-radius:8px':'')+'"><b>'+(['🥇','🥈','🥉'][i]||i+1)+'</b><b>'+E(r.name)+'</b><span>'+r.score+'/'+r.total+' · '+r.time+' san</span></div>'}).join('')}
+
+/* ================= ADMIN ================= */
+QM.openAdmin=async function(){QM.admin=true;await load();QM.list()};
+QM.list=function(){var h='<div class="qm-top"><h2>🎲 QuizMood</h2><div><button class="qm-b g" onclick="QM.edit()">＋ Yeni quiz</button> <button class="qm-b o" onclick="QM.close()">✕</button></div></div>';
+ if(!QM.Q.length)h+='<div class="qm-c"><div class="qm-bd">Hələ quiz yoxdur.</div></div>';
+ QM.Q.forEach(function(q){var s=eff(q);h+='<div class="qm-c"><div class="qm-cv" style="background-image:'+cover(q)+'">'+E(q.title)+'</div><div class="qm-bd"><div class="qm-row" style="margin:0"><span class="qm-tag '+s+'">'+LBL[s]+'</span><span class="qm-tag">'+E(q.subject)+'</span><span class="qm-tag">'+q.qs.length+' sual</span><span class="qm-tag">⏱ '+q.sec+' san</span>'+(q.startAt?'<span class="qm-tag">📅 '+new Date(q.startAt).toLocaleString('az-AZ')+'</span>':'')+'</div><div class="qm-row">'+
+ (s==='live'?'<button class="qm-b r" onclick="QM.setSt('+q._id+',\'finished\')">⏹ Bitir</button>':'<button class="qm-b g" onclick="QM.setSt('+q._id+',\'live\')">▶ Start</button>')+
+ '<button class="qm-b" onclick="QM.edit('+q._id+')">✏️ Redaktə</button><button class="qm-b p" onclick="QM.share('+q._id+')">🔗 Link</button><button class="qm-b y" onclick="QM.res('+q._id+')">🏆 Nəticələr</button><button class="qm-b o" onclick="QM.rm('+q._id+')">🗑</button></div></div></div>'});
+ show(h)};
+QM.setSt=async function(id,st){var q=QM.Q.find(function(x){return x._id==id}),d=Object.assign({},q);delete d._id;d.status=st;if(st==='live')d.startAt=new Date().toISOString();await V2.put('qm_quiz',d,id);await load();QM.list();toast(st==='live'?'Quiz başladı':'Quiz bitdi')};
+QM.rm=async function(id){await del('qm_quiz',id);await load();QM.list()};
+QM.share=function(id){var q=QM.Q.find(function(x){return x._id==id}),u=link(id),t='🎲 '+q.title+(q.startAt?' — '+new Date(q.startAt).toLocaleString('az-AZ'):'');
+ show('<div class="qm-top"><h2>🔗 Paylaş</h2><button class="qm-b o" onclick="QM.list()">← Geri</button></div><div class="qm-c"><div class="qm-bd"><input class="qm-in" readonly value="'+u+'" onclick="this.select()"><div class="qm-row"><button class="qm-b" onclick="navigator.clipboard.writeText(\''+u+'\');V2.toast(\'Kopyalandı\')">📋 Kopyala</button><a class="qm-b" style="text-decoration:none;background:#229ed9" target="_blank" href="https://t.me/share/url?url='+encodeURIComponent(u)+'&text='+encodeURIComponent(t)+'">Telegram</a><a class="qm-b g" style="text-decoration:none" target="_blank" href="https://wa.me/?text='+encodeURIComponent(t+' '+u)+'">WhatsApp</a></div></div></div>')};
+QM.res=function(id){var q=QM.Q.find(function(x){return x._id==id});
+ show('<div class="qm-top"><h2>🏆 '+E(q.title)+'</h2><button class="qm-b o" onclick="QM.list()">← Geri</button></div><div class="qm-c"><div class="qm-bd">'+rankHtml(id)+'<p style="font-size:12px;color:#64748b">Cəmi iştirakçı: '+rank(id).length+'</p><div class="qm-row"><button class="qm-b" onclick="QM.openAdmin().then(function(){QM.res('+id+')})">🔄 Yenilə</button><button class="qm-b o" onclick="QM.tgl('+id+',\'hide\')">'+(q.hide?'👁 Sualları göstər':'🙈 Sualları gizlət')+'</button><button class="qm-b o" onclick="QM.tgl('+id+',\'keep\')">'+(q.keep===false?'💾 Nəticəni saxla':'🚫 Saxlama')+'</button></div></div></div>')};
+QM.tgl=async function(id,k){var q=QM.Q.find(function(x){return x._id==id}),d=Object.assign({},q);delete d._id;d[k]=k==='keep'?(q.keep===false):!q.hide;await V2.put('qm_quiz',d,id);await load();QM.res(id)};
+
+QM.edit=function(id){var q=id?QM.Q.find(function(x){return x._id==id}):null;
+ QM.draft=q?JSON.parse(JSON.stringify(q)):{title:'',subject:SUBJ[0],sec:30,startAt:'',cover:'',hide:false,keep:true,status:'draft',qs:[]};QM.form()};
+QM.form=function(){var d=QM.draft,so=SUBJ.map(function(s){return'<option'+(s===d.subject?' selected':'')+'>'+s+'</option>'}).join('');
+ var qs=d.qs.map(function(x,i){return'<div class="qm-q"><b>'+(i+1)+'. '+E(x.t)+'</b>'+(x.img?'<img src="'+x.img+'">':'')+x.o.map(function(o,k){return'<div style="'+(k===x.c?'color:#15803d;font-weight:800':'')+'">'+'ABCDEF'[k]+') '+E(o)+'</div>'}).join('')+'<div class="qm-row"><button class="qm-b o" onclick="QM.qEdit('+i+')">✏️</button><button class="qm-b o" onclick="QM.qDel('+i+')">🗑</button></div></div>'}).join('');
+ var sa=d.startAt?new Date(new Date(d.startAt).getTime()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16):'';
+ show('<div class="qm-top"><h2>'+(d._id?'Redaktə':'Yeni quiz')+'</h2><button class="qm-b o" onclick="QM.list()">← Geri</button></div><div class="qm-c"><div class="qm-bd"><div class="qm-cv" style="background-image:'+cover(d)+';border-radius:12px">'+E(d.title||'Quiz adı')+'</div>'+
+ '<span class="qm-l">Qapaq şəkli (boşdursa fənnə uyğun avtomatik)</span><input class="qm-in" type="file" accept="image/*" onchange="QM.cov(this)"><span class="qm-l">Ad</span><input class="qm-in" id="qm-t" value="'+E(d.title)+'" oninput="QM.draft.title=this.value"><div class="qm-g2"><div><span class="qm-l">Fənn</span><select class="qm-in" onchange="QM.draft.subject=this.value;QM.form()">'+so+'</select></div><div><span class="qm-l">Sual başına saniyə</span><input class="qm-in" type="number" min="5" value="'+d.sec+'" oninput="QM.draft.sec=+this.value||30"></div></div>'+
+ '<span class="qm-l">Başlama vaxtı (əvvəlcədən təyin)</span><input class="qm-in" type="datetime-local" value="'+sa+'" onchange="QM.draft.startAt=this.value?new Date(this.value).toISOString():\'\'">'+
+ '<label class="qm-ck"><input type="checkbox" '+(d.hide?'checked':'')+' onchange="QM.draft.hide=this.checked"> Bitəndən sonra sualları gizlət</label><label class="qm-ck"><input type="checkbox" '+(d.keep!==false?'checked':'')+' onchange="QM.draft.keep=this.checked"> Nəticə siyahısını saxla</label></div></div>'+
+ '<div class="qm-c"><div class="qm-bd"><b>Suallar ('+d.qs.length+')</b>'+qs+'<div class="qm-row"><button class="qm-b" onclick="QM.qEdit(-1)">✍️ Əl ilə</button><button class="qm-b p" onclick="QM.pdf()">📄 PDF / mətndən nömrələ</button></div></div></div><button class="qm-b g" style="width:100%;padding:14px" onclick="QM.save()">💾 Saxla</button>')};
+QM.cov=async function(i){if(i.files[0]){QM.draft.cover=await img(i.files[0],700,.7);QM.form()}};
+QM.qDel=function(i){QM.draft.qs.splice(i,1);QM.form()};
+QM.qEdit=function(i){var x=i>=0?QM.draft.qs[i]:{t:'',img:'',o:['Doğru','Yanlış'],c:0};QM.cq={i:i,x:JSON.parse(JSON.stringify(x))};QM.qForm()};
+QM.qForm=function(){var x=QM.cq.x;
+ show('<div class="qm-top"><h2>Sual</h2><button class="qm-b o" onclick="QM.form()">← Geri</button></div><div class="qm-c"><div class="qm-bd"><span class="qm-l">Sual mətni</span><textarea class="qm-in" rows="3" oninput="QM.cq.x.t=this.value">'+E(x.t)+'</textarea><span class="qm-l">Şəkil (istəyə bağlı)</span><input class="qm-in" type="file" accept="image/*" onchange="QM.qImg(this)">'+(x.img?'<img src="'+x.img+'" style="max-width:100%;max-height:150px"><button class="qm-b o" onclick="QM.cq.x.img=\'\';QM.qForm()">Şəkli sil</button>':'')+
+ '<div class="qm-row"><button class="qm-b o" onclick="QM.cq.x.o=[\'Doğru\',\'Yanlış\'];QM.cq.x.c=0;QM.qForm()">Doğru/Yanlış</button><button class="qm-b o" onclick="if(QM.cq.x.o.length<6)QM.cq.x.o.push(\'\');QM.qForm()">＋ Variant</button></div>'+
+ x.o.map(function(o,k){return'<div style="display:flex;gap:6px;align-items:center"><input type="radio" name="qmc" '+(x.c===k?'checked':'')+' onchange="QM.cq.x.c='+k+'"><input class="qm-in" value="'+E(o)+'" placeholder="'+'ABCDEF'[k]+' variantı" oninput="QM.cq.x.o['+k+']=this.value"></div>'}).join('')+'<small>● düzgün cavab</small><br><br><button class="qm-b g" onclick="QM.qOk()">Əlavə et</button></div></div>')};
+QM.qImg=async function(i){if(i.files[0]){QM.cq.x.img=await img(i.files[0],800,.7);QM.qForm()}};
+QM.qOk=function(){var x=QM.cq.x;x.o=x.o.filter(function(o){return o.trim()});if(!x.t.trim()&&!x.img||x.o.length<2)return toast('Sual və ən azı 2 variant lazımdır');if(x.c>=x.o.length)x.c=0;
+ if(QM.cq.i>=0)QM.draft.qs[QM.cq.i]=x;else QM.draft.qs.push(x);QM.form()};
+
+/* PDF / mətn -> nömrələmə */
+QM.pdf=function(){show('<div class="qm-top"><h2>📄 Sualları nömrələ</h2><button class="qm-b o" onclick="QM.form()">← Geri</button></div><div class="qm-c"><div class="qm-bd"><span class="qm-l">PDF seç (mətn çıxarılır) və ya aşağıya yapışdır</span><input class="qm-in" type="file" accept="application/pdf" onchange="QM.pdfRead(this)"><textarea class="qm-in" id="qm-tx" rows="10" placeholder="1. Sual mətni\nA) ...\nB) ...\nCavab: B\n\n2. Doğru-yanlış sual (variantsız yazsanız Doğru/Yanlış olur)\nCavab: Doğru"></textarea><button class="qm-b g" onclick="QM.parse()">🔢 Nömrələ və ayır</button><p style="font-size:12px;color:#64748b">Skan edilmiş PDF-lər üçün mətn çıxmır — onları «AI PDF Studio PRO» ilə oxuyub mətni bura yapışdırın.</p></div></div>')};
+QM.pdfRead=async function(i){var f=i.files[0];if(!f)return;toast('PDF oxunur…');
+ try{if(!window.pdfjsLib){await new Promise(function(ok,no){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}
+ var p=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,t='';
+ for(var n=1;n<=p.numPages;n++){var c=await(await p.getPage(n)).getTextContent(),y=null;c.items.forEach(function(it){var yy=Math.round(it.transform[5]);t+=(y!==null&&Math.abs(yy-y)>3?'\n':' ')+it.str;y=yy});t+='\n'}
+ $('qm-tx').value=t.trim();toast('Mətn çıxarıldı — «Nömrələ» düyməsinə basın')}catch(e){toast('PDF oxunmadı')}};
+QM.parse=function(){var t=($('qm-tx').value||'').replace(/\r/g,''),parts=t.split(/(?:^|\n)\s*\d{1,3}\s*[.)]\s+/).slice(1),out=[];
+ parts.forEach(function(b){var ans='',m=b.match(/(?:cavab|düzgün cavab|answer)\s*[:\-]\s*([A-Fa-f]|doğru|yanlış)/i);if(m){ans=m[1];b=b.replace(m[0],'')}
+  var seg=b.split(/(?:^|\s)([A-F])\s*[).]\s+/),q={t:seg[0].replace(/\s+/g,' ').trim(),img:'',o:[],c:0};
+  for(var i=1;i<seg.length;i+=2)q.o.push(seg[i+1].replace(/\s+/g,' ').trim());
+  if(q.o.length<2){q.o=['Doğru','Yanlış'];q.c=/yanl/i.test(ans)?1:0}else if(/^[A-F]$/i.test(ans))q.c='ABCDEF'.indexOf(ans.toUpperCase());
+  if(q.t)out.push(q)});
+ if(!out.length)return toast('Sual tapılmadı. Format: «1. sual» + A) B) C)…');
+ QM.draft.qs=QM.draft.qs.concat(out);toast(out.length+' sual əlavə olundu. Düzgün cavabları yoxlayın');QM.form()};
+QM.save=async function(){var d=QM.draft;if(!d.title.trim())return toast('Quiz adı yazın');if(!d.qs.length)return toast('Sual əlavə edin');
+ var id=d._id;delete d._id;if(d.startAt&&d.status==='draft')d.status='scheduled';await V2.put('qm_quiz',d,id);await load();toast('Saxlandı');QM.list()};
+
+/* ================= İŞTİRAKÇI ================= */
+QM.openHome=async function(){await load();var h='<div class="qm-top"><h2>🎲 QuizMood</h2><button class="qm-b o" onclick="QM.close()">✕</button></div>';
+ var L=QM.Q.filter(function(q){return q.status!=='draft'});if(!L.length)h+='<p>Hazırda quiz yoxdur.</p>';
+ L.forEach(function(q){var s=eff(q);h+='<div class="qm-c" onclick="QM.intro('+q._id+')" style="cursor:pointer"><div class="qm-cv" style="background-image:'+cover(q)+'">'+E(q.title)+'</div><div class="qm-bd"><span class="qm-tag '+s+'">'+LBL[s]+'</span> <span class="qm-tag">'+E(q.subject)+'</span> <span class="qm-tag">'+q.qs.length+' sual · '+q.sec+' san</span></div></div>'});show(h)};
+QM.intro=async function(id){if(!QM.Q.length)await load();var q=QM.Q.find(function(x){return x._id==id});if(!q)return toast('Quiz tapılmadı');var s=eff(q),nm='';try{nm=localStorage.getItem('qm_name')||''}catch(e){}
+ var h='<div class="qm-top"><h2>'+E(q.title)+'</h2><button class="qm-b o" onclick="QM.openHome()">←</button></div><div class="qm-c"><div class="qm-cv" style="background-image:'+cover(q)+'"></div><div class="qm-bd"><p>📝 '+q.qs.length+' sual<br>⏱ Hər sual üçün '+q.sec+' saniyə<br>'+E(q.subject)+'</p>';
+ if(s==='live')h+='<span class="qm-l">Ad Soyad</span><input class="qm-in" id="qm-nm" value="'+E(nm)+'"><button class="qm-b g" style="width:100%;padding:13px" onclick="QM.go('+id+')">▶ Quizə başla</button>';
+ else if(s==='sch')h+='<p>⏰ Başlama: <b>'+new Date(q.startAt).toLocaleString('az-AZ')+'</b></p><button class="qm-b" onclick="QM.openAdmin&&0;QM.refresh('+id+')">🔄 Yoxla</button>';
+ else h+='<h3>🏆 İştirakçı sıralaması</h3>'+rankHtml(id,nm);
+ show(h+'</div></div>')};
+QM.refresh=async function(id){await load();QM.intro(id)};
+QM.go=async function(id){var n=($('qm-nm').value||'').trim();if(n.length<3)return toast('Ad və soyadı yazın');try{localStorage.setItem('qm_name',n)}catch(e){}
+ await load();var q=QM.Q.find(function(x){return x._id==id});
+ if(QM.R.some(function(r){return r.qid==id&&r.name===n})||localStorage.getItem('qm_done_'+id+n))return toast('Bu adla artıq iştirak olunub');
+ QM.play={q:q,n:n,i:0,sc:0,t0:Date.now(),log:[]};QM.ask()};
+QM.ask=function(){var P=QM.play,q=P.q;if(P.i>=q.qs.length)return QM.fin();var x=q.qs[P.i];P.left=q.sec;P.lock=false;
+ show('<div class="qm-top"><b>'+(P.i+1)+'/'+q.qs.length+'</b><b id="qm-cd">⏱ '+P.left+'</b></div><div class="qm-bar"><i id="qm-pb" style="width:100%"></i></div><div class="qm-c" style="margin-top:12px"><div class="qm-bd"><h3>'+E(x.t)+'</h3>'+(x.img?'<img src="'+x.img+'" style="max-width:100%;border-radius:10px">':'')+x.o.map(function(o,k){return'<button class="qm-opt" id="qo'+k+'" onclick="QM.pick('+k+')">'+E(o)+'</button>'}).join('')+'</div></div>');
+ clearInterval(QM.tm);QM.tm=setInterval(function(){P.left--;var c=$('qm-cd');if(c)c.textContent='⏱ '+Math.max(P.left,0);var b=$('qm-pb');if(b)b.style.width=(P.left/q.sec*100)+'%';if(P.left<=0)QM.pick(-1)},1000)};
+QM.pick=function(k){var P=QM.play;if(P.lock)return;P.lock=true;clearInterval(QM.tm);var x=P.q.qs[P.i];if(k===x.c)P.sc++;
+ var a=$('qo'+k),c=$('qo'+x.c);if(a)a.classList.add(k===x.c?'ok':'no');if(c)c.classList.add('ok');P.i++;setTimeout(QM.ask,1300)};
+QM.fin=async function(){var P=QM.play,q=P.q,tm=Math.round((Date.now()-P.t0)/1000);try{localStorage.setItem('qm_done_'+q._id+P.n,'1')}catch(e){}
+ if(q.keep!==false)try{await V2.put('qm_res',{qid:q._id,name:P.n,score:P.sc,total:q.qs.length,time:tm,at:new Date().toISOString()});await load()}catch(e){}
+ show('<div class="qm-c"><div class="qm-bd" style="text-align:center"><div style="font-size:54px">🏁</div><h2>'+P.sc+' / '+q.qs.length+'</h2><p>'+Math.round(P.sc/q.qs.length*100)+'% · '+tm+' san</p></div></div><div class="qm-c"><div class="qm-bd"><h3>🏆 Sıralama</h3>'+(q.keep===false?'<p>Nəticə siyahısı bu quiz üçün saxlanmır.</p>':rankHtml(q._id,P.n))+(eff(q)==='fin'||!q.hide?'':'')+'</div></div><button class="qm-b" style="width:100%;padding:13px" onclick="QM.openHome()">Quizlərə qayıt</button>')};
+
+/* ================= qoşulma ================= */
+function mount(){
+ if(!$('qm-fab')){var f=document.createElement('button');f.id='qm-fab';f.textContent='🎲 QuizMood';f.onclick=QM.openHome;document.body.appendChild(f)}
+ var g=document.querySelector('#admin-panel .admin-nav-grid');
+ if(g&&!$('qm-card')){var d=document.createElement('div');d.id='qm-card';d.className='admin-nav-card';d.style.cssText='background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff';d.onclick=QM.openAdmin;d.innerHTML='<span class="icon">🎲</span> QuizMood';g.insertBefore(d,g.firstChild)}}
+setInterval(mount,1500);mount();
+var m=location.search.match(/[?&]quiz=(\d+)/);if(m)setTimeout(function(){QM.intro(+m[1])},1500);
+})();
+</script>
+
 
 
 </body>
