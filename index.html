@@ -22325,6 +22325,104 @@ setInterval(mount,1500);mount();
 var m=location.search.match(/[?&]quiz=(\d+)/);if(m)setTimeout(function(){QM.intro(+m[1])},1500);
 })();
 </script>
+    <!-- YAMAQ: QuizMood sağda + sürüşdürülə bilən; Sınaq "Paylaş" mesajı.
+     Ən SONUNCU yamağın altına, </body>-dən əvvələ yapışdır. Heç nə silmə. -->
+<style>
+#qm-fab{left:auto!important;right:12px;bottom:90px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+#qm-fab.qm-drag{cursor:grabbing;opacity:.9;transition:none}
+</style>
+<script>
+(function () {
+  /* ---------- 1) QuizMood: sağda, sürüşdürülə bilən ---------- */
+  var KEY = 'dq_qm_fab_pos';
+
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  function place(f, x, y) {
+    var w = f.offsetWidth, h = f.offsetHeight;
+    x = clamp(x, 6, window.innerWidth - w - 6);
+    y = clamp(y, 6, window.innerHeight - h - 6);
+    f.style.left = x + 'px'; f.style.top = y + 'px';
+    f.style.right = 'auto'; f.style.bottom = 'auto';
+    return { x: x, y: y };
+  }
+
+  function makeDraggable(f) {
+    if (f.__drag) return; f.__drag = 1;
+
+    try {
+      var s = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (s) place(f, s.x * (window.innerWidth - f.offsetWidth), s.y * (window.innerHeight - f.offsetHeight));
+    } catch (e) {}
+
+    var sx, sy, ox, oy, moved = false, down = false;
+
+    f.addEventListener('pointerdown', function (e) {
+      down = true; moved = false;
+      var r = f.getBoundingClientRect();
+      sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top;
+      try { f.setPointerCapture(e.pointerId); } catch (x) {}
+    });
+
+    f.addEventListener('pointermove', function (e) {
+      if (!down) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (!moved && Math.abs(dx) + Math.abs(dy) < 6) return;
+      moved = true; f.classList.add('qm-drag');
+      place(f, ox + dx, oy + dy);
+      e.preventDefault();
+    });
+
+    function end() {
+      if (!down) return; down = false; f.classList.remove('qm-drag');
+      if (moved) {
+        try {
+          var r = f.getBoundingClientRect();
+          var mx = window.innerWidth - f.offsetWidth, my = window.innerHeight - f.offsetHeight;
+          localStorage.setItem(KEY, JSON.stringify({ x: mx > 0 ? r.left / mx : 0, y: my > 0 ? r.top / my : 0 }));
+        } catch (e) {}
+      }
+    }
+    f.addEventListener('pointerup', end);
+    f.addEventListener('pointercancel', end);
+
+    /* sürüşdürmədən sonra təsadüfən panel açılmasın */
+    f.addEventListener('click', function (e) {
+      if (moved) { e.stopImmediatePropagation(); e.preventDefault(); moved = false; }
+    }, true);
+
+    window.addEventListener('resize', function () {
+      var r = f.getBoundingClientRect(); place(f, r.left, r.top);
+    });
+  }
+
+  var t = setInterval(function () {
+    var f = document.getElementById('qm-fab');
+    if (f) { makeDraggable(f); clearInterval(t); }
+  }, 300);
+
+  /* ---------- 2) Sınaq kartında "Paylaş" mesajı ---------- */
+  function p2(n) { return String(n).padStart(2, '0'); }
+  function dmy(d) { return p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear(); }
+  function hm(d) { return p2(d.getHours()) + ':' + p2(d.getMinutes()); }
+
+  function install() {
+    if (!window.LX) return false;
+    LX.shareText = function (x) {
+      var s = new Date(x.start), e = LX.endOf(x);
+      var when = dmy(s) + ', ' + hm(s) + '-' + (dmy(e) === dmy(s) ? hm(e) : dmy(e) + ' ' + hm(e));
+      return '📢 ' + x.type + ' — ' + x.title + ' (' + x.cat + ')\n' +
+        '📅  ' + when + '\n' +
+        '🔒 Yalnız qeydiyyatdan keçmiş tələbələr · FİN kod ilə giriş\n\n' +
+        '📝 Qeydiyyat üçün:\n\n' +
+        '🌐 https://dq-platform.github.io/exam/';
+    };
+    return true;
+  }
+  if (!install()) { var t2 = setInterval(function () { if (install()) clearInterval(t2); }, 300); }
+})();
+</script>
+
 
 
 
