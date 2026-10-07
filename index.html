@@ -23435,6 +23435,92 @@ html.dqa .dqn-new{animation:dqnPop .6s .7s cubic-bezier(.3,1.6,.4,1) both}
   })();
 })();
 </script>
+    <!-- MODUL İDARƏSİ yamağı: Tesla + QuizMood üçün Aktiv/Deaktiv və ad dəyişmə.
+     Ən SONUNCU yamağın altına, </body>-dən əvvələ yapışdır. Bir dəfə. Əlavə SQL lazım deyil. Konsol: MODS.open() -->
+<style>
+#md-ov{position:fixed;inset:0;z-index:100000;background:#0f172a99;backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:12px;font-family:inherit}
+#md-ov .c{background:#fff;color:#0f172a;border-radius:20px;padding:20px;width:min(460px,100%);max-height:92vh;overflow:auto}
+#md-ov .m{border:1px solid #e2e8f0;border-radius:14px;padding:14px;margin:10px 0}
+#md-ov input[type=text]{width:100%;box-sizing:border-box;padding:11px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;margin:6px 0}
+#md-ov .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#md-ov .sw{position:relative;width:52px;height:30px;border-radius:30px;background:#cbd5e1;cursor:pointer;flex:none;transition:.2s}
+#md-ov .sw i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 4px #0004}
+#md-ov .sw.on{background:#16a34a}#md-ov .sw.on i{left:25px}
+#md-ov .b{border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;background:#0a5cff;color:#fff;font:inherit;font-weight:700}
+#md-ov .b.o{background:#fff;color:#0f172a;border:1px solid #cbd5e1}
+#md-ov small{color:#64748b}
+.md-gear{border:1px solid #cbd5e1;background:#fff;color:#0f172a;border-radius:10px;padding:6px 10px;cursor:pointer;font-size:15px;margin-left:6px}
+</style>
+<script>
+(function(){
+var ls=localStorage;
+var M={tesla:{def:'Tesla',icon:'',last:'Tesla'},qm:{def:'QuizMood',icon:'🎲 ',last:'QuizMood'}};
+function on(k){return ls.getItem('mod_'+k+'_on')!=='0'}
+function name(k){return(ls.getItem('mod_'+k+'_name')||'').trim()||M[k].def}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function hide(el,h){if(!el)return;if(h)el.style.setProperty('display','none','important');else if(el.style.display==='none')el.style.removeProperty('display')}
+function toast(t){try{V2.toast(t)}catch(e){alert(t)}}
+
+/* ---- açılışı blokla (deaktiv olanda) ---- */
+function guard(obj,fn,k){if(!obj||!obj[fn]||obj[fn].__g)return;var o=obj[fn];obj[fn]=function(){if(!on(k)){toast(name(k)+' deaktivdir');return}return o.apply(this,arguments)};obj[fn].__g=1}
+
+/* ---- tətbiq et: ad + görünüş ---- */
+function apply(){
+ guard(window.TESLA,'open','tesla');guard(window.QM,'openHome','qm');guard(window.QM,'openAdmin','qm');
+ /* FAB-lar */
+ var tf=document.getElementById('ts-fab'),qf=document.getElementById('qm-fab');
+ if(tf){hide(tf,!on('tesla'));if(tf.textContent!==name('tesla'))tf.textContent=name('tesla')}
+ if(qf){hide(qf,!on('qm'));var qt=M.qm.icon+name('qm');if(qf.textContent!==qt)qf.textContent=qt}
+ /* admin kartları */
+ var g=document.querySelector('#admin-panel .admin-nav-grid');
+ if(g){
+  [].slice.call(g.querySelectorAll('.admin-nav-card')).forEach(function(c){
+   if(c.id==='md-card')return;
+   var t=c.textContent;
+   if(c.id==='qm-card'||c.dataset.mod==='qm'){c.dataset.mod='qm'}
+   else if(c.dataset.mod==='tesla'||new RegExp(M.tesla.def+'|'+M.tesla.last.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i').test(t)&&c.id!=='qm-card'){c.dataset.mod='tesla'}
+   var k=c.dataset.mod;if(!k)return;
+   hide(c,!on(k));
+   var ic=c.querySelector('.icon'),want=name(k);
+   if(ic){var tx=c.lastChild;if(tx&&tx.nodeType===3){if(tx.nodeValue.trim()!==want)tx.nodeValue=' '+want}else if(c.textContent.replace(ic.textContent,'').trim()!==want){c.appendChild(document.createTextNode(' '+want))}}
+   else if(c.textContent.trim()!==want&&k==='tesla')c.textContent=want;
+  });
+  if(!document.getElementById('md-card')){var d=document.createElement('div');d.id='md-card';d.className='admin-nav-card';d.style.cssText='background:#0f172a;color:#fff';d.onclick=open;d.innerHTML='<span class="icon">⚙</span> Modullar';g.appendChild(d)}
+ }
+ /* Tesla daxili: logo + ⚙ */
+ var lg=document.querySelector('#ts-ov .ts-logo');
+ if(lg){var nm=name('tesla').toLowerCase();if(lg.dataset.n!==nm){lg.innerHTML=esc(nm)+'<b>.</b>';lg.dataset.n=nm}}
+ var top=document.querySelector('#ts-ov .ts-top');
+ if(top&&!top.querySelector('.md-gear')){var b=document.createElement('button');b.className='md-gear';b.textContent='⚙';b.onclick=open;top.insertBefore(b,top.lastElementChild)}
+ if(!on('tesla')){var ov=document.getElementById('ts-ov');if(ov&&ov.style.display==='block'){ov.style.display='none'}}
+ /* QuizMood daxili */
+ [].slice.call(document.querySelectorAll('.qm-top')).forEach(function(tp){
+  var h=tp.querySelector('h2');
+  if(h&&/QuizMood/.test(h.textContent+M.qm.last)&&(h.textContent.indexOf('QuizMood')>-1||h.textContent.indexOf(M.qm.last)>-1)){var w=M.qm.icon+name('qm');if(h.textContent!==w)h.textContent=w}
+  if(!tp.querySelector('.md-gear')){var b=document.createElement('button');b.className='md-gear';b.textContent='⚙';b.onclick=open;(h&&h.nextElementSibling?h.nextElementSibling:tp).appendChild(b)}
+ });
+ if(!on('qm')){var qo=document.getElementById('qm-ov');if(qo&&qo.style.display&&qo.style.display!=='none')qo.style.display='none'}
+ M.tesla.last=name('tesla');M.qm.last=name('qm');
+}
+
+/* ---- panel ---- */
+function row(k,title){return'<div class="m"><div class="row"><b>'+title+'</b><div class="sw'+(on(k)?' on':'')+'" data-k="'+k+'"><i></i></div></div><small id="md-s-'+k+'">'+(on(k)?'Aktivdir':'Deaktivdir (gizlədilib)')+'</small><br><label><small>Modulun adı</small></label><input type="text" maxlength="24" id="md-n-'+k+'" value="'+esc(name(k))+'" placeholder="'+esc(M[k].def)+'"></div>'}
+function open(){
+ var o=document.getElementById('md-ov');if(!o){o=document.createElement('div');o.id='md-ov';document.body.appendChild(o)}
+ o.innerHTML='<div class="c"><div class="row"><h3 style="margin:0">⚙ Modul idarəsi</h3><button class="b o" id="md-x">✕</button></div><small>Deaktiv edilən modul düyməsi və admin kartı ilə birlikdə gizlənir. Məlumatlar silinmir.</small>'+row('tesla','Tesla modulu')+row('qm','QuizMood (quiz modu)')+'<div class="row" style="justify-content:flex-end"><button class="b" id="md-ok">Yadda saxla</button></div></div>';
+ o.style.display='flex';
+ var st={tesla:on('tesla'),qm:on('qm')};
+ [].forEach.call(o.querySelectorAll('.sw'),function(s){s.onclick=function(){var k=s.dataset.k;st[k]=!st[k];s.classList.toggle('on',st[k]);document.getElementById('md-s-'+k).textContent=st[k]?'Aktivdir':'Deaktivdir (gizlədilib)'}});
+ document.getElementById('md-x').onclick=function(){o.style.display='none'};
+ o.onclick=function(e){if(e.target===o)o.style.display='none'};
+ document.getElementById('md-ok').onclick=function(){
+  ['tesla','qm'].forEach(function(k){ls.setItem('mod_'+k+'_on',st[k]?'1':'0');var v=document.getElementById('md-n-'+k).value.trim();if(v&&v!==M[k].def)ls.setItem('mod_'+k+'_name',v);else ls.removeItem('mod_'+k+'_name')});
+  o.style.display='none';apply();toast('Yadda saxlanıldı')}
+}
+window.MODS={open:open,apply:apply,on:on,name:name};
+setInterval(apply,700);apply();
+})();
+</script>
 
 </body>
 </html>
