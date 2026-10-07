@@ -65,6 +65,21 @@ export default {
     const pass = () => (env.ASSETS ? env.ASSETS.fetch(request) : fetch(request));
     const head = request.method === 'HEAD';
 
+    // 0) Diaqnostika: /news-debug?id=... → Worker nəyi tapdı, hansı şəkli verir
+    if (url.pathname === '/news-debug') {
+      const id = url.searchParams.get('id') || '';
+      const n = await findNews(id);
+      const pick = n && (decodeDataUrl(n.og) || decodeDataUrl(n.img));
+      let fb = null;
+      try { const r = await fetch(FALLBACK.url, { method: 'HEAD' }); fb = { status: r.status, type: r.headers.get('content-type'), bytes: r.headers.get('content-length') }; } catch (e) { fb = String(e); }
+      return new Response(JSON.stringify({
+        worker: 'v3', found: !!n, title: n && n.title, slug: n && n.slug, id: n && n._id,
+        hasImg: !!(n && n.img), hasOg: !!(n && n.og), imgKind: n && n.img ? String(n.img).slice(0, 20) : null,
+        chosen: pick ? { type: pick.type, bytes: pick.bytes.length, w: pick.w, h: pick.h, whatsappOk: pick.bytes.length < 300000 } : 'fallback',
+        fallback: fb
+      }, null, 2), { headers: { 'content-type': 'application/json;charset=utf-8', 'cache-control': 'no-store' } });
+    }
+
     // 1) Qapaq şəkli: data:image → real şəkil (Cloudflare keşi ilə)
     if (url.pathname === '/news-img') {
       const id = url.searchParams.get('id') || '';
@@ -74,7 +89,7 @@ export default {
       if (hit) return head ? new Response(null, hit) : hit;
 
       const n = await findNews(id);
-      const im = n && n.img;
+      const im = n && (n.og || n.img);   // og = saytın yaratdığı 1200x630 önizləmə şəkli
       if (im && /^https?:\/\//i.test(im)) return Response.redirect(im, 302);
       const d = decodeDataUrl(im);
       if (!d) return Response.redirect(FALLBACK.url, 302);
@@ -103,7 +118,7 @@ export default {
 
       // Şəkil seçimi
       let img = FALLBACK.url, itype = FALLBACK.type, iw = FALLBACK.w, ih = FALLBACK.h;
-      const d = decodeDataUrl(n.img);
+      const d = decodeDataUrl(n.og) || decodeDataUrl(n.img);
       if (d) {
         // v = şəklin ölçüsü → şəkil dəyişəndə link də dəyişir, WhatsApp köhnə keşi göstərmir
         img = `${SITE}/news-img?id=${encodeURIComponent(key)}&v=${d.bytes.length}`;
