@@ -23065,5 +23065,376 @@ html.dqa .dqn-new{animation:dqnPop .6s .7s cubic-bezier(.3,1.6,.4,1) both}
   var n = 0, iv = setInterval(function () { if (install() || ++n > 240) clearInterval(iv); }, 250);
 })();
 </script>
+    <!-- ═══════════════════════════════════════════════════════════════
+     XƏBƏR MODULU PRO — YAMAQ
+     Qoyulacaq yer: index.html faylında SON </body> teqindən əvvəl.
+     Mövcud 'news' və 'wachan' məlumatları ilə tam uyğundur.
+     ═══════════════════════════════════════════════════════════════ -->
+<style id="nwp-css">
+#nwp-root{position:fixed;inset:0;z-index:9300;display:none;background:#f4f6fb;overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:'Noto Sans',-apple-system,'Segoe UI',Roboto,sans-serif;color:#0f1f3d}
+#nwp-root *{box-sizing:border-box}
+.nwp-h{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(180deg,#0f2a52,#0b2146);border-bottom:2px solid #d4af37;color:#fff}
+.nwp-ico{width:44px;height:44px;border-radius:12px;background:#d4af37;display:grid;place-items:center;font-size:22px;flex:none}
+.nwp-h b{display:block;font-size:18px;line-height:1.2}.nwp-h small{color:#d4af37;font-size:12px}
+.nwp-hb{margin-left:auto;display:flex;gap:8px}
+.nwp-hb button{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font:600 13px inherit;padding:9px 14px;border-radius:10px;cursor:pointer}
+.nwp-hb .out{color:#fca5a5;border-color:rgba(252,165,165,.4)}
+.nwp-m{max-width:1180px;margin:0 auto;padding:22px 16px 60px}
+.nwp-c{background:#fff;border:1px solid #e3e8f2;border-radius:20px;padding:22px;box-shadow:0 8px 28px rgba(15,42,82,.07)}
+.nwp-c h3{margin:0 0 14px;font-size:19px;color:#0f2a52}
+.nwp-wa{margin-bottom:26px}.nwp-wa p{margin:2px 0 14px;color:#64748b;font-size:13px}
+.nwp-row{display:flex;gap:10px;flex-wrap:wrap}
+.nwp-in,.nwp-sel,.nwp-ta{width:100%;font:inherit;font-size:15px;color:#0f1f3d;background:#fff;border:1px solid #dbe2ef;border-radius:14px;padding:13px 15px;outline:none;transition:border .2s,box-shadow .2s}
+.nwp-in:focus,.nwp-sel:focus,.nwp-ta:focus{border-color:#2f63bd;box-shadow:0 0 0 3px rgba(47,99,189,.15)}
+.nwp-in.bad,.nwp-ta.bad{border-color:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,.12)}
+.nwp-ta{resize:vertical;min-height:170px;line-height:1.6}
+.nwp-btn{border:0;font:700 14px inherit;padding:13px 22px;border-radius:14px;cursor:pointer;color:#fff;background:#1b1b4b;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,opacity .2s}
+.nwp-btn:active{transform:scale(.97)}.nwp-btn:disabled{opacity:.55;cursor:wait}
+.nwp-btn.g{background:linear-gradient(135deg,#22c55e,#0f9d73)}.nwp-btn.o{background:#eef2fb;color:#1e4fa3}.nwp-btn.r{background:#fee2e2;color:#b91c1c}
+.nwp-btn.full{width:100%}.nwp-btn.s{padding:8px 11px;font-size:13px;border-radius:10px}
+.nwp-wab{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#22c55e,#0f9d73);color:#fff;font-weight:700;font-size:13px;padding:10px 18px;border-radius:99px;text-decoration:none}
+.nwp-note{font-size:12.5px;margin-top:6px;color:#64748b}.nwp-note.err{color:#dc2626}
+.nwp-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;flex-wrap:wrap}
+.nwp-bar h2{margin:0;font-size:26px;color:#0b1e3f}.nwp-bar .nwp-in{max-width:280px;padding:10px 14px;font-size:13px}
+.nwp-g{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+.nwp-f{margin-bottom:16px}.nwp-f label{display:flex;justify-content:space-between;font-weight:700;font-size:14px;margin-bottom:8px;color:#0f1f3d}
+.nwp-f label i{font-style:normal;font-weight:500;color:#94a3b8;font-size:12px}
+.nwp-cv{width:200px;aspect-ratio:4/5;border:1.5px dashed #cbd5e1;border-radius:16px;background:#f8fafc center/cover no-repeat;display:grid;place-items:center;color:#64748b;font-size:14px;text-align:center}
+.nwp-cv.has{border-style:solid;border-color:#e3e8f2}
+.nwp-gal{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}
+.nwp-gal img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:transform .15s}
+.nwp-gal img:hover{transform:scale(1.05)}.nwp-gal img.on{border-color:#2f63bd}
+.nwp-pv{display:flex;gap:12px;padding:12px;border:1px solid #e3e8f2;border-radius:14px;background:#f8fafc;margin-bottom:16px}
+.nwp-pv .im{width:70px;aspect-ratio:4/5;border-radius:10px;background:#dbe6f8 center/cover;flex:none}
+.nwp-pv b{display:block;font-size:14px;line-height:1.35;margin:3px 0}.nwp-pv p{margin:0;font-size:12.5px;color:#64748b;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nwp-tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.6px;padding:3px 9px;border-radius:99px;background:#dbeafe;color:#1e40af}
+.nwp-tag.c1{background:#fef3c7;color:#92400e}.nwp-tag.c2{background:#d1fae5;color:#065f46}.nwp-tag.c3{background:#ede9fe;color:#5b21b6}
+.nwp-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.nwp-chip{border:1px solid #dbe2ef;background:#fff;color:#334155;font:600 12.5px inherit;padding:7px 12px;border-radius:99px;cursor:pointer}
+.nwp-chip.on{background:#0f2a52;color:#fff;border-color:#0f2a52}.nwp-chip b{opacity:.7;margin-left:4px}
+.nwp-li{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid #e3e8f2;border-radius:16px;margin-bottom:10px;background:#fff}
+.nwp-li img,.nwp-li .ph{width:52px;aspect-ratio:4/5;border-radius:9px;object-fit:cover;background:#e8eefb;flex:none}
+.nwp-li .tx{min-width:0;flex:1}.nwp-li .tx b{display:block;font-size:15px;margin:3px 0;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.nwp-li .tx small{color:#64748b;font-size:12px}.nwp-ac{display:flex;gap:6px;flex-shrink:0}
+.nwp-ac button{width:36px;height:36px;border-radius:50%;border:1px solid #dbe2ef;background:#fff;cursor:pointer;font-size:15px}
+.nwp-ac .d{color:#dc2626;border-color:#fecaca}
+.nwp-empty{text-align:center;padding:36px 10px;color:#64748b}.nwp-empty div{font-size:38px;margin-bottom:6px}
+.nwp-ban{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:10px 14px;border-radius:12px;margin-bottom:14px;font-size:13px}
+.nwp-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:9500;background:#0f2a52;color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;font-weight:600;display:flex;gap:14px;align-items:center;box-shadow:0 12px 30px rgba(0,0,0,.3);max-width:92vw}
+.nwp-toast button{background:none;border:0;color:#d4af37;font:700 14px inherit;cursor:pointer;padding:0}
+.nwp-md{position:fixed;inset:0;z-index:9450;background:rgba(10,22,52,.6);display:grid;place-items:center;padding:16px}
+.nwp-md>div{background:#fff;border-radius:20px;padding:24px;max-width:380px;width:100%;text-align:center}
+.nwp-md h4{margin:0 0 8px;font-size:18px}.nwp-md p{margin:0 0 18px;color:#64748b;font-size:14px}.nwp-md .nwp-row{justify-content:center}
+@media(max-width:900px){.nwp-g{grid-template-columns:1fr}.nwp-bar .nwp-in{max-width:none;width:100%}.nwp-bar h2{font-size:23px}}
+@media(max-width:520px){.nwp-hb button span{display:none}.nwp-c{padding:18px}.nwp-h b{font-size:16px}}
+</style>
+
+<script id="nwp-js">
+(function () {
+  'use strict';
+  if (window.NWP) return;
+
+  var CATS = ['İmtahan Elanları', 'Qanunda Dəyişikliklər', 'Qeydiyyat Elanları', 'Xəbər'];
+  var TAG = ['İMTAHAN', 'QANUN', 'QEYDİYYAT', 'XƏBƏR'], DKEY = 'nwp_draft_v1';
+  var WA_RE = /^https:\/\/(www\.)?(whatsapp\.com\/channel\/|chat\.whatsapp\.com\/|wa\.me\/)[\w\-\/?=&.%]+$/i;
+  var S = { rows: [], q: '', f: '', eid: null, img: '', dirty: false, wa: {}, busy: false, tt: 0 };
+  var $ = function (id) { return document.getElementById(id); };
+  var E = function (s) { return V2.esc(s == null ? '' : s); };
+  var val = function (id) { return ($(id) || {}).value ? $(id).value.trim() : ''; };
+  var today = function () { return new Date().toISOString().slice(0, 10); };
+  var slug = function () { return Math.random().toString(36).slice(2, 8) + Date.now().toString(36); };
+  function ci(n) {
+    var k = String((n && n.kind) || '');
+    return /mtahan|^elan$/i.test(k) ? 0 : /qanun/i.test(k) ? 1 : /qeydiyyat/i.test(k) ? 2 : 3;
+  }
+  function find(id) { return S.rows.filter(function (r) { return r._id == id; })[0]; }
+  function link(n) { return location.origin + location.pathname + '?news=' + encodeURIComponent(n.slug || n._id); }
+  function ps(bg, fg, em) {
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500"><rect width="400" height="500" fill="' + bg + '"/><circle cx="200" cy="250" r="120" fill="' + fg + '" opacity=".22"/><text x="200" y="290" font-size="120" text-anchor="middle">' + em + '</text></svg>');
+  }
+  function presets() {
+    var p = (window.NW && Array.isArray(NW.pre) && NW.pre.length) ? NW.pre.slice(0, 8) : [];
+    var d = [ps('#1e3a8a', '#3b82f6', '📰'), ps('#92400e', '#f59e0b', '📢'), ps('#065f46', '#10b981', '⚖️'), ps('#4c1d95', '#8b5cf6', '📚'), ps('#9f1239', '#f43f5e', '📝'), ps('#0f172a', '#d4af37', '🎓'), ps('#134e4a', '#14b8a6', '🏛️'), ps('#7c2d12', '#fb923c', '🗓️')];
+    return p.concat(d).slice(0, 8);
+  }
+
+  /* ───────── yardımçılar ───────── */
+  function toast(msg, act, fn, ms) {
+    var o = document.querySelector('.nwp-toast'); if (o) o.remove();
+    var t = document.createElement('div'); t.className = 'nwp-toast'; t.setAttribute('role', 'status');
+    t.innerHTML = '<span>' + E(msg) + '</span>' + (act ? '<button type="button">' + E(act) + '</button>' : '');
+    if (act) t.querySelector('button').onclick = function () { t.remove(); fn && fn(); };
+    document.body.appendChild(t); setTimeout(function () { t.remove(); }, ms || 3400);
+  }
+  function confirmBox(title, text, okTxt) {
+    return new Promise(function (res) {
+      var m = document.createElement('div'); m.className = 'nwp-md';
+      m.innerHTML = '<div role="dialog" aria-modal="true"><h4>' + E(title) + '</h4><p>' + E(text) + '</p><div class="nwp-row"><button type="button" class="nwp-btn o" data-v="0">Ləğv et</button><button type="button" class="nwp-btn r" data-v="1">' + E(okTxt) + '</button></div></div>';
+      m.onclick = function (e) { var v = e.target.getAttribute && e.target.getAttribute('data-v'); if (v !== null || e.target === m) { m.remove(); res(v === '1'); } };
+      document.body.appendChild(m);
+    });
+  }
+  function copy(t) {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t).then(function () { toast('Link kopyalandı ✅'); }, function () { prompt('Kopyalayın:', t); });
+    prompt('Kopyalayın:', t);
+  }
+  function fileToCover(file) {
+    return new Promise(function (ok, no) {
+      if (!/^image\//.test(file.type)) return no(new Error('Yalnız şəkil faylı seçin.'));
+      var r = new FileReader(); r.onerror = no;
+      r.onload = function () {
+        var im = new Image(); im.onerror = function () { no(new Error('Şəkil oxunmadı.')); };
+        im.onload = function () {
+          var W = 720, H = 900, c = document.createElement('canvas'); c.width = W; c.height = H;
+          var x = c.getContext('2d'), s = Math.max(W / im.width, H / im.height), w = im.width * s, h = im.height * s;
+          x.fillStyle = '#fff'; x.fillRect(0, 0, W, H); x.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
+          var q = .82, d = c.toDataURL('image/jpeg', q);
+          while (d.length > 520000 && q > .4) { q -= .1; d = c.toDataURL('image/jpeg', q); }
+          ok(d);
+        };
+        im.src = r.result;
+      };
+      r.readAsDataURL(file);
+    });
+  }
+
+  /* ───────── məlumat qatı ───────── */
+  async function load() {
+    try { S.rows = (await V2.list('news')) || []; } catch (e) { S.rows = []; }
+    S.rows.sort(function (a, b) { return String(b.pub || b.date || '').localeCompare(String(a.pub || a.date || '')) || (b._id - a._id); });
+    try { S.wa = (await V2.list('wachan'))[0] || {}; } catch (e) { S.wa = {}; }
+  }
+  function sync() {
+    try { DQ_NEWS = S.rows; } catch (e) {}
+    try { HOME.all = S.rows; } catch (e) {}
+    try { if (window.__dqIdb) window.__dqIdb('set', null); } catch (e) {}
+  }
+  async function put(coll, obj, id) {
+    var prev = window.DQP ? DQP.raw : false; if (window.DQP) DQP.raw = true; // köhnə qatın müdaxiləsinin qarşısı
+    try { await V2.put(coll, obj, id); } finally { if (window.DQP) DQP.raw = prev; }
+  }
+  async function rawDel(id) {
+    await V2.probe();
+    if (V2.mode === 'cloud') { var r = await _supabase.from('dq_v2_store').delete().eq('id', id); if (r.error) throw r.error; }
+    else localStorage.setItem('dq_v2_news', JSON.stringify((await V2.list('news')).filter(function (x) { return x._id != id; })));
+  }
+
+  /* ───────── qaralama (yalnız mətn) ───────── */
+  function draftSave() {
+    if (S.eid) return; clearTimeout(S.tt);
+    S.tt = setTimeout(function () {
+      var d = { t: val('nwp-t'), k: val('nwp-k'), s: val('nwp-s'), b: val('nwp-b'), d: val('nwp-d') };
+      try { if (d.t || d.b) localStorage.setItem(DKEY, JSON.stringify(d)); else localStorage.removeItem(DKEY); } catch (e) {}
+    }, 600);
+  }
+  function draftGet() { try { return JSON.parse(localStorage.getItem(DKEY) || 'null'); } catch (e) { return null; } }
+  function draftClear() { try { localStorage.removeItem(DKEY); } catch (e) {} }
+
+  /* ───────── interfeys ───────── */
+  function shell() {
+    var r = $('nwp-root');
+    if (!r) { r = document.createElement('div'); r.id = 'nwp-root'; r.setAttribute('role', 'dialog'); r.setAttribute('aria-label', 'Xəbərlər və Elanlar Paneli'); document.body.appendChild(r); }
+    r.innerHTML =
+      '<div class="nwp-h"><div class="nwp-ico">📰</div><div><b>Xəbərlər və Elanlar Paneli</b><small>Xəbər Admini</small></div>' +
+      '<div class="nwp-hb"><button type="button" id="nwp-site">↗ <span>Saytda Bax</span></button><button type="button" class="out" id="nwp-out">⎋ <span>Çıxış</span></button></div></div>' +
+      '<div class="nwp-m">' +
+      '<section class="nwp-c nwp-wa"><h3>💬 WhatsApp Kanal Linki İdarəetməsi</h3><p>Yerləşdirdiyiniz WhatsApp kanal linki xəbərlər səhifəsində avtomatik görünəcəkdir.</p>' +
+      '<div class="nwp-row"><input class="nwp-in" id="nwp-wa" style="flex:1;min-width:220px" placeholder="https://www.whatsapp.com/channel/..." inputmode="url" autocomplete="off"><button type="button" class="nwp-btn g" id="nwp-wasv">💾 Link Yadda Saxla</button></div>' +
+      '<div class="nwp-note" id="nwp-wan"></div><div style="margin-top:12px;font-size:13px;color:#64748b" id="nwp-wapv"></div></section>' +
+      '<div class="nwp-bar"><h2>Xəbər və Elan Paylaşımı</h2><input class="nwp-in" id="nwp-q" placeholder="Xəbər axtar..." type="search"></div>' +
+      '<div class="nwp-g"><section class="nwp-c" id="nwp-form"></section>' +
+      '<section class="nwp-c"><h3>Paylaşılmış Xəbərlər (<span id="nwp-cnt">0</span>)</h3><div class="nwp-chips" id="nwp-chips"></div><div id="nwp-list"></div></section></div></div>';
+    $('nwp-site').onclick = function () { close(true); setTimeout(function () { try { HOME.openNews(); } catch (e) {} }, 60); };
+    $('nwp-out').onclick = function () { close(); };
+    $('nwp-wasv').onclick = saveWa;
+    $('nwp-q').oninput = function () { S.q = this.value.trim().toLowerCase(); renderList(); };
+    $('nwp-wa').oninput = waPreview;
+    return r;
+  }
+  function waPreview() {
+    var u = val('nwp-wa'), ok = !u || WA_RE.test(u);
+    $('nwp-wan').textContent = ok ? '' : 'Link https://www.whatsapp.com/channel/... formatında olmalıdır.';
+    $('nwp-wan').className = 'nwp-note' + (ok ? '' : ' err');
+    $('nwp-wapv').innerHTML = (S.wa.url ? 'Saytda Görünüşü: <a class="nwp-wab" target="_blank" rel="noopener" href="' + E(S.wa.url) + '">💬 WhatsApp Kanalımıza Qoşulun</a>' : 'Saytda Görünüşü: —');
+  }
+  async function saveWa() {
+    var u = val('nwp-wa');
+    if (u && !WA_RE.test(u)) { waPreview(); return; }
+    var b = $('nwp-wasv'); b.disabled = true;
+    try { await put('wachan', { url: u }, S.wa._id || undefined); S.wa = (await V2.list('wachan'))[0] || {}; toast(u ? 'Link saxlanıldı ✅' : 'Link silindi'); }
+    catch (e) { toast('Xəta: link saxlanmadı'); }
+    b.disabled = false; waPreview();
+  }
+
+  function renderForm() {
+    var cur = S.eid ? find(S.eid) : null, d = !cur && draftGet(), ph = presets();
+    S.img = cur ? (cur.img || '') : (S.img || ''); S.dirty = false;
+    var html =
+      '<h3>' + (cur ? 'Xəbəri Redaktə Et' : 'Yeni Xəbər Paylaş') + '</h3>' +
+      (d ? '<div class="nwp-ban" id="nwp-dr">📝 Yarımçıq qaralama tapıldı. <button type="button" class="nwp-btn o s" id="nwp-dr1">Bərpa et</button><button type="button" class="nwp-btn r s" id="nwp-dr0">Sil</button></div>' : '') +
+      '<div class="nwp-f"><label for="nwp-t">Xəbərin Başlığı <i id="nwp-tc">0/150</i></label><input class="nwp-in" id="nwp-t" maxlength="150" placeholder="Məsələn: Dövlət qulluğu imtahan tarixi elan olundu" value="' + E(cur && cur.title) + '"></div>' +
+      '<div class="nwp-f"><label for="nwp-k">Kateqoriya</label><select class="nwp-sel" id="nwp-k">' + CATS.map(function (c, i) { return '<option' + (cur && ci(cur) === i ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></div>' +
+      '<div class="nwp-f"><label for="nwp-d">Tarix</label><input type="date" class="nwp-in" id="nwp-d" value="' + E((cur && cur.pub) || today()) + '"></div>' +
+      '<div class="nwp-f"><label>Qapaq Şəkli <i>4:5 · avtomatik sıxılır</i></label><div class="nwp-cv" id="nwp-cv"></div>' +
+      '<div class="nwp-gal" id="nwp-gal">' + ph.map(function (p, i) { return '<img src="' + p + '" alt="Hazır şəkil ' + (i + 1) + '" data-i="' + i + '" loading="lazy">'; }).join('') + '</div>' +
+      '<div class="nwp-row"><button type="button" class="nwp-btn o" style="flex:1" id="nwp-pick">📁 Kompüterdən / Telefondan Seç</button><button type="button" class="nwp-btn r" id="nwp-noimg">Şəkli sil</button></div>' +
+      '<input type="file" id="nwp-file" accept="image/*" hidden></div>' +
+      '<div class="nwp-f"><label for="nwp-s">Qısa Xülasə (List üçün) <i id="nwp-sc">0/200</i></label><input class="nwp-in" id="nwp-s" maxlength="200" placeholder="Xəbərin qısa xülasəsi..." value="' + E(cur && cur.sum) + '"></div>' +
+      '<div class="nwp-f"><label for="nwp-b">Xəbərin Tam Mətni <i id="nwp-bc">0 simvol</i></label><textarea class="nwp-ta" id="nwp-b" placeholder="Xəbərin tam detalı...">' + E(cur && cur.body) + '</textarea></div>' +
+      '<div class="nwp-f"><label>Canlı Önizləmə</label><div class="nwp-pv"><div class="im" id="nwp-pi"></div><div style="min-width:0"><span class="nwp-tag" id="nwp-pt"></span><b id="nwp-ph"></b><p id="nwp-pp"></p></div></div></div>' +
+      '<button type="button" class="nwp-btn full" id="nwp-sv">' + (cur ? '💾 Yadda Saxla' : '＋ Paylaş') + '</button>' +
+      (cur ? '<button type="button" class="nwp-btn o full" style="margin-top:10px" id="nwp-cn">Ləğv et</button>' : '') +
+      '<div class="nwp-note" style="text-align:center">Ctrl + S ilə sürətli yadda saxla</div>';
+    $('nwp-form').innerHTML = html;
+    $('nwp-pick').onclick = function () { $('nwp-file').click(); };
+    $('nwp-file').onchange = async function () {
+      var f = this.files && this.files[0]; if (!f) return;
+      try { setImg(await fileToCover(f)); } catch (e) { toast(e.message || 'Şəkil oxunmadı.'); } this.value = '';
+    };
+    $('nwp-noimg').onclick = function () { setImg(''); };
+    $('nwp-gal').onclick = function (e) { var i = e.target.getAttribute && e.target.getAttribute('data-i'); if (i !== null && i !== undefined) setImg(ph[+i]); };
+    $('nwp-sv').onclick = save;
+    if ($('nwp-cn')) $('nwp-cn').onclick = cancel;
+    if (d) {
+      $('nwp-dr1').onclick = function () { $('nwp-t').value = d.t || ''; $('nwp-s').value = d.s || ''; $('nwp-b').value = d.b || ''; if (d.k) $('nwp-k').value = d.k; if (d.d) $('nwp-d').value = d.d; $('nwp-dr').remove(); counters(); S.dirty = true; };
+      $('nwp-dr0').onclick = function () { draftClear(); $('nwp-dr').remove(); };
+    }
+    ['nwp-t', 'nwp-k', 'nwp-d', 'nwp-s', 'nwp-b'].forEach(function (id) {
+      $(id).addEventListener('input', function () { S.dirty = true; this.classList.remove('bad'); counters(); draftSave(); });
+      $(id).addEventListener('change', counters);
+    });
+    paintImg(); counters();
+  }
+  function setImg(u) { S.img = u || ''; S.dirty = true; paintImg(); counters(); }
+  function paintImg() {
+    var cv = $('nwp-cv'); if (!cv) return;
+    cv.style.backgroundImage = S.img ? 'url("' + S.img + '")' : ''; cv.className = 'nwp-cv' + (S.img ? ' has' : '');
+    cv.textContent = S.img ? '' : '4:5 Qapaq Şəkli';
+    var g = $('nwp-gal'); if (g) [].forEach.call(g.children, function (im) { im.className = im.src === S.img || im.getAttribute('src') === S.img ? 'on' : ''; });
+  }
+  function counters() {
+    var t = val('nwp-t'), s = val('nwp-s'), b = val('nwp-b'), k = $('nwp-k') ? $('nwp-k').selectedIndex : 0;
+    if (!$('nwp-tc')) return;
+    $('nwp-tc').textContent = t.length + '/150'; $('nwp-sc').textContent = s.length + '/200'; $('nwp-bc').textContent = b.length + ' simvol';
+    $('nwp-pt').textContent = TAG[k] || ''; $('nwp-pt').className = 'nwp-tag' + (k === 0 ? ' c1' : k === 1 ? ' c2' : k === 2 ? ' c3' : '');
+    $('nwp-ph').textContent = t || 'Başlıq burada görünəcək'; $('nwp-pp').textContent = s || b.slice(0, 140) || 'Xülasə burada görünəcək';
+    $('nwp-pi').style.backgroundImage = S.img ? 'url("' + S.img + '")' : '';
+  }
+  function bad(id, msg) { var el = $(id); if (el) { el.classList.add('bad'); el.focus(); } toast(msg); return false; }
+
+  async function save() {
+    if (S.busy) return;
+    var t = val('nwp-t'), b = val('nwp-b'), s = val('nwp-s');
+    if (t.length < 5) return bad('nwp-t', 'Başlıq ən azı 5 simvol olmalıdır.');
+    if (b.length < 20) return bad('nwp-b', 'Tam mətn ən azı 20 simvol olmalıdır.');
+    var old = S.eid ? find(S.eid) : null, btn = $('nwp-sv'); S.busy = true; btn.disabled = true; btn.textContent = 'Saxlanılır...';
+    var obj = Object.assign({}, old || {}, {
+      title: t, kind: CATS[$('nwp-k').selectedIndex], sum: s, body: b, img: S.img || '',
+      pub: val('nwp-d') || today(), slug: (old && old.slug) || slug(), date: (old && old.date) || V2.date()
+    });
+    delete obj._id; if (S.img && obj.noimg) obj.noimg = 0;
+    var n0 = S.rows.length;
+    try {
+      await put('news', obj, S.eid || undefined); await load();
+      var ok = S.eid ? true : (S.rows.length > n0 || S.rows.some(function (r) { return r.slug === obj.slug; }));
+      if (!ok) throw new Error('not saved');
+      sync(); draftClear();
+      var saved = S.rows.filter(function (r) { return r.slug === obj.slug; })[0] || obj, was = S.eid;
+      S.eid = null; S.img = ''; S.dirty = false; renderAll();
+      toast(was ? 'Yeniləndi ✅' : 'Paylaşıldı ✅', 'Linki kopyala', function () { copy(link(saved)); }, 6000);
+    } catch (e) {
+      toast('Xəta: saxlanmadı. İnternet / Supabase əlaqəsini yoxlayın.');
+      btn.disabled = false; btn.textContent = old ? '💾 Yadda Saxla' : '＋ Paylaş';
+    }
+    S.busy = false;
+  }
+  async function cancel() {
+    if (S.dirty && !(await confirmBox('Dəyişikliklər itəcək', 'Saxlanmamış dəyişikliklər var. Ləğv edilsin?', 'Bəli, ləğv et'))) return;
+    S.eid = null; S.img = ''; renderForm(); scrollTo0();
+  }
+  function scrollTo0() { var r = $('nwp-root'); if (r) r.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+  function renderList() {
+    var cnt = [S.rows.length, 0, 0, 0, 0]; S.rows.forEach(function (n) { cnt[ci(n) + 1]++; });
+    $('nwp-cnt').textContent = S.rows.length;
+    $('nwp-chips').innerHTML = [['', 'Hamısı', cnt[0]]].concat(CATS.map(function (c, i) { return [c, c, cnt[i + 1]]; })).map(function (c) {
+      return '<button type="button" class="nwp-chip' + (S.f === c[0] ? ' on' : '') + '" data-c="' + E(c[0]) + '">' + E(c[1]) + '<b>' + c[2] + '</b></button>';
+    }).join('');
+    var l = S.rows.filter(function (n) {
+      return (!S.f || CATS[ci(n)] === S.f) && (!S.q || (n.title + ' ' + (n.sum || '') + ' ' + (n.body || '')).toLowerCase().indexOf(S.q) > -1);
+    });
+    $('nwp-list').innerHTML = l.length ? l.map(function (n) {
+      var i = ci(n);
+      return '<div class="nwp-li">' + (n.img ? '<img loading="lazy" alt="" src="' + n.img + '">' : '<div class="ph"></div>') +
+        '<div class="tx"><span class="nwp-tag' + (i === 0 ? ' c1' : i === 1 ? ' c2' : i === 2 ? ' c3' : '') + '">' + TAG[i] + '</span><b>' + E(n.title) + '</b><small>' + E(n.pub || n.date || '') + '</small></div>' +
+        '<div class="nwp-ac" data-id="' + n._id + '"><button type="button" data-a="cp" title="Linki kopyala" aria-label="Linki kopyala">🔗</button><button type="button" data-a="ed" title="Redaktə" aria-label="Redaktə et">✏️</button><button type="button" data-a="du" title="Dublikat" aria-label="Dublikat">⧉</button><button type="button" class="d" data-a="de" title="Sil" aria-label="Sil">🗑</button></div></div>';
+    }).join('') : '<div class="nwp-empty"><div>🗞️</div>' + (S.rows.length ? 'Axtarışa uyğun xəbər tapılmadı.' : 'Hələ xəbər paylaşılmayıb.') + '</div>';
+  }
+  async function onList(e) {
+    var chip = e.target.closest && e.target.closest('.nwp-chip');
+    if (chip) { S.f = chip.getAttribute('data-c'); return renderList(); }
+    var b = e.target.closest && e.target.closest('button[data-a]'); if (!b) return;
+    var id = b.parentNode.getAttribute('data-id'), n = find(id), a = b.getAttribute('data-a'); if (!n) return;
+    if (a === 'cp') return copy(link(n));
+    if (a === 'ed') {
+      if (S.dirty && !(await confirmBox('Dəyişikliklər itəcək', 'Saxlanmamış dəyişikliklər var. Davam edilsin?', 'Davam et'))) return;
+      S.eid = n._id; S.img = ''; renderForm(); return scrollTo0();
+    }
+    if (a === 'du') {
+      var c = Object.assign({}, n, { title: n.title + ' (surət)', slug: slug(), pub: today(), date: V2.date() }); delete c._id;
+      try { await put('news', c); await load(); sync(); renderAll(); toast('Dublikat yaradıldı ✅'); } catch (x) { toast('Xəta baş verdi'); } return;
+    }
+    if (a === 'de') {
+      if (!(await confirmBox('Xəbər silinsin?', '"' + n.title.slice(0, 70) + '" həmişəlik silinəcək.', 'Sil'))) return;
+      try {
+        await rawDel(n._id); var snap = Object.assign({}, n); delete snap._id;
+        if (S.eid == n._id) { S.eid = null; S.img = ''; }
+        await load(); sync(); renderAll();
+        toast('Xəbər silindi', 'Geri qaytar', async function () { try { await put('news', snap); await load(); sync(); renderAll(); toast('Bərpa olundu ✅'); } catch (x) { toast('Bərpa alınmadı'); } }, 7000);
+      } catch (x) { toast('Silinmə alınmadı'); }
+    }
+  }
+  function renderAll() { renderForm(); renderList(); waPreview(); }
+
+  /* ───────── açma / bağlama ───────── */
+  async function open() {
+    var r = shell(); r.style.display = 'block'; document.body.style.overflow = 'hidden';
+    S.q = ''; S.f = ''; S.eid = null; S.img = ''; r.scrollTop = 0;
+    $('nwp-list').innerHTML = '<div class="nwp-empty">Yüklənir...</div>';
+    $('nwp-list').onclick = onList; $('nwp-chips').onclick = onList;
+    await load(); sync(); $('nwp-wa').value = S.wa.url || ''; renderAll();
+  }
+  async function close(force) {
+    var r = $('nwp-root'); if (!r || r.style.display === 'none') return;
+    if (!force && S.dirty && !(await confirmBox('Çıxılsın?', 'Saxlanmamış dəyişikliklər itəcək.', 'Çıx'))) return;
+    r.style.display = 'none'; document.body.style.overflow = ''; S.dirty = false;
+  }
+  document.addEventListener('keydown', function (e) {
+    var r = $('nwp-root'); if (!r || r.style.display !== 'block') return;
+    if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); save(); }
+    else if (e.key === 'Escape' && !document.querySelector('.nwp-md')) close();
+  });
+  window.addEventListener('beforeunload', function (e) { if (S.dirty && $('nwp-root') && $('nwp-root').style.display === 'block') { e.preventDefault(); e.returnValue = ''; } });
+
+  window.NWP = { open: open, close: close };
+
+  /* ───────── admin panelə düymə əlavə et ───────── */
+  var tries = 0;
+  (function mount() {
+    if (typeof V2 === 'undefined' || typeof _supabase === 'undefined') { if (tries++ < 120) return setTimeout(mount, 250); return; }
+    var g = document.querySelector('.admin-nav-grid'); if (!g) { if (tries++ < 120) return setTimeout(mount, 250); return; }
+    if (!g.querySelector('[data-nwp]')) {
+      var c = document.createElement('div'); c.className = 'admin-nav-card'; c.setAttribute('data-nwp', '1');
+      c.style.cssText = 'background:linear-gradient(135deg,#0f2a52,#1e4fa3);color:#fff;border:1px solid #d4af37';
+      c.innerHTML = '<span class="icon">📰</span> Xəbərlər Modulu'; c.onclick = function () { NWP.open(); };
+      g.insertBefore(c, g.firstChild);
+    }
+    [].forEach.call(g.querySelectorAll('.admin-nav-card'), function (el) {
+      if (/İmtahan Elanı Paylaş/.test(el.textContent)) el.onclick = function () { NWP.open(); };
+    });
+  })();
+})();
+</script>
+
 </body>
 </html>
