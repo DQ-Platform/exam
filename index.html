@@ -24470,6 +24470,145 @@ new MutationObserver(function(ms){ms.forEach(function(r){r.addedNodes.forEach(fu
   poll(wrapLXP, function () {}, 600);
 })();
 </script>
+    <!-- ═══════════════════════════════════════════════════════════════════════════
+  DQ YAMAQ v21 — SÜRƏT: sorğu keşi · əvvəlcədən qoşulma · kabinet girişində yüklənmə zolağı · yüngül pəncərələr
+  Yalnız BİR DƏFƏ, v20 yamağının altına, </body> teqindən əvvələ yapışdırın. Heç nə silmə. Əlavə SQL lazım deyil.
+  ═══════════════════════════════════════════════════════════════════════════ -->
+<style id="dqs-css">
+/* pəncərələr: qısa animasiya, bulanıqlıq (blur) yoxdur — telefonda ən çox yavaşladan budur */
+.v3-md,.dq-mdl,.dq-modal,.lxp-ov,#dq-pay-ov,#dq-otp-ov,#dqk-ov,#yq-m{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;animation-duration:.14s!important}
+#dq-pay-ov{background:rgba(10,20,50,.72)!important}
+#dqk-ov,#dq-otp-ov{background:rgba(10,20,50,.72)!important}
+#dq-pay-box,.lxp-bx,#dq-otp-ov>div,#dqk-ov .dqk-bx,.v3-md>div{animation-duration:.18s!important}
+/* qeydiyyat paneli: sonsuz animasiyalar telefonda kadrları atır */
+@media (pointer:coarse),(max-width:900px){
+  #lxp .lxp-hero:before,#lxp .lxp-hero:after,#lxp .lxp-bt:after,#lxp .lxp-bdg i{animation:none!important}
+  #lxp .lxp-r:hover{transform:none!important;filter:none!important}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+/* böyük bölmələr üçün render qənaəti */
+#lxp,#dq-cab{contain:layout style}
+/* yüklənmə zolağı */
+#dqs-bar{position:fixed;top:0;left:0;height:3px;width:0;opacity:0;z-index:2147483200;background:linear-gradient(90deg,#0a64d6,#16a34a);box-shadow:0 0 8px rgba(10,100,214,.6);transition:width .35s ease,opacity .25s ease;pointer-events:none}
+body.dqs-busy,body.dqs-busy *{cursor:progress}
+</style>
+<script id="dqs-js">
+(function () {
+  'use strict';
+  if (window.__DQS) return; window.__DQS = 1;
+  var SB = 'https://cpzwliqlgaplroscvduo.supabase.co';
+  var $ = function (i) { return document.getElementById(i); };
+
+  /* ── 0) Əvvəlcədən qoşulma: ilk sorğunun DNS/TLS gecikməsi aradan qalxır ── */
+  ['preconnect', 'dns-prefetch'].forEach(function (rel) {
+    [SB, 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'].forEach(function (h) {
+      if (document.querySelector('link[rel="' + rel + '"][href="' + h + '"]')) return;
+      var l = document.createElement('link'); l.rel = rel; l.href = h; if (rel === 'preconnect') l.crossOrigin = ''; document.head.appendChild(l);
+    });
+  });
+
+  /* ── 1) Sorğu keşi: eyni məlumat 6 san. ərzində təkrar-təkrar serverdən çəkilmir; paralel sorğular birləşir ── */
+  var gen = 0, LC = {}, LIN = {}, YF = {}, YIN = {};
+  var TTL = { regs: 2000, lxreg: 2000, lxpay: 2000 };           /* qeydiyyat/ödəniş məlumatı daha tez təzələnir */
+  function inval() { gen++; LC = {}; LIN = {}; YF = {}; YIN = {}; }
+  function cloneRows(d) { return Array.isArray(d) ? d.map(function (r) { return (r && typeof r === 'object') ? Object.assign({}, r) : r; }) : d; }
+
+  function wrapList() {
+    if (typeof V2 === 'undefined' || !V2.list || V2.list.__s) return false;
+    var oList = V2.list;
+    V2.list = async function (c) {
+      try { await V2.probe(); } catch (e) {}
+      if (V2.mode !== 'cloud') return oList.call(V2, c);
+      var now = Date.now(), e = LC[c];
+      if (e && now - e.t < (TTL[c] || 6000)) return cloneRows(e.d);
+      if (LIN[c]) return cloneRows(await LIN[c]);
+      var g0 = gen, p = oList.call(V2, c).then(function (d) {
+        if (g0 === gen && Array.isArray(d) && d.length) LC[c] = { t: Date.now(), d: d };   /* boş nəticə keşlənmir */
+        if (LIN[c] === p) delete LIN[c]; return d;
+      }, function (err) { if (LIN[c] === p) delete LIN[c]; throw err; });
+      LIN[c] = p; return cloneRows(await p);
+    };
+    V2.list.__s = 1; return true;
+  }
+  function wrapFind() {
+    if (typeof YQ === 'undefined' || !YQ.find || YQ.find.__s) return false;
+    var oFind = YQ.find;
+    YQ.find = async function (k) {
+      var now = Date.now(), e = YF[k];
+      if (e && now - e.t < (e.d ? 6000 : 2500)) return e.d ? Object.assign({}, e.d) : null;
+      if (YIN[k]) { var r0 = await YIN[k]; return r0 ? Object.assign({}, r0) : null; }
+      var g0 = gen, p = oFind.call(YQ, k).then(function (d) {
+        if (g0 === gen) YF[k] = { t: Date.now(), d: d }; if (YIN[k] === p) delete YIN[k]; return d;
+      }, function (err) { if (YIN[k] === p) delete YIN[k]; throw err; });
+      YIN[k] = p; var r = await p; return r ? Object.assign({}, r) : null;
+    };
+    YQ.find.__s = 1; return true;
+  }
+  /* bazaya yazılanda keş dərhal təmizlənir → admin paneli və qeydiyyat həmişə təzə məlumat görür */
+  function wrapWrites() {
+    if (typeof _supabase === 'undefined' || !_supabase.from || _supabase.from.__s) return false;
+    var of = _supabase.from.bind(_supabase);
+    _supabase.from = function (t) {
+      var q = of(t);
+      if (t === 'dq_v2_store' || t === 'allowed_students') {
+        ['insert', 'update', 'delete', 'upsert'].forEach(function (m) {
+          var f = q[m]; if (typeof f !== 'function') return;
+          q[m] = function () { inval(); setTimeout(inval, 1200); setTimeout(inval, 3500); return f.apply(this, arguments); };
+        });
+      }
+      return q;
+    };
+    _supabase.from.__s = 1; return true;
+  }
+  function poll(test, n) { var k = 0, t = setInterval(function () { var ok = false; try { ok = test(); } catch (e) { console.error('[dqs]', e); } if (ok || ++k > (n || 200)) clearInterval(t); }, 100); }
+  poll(wrapWrites); poll(wrapList); poll(wrapFind);
+  window.addEventListener('storage', function (e) { if (e && /dq_v2_/.test(e.key || '')) inval(); });
+
+  /* ── 2) Əvvəlcədən yükləmə: sayt açılanda kabinet üçün lazım olanlar fonda hazırlanır ── */
+  function idle(fn) { if (window.requestIdleCallback) requestIdleCallback(fn, { timeout: 2500 }); else setTimeout(fn, 900); }
+  idle(function () {
+    poll(function () {
+      if (typeof V2 === 'undefined' || typeof YQ === 'undefined' || typeof YQ2 === 'undefined' || !V2.list.__s || !YQ.find.__s) return false;
+      V2.probe().then(function () {
+        var k = ''; try { k = YQ2.sess() || ''; } catch (e) {}
+        if (!k) { try { k = localStorage.getItem('dq_gmail') || ''; } catch (e) {} }
+        if (k) YQ.find(String(k).toLowerCase()).catch(function () {});
+      }).catch(function () {});
+      return true;
+    }, 150);
+  });
+
+  /* ── 3) Kabinetə giriş: klikdən dərhal yüklənmə zolağı (boş gözləmə hissi yoxdur) ── */
+  var bar = document.createElement('div'); bar.id = 'dqs-bar'; document.body.appendChild(bar);
+  var barT = null, barBusy = false;
+  function opened() {
+    if ($('dq-cab') || $('dq-otp-ov') || $('dqk-ov') || $('yq-m')) return true;
+    var s = $('exam-select-screen'); return !!(s && s.classList.contains('active'));
+  }
+  function barStart() {
+    if (barBusy || opened()) return; barBusy = true; document.body.classList.add('dqs-busy');
+    bar.style.transition = 'none'; bar.style.width = '0'; bar.style.opacity = '1'; void bar.offsetWidth; bar.style.transition = '';
+    bar.style.width = '38%'; setTimeout(function () { if (barBusy) bar.style.width = '72%'; }, 220);
+    var t0 = Date.now(), iv = setInterval(function () {
+      if (opened() && Date.now() - t0 > 120 || Date.now() - t0 > 8000) { clearInterval(iv); barEnd(); }
+    }, 80);
+  }
+  function barEnd() {
+    bar.style.width = '100%'; document.body.classList.remove('dqs-busy');
+    clearTimeout(barT); barT = setTimeout(function () { bar.style.opacity = '0'; barBusy = false; setTimeout(function () { if (!barBusy) bar.style.width = '0'; }, 300); }, 220);
+  }
+  function wrapGo() {
+    if (typeof V3 === 'undefined' || typeof DQ === 'undefined' || !V3.go || !DQ.openCabinet || V3.go.__s) return false;
+    var og = V3.go, oc = DQ.openCabinet;
+    V3.go = function (id) { if (id === 'kab') barStart(); return og.apply(this, arguments); };
+    V3.go.__s = 1;
+    DQ.openCabinet = function () { barStart(); return oc.apply(this, arguments); };
+    DQ.openCabinet.__s = 1; return true;
+  }
+  poll(wrapGo, 300);
+})();
+</script>
+
 
 
 
