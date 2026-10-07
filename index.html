@@ -22826,6 +22826,93 @@ var m=location.search.match(/[?&]quiz=(\d+)/);if(m)setTimeout(function(){QM.intr
   if (s0) new MutationObserver(build).observe(s0, { childList: true, subtree: true });
 })();
 </script>
+            <!-- ═══════════════════════════════════════════════════════════
+  YAMAQ 1/2 — index.html
+  A) <head>-də, "dq-prefetch" skriptindən SONRA yapışdır
+  B) </body>-dən ƏVVƏL yapışdır (faylın ən sonu)
+═══════════════════════════════════════════════════════════ -->
+
+<!-- ───────────── A) HEAD ───────────── -->
+<script id="dq-news-prefetch">
+/* Xəbərləri səhifə açılan kimi (supabase-js yüklənməsini gözləmədən) çəkir,
+   keşdən isə ANINDA göstərir. */
+(function () {
+  var U = 'https://cpzwliqlgaplroscvduo.supabase.co',
+      K = 'sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF';
+  try { window.__dqNewsC = JSON.parse(localStorage.getItem('dq_news_c1') || 'null'); } catch (e) {}
+  window.__dqNewsP = fetch(U + '/rest/v1/dq_v2_store?select=*&collection=eq.news&order=id.desc&limit=8',
+      { headers: { apikey: K } })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (a) {
+      if (!Array.isArray(a)) return null;
+      a = a.map(function (x) { return Object.assign({}, x.data, { _id: x.id }); });
+      try { localStorage.setItem('dq_news_c1', JSON.stringify(a)); } catch (e) {}
+      return a;
+    })
+    .catch(function () { return null; });
+})();
+</script>
+
+
+<!-- ───────────── B) </body>-dən əvvəl ───────────── -->
+<script id="dq-news-patch">
+(function () {
+  var BASE = 'https://exam.dqplatform.workers.dev';
+
+  /* 1) Keşdəki xəbərlər varsa slayder dərhal çəkilsin, təzə data gələndə yenilənsin */
+  try {
+    if (typeof YQ !== 'undefined' && !YQ.news && window.__dqNewsC && window.__dqNewsC.length)
+      YQ.news = window.__dqNewsC.slice(0, 8);
+  } catch (e) {}
+  if (window.__dqNewsP) window.__dqNewsP.then(function (a) {
+    if (!a || !a.length) return;
+    try {
+      if (typeof YQ === 'undefined') return;
+      YQ.news = a.slice(0, 8);
+      if (window.DQN && DQN.el) YQ.paint();   // eyni data olsa DQN.render özü yenidən çəkmir (sig yoxlaması)
+    } catch (e) {}
+  });
+
+  /* 2) Qapaq şəkilləri: lazy yox, hamısı dərhal; birinci slayd yüksək prioritet */
+  function fix() {
+    document.querySelectorAll('#yq-news .dqn-slide img').forEach(function (im, i) {
+      im.loading = 'eager'; im.removeAttribute('loading');
+      im.decoding = 'async';
+      if (i === 0) im.setAttribute('fetchpriority', 'high');
+      if (im.decode) im.decode().catch(function () {});
+    });
+  }
+  var tries = 0;
+  (function wrap() {
+    if (window.DQN && DQN.render && !DQN.__dq3) {
+      DQN.__dq3 = 1;
+      var o = DQN.render;
+      DQN.render = function () { var r = o.apply(this, arguments); fix(); return r; };
+      fix();
+      return;
+    }
+    if (tries++ < 80) setTimeout(wrap, 150);
+  })();
+
+  /* 3) "Paylaş" düyməsi: səhifə linki yox, xəbərin öz linki (/news?id=...) → qapaq şəkli ilə önizləmə */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('#yq-news [data-a="share"]');
+    if (!b || !window.DQN) return;
+    e.preventDefault(); e.stopPropagation();
+    var n = DQN.items && DQN.items[DQN.cur]; if (!n) return;
+    var link = BASE + '/news?id=' + encodeURIComponent(n.slug || n._id);
+    var text = window.dqShareText ? dqShareText(n) : ('DQPlatform - ' + n.title + ': ' + link);
+    if (navigator.share) { navigator.share({ text: text }).catch(function () {}); return; }
+    if (window.dqOpenShare) {                       // mövcud paylaşma pəncərəsi
+      var idx = (window.DQ_NEWS || []).findIndex(function (x) { return x._id === n._id; });
+      if (idx > -1) return dqOpenShare(idx);
+    }
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { alert('Kopyalandı ✅'); });
+    else prompt('Kopyalayın:', text);
+  }, true);
+})();
+</script>
+
 
 </body>
 </html>
