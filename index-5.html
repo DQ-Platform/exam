@@ -2411,12 +2411,113 @@ var Y=window.Y2={page:"home",tab:"pk",flt:"all",qf:"all",view:"",D:{},R:[],imp:n
   function guard(){try{
     var s=localStorage.getItem(YQ2.SK),u=+localStorage.getItem("dq_rem_until")||0;
     if(!s){localStorage.removeItem("dq_rem_until");return}
-    if(!u){localStorage.setItem("dq_rem_until",Date.now()+(localStorage.getItem("dq_rem_pref")==="0"?1:90)*864e5);return}
+    if(!u){localStorage.setItem("dq_rem_until",Date.now()+(localStorage.getItem("dq_rem_pref")==="0"?1:77)*864e5);return}
     if(Date.now()>u){localStorage.removeItem(YQ2.SK);localStorage.removeItem("dq_cabinet");localStorage.removeItem("dq_rem_until");YQ2.me=null;window.HOME&&HOME.header()}
   }catch(e){}}
   guard();setInterval(guard,5000);
 })();
 </script>
+    <!-- ===== DQ GİZLİ ADMİN GİRİŞİ (yamaq) — </body>-dən əvvəl yapışdırın ===== -->
+<style id="dq-secret-css">
+#dq-sec-box{display:none;margin:0 0 14px;text-align:left}
+#dq-sec-box.on{display:block;animation:dqPop .3s ease both}
+#dq-sec-box .code-input{text-align:center;letter-spacing:2px}
+#dq-sec-box .btn{width:100%;margin-top:8px;display:none}
+#dq-sec-box.ok .btn{display:block}
+.dq-ysl{display:inline-block;margin-left:8px;padding:2px 11px;border-radius:999px;background:#0a2f7a;color:#d9a441;font-weight:800;font-size:12px;letter-spacing:1.5px;vertical-align:middle;animation:dqPop .3s ease both}
+</style>
+<script id="dq-secret-admin">
+(function(){
+  var CODE="yuniss2003", GAP=450, n=0, t=null, replay=false;
+  var SEL='#v3-home .v3-hd a[data-dqauth="guest"], #login-screen .dq-primary';
+  var $=function(id){return document.getElementById(id)};
+
+  function box(){
+    var b=$("dq-sec-box"); if(b) return b;
+    var form=document.querySelector("#login-screen .dq-form"); if(!form) return null;
+    b=document.createElement("div"); b.id="dq-sec-box";
+    b.innerHTML='<label class="dq-field"><span>Giriş kodu</span>'+
+      '<input type="password" id="dq-sec-code" class="code-input" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Kodu daxil edin"></label>'+
+      '<button type="button" class="btn dq-primary-secret"><i class="fa-solid fa-shield-halved"></i> Admin panelinə daxil ol</button>';
+    form.insertBefore(b, form.firstChild);
+    var inp=b.querySelector("input");
+    inp.addEventListener("input", check);
+    inp.addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); enter(); } });
+    b.querySelector("button").addEventListener("click", enter);
+    return b;
+  }
+
+  function check(){
+    var b=$("dq-sec-box"), v=($("dq-sec-code").value||"").trim(), sub=document.querySelector("#login-screen .dq-sub");
+    var ok = v===CODE;
+    b.classList.toggle("ok", ok);
+    var tag=sub&&sub.querySelector(".dq-ysl");
+    if(ok && sub && !tag){ tag=document.createElement("span"); tag.className="dq-ysl"; tag.textContent="ysl"; sub.appendChild(tag); }
+    if(!ok && tag) tag.remove();
+  }
+
+  function reset(){
+    var i=$("dq-sec-code"); if(i) i.value="";
+    var b=$("dq-sec-box"); if(b){ b.classList.remove("on","ok"); }
+    document.querySelectorAll(".dq-ysl").forEach(function(x){x.remove()});
+  }
+
+  function enter(){
+    var i=$("dq-sec-code"); if(!i) return;
+    if((i.value||"").trim()!==CODE){
+      try{ DQ.msg("Kod yanlışdır!"); }catch(e){ alert("Kod yanlışdır!"); }
+      return;
+    }
+    try{ localStorage.setItem("dq_admin_logged","true"); }catch(e){}
+    window.__dqSecretAdmin=true;
+    reset();
+    try{ V2.open(); }catch(e){ alert("Panel yüklənmədi"); }
+  }
+
+  function openSecret(){
+    try{ showScreen("login-screen"); }catch(e){}
+    var b=box(); if(!b) return;
+    b.classList.add("on");
+    setTimeout(function(){ var i=$("dq-sec-code"); i&&i.focus(); },80);
+    scrollTo(0,0);
+  }
+
+  /* 3 dəfə ard-arda toxunma; tək toxunuş 450ms gecikmə ilə normal işləyir */
+  document.addEventListener("click", function(e){
+    if(replay) return;
+    var el=e.target.closest && e.target.closest(SEL); if(!el) return;
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+    n++; clearTimeout(t);
+    if(n>=3){ n=0; openSecret(); return; }
+    t=setTimeout(function(){
+      n=0; replay=true;
+      try{ (document.contains(el)?el:document.querySelector(SEL)).click(); } finally { replay=false; }
+    }, GAP);
+  }, true);
+
+  /* Admin açıq olanda sidebar-dakı sonuncu düymə "Çıxış" olsun */
+  var og=V2.go;
+  V2.go=async function(){
+    var r=await og.apply(this,arguments);
+    if(window.__dqSecretAdmin){
+      var navs=document.querySelectorAll("#v2-root .v2-side .v2-nav"), last=navs[navs.length-1];
+      if(last && /Admin Panel/i.test(last.textContent)) last.innerHTML='<i class="fa-solid fa-right-from-bracket"></i>Çıxış';
+    }
+    return r;
+  };
+  var oc=V2.close;
+  V2.close=function(){
+    var r=oc.apply(this,arguments);
+    if(window.__dqSecretAdmin){
+      window.__dqSecretAdmin=false;
+      try{ localStorage.removeItem("dq_admin_logged"); }catch(e){}
+      try{ showScreen("v3-home"); }catch(e){}
+    }
+    return r;
+  };
+})();
+</script>
+
 
 </body>
 </html>
