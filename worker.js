@@ -64,3 +64,70 @@ export default {
     return pass();
   }
 };
+// ═══════════════════════════════════════════════════════════
+// YAMAQ 2/2 — Cloudflare Worker (exam.dqplatform.workers.dev)
+// Səbəb: şəkil bazada base64 saxlanır, WhatsApp/Telegram isə og:image üçün
+// real https linki (jpeg/png) tələb edir. Worker həm /news-img?id=... verir,
+// həm də /news?id=... səhifəsinin og: teqlərinə bu linki yazır.
+// ═══════════════════════════════════════════════════════════
+const SB  = 'https://cpzwliqlgaplroscvduo.supabase.co';
+const KEY = 'sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF';
+
+async function getNews(id) {
+  const q = /^\d+$/.test(id) ? 'id=eq.' + id : 'data->>slug=eq.' + encodeURIComponent(id);
+  const r = await fetch(`${SB}/rest/v1/dq_v2_store?select=id,data&collection=eq.news&${q}&limit=1`,
+    { headers: { apikey: KEY } });
+  const a = r.ok ? await r.json() : [];
+  return a[0] ? { ...a[0].data, _id: a[0].id } : null;
+}
+const clean = (s, n) => String(s || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n);
+
+export default {
+  async fetch(req, env, ctx) {
+    const u = new URL(req.url);
+    const id = u.searchParams.get('id');
+
+    /* ── 1) Qapaq şəkli: base64 → real şəkil faylı ── */
+    if (u.pathname === '/news-img' && id) {
+      const n = await getNews(id);
+      const m = /^data:(image\/[\w.+-]+);base64,([\s\S]+)$/.exec((n && n.img) || '');
+      if (!m) return Response.redirect(u.origin + '/og-image.jpg', 302);
+      const bin = atob(m[2]), bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return new Response(bytes, {
+        headers: { 'content-type': m[1], 'cache-control': 'public, max-age=86400, s-maxage=86400' }
+      });
+    }
+
+    /* ── 2) Paylaşılan xəbər linki: og teqləri ── */
+    if (u.pathname === '/news' && id) {
+      const page = await env.ASSETS.fetch(new Request(u.origin + '/', req)); // index.html
+      const n = await getNews(id);
+      if (!n) return page;
+
+      const link  = `${u.origin}/news?id=${encodeURIComponent(n.slug || n._id)}`;
+      const title = 'DQPlatform - ' + clean(n.title, 120);
+      const desc  = clean(n.sum || n.body, 200) || 'DQPlatform Exam';
+      const hasImg = /^data:image\//.test(n.img || '');
+      const image = hasImg ? `${u.origin}/news-img?id=${encodeURIComponent(n.slug || n._id)}`
+                           : `${u.origin}/og-image.jpg`;
+      const set = {
+        'og:title': title, 'twitter:title': title,
+        'og:description': desc, 'twitter:description': desc, 'description': desc,
+        'og:url': link,
+        'og:image': image, 'og:image:secure_url': image, 'twitter:image': image,
+        ...(hasImg ? { 'og:image:width': '720', 'og:image:height': '900', 'og:image:type': 'image/jpeg' } : {})
+      };
+      return new HTMLRewriter()
+        .on('meta', { element(el) {
+          const k = el.getAttribute('property') || el.getAttribute('name');
+          if (k in set) el.setAttribute('content', set[k]);
+        }})
+        .on('title', { element(el) { el.setInnerContent(title); } })
+        .transform(new Response(page.body, { status: 200, headers: page.headers }));
+    }
+
+    return env.ASSETS.fetch(req);
+  }
+};
+
