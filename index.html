@@ -23724,6 +23724,245 @@ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.c
 function u(){t=0;var h=document.documentElement,m=h.scrollHeight-h.clientHeight;b.style.width=(m>0?Math.min(100,h.scrollTop/m*100):0)+'%'}
 addEventListener('scroll',function(){if(!t)t=requestAnimationFrame(u)},{passive:true});u()})();
 </script>
+    <!-- ═══ DQ YAMAQ: admin girişi · mətn redaktəsi · qeydiyyat paneli · qapı · cila. Son </body> teqindən əvvələ yapışdırın. ═══ -->
+<style id="dq-patch-css">
+/* Qeydiyyat paneli dizaynı */
+#lxp{--ink:#1e1b4b;--ind:#312e81;--gold:#c9a35a;--mut:#64748b;--ln:#e8e6f3;--grn:#16a34a}
+#lxp .lxp-hero{border-radius:30px;padding:44px 40px;background:linear-gradient(118deg,#14123f 0%,#2b2a8f 55%,#5a4b9e 100%);box-shadow:0 24px 50px -18px rgba(30,27,75,.55)}
+#lxp .lxp-hero:before{animation:rgBreath 7s ease-in-out infinite}
+#lxp .lxp-hero:after{animation:rgFloat 5s ease-in-out infinite;box-shadow:0 22px 40px -10px rgba(10,8,50,.55)}
+#lxp .lxp-bdg{padding:7px 14px;border-radius:99px;backdrop-filter:blur(6px);display:inline-flex;align-items:center;gap:8px;font-size:13px}
+#lxp .lxp-bdg i{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 0 rgba(74,222,128,.7);animation:rgPulse 2s infinite}
+#lxp .lxp-hero h1{background:linear-gradient(90deg,#fff 40%,#f3dfb0);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+#lxp .lxp-card{border-radius:30px;padding:8px 10px 14px;box-shadow:0 26px 56px -24px rgba(30,27,75,.35)}
+#lxp .lxp-ch{padding:20px 18px 14px;gap:12px;flex-wrap:wrap}
+#lxp .lxp-ch b{font-size:21px;color:var(--ink);letter-spacing:.1px}
+#lxp .lxp-ch small{display:inline-block;margin-top:5px;padding:3px 11px;border-radius:99px;background:#eeedfb;color:var(--ind);font-weight:700}
+#lxp .lxp-gh{border-radius:99px;padding:10px 18px;border:1px solid var(--ln);background:#fff;color:var(--ink);font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s,color .2s}
+#lxp .lxp-gh:hover{background:var(--ink);color:#fff;transform:translateY(-2px);box-shadow:0 10px 20px -8px rgba(30,27,75,.5)}
+#lxp .lxp-t{border-collapse:separate;border-spacing:0 10px;width:100%}
+#lxp .lxp-t thead th{background:linear-gradient(90deg,#17154a,#2f2d8a);color:#fff;font-size:11.5px;letter-spacing:.7px;padding:14px 12px;text-transform:uppercase;white-space:nowrap}
+#lxp .lxp-t thead th:first-child{border-radius:16px 0 0 16px}#lxp .lxp-t thead th:last-child{border-radius:0 16px 16px 0}
+#lxp .lxp-r td{background:#fff;padding:16px 12px;vertical-align:middle;border-top:1px solid var(--ln);border-bottom:1px solid var(--ln);transition:background .25s}
+#lxp .lxp-r td:first-child{border-left:1px solid var(--ln);border-radius:18px 0 0 18px}#lxp .lxp-r td:last-child{border-right:1px solid var(--ln);border-radius:0 18px 18px 0}
+#lxp .lxp-r{cursor:pointer;transition:transform .25s,filter .25s}
+#lxp .lxp-r:hover{transform:translateY(-3px);filter:drop-shadow(0 14px 18px rgba(30,27,75,.14))}#lxp .lxp-r:hover td{background:#faf9ff}
+#lxp .lxp-ct{background:#fbf1d9;color:#8a6420;border:1px solid #ecd9a5;border-radius:99px;padding:4px 12px;font-weight:800}
+#lxp .lxp-sh{background:#eeedfb;color:var(--ind);border-radius:99px;padding:5px 12px;font-weight:700}
+#lxp .lxp-fr b{color:var(--grn)}#lxp .lxp-fr.low b{color:#d97706}#lxp .lxp-fr.out b{color:#dc2626}
+#lxp .lxp-bt{position:relative;overflow:hidden;border:0;border-radius:14px;padding:12px 20px;font-weight:800;color:#fff;cursor:pointer;background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 10px 22px -10px rgba(22,163,74,.8);transition:transform .2s,box-shadow .2s}
+#lxp .lxp-bt:hover:not(:disabled){transform:translateY(-2px) scale(1.03)}#lxp .lxp-bt:active{transform:scale(.97)}
+#lxp .lxp-bt:not(:disabled):after{content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:rgShine 3.6s infinite}
+#lxp .lxp-bt:disabled{background:#e5e7eb;color:#9ca3af;box-shadow:none;cursor:not-allowed}
+#lxp .lxp-bt.ok{background:linear-gradient(135deg,#1e1b4b,#3b37a0);box-shadow:0 10px 22px -10px rgba(49,46,129,.8)}
+#lxp .lxp-d{border-radius:22px;overflow:hidden;border:1px solid var(--ln);box-shadow:0 18px 36px -22px rgba(30,27,75,.5);animation:rgDrop .35s ease both}
+#lxp .lxp-dh{background:linear-gradient(90deg,#17154a,#3b37a0);color:#fff;padding:16px 20px}
+#lxp .lxp-dl>div{padding:13px 20px;border-bottom:1px solid var(--ln)}
+#lxp .lxp-em{padding:50px 20px;text-align:center;color:var(--mut);font-weight:600}
+#lxp.fresh .lxp-hero{animation:rgUp .6s cubic-bezier(.2,.8,.2,1) both}
+#lxp.fresh .lxp-card{animation:rgUp .6s .12s cubic-bezier(.2,.8,.2,1) both}
+#lxp.fresh .lxp-r{animation:rgUp .5s cubic-bezier(.2,.8,.2,1) both}
+#lxp.fresh .lxp-r:nth-child(1){animation-delay:.3s}#lxp.fresh .lxp-r:nth-child(2){animation-delay:.38s}#lxp.fresh .lxp-r:nth-child(3){animation-delay:.46s}#lxp.fresh .lxp-r:nth-child(n+4){animation-delay:.54s}
+@keyframes rgUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes rgDrop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@keyframes rgFloat{0%,100%{transform:translateY(-50%) rotate(6deg)}50%{transform:translateY(-56%) rotate(2deg)}}
+@keyframes rgBreath{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.25);opacity:.6}}
+@keyframes rgPulse{70%{box-shadow:0 0 0 9px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+@keyframes rgShine{0%,60%{left:-70%}100%{left:130%}}
+@media(max-width:860px){
+#lxp .lxp-hero{padding:30px 22px;border-radius:24px}#lxp .lxp-hero p{padding-right:0}#lxp .lxp-hero:after{width:70px;height:94px;font-size:34px;right:16px;top:26px;transform:rotate(6deg);animation:none;opacity:.9}
+#lxp .lxp-sc{overflow:visible}
+#lxp .lxp-t,#lxp .lxp-t tbody,#lxp .lxp-t tr,#lxp .lxp-t td{display:block;width:100%;box-sizing:border-box}#lxp .lxp-t thead{display:none}
+#lxp .lxp-r{background:#fff;border:1px solid var(--ln);border-radius:22px;margin:0 0 14px;padding:8px 16px 16px;box-shadow:0 14px 28px -20px rgba(30,27,75,.5)}
+#lxp .lxp-r td,#lxp .lxp-r td:first-child,#lxp .lxp-r td:last-child{display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:right;padding:9px 0;border:0;border-bottom:1px dashed var(--ln);border-radius:0;background:none}
+#lxp .lxp-r td[data-l]:before{content:attr(data-l);color:var(--mut);font-weight:600;font-size:13px;text-align:left}
+#lxp .lxp-r td:first-child{display:none}#lxp .lxp-r td:last-child{border:0;padding-top:14px}#lxp .lxp-r td:last-child .lxp-bt{width:100%}
+#lxp .lxp-r:hover{transform:none;filter:none}
+#lxp .lxp-dr td{padding:0}#lxp .lxp-d{margin:-4px 0 14px}
+}
+@media(prefers-reduced-motion:reduce){#lxp *,#lxp *:before,#lxp *:after{animation:none!important;transition:none!important}}
+
+/* Təklif və qapı pəncərələri */
+.dqg-ov{position:fixed;inset:0;z-index:100002;background:rgba(15,14,50,.62);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:18px;animation:dqgF .3s ease both}
+.dqg-ov.out{opacity:0;transition:opacity .25s}
+.dqg-c{width:100%;max-width:380px;background:#fff;border-radius:28px;padding:30px 24px 22px;text-align:center;font-family:inherit;box-shadow:0 30px 70px -20px rgba(15,14,50,.7);animation:dqgP .45s cubic-bezier(.2,1.2,.3,1) both}
+.dqg-ic{width:76px;height:76px;margin:-64px auto 14px;border-radius:24px;background:linear-gradient(135deg,#17154a,#3b37a0);display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 14px 28px -8px rgba(49,46,129,.7);animation:dqgB 3s ease-in-out infinite}
+.dqg-c h3{margin:0 0 8px;font-size:20px;font-weight:800;color:#1e1b4b}
+.dqg-c p{margin:0 0 20px;color:#64748b;font-size:14.5px;line-height:1.6}
+.dqg-c button{display:block;width:100%;border:0;border-radius:15px;padding:14px;font:inherit;font-weight:800;font-size:15px;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.dqg-p{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;box-shadow:0 12px 24px -10px rgba(22,163,74,.85)}
+.dqg-s{margin-top:10px;background:#eeedfb;color:#312e81}
+.dqg-l{margin-top:8px;background:none;color:#64748b;font-weight:700!important}
+.dqg-c button:hover{transform:translateY(-2px)}.dqg-c button:active{transform:scale(.97)}
+@keyframes dqgF{from{opacity:0}to{opacity:1}}
+@keyframes dqgP{from{opacity:0;transform:translateY(30px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes dqgB{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@media(prefers-reduced-motion:reduce){.dqg-ov,.dqg-c,.dqg-ic{animation:none}}
+
+/* Ümumi cila */
+/* ===== Ümumi interfeys cilası — yalnız görünüş, funksiyalara toxunmur ===== */
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+::selection{background:#c9a35a55;color:inherit}
+body{animation:dquFade .5s ease both}
+@keyframes dquFade{from{opacity:0}to{opacity:1}}
+*{scrollbar-width:thin;scrollbar-color:#9aa3c7 transparent}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:#9aa3c7;border-radius:9px;border:2px solid transparent;background-clip:content-box}::-webkit-scrollbar-thumb:hover{background:#6b76a8;background-clip:content-box;border:2px solid transparent}
+:where(a,button,input,select,textarea,[role=button],[onclick]):focus-visible{outline:3px solid #c9a35a;outline-offset:2px;border-radius:10px}
+/* düymələr: yumşaq keçid, qalxma və basma hissi (aşağı spesifiklik — mövcud üslublar üstün qalır) */
+:where(button,.v3-b,.v3-bt,.btn,.dq-ab,.lx-reg,.lx-shr,[role=button]){transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s,filter .22s,background-color .22s,color .22s,border-color .22s}
+:where(button,.v3-b,.v3-bt,.btn,.dq-ab,.lx-reg,.lx-shr):not(:disabled):hover{transform:translateY(-2px);filter:brightness(1.06)}
+:where(button,.v3-b,.v3-bt,.btn,.dq-ab,.lx-reg,.lx-shr):not(:disabled):active{transform:translateY(0) scale(.97);filter:brightness(.96)}
+:where(button,.v3-b,.v3-bt,.btn):disabled{cursor:not-allowed;opacity:.65}
+/* yuxarı menyu: altından sürüşən xətt */
+.v3-nav a{position:relative;transition:color .2s}
+.v3-nav a:after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;border-radius:2px;background:#c9a35a;transform:scaleX(0);transform-origin:left;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.v3-nav a:hover:after{transform:scaleX(1)}
+/* kartlar */
+.lx-card,.exam-item-card{transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s}
+.lx-card:hover,.exam-item-card:hover{transform:translateY(-4px);box-shadow:0 22px 40px -22px rgba(30,27,75,.45)}
+/* giriş sahələri */
+:where(input,select,textarea){transition:border-color .2s,box-shadow .2s,background-color .2s}
+:where(input,select,textarea):focus{box-shadow:0 0 0 4px rgba(47,99,189,.16)}
+/* şəkillər yüklənəndə yumşaq görünsün */
+img{transition:opacity .35s}
+/* yuxarıda oxuma xətti */
+#dqu-bar{position:fixed;top:0;left:0;height:3px;width:0;z-index:100003;pointer-events:none;background:linear-gradient(90deg,#c9a35a,#f3dfb0,#2f63bd);box-shadow:0 0 8px rgba(201,163,90,.6);transition:width .12s linear}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}body,.lx-card,.exam-item-card,.v3-nav a:after,:where(button,.v3-b,.v3-bt,.btn){animation:none!important;transition:none!important}:where(button,.v3-b,.v3-bt,.btn):hover{transform:none!important}}
+
+</style>
+<script data-dq-patch="patch.js">
+/* 1) Admin girişi (Gmail+kod) və mətn redaktəsi */
+(function(){'use strict';
+var SB='https://cpzwliqlgaplroscvduo.supabase.co',KEY='sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF',ADMIN='dqplatform.exam@gmail.com',SK='dq_adm_tok';
+var map={},docId=null,editOn=false,authed=false;
+var $=function(i){return document.getElementById(i)};
+function api(p,b,tok,m){return fetch(SB+'/auth/v1/'+p,{method:m||'POST',headers:{apikey:KEY,'Content-Type':'application/json',Authorization:'Bearer '+(tok||KEY)},body:b?JSON.stringify(b):undefined}).then(function(r){return r.json().catch(function(){return{}}).then(function(j){return{ok:r.ok,j:j}})}).catch(function(){return{ok:false,j:{msg:'Şəbəkə xətası'}}})}
+/* ---------- Üslub ---------- */
+var st=document.createElement('style');st.textContent='#dq-adm-bar{position:fixed;right:12px;bottom:12px;z-index:99990;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}#dq-adm-bar button,#dq-adm-login{font:600 13px system-ui;border:0;border-radius:10px;padding:10px 14px;background:#0b2a6b;color:#fff;box-shadow:0 4px 14px #0004;cursor:pointer}#dq-adm-bar button.on{background:#16a34a}#dq-adm-bar .x{background:#b91c1c}#dq-adm-login{background:none;color:inherit;box-shadow:none;opacity:.7;text-decoration:underline;padding:4px}.dq-adm-nav{cursor:pointer;color:#fbbf24!important;font-weight:700}#dq-adm-ov{position:fixed;inset:0;background:#000a;z-index:100001;display:flex;align-items:center;justify-content:center;padding:16px}#dq-adm-ov>div{background:#fff;color:#0b2a6b;border-radius:16px;padding:22px;width:100%;max-width:340px;text-align:center;font-family:system-ui}#dq-adm-ov input{width:100%;box-sizing:border-box;padding:12px;margin:10px 0;border:2px solid #cbd5e1;border-radius:10px;font-size:16px;text-align:center}#dq-adm-ov button{width:100%;padding:12px;margin-top:6px;border:0;border-radius:10px;font-weight:700;background:#2f5fbd;color:#fff}#dq-adm-ov button.c{background:#0b2a6b}#dq-adm-err{color:#dc2626;min-height:18px;font-size:13px}body.dq-edit [data-dq-e]{outline:2px dashed #16a34a;outline-offset:2px;cursor:text}';document.head.appendChild(st);
+/* ---------- Giriş (Gmail + kod) ---------- */
+function modal(h){var o=document.createElement('div');o.id='dq-adm-ov';o.innerHTML='<div>'+h+'</div>';document.body.appendChild(o);return o}
+function login(){var o=modal('<h3>Admin girişi</h3><small>Admin Gmail ünvanını yazın</small><input id="dq-a1" type="email" autocapitalize="none" placeholder="ad@gmail.com"><div id="dq-adm-err"></div><button id="dq-a2">Kod göndər</button><button class="c" id="dq-a3">Ləğv et</button>'),email;
+ var er=function(t){$('dq-adm-err').textContent=t};$('dq-a3').onclick=function(){o.remove()};
+ $('dq-a2').onclick=async function(){
+  if(!email){var e=$('dq-a1').value.trim().toLowerCase();if(e!==ADMIN)return er('Bu ünvan admin deyil');
+   var r=await api('otp',{email:e,create_user:true});if(!r.ok)return er(r.j.msg||r.j.message||'Kod göndərilmədi');
+   email=e;o.firstChild.querySelector('small').textContent='Kod '+e.slice(0,2)+'***@gmail.com ünvanına göndərildi';var i=$('dq-a1');i.value='';i.type='text';i.placeholder='Kod';i.inputMode='numeric';this.textContent='Təsdiqlə';er('');return}
+  var code=$('dq-a1').value.replace(/\D/g,'');if(code.length<6)return er('Kodu tam yazın');
+  var v=await api('verify',{type:'email',email:email,token:code});
+  if(!v.ok||!v.j.access_token||(v.j.user&&String(v.j.user.email).toLowerCase()!==ADMIN))return er('Kod yanlışdır və ya vaxtı bitib');
+  localStorage.setItem(SK,JSON.stringify({t:v.j.access_token,e:Date.now()+(v.j.expires_in||3600)*1000}));o.remove();setAuth(true);openPanel()}}
+async function checkAuth(){try{var s=JSON.parse(localStorage.getItem(SK)||'null');if(!s||s.e<Date.now())throw 0;var r=await api('user',null,s.t,'GET');if(r.ok&&String(r.j.email).toLowerCase()===ADMIN)return setAuth(true)}catch(e){}localStorage.removeItem(SK);setAuth(false)}
+function setAuth(a){authed=a;try{a?localStorage.setItem('dq_admin_logged','true'):(localStorage.removeItem('dq_admin_logged'),editOn&&toggleEdit())}catch(e){}ui()}
+function logout(){localStorage.removeItem(SK);try{V2.close()}catch(e){}setAuth(false)}
+function openPanel(){try{localStorage.setItem('dq_admin_logged','true');V2.open()}catch(e){alert('Panel yüklənmədi')}}
+/* ---------- İnterfeys: yuxarı menyuda «Admin panel» ---------- */
+function ui(){
+ document.querySelectorAll('.v3-nav').forEach(function(n){var a=n.querySelector('.dq-adm-nav');if(authed&&!a){a=document.createElement('a');a.className='dq-adm-nav';a.textContent='🛡️ Admin panel';a.onclick=openPanel;n.appendChild(a)}else if(!authed&&a)a.remove()});
+ var b=$('dq-adm-bar');if(authed&&!b){b=document.createElement('div');b.id='dq-adm-bar';b.innerHTML='<button id="dqad-b1">✏️ Mətnləri redaktə et</button><button id="dqad-b2">🛡️ Admin panel</button><button class="x" id="dqad-b3">Çıxış</button>';document.body.appendChild(b);$('dqad-b1').onclick=toggleEdit;$('dqad-b2').onclick=openPanel;$('dqad-b3').onclick=logout}else if(!authed&&b)b.remove();
+ var l=$('dq-adm-login'),f=document.querySelector('.v3-ft');if(!authed&&f&&!l){l=document.createElement('a');l.id='dq-adm-login';l.textContent='Admin girişi';l.onclick=login;f.appendChild(l)}else if(authed&&l)l.remove()}
+/* ---------- Mətn redaktəsi (hər söz/cümlə) ---------- */
+var SKIP='SCRIPT,STYLE,NOSCRIPT,TEXTAREA,INPUT,SELECT,#dq-adm-bar,#dq-adm-ov,#v2-root';
+function skip(n){return n.closest&&n.closest(SKIP)}
+function apply(root){var w=document.createTreeWalker(root||document.body,NodeFilter.SHOW_TEXT),n,L=[];while(n=w.nextNode())L.push(n);
+ L.forEach(function(n){var p=n.parentElement;if(!p||skip(p))return;var k=n.nodeValue.trim();if(k&&map[k]!==undefined&&map[k]!==k){p.dataset.dqOrig=k;n.nodeValue=n.nodeValue.replace(k,map[k])}})}
+var tm;new MutationObserver(function(){clearTimeout(tm);tm=setTimeout(function(){apply();ui()},150)}).observe(document.body,{childList:true,subtree:true});
+function leaf(e){var t=0,c=0;e.childNodes.forEach(function(x){if(x.nodeType==1)c++;else if(x.nodeType==3&&x.nodeValue.trim())t++});return t==1&&c==0}
+function toggleEdit(){editOn=!editOn;document.body.classList.toggle('dq-edit',editOn);var b=$('dqad-b1');if(b){b.classList.toggle('on',editOn);b.textContent=editOn?'✅ Redaktə rejimi (söndür)':'✏️ Mətnləri redaktə et'}
+ document.querySelectorAll('[data-dq-e]').forEach(function(e){e.removeAttribute('data-dq-e');e.removeAttribute('contenteditable')});
+ if(editOn)document.querySelectorAll('body *').forEach(function(e){if(!skip(e)&&leaf(e)&&!e.closest('#dq-adm-bar'))e.setAttribute('data-dq-e','1')})}
+document.addEventListener('click',function(e){if(!editOn)return;var t=e.target.closest&&e.target.closest('[data-dq-e]');if(!t)return;e.preventDefault();e.stopPropagation();if(t.isContentEditable)return;t.dataset.dqBefore=t.textContent.trim();t.setAttribute('contenteditable','true');t.focus()},true);
+document.addEventListener('focusout',function(e){var t=e.target;if(!editOn||!t.dataset||!t.dataset.dqBefore)return;var nv=t.textContent.trim(),ov=t.dataset.dqOrig||t.dataset.dqBefore;t.removeAttribute('contenteditable');delete t.dataset.dqBefore;
+ if(nv===t.textContent.trim()&&nv===(map[ov]!==undefined?map[ov]:ov))return;if(!nv||nv===ov)delete map[ov];else{map[ov]=nv;t.dataset.dqOrig=ov}save()},true);
+async function save(){try{await V2.put('site_texts',{map:map},docId);if(!docId){var l=await V2.list('site_texts');docId=l[0]&&l[0]._id}}catch(e){alert('Yadda saxlanmadı')}}
+async function load(){for(var i=0;i<60&&typeof V2==='undefined';i++)await new Promise(function(r){setTimeout(r,200)});try{var l=await V2.list('site_texts');if(l[0]){docId=l[0]._id;map=l[0].map||{}}}catch(e){}apply();ui()}
+window.DQADM={login:login,open:openPanel,logout:logout};
+checkAuth();load();
+})();
+</script>
+<script data-dq-patch="reg.js">
+/* 2) Qeydiyyatdan keç düymələri → qeydiyyat paneli */
+(function(){
+/* «Qeydiyyatdan keç» / «Qeydiyyat paneli» düymələri → qeydiyyat paneli */
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-a=reg],.dq2-pn,.lx-reg');if(!b||!window.LXP||!LXP.open)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();LXP.open()},true);
+/* panel açılanda animasiyalı giriş */
+function wrap(){if(!window.LXP||!LXP.open||LXP.open.__a)return false;var o=LXP.open;LXP.open=function(){var r=o.apply(this,arguments),n=0,t=setInterval(function(){var p=document.getElementById('lxp');if(p){p.classList.remove('fresh');void p.offsetWidth;p.classList.add('fresh');clearInterval(t);setTimeout(function(){p.classList.remove('fresh')},1800)}else if(++n>40)clearInterval(t)},50);return r};LXP.open.__a=1;return true}
+var k=0,i=setInterval(function(){if(wrap()||++k>100)clearInterval(i)},150);
+})();
+</script>
+<script data-dq-patch="nf.js">
+/* 3) Gmail tapılmayanda «Qeydiyyatdan keç» */
+(function(){
+var MSG='Bu Gmail ilə təsdiqlənmiş qeydiyyat tapılmadı',nf=false;
+function reset(){var b=document.getElementById('dq-em-ok'),x=document.getElementById('dq-otp-err');nf=false;if(b){b.textContent='Kod göndər';b.style.background=''}if(x)x.textContent=''}
+new MutationObserver(function(){var x=document.getElementById('dq-otp-err'),b=document.getElementById('dq-em-ok');if(!b){nf=false;return}
+ if(x&&!nf&&x.textContent===MSG){nf=true;b.textContent='📝 Qeydiyyatdan keç';b.style.background='linear-gradient(135deg,#16a34a,#15803d)'}}).observe(document.body,{childList:true,subtree:true,characterData:true});
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('#dq-em-ok');if(!b||!nf)return;e.preventDefault();e.stopImmediatePropagation();nf=false;var c=document.getElementById('dq-em-no');if(c)c.click();try{YQ.open('reg');YQ.stay=true}catch(er){}},true);
+document.addEventListener('input',function(e){if(e.target&&e.target.id==='dq-em'&&nf)reset()});
+})();
+</script>
+<script data-dq-patch="g.js">
+/* 4) Yeni istifadəçiyə təklif + nəticə qapısı */
+(function(){
+function guest(){try{return !(YQ2.sess&&YQ2.sess())&&!(DQ.cabinet&&DQ.cabinet())}catch(e){return true}}
+function reg(tab){try{YQ.open(tab||'reg');YQ.stay=true}catch(e){}}
+function box(o){var d=document.createElement('div');d.className='dqg-ov';d.innerHTML='<div class="dqg-c"><div class="dqg-ic">'+o.ic+'</div><h3>'+o.t+'</h3><p>'+o.m+'</p>'+o.b+'</div>';document.body.appendChild(d);return d}
+function rm(d){d.classList.add('out');setTimeout(function(){d.remove()},250)}
+/* 1) Yeni istifadəçiyə qeydiyyat təklifi */
+function welcome(){
+ try{if(sessionStorage.getItem('dq_later'))return}catch(e){}
+ if(!guest()||document.querySelector('.dqg-ov')||document.getElementById('dt-chk')||localStorage.getItem('dq_admin_logged')==='true')return;
+ var d=box({ic:'🎓',t:'DQ Platforma xoş gəlmisiniz',m:'Qeydiyyatdan keçin: sınaq imtahanlarına yazılın, test nəticələriniz şəxsi kabinetinizdə saxlansın.',b:'<button class="dqg-p" data-a="r">📝 Qeydiyyatdan keç</button><button class="dqg-l" data-a="l">Daha sonra keçərəm</button>'});
+ d.onclick=function(e){var a=e.target.getAttribute&&e.target.getAttribute('data-a');if(!a)return;if(a==='l')try{sessionStorage.setItem('dq_later','1')}catch(x){}rm(d);if(a==='r')reg()}}
+setTimeout(welcome,2500);
+/* 2) Testi bitirib cavabı yoxlayanda qeydiyyat tələb olunur (testlərin özü hamıya açıqdır) */
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('#dt-chk');if(!b||!guest())return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+ if(document.querySelector('.dqg-ov'))return;
+ var d=box({ic:'🔒',t:'Nəticəni görmək üçün qeydiyyat lazımdır',m:'Cavablarınız saxlanılıb. Qeydiyyatdan keçin, sonra «Testi bitir» düyməsinə yenidən basıb nəticənizi öyrənin.',b:'<button class="dqg-p" data-a="r">📝 Qeydiyyatdan keç</button><button class="dqg-s" data-a="i">Artıq qeydiyyatlıyam — daxil ol</button><button class="dqg-l" data-a="b">Testə qayıt</button>'});
+ d.onclick=function(ev){var a=ev.target.getAttribute&&ev.target.getAttribute('data-a');if(!a)return;rm(d);if(a==='r')reg('reg');if(a==='i')reg('in')}},true);
+})();
+</script>
+<script data-dq-patch="u.js">
+/* 5) Ümumi interfeys cilası */
+(function(){var b=document.createElement('div');b.id='dqu-bar';document.body.appendChild(b);var t=0;
+function u(){t=0;var h=document.documentElement,m=h.scrollHeight-h.clientHeight;b.style.width=(m>0?Math.min(100,h.scrollTop/m*100):0)+'%'}
+addEventListener('scroll',function(){if(!t)t=requestAnimationFrame(u)},{passive:true});u()})();
+</script>
+<script data-dq-patch="share.js">
+/* 6) Paylaş → qeydiyyat linki + linkdən qeydiyyat panelinin açılması */
+(function(){
+/* Paylaşılan linkin ünvanı — yalnız burada dəyişin */
+var REG_URL='https://exam.dqplatform.workers.dev/qeydiyyat';
+var esc=function(s){return s.replace(/[.*+?^${}()|[\]\\\/]/g,'\\$&')};
+/* A) Link qeydiyyata gələndə qeydiyyat paneli avtomatik açılır */
+var landed=/^\/qeydiyyat\/?$/i.test(location.pathname)||/[?&]qeydiyyat(=|&|$)/i.test(location.search)||/^#qeydiyyat/i.test(location.hash);
+if(landed){try{sessionStorage.setItem('dq_later','1')}catch(e){}
+ var n=0,t=setInterval(function(){if(window.LXP&&LXP.open){clearInterval(t);try{LXP.open()}catch(e){}try{history.replaceState(null,'',/^\/qeydiyyat/i.test(location.pathname)?'/':location.pathname)}catch(e){}}else if(++n>120)clearInterval(t)},150)}
+/* B) Mətndəki sayt linklərini qeydiyyat linki ilə əvəz et */
+var SITE=new RegExp('https?:\\/\\/(?:dq-platform\\.github\\.io\\/exam\\/?|exam\\.dqplatform\\.workers\\.dev\\/(?!qeydiyyat)[^\\s]*|'+esc(location.origin+location.pathname)+'[^\\s]*)','g');
+function fix(t){t=String(t||'');var r=t.replace(SITE,REG_URL);return r.indexOf(REG_URL)>-1?r:r+'\n\n🌐 '+REG_URL}
+function isExam(n){try{return HOME.isExam(n)}catch(e){return /mtahan/i.test((n&&n.kind)||'')}}
+/* C) İmtahan elanının paylaşım mətni */
+function wrapText(){if(typeof window.dqShareText!=='function'||window.dqShareText.__r)return false;var o=window.dqShareText;
+ window.dqShareText=function(n){return isExam(n)?'DQPlatform - '+(n.title||'Sınaq')+': '+REG_URL:o.apply(this,arguments)};window.dqShareText.__r=1;return true}
+/* D) Sınaq kartı (LX) paylaşımı: WhatsApp / Telegram / kopyala */
+function wrapLX(){if(!window.LX||!LX.shr||LX.shr.__r)return false;
+ LX.shr=function(v){var x=LX.cur&&LX.cur();if(!x)return;var t=fix(LX.shareText(x));
+  if(v==='wa')window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
+  else if(v==='tg')window.open('https://t.me/share/url?url='+encodeURIComponent(REG_URL)+'&text='+encodeURIComponent(t),'_blank');
+  else{try{navigator.clipboard.writeText(t);V2.toast('Kopyalandı ✅')}catch(e){prompt('Kopyalayın:',t)}}};
+ LX.shr.__r=1;return true}
+var k=0,iv=setInterval(function(){wrapText();wrapLX();if(++k>240)clearInterval(iv)},250);
+/* E) Paylaşım pəncərələri (kart və elan): link, Telegram və «Linki kopyala» qeydiyyat linkinə yönəlir */
+function copy(){try{if(window.dqCopy)return dqCopy(REG_URL);navigator.clipboard.writeText(REG_URL);V2.toast('Link kopyalandı ✅')}catch(e){prompt('Kopyalayın:',REG_URL)}}
+function patch(m){var wa=m.querySelector('a.wa');if(!wa||m.__q)return;var h='';try{h=decodeURIComponent(wa.getAttribute('href')||'')}catch(e){}
+ if(h.indexOf(REG_URL)<0)return;m.__q=1;
+ m.querySelectorAll('p').forEach(function(p){if(/^https?:\/\//.test(p.textContent.trim()))p.textContent=REG_URL});
+ var tg=m.querySelector('a.tg');if(tg){var tx=(tg.getAttribute('href').match(/[?&]text=([^&]*)/)||[])[1]||'';tg.href='https://t.me/share/url?url='+encodeURIComponent(REG_URL)+'&text='+tx}
+ ['#nw-c','#nw-dl'].forEach(function(s){var b=m.querySelector(s);if(b)b.onclick=copy})}
+new MutationObserver(function(ms){ms.forEach(function(r){r.addedNodes.forEach(function(n){if(n.nodeType!==1)return;if(n.matches&&n.matches('.dq-share,#nw-det'))patch(n);else if(n.querySelector){var c=n.querySelector('.dq-share,#nw-det');if(c)patch(c)}})})}).observe(document.body,{childList:true});
+})();
+</script>
+
 
 
 </body>
