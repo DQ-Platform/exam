@@ -23962,6 +23962,515 @@ function patch(m){var wa=m.querySelector('a.wa');if(!wa||m.__q)return;var h='';t
 new MutationObserver(function(ms){ms.forEach(function(r){r.addedNodes.forEach(function(n){if(n.nodeType!==1)return;if(n.matches&&n.matches('.dq-share,#nw-det'))patch(n);else if(n.querySelector){var c=n.querySelector('.dq-share,#nw-det');if(c)patch(c)}})})}).observe(document.body,{childList:true});
 })();
 </script>
+    <!-- ═══════════════════════════════════════════════════════════════════════════
+  DQ YAMAQ v20 — şifrəli qeydiyyat · Google giriş · qeydiyyat kartı · admin gizli giriş · istifadəçi menyusu
+  Yalnız BİR DƏFƏ, ƏN SONUNCU yamağın altına, </body> teqindən əvvələ yapışdırın. Heç nə silmə. Əlavə SQL lazım deyil.
+  ═══════════════════════════════════════════════════════════════════════════ -->
+<style id="dqk-css">
+/* ---- ümumi pəncərə (OTP / şifrə) ---- */
+#dqk-ov{position:fixed;inset:0;z-index:2147483100;display:flex;align-items:center;justify-content:center;padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch;background:rgba(10,20,50,.6);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+#dqk-ov .dqk-bx{margin:auto;width:100%;max-width:420px;box-sizing:border-box;background:#fff;color:#0f172a;border-radius:20px;padding:24px 20px 18px;box-shadow:0 24px 60px rgba(0,0,0,.35);font-family:inherit;text-align:left}
+#dqk-ov h3{margin:0 0 6px;text-align:center;font-size:22px;color:#0f172a}
+#dqk-ov .dqk-s{margin:0 0 14px;text-align:center;color:#64748b;font-size:14px;line-height:1.5}
+#dqk-ov .dqk-l{display:block;font-size:12px;font-weight:800;letter-spacing:.06em;color:#334155;margin:10px 0 6px}
+#dqk-ov input{width:100%;box-sizing:border-box;padding:13px 14px;border:1.5px solid #cbd5e1;border-radius:12px;background:#f8fafc;font-size:16px;font-weight:600;color:#0f172a;margin:0}
+#dqk-ov input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+#dqk-ov input#dqk-code{text-align:center;font-size:26px;letter-spacing:10px;font-weight:800;margin:6px 0}
+#dqk-ov .dqk-pw{position:relative}#dqk-ov .dqk-pw input{padding-right:46px}
+#dqk-ov .dqk-pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:none;font-size:18px;cursor:pointer;opacity:.7}
+#dqk-ov .dqk-er{min-height:0;color:#b91c1c;font-size:14px;font-weight:700}
+#dqk-ov .dqk-er:not(:empty){background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:10px 12px;margin:0 0 8px}
+#dqk-ov .dqk-er.g:not(:empty){background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
+#dqk-ov button.dqk-p,#dqk-ov button.dqk-o{display:block;width:100%;border:0;border-radius:12px;padding:14px;font:700 16px inherit;font-family:inherit;cursor:pointer;margin-top:10px}
+#dqk-ov button.dqk-p{background:linear-gradient(135deg,#0a64d6,#0645a8);color:#fff;box-shadow:0 8px 18px rgba(10,100,214,.28)}
+#dqk-ov button.dqk-o{background:#fff;color:#0f172a;border:1.5px solid #e2e8f0}
+#dqk-ov button.dqk-x{display:block;margin:8px auto 0;border:0;background:none;color:#64748b;font-size:14px;cursor:pointer;padding:8px}
+#dqk-ov button[disabled]{opacity:.65;cursor:wait}
+/* ---- qeydiyyat formasında şifrə bloku ---- */
+#dqk-pwb{margin:2px 0 6px}
+#dqk-pwb .dqk-l{display:block;font-size:13px;color:#334155;margin:4px 0 0}
+#dqk-pwb .dqk-pw{position:relative}#dqk-pwb .dqk-pw input{padding-right:44px}
+#dqk-pwb .dqk-pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;background:none;font-size:17px;cursor:pointer;opacity:.7}
+#dqk-pwb .dqk-h{display:block;color:#64748b;font-size:12.5px;line-height:1.45;margin:-4px 0 10px}
+/* ---- istifadəçi menyusu (başlıqdakı ad) ---- */
+#dqk-menu{position:fixed;z-index:2147483000;min-width:220px;max-width:calc(100vw - 24px);background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 18px 40px rgba(15,23,42,.25);padding:6px;animation:dqkIn .16s ease both}
+#dqk-menu button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:12px 12px;border-radius:10px;font:600 15px inherit;font-family:inherit;color:#0f172a;cursor:pointer}
+#dqk-menu button:hover,#dqk-menu button:active{background:#f1f5f9}
+#dqk-menu button.r{color:#b91c1c}
+#dqk-menu hr{border:0;border-top:1px solid #eef2f7;margin:4px 6px}
+@keyframes dqkIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+/* ---- gizlətmə ---- */
+.dqk-hide,#dq-adm-login{display:none!important}
+</style>
+<script id="dqk-js">
+(function () {
+  'use strict';
+  if (window.__DQK) return; window.__DQK = 1;
+
+  var SB = 'https://cpzwliqlgaplroscvduo.supabase.co', KEY = 'sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF';
+  var ADMIN_SK = 'dq_adm_tok';
+  var GM = /^[^\s@]+@gmail\.com$/i;
+  var $ = function (i) { return document.getElementById(i); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function toast(t) { try { V2.toast(t); } catch (e) { try { alert(t); } catch (x) {} } }
+  function pwOk(p) { return p.length >= 8 && /[A-Za-z]/.test(p) && /\d/.test(p); }
+  function mask(e) { var p = String(e).split('@'); return p[0].slice(0, 2) + '***@' + (p[1] || ''); }
+  function poll(test, fn, max) { var n = 0, t = setInterval(function () { var r = null; try { r = test(); } catch (e) {} if (r) { clearInterval(t); try { fn(r); } catch (e) { console.error('[dqk]', e); } } else if (++n > (max || 400)) clearInterval(t); }, 150); }
+  function friendly(m) {
+    m = String(m || '');
+    if (/duplicate|unique|constraint|profiles_|database error/i.test(m)) return 'Hesab yaradılarkən texniki xəta baş verdi. Bir az sonra yenidən cəhd edin.';
+    if (/rate|too many|seconds|limit/i.test(m)) return 'Çox sorğu göndərildi. Bir az gözləyib yenidən cəhd edin.';
+    if (/network|şəbəkə/i.test(m)) return 'Şəbəkə xətası. İnternet bağlantınızı yoxlayın.';
+    return m || 'Əməliyyat alınmadı. Yenidən cəhd edin.';
+  }
+
+  /* ───────────── Supabase Auth köməkçiləri ───────────── */
+  async function api(path, body, tok, method) {
+    var ac = window.AbortController ? new AbortController() : null, t = setTimeout(function () { try { ac && ac.abort(); } catch (e) {} }, 15000);
+    try {
+      var h = { apikey: KEY, 'Content-Type': 'application/json' }; if (tok) h.Authorization = 'Bearer ' + tok;
+      var r = await fetch(SB + '/auth/v1/' + path, { method: method || 'POST', headers: h, body: body ? JSON.stringify(body) : undefined, signal: ac ? ac.signal : undefined });
+      var j = {}; try { j = await r.json(); } catch (e) {}
+      return { ok: r.ok, j: j };
+    } catch (e) { return { ok: false, j: { msg: 'Şəbəkə xətası. İnternet bağlantınızı yoxlayın.' } }; }
+    finally { clearTimeout(t); }
+  }
+  async function sendOtp(email) {
+    var r = await api('otp', { email: email, create_user: false });
+    if (!r.ok && /signup|not allowed|not found|disabled/i.test(JSON.stringify(r.j || {}))) r = await api('otp', { email: email, create_user: true });
+    return r;
+  }
+  async function setPassword(tok, pw) {
+    var r = await api('user', { password: pw }, tok, 'PUT');
+    if (!r.ok && /same|different/i.test(JSON.stringify(r.j || {}))) return { ok: true, j: {} };   /* şifrə artıq eynidir */
+    return r;
+  }
+
+  /* ───────────── Pəncərə köməkçiləri ───────────── */
+  function ov(html) {
+    var o = $('dqk-ov'); if (o) o.remove();
+    o = document.createElement('div'); o.id = 'dqk-ov'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-modal', 'true');
+    o.innerHTML = '<div class="dqk-bx">' + html + '</div>'; document.body.appendChild(o); document.body.classList.add('dq-ov-lock'); return o;
+  }
+  function closeOv() { var o = $('dqk-ov'); if (o) o.remove(); document.body.classList.remove('dq-ov-lock'); }
+  function er(t, g) { var x = $('dqk-er'); if (!x) return; x.className = 'dqk-er' + (g ? ' g' : ''); x.textContent = t || ''; }
+  function busy(b, on, t) { if (!b) return; if (on) { b._t = b.textContent; b.textContent = t || 'Gözləyin…'; } else if (b._t) b.textContent = b._t; b.disabled = !!on; }
+  function enter(el, btn) { el.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); var b = $(btn); if (b) b.click(); } }); }
+  function eye(btnId, inputs) { var b = $(btnId); if (!b) return; b.onclick = function () { var t = inputs[0].type === 'password' ? 'text' : 'password'; inputs.forEach(function (i) { if (i) i.type = t; }); }; }
+
+  /* e-poçta kod göndər → kodu yoxla → access_token qaytar (ləğv olunsa null) */
+  function askOtp(email, subtitle) {
+    return new Promise(async function (res) {
+      var tries = 0, last = Date.now(), done = false;
+      function fin(v) { if (done) return; done = true; closeOv(); res(v); }
+      var b0 = document.activeElement; var r0 = await sendOtp(email);
+      if (!r0.ok) { alert('Kod göndərilmədi. ' + friendly(r0.j.msg || r0.j.error_description || r0.j.message)); return fin(null); }
+      var o = ov('<h3>Doğrulama kodu</h3><p class="dqk-s">' + (subtitle ? esc(subtitle) + '<br>' : '') + 'Kod <b>' + esc(mask(email)) + '</b> ünvanına göndərildi</p>' +
+        '<div id="dqk-er" class="dqk-er" role="alert"></div>' +
+        '<input id="dqk-code" type="text" inputmode="numeric" maxlength="8" autocomplete="one-time-code" placeholder="••••••">' +
+        '<button class="dqk-p" id="dqk-ok" type="button">Təsdiqlə</button><button class="dqk-o" id="dqk-re" type="button">Kodu yenidən göndər</button><button class="dqk-x" id="dqk-no" type="button">Ləğv et</button>');
+      var inp = $('dqk-code'); setTimeout(function () { try { inp.focus(); } catch (e) {} }, 60); enter(inp, 'dqk-ok');
+      $('dqk-no').onclick = function () { fin(null); };
+      $('dqk-re').onclick = async function () {
+        var s = 45 - Math.floor((Date.now() - last) / 1e3); if (s > 0) return er(s + ' san. gözləyin');
+        var r = await sendOtp(email); last = Date.now(); er(r.ok ? 'Yeni kod göndərildi' : friendly(r.j.msg || r.j.message), r.ok);
+      };
+      $('dqk-ok').onclick = async function () {
+        var b = this, c = inp.value.replace(/\D/g, ''); er(''); if (b.disabled) return;
+        if (c.length < 6) return er('Kodu tam yazın');
+        if (tries >= 5) return er('Çox səhv cəhd. Kodu yenidən göndərin.');
+        busy(b, true, 'Yoxlanılır…');
+        try {
+          var v = await api('verify', { type: 'email', email: email, token: c });
+          if (!v.ok || !v.j.access_token) { tries++; return er('Kod yanlışdır və ya vaxtı bitib'); }
+          fin(v.j.access_token);
+        } finally { if (document.body.contains(b)) busy(b, false); }
+      };
+    });
+  }
+
+  /* yeni şifrə pəncərəsi (token ilə) */
+  function newPwModal(tok, title) {
+    return new Promise(function (res) {
+      ov('<h3>' + esc(title || 'Şifrə təyin edin') + '</h3><p class="dqk-s">Ən azı 8 simvol; hərf və rəqəm olmalıdır.</p><div id="dqk-er" class="dqk-er" role="alert"></div>' +
+        '<label class="dqk-l" for="dqk-n1">YENİ ŞİFRƏ</label><div class="dqk-pw"><input id="dqk-n1" type="password" autocomplete="new-password" placeholder="Yeni şifrə"><button type="button" id="dqk-ey" aria-label="Şifrəni göstər">👁</button></div>' +
+        '<label class="dqk-l" for="dqk-n2">ŞİFRƏNİ TƏKRARLAYIN</label><input id="dqk-n2" type="password" autocomplete="new-password" placeholder="Şifrəni təkrar yazın">' +
+        '<button class="dqk-p" id="dqk-ok" type="button">Şifrəni yadda saxla</button><button class="dqk-x" id="dqk-no" type="button">Ləğv et</button>');
+      var p1 = $('dqk-n1'), p2 = $('dqk-n2'); setTimeout(function () { try { p1.focus(); } catch (e) {} }, 60);
+      enter(p1, 'dqk-ok'); enter(p2, 'dqk-ok'); eye('dqk-ey', [p1, p2]);
+      $('dqk-no').onclick = function () { closeOv(); res(false); };
+      $('dqk-ok').onclick = async function () {
+        var b = this; er(''); if (b.disabled) return;
+        if (!pwOk(p1.value)) return er('Şifrə ən azı 8 simvol olmalı, hərf və rəqəm daxil etməlidir.');
+        if (p1.value !== p2.value) return er('Şifrələr eyni deyil.');
+        busy(b, true, 'Yadda saxlanılır…');
+        try {
+          var r = await setPassword(tok, p1.value);
+          if (!r.ok) return er(friendly(r.j.msg || r.j.message));
+          closeOv(); res(true);
+        } finally { if (document.body.contains(b)) busy(b, false); }
+      };
+    });
+  }
+  function emailModal(pre) {
+    return new Promise(function (res) {
+      ov('<h3>Gmail ünvanınız</h3><p class="dqk-s">Təsdiq kodu bu ünvana göndəriləcək.</p><div id="dqk-er" class="dqk-er" role="alert"></div>' +
+        '<label class="dqk-l" for="dqk-em">E-POÇT ÜNVANI</label><input id="dqk-em" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="ad@gmail.com">' +
+        '<button class="dqk-p" id="dqk-ok" type="button">Kod göndər</button><button class="dqk-x" id="dqk-no" type="button">Ləğv et</button>');
+      var em = $('dqk-em'); em.value = pre || ''; setTimeout(function () { try { em.focus(); } catch (e) {} }, 60); enter(em, 'dqk-ok');
+      $('dqk-no').onclick = function () { closeOv(); res(null); };
+      $('dqk-ok').onclick = function () { var e = em.value.trim().toLowerCase(); if (!GM.test(e)) return er('Düzgün Gmail yazın (məsələn: ad@gmail.com)'); closeOv(); res(e); };
+    });
+  }
+
+  /* ═════════════ 1) ŞİFRƏLİ QEYDİYYAT (Gmail-ə təsdiq kodu + şifrə təyini) ═════════════ */
+  function pwBlock() {
+    return '<div id="dqk-pwb"><label class="dqk-l" for="dqk-p1">Şifrə təyin edin</label>' +
+      '<div class="dqk-pw"><input class="v3-in" id="dqk-p1" type="password" autocomplete="new-password" placeholder="Ən azı 8 simvol (hərf + rəqəm)"><button type="button" id="dqk-eye" aria-label="Şifrəni göstər">👁</button></div>' +
+      '<input class="v3-in" id="dqk-p2" type="password" autocomplete="new-password" placeholder="Şifrəni təkrar yazın">' +
+      '<small class="dqk-h">Gmail ünvanınıza təsdiq kodu göndəriləcək. Növbəti girişdə Gmail və şifrənizlə daxil ola biləcəksiniz.</small></div>';
+  }
+  function wrapDraw() {
+    if (typeof YQ === 'undefined' || !YQ.draw || YQ.draw.__k) return false;
+    var od = YQ.draw;
+    YQ.draw = function (tab, body) {
+      var r = od.apply(this, arguments);
+      try {
+        if (tab === 'reg' && !body) {
+          var m = $('yq-m'), b = m && m.querySelector('button[onclick*="YQ.register"]');
+          if (b && !$('dqk-pwb')) {
+            b.insertAdjacentHTML('beforebegin', pwBlock());
+            var p1 = $('dqk-p1'), p2 = $('dqk-p2'); eye('dqk-eye', [p1, p2]);
+            [p1, p2].forEach(function (i) { enter(i, 'dqk-regbtn'); }); b.id = 'dqk-regbtn';
+          }
+        }
+      } catch (e) { console.error('[dqk] draw', e); }
+      return r;
+    };
+    YQ.draw.__k = 1; return true;
+  }
+
+  var REG_BUSY = false;
+  function grant(r) {
+    var p = r.perms || {};
+    return Object.assign({}, r, { status: 'approved', verified: 'email', perms: { tests: p.tests !== false, cats: Array.isArray(p.cats) ? p.cats : [], exam: String(p.exam || '1') } });
+  }
+  function wrapRegister() {
+    if (typeof YQ === 'undefined' || typeof V2 === 'undefined' || !YQ.register || YQ.register.__k) return false;
+    YQ.register = async function () {
+      if (REG_BUSY) return;
+      var name = (($('yq-n') || {}).value || '').trim().replace(/\s+/g, ' '), c = (($('yq-c') || {}).value || '').trim();
+      var fin0 = $('yq-f') ? $('yq-f').value : '';
+      var f = YQ.cleanFin ? YQ.cleanFin(fin0) : String(fin0 || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      var p1 = $('dqk-p1') ? $('dqk-p1').value : '', p2 = $('dqk-p2') ? $('dqk-p2').value : '';
+      if (!name || name.length < 3) return alert('Ad və soyadınızı tam daxil edin.');
+      if (!/^[A-Z0-9]{7}$/.test(f)) return alert('FİN kod 7 simvoldan ibarət olmalıdır (hərf və rəqəm).');
+      if (!c || !GM.test(c)) return alert('Yalnız Gmail ünvanı ilə qeydiyyat mümkündür (məsələn: ad@gmail.com).');
+      if (!pwOk(p1)) return alert('Şifrə ən azı 8 simvol olmalı, hərf və rəqəm daxil etməlidir.');
+      if (p1 !== p2) return alert('Şifrələr eyni deyil.');
+      REG_BUSY = true;
+      var btn = $('dqk-regbtn') || document.querySelector('#yq-m button[onclick*="YQ.register"]'); busy(btn, true, 'Yoxlanılır…');
+      try {
+        await V2.probe(); if (V2.mode !== 'cloud') return alert('Baza əlçatan deyil, qeydiyyat hazırda mümkün deyil.');
+        var email = c.toLowerCase(), k = YQ.key(email), ex = await YQ.find(k);
+        if (ex && ex.status !== 'pending') { alert('Bu Gmail ilə artıq qeydiyyat mövcuddur. «Giriş» bölməsindən daxil olun (şifrəniz yoxdursa «Şifrəni unutmusunuz?» ilə təyin edin).'); return YQ.state(ex); }
+        if (!ex && YQ.findFin) { var exF = await YQ.findFin(f); if (exF) return alert('Bu FİN kodla artıq qeydiyyat mövcuddur. «Giriş» bölməsindən daxil olun.'); }
+        busy(btn, false);
+        var tok = await askOtp(email, 'Qeydiyyatı təsdiqləyin');
+        if (!tok) return;
+        var pr = await setPassword(tok, p1);
+        if (!pr.ok) return alert('Şifrə yadda saxlanmadı. ' + friendly(pr.j.msg || pr.j.message));
+        var rec;
+        try {
+          if (ex) { rec = grant(ex); await V2.put('regs', rec, ex._id); }
+          else { rec = { name: name, fin: f, contact: email, key: k, status: 'approved', verified: 'email', perms: { tests: true, cats: [], exam: '1' }, ts: new Date().toISOString() }; await V2.put('regs', rec); }
+        } catch (e) { return alert('Qeydiyyat yazılmadı. Yenidən cəhd edin.'); }
+        try { localStorage.setItem('dq_gmail', email); } catch (e) {}
+        YQ.state(rec);
+        try {
+          var m = $('yq-m'), p = m && m.querySelector('p');
+          if (p) p.insertAdjacentHTML('afterend', '<p style="margin:0 0 12px;color:#15803d;font-size:14px">🔐 Şifrəniz təyin olundu. Növbəti dəfə Gmail və şifrə ilə daxil ola bilərsiniz.</p>');
+        } catch (e) {}
+      } finally { REG_BUSY = false; if (btn && document.body.contains(btn)) busy(btn, false); }
+    };
+    YQ.register.__k = 1; return true;
+  }
+
+  /* mövcud istifadəçi üçün: şifrə təyin et / dəyiş (Gmail-ə kod göndərilir) */
+  function userEmail() {
+    var k = ''; try { k = YQ2.sess() || ''; } catch (e) {}
+    if (GM.test(k)) return k.toLowerCase();
+    try { if (YQ2.me && GM.test(YQ2.me.contact || '')) return YQ2.me.contact.toLowerCase(); } catch (e) {}
+    try { var q = localStorage.getItem('dq_gmail') || localStorage.getItem('dq_mail'); if (q && GM.test(q)) return q.toLowerCase(); } catch (e) {}
+    return '';
+  }
+  async function passwordFlow() {
+    var em = userEmail(); if (!em) { em = await emailModal(''); if (!em) return; }
+    var tok = await askOtp(em, 'Şifrə təyin etmək üçün təsdiq'); if (!tok) return;
+    var ok = await newPwModal(tok, 'Yeni şifrə'); if (ok) toast('Şifrə təyin olundu ✅');
+  }
+
+  /* ═════════════ 2) GOOGLE İLƏ GİRİŞ (telefondakı Gmail hesabı seçilir) ═════════════ */
+  function inApp() { return /FBAN|FBAV|Instagram|Messenger|TikTok|Snapchat|; wv\)|\bLine\//i.test(navigator.userAgent || ''); }
+  function googleStart() {
+    if (inApp()) { alert('Google ilə giriş bu tətbiqin daxili brauzerində işləmir. Səhifəni Chrome (Android) və ya Safari (iPhone) brauzerində açıb yenidən cəhd edin.'); return; }
+    try { sessionStorage.setItem('dq_g', '1'); } catch (e) {}
+    location.href = SB + '/auth/v1/authorize?provider=google&prompt=select_account&redirect_to=' + encodeURIComponent(location.href.split('#')[0].split('?')[0]);
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('#dqa-g'); if (!b) return;
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); googleStart();
+  }, true);
+
+  /* ═════════════ 3) GİRİŞ PƏNCƏRƏSİNDƏ YALAN «şifrə yanlışdır» XƏTASI GÖSTƏRİLMƏSİN ═════════════ */
+  (function () {
+    var touched = false, lastOv = null;
+    document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('#dq-otp-ov button, #dq-otp-ov a')) touched = true; }, true);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.closest && e.target.closest('#dq-otp-ov')) touched = true; }, true);
+    function scrub() {
+      var o = $('dq-otp-ov'); if (o !== lastOv) { lastOv = o; touched = false; }
+      if (!o) return;
+      var x = $('dq-otp-err'); if (!x || !x.textContent) return;
+      var t = x.textContent, red = !/16a34a|15803d|22, ?163, ?74|21, ?128, ?61/i.test((x.style && x.style.color) || '');
+      var fieldsEmpty = !(($('dq-em') || {}).value) && !(($('dq-pw') || {}).value);
+      if (/F[İI]N\s*\/\s*e-?po[çc]t/i.test(t) && fieldsEmpty) { x.textContent = ''; return; }
+      if (red && !touched && /yanl[ıi]şd[ıi]r|tapılmadı|alınmadı/i.test(t)) x.textContent = '';
+    }
+    new MutationObserver(scrub).observe(document.body, { childList: true, subtree: true, characterData: true });
+  })();
+
+  /* ═════════════ 4) QEYDİYYAT KARTI (LXP): düymələr, «Diqqət» xəbərdarlığı, təsdiq vəziyyəti ═════════════ */
+  function fixBtns() {
+    if (!$('lxp')) return;
+    [].forEach.call(document.querySelectorAll('#lxp .lxp-bt'), function (b) {
+      if (/Qeydiyyatım/.test(b.textContent)) { b.textContent = 'Qeydiyyatdan keç'; b.classList.remove('ok'); }
+    });
+  }
+  new MutationObserver(fixBtns).observe(document.body, { childList: true, subtree: true });
+
+  function examOf(id) { try { return (LX.cache || []).filter(function (x) { return String(x._id) === String(id); })[0] || null; } catch (e) { return null; } }
+  function myReg(id) { try { return (JSON.parse(localStorage.getItem('lx_my_regs') || '{}') || {})[id] || null; } catch (e) { return null; } }
+
+  /* «Diqqət! Sınaqda iştirak ödənişlidir» — qeydiyyat formasından əvvəl */
+  function gate(id) {
+    return new Promise(function (res) {
+      if ($('dq-pay-ov')) return res(false);
+      var x = examOf(id), c = x ? String(x.cat || '').toUpperCase() : '';
+      var prices = [['BB', '10 ₼'], ['BA', '13 ₼'], ['AC', '15 ₼']];
+      try {
+        var p = x && x.pay;
+        if (p && typeof p === 'object' && p.on && c) {
+          var n = Math.round(parseFloat(p.price) * 100) / 100;
+          if (!isNaN(n)) { var hit = false; prices.forEach(function (r) { if (r[0] === c) { r[1] = n + ' ₼'; hit = true; } }); if (!hit) prices.push([c, n + ' ₼']); }
+        }
+      } catch (e) {}
+      var o = document.createElement('div'); o.id = 'dq-pay-ov'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-modal', 'true'); o.style.zIndex = 100030;
+      o.innerHTML = '<div id="dq-pay-box"><div class="pi">⚠️</div><h3>Diqqət!</h3><div class="pt">Sınaqda iştirak ödənişlidir</div>' +
+        '<p>Sınaq DİM standartlarına uyğun olaraq elektron variantda onlayn şəkildə keçirilir və <b>yalnız 1 dəfə</b> iştirak mümkündür!</p>' +
+        '<div class="pp">' + prices.map(function (r) { return '<div' + (r[0] === c ? ' class="on"' : '') + '><b>' + esc(r[0]) + '</b><span>' + esc(r[1]) + '</span></div>'; }).join('') + '</div>' +
+        '<div class="pn">💳 Sizə kart kodu göndərilir. Ödəniş edib qəbzi göndərdikdən sonra qeydiyyatınız aktivləşir.</div>' +
+        '<div class="pb"><button type="button" class="no">Ləğv et</button><button type="button" class="ok">Anladım, davam et</button></div></div>';
+      function close(v) { o.remove(); document.removeEventListener('keydown', key); res(v); }
+      function key(e) { if (e.key === 'Escape') close(false); }
+      o.addEventListener('click', function (e) {
+        if (e.target === o) return close(false);
+        var b = e.target.closest && e.target.closest('button'); if (!b) return;
+        close(b.classList.contains('ok'));
+      });
+      document.addEventListener('keydown', key); document.body.appendChild(o);
+    });
+  }
+
+  async function isConfirmed(id, wn, fin) {
+    var regs = [], pays = [];
+    try { regs = (await V2.list('lxreg')) || []; } catch (e) {}
+    try { pays = (await V2.list('lxpay')) || []; } catch (e) {}
+    var rec = regs.filter(function (r) { return r.work_no === wn && r.status !== 'cancelled'; })[0];
+    if (rec && rec.status === 'approved') return true;
+    var x = examOf(id), cat = String((rec && rec.cat) || (x && x.cat) || '').toUpperCase(), no = String((rec && rec.exam_no) || (x && x.exam_no) || '');
+    return pays.some(function (z) { return z.paid && String(z.fin).toUpperCase() === String(fin).toUpperCase() && String(z.exam_no) === no && String(z.cat).toUpperCase() === cat; });
+  }
+  function tidyDone(m) {
+    var h = m.querySelector('h3'); if (h) h.textContent = '✅ Siz artıq qeydiyyatdan keçmisiniz';
+    [].forEach.call(m.querySelectorAll('button[onclick*="LXP.pay("],button[onclick*="LXP.notify("]'), function (b) {
+      var row = b.closest('.lxp-row'); b.remove(); if (row && !row.querySelector('button')) row.remove();
+    });
+    [].forEach.call(m.querySelectorAll('.lxp-ck'), function (d) {
+      var t = (d.textContent || '').trim();
+      if (/^Qiymət\s*:/.test(t)) d.remove(); else if (/^Status\s*:/.test(t)) d.innerHTML = 'Status: <b>✅ Təsdiqlənib</b>';
+    });
+  }
+
+  function wrapLXP() {
+    if (!window.LXP || !LXP.reg || !LXP.done || !LXP.find || LXP.reg.__k) return false;
+    var oReg = LXP.reg, oDone = LXP.done, oFind = LXP.find;
+
+    LXP.reg = function (id) {
+      var args = arguments;
+      if (myReg(id)) return oReg.apply(this, args);          /* artıq qeydiyyatlıdır → vəziyyət pəncərəsi */
+      gate(id).then(function (ok) { if (ok) oReg.apply(LXP, args); });
+    };
+    LXP.reg.__k = 1;
+
+    LXP.done = function (id, wn, fin, mode) {
+      var r = oDone.apply(this, arguments);
+      try {
+        var m = $('lxp-m');
+        if (m && mode === 'status' && m.querySelector('.lxp-no')) {
+          m.style.visibility = 'hidden';
+          var shown = false, show = function () { if (!shown) { shown = true; m.style.visibility = ''; } };
+          setTimeout(show, 2500);
+          isConfirmed(id, wn, fin).then(function (c) { if (c && document.body.contains(m)) tidyDone(m); }).catch(function () {}).then(show);
+        }
+      } catch (e) { console.error('[dqk] done', e); }
+      return r;
+    };
+
+    LXP.find = async function () {
+      var r = await oFind.apply(this, arguments);
+      try {
+        var m = $('lxp-cm'), box = $('lxp-cl');
+        if (m && box) {
+          if (/qeydiyyat tapılmadı/i.test(m.textContent)) {
+            m.textContent = 'Siz qeydiyyatdan keçməmisiniz.';
+            box.innerHTML = '<div class="lxp-row"><button type="button" class="lxp-sb" id="dqk-nr">Qeydiyyatdan keç</button></div>';
+            $('dqk-nr').onclick = function () {
+              LXP.close();
+              try {
+                var now = Date.now(), ex = (LX.cache || []).filter(function (x) { return x.status !== 'Bitib' && x.start && LX.endOf(x).getTime() > now; });
+                if (ex.length === 1) LXP.reg(ex[0]._id);
+              } catch (e) {}
+            };
+          } else if (box.children.length && !box.querySelector('.dqk-ok')) {
+            box.insertAdjacentHTML('afterbegin', '<div class="lxp-ck dqk-ok">✅ <b>Siz artıq qeydiyyatdan keçmisiniz</b></div>');
+          }
+        }
+      } catch (e) {}
+      return r;
+    };
+    fixBtns(); return true;
+  }
+
+  /* ═════════════ 5) ADMİN: yalnız telefon nömrəsinə 3 san. basılı tutmaqla ═════════════ */
+  (function () {
+    var PH = /667\s*15\s*57/, timer = null, sx = 0, sy = 0, fired = false;
+    function tokenOk() { try { var s = JSON.parse(localStorage.getItem(ADMIN_SK) || 'null'); return !!(s && s.t && s.e > Date.now()); } catch (e) { return false; } }
+    function target(e) {
+      var n = e.target && e.target.closest ? e.target : null;
+      while (n && n !== document.body && n !== document.documentElement) {
+        var t = n.textContent || '';
+        if (PH.test(t) && t.length < 64 && !n.closest('#dq-adm-ov,#dqk-ov,#dq-otp-ov')) return n;
+        n = n.parentElement;
+      }
+      return null;
+    }
+    function stop() { if (timer) { clearTimeout(timer); timer = null; } }
+    function enterAdmin() {
+      try { if (navigator.vibrate) navigator.vibrate(40); } catch (e) {}
+      var D = window.DQADM; if (!D) return;
+      if (tokenOk()) { var ovl = $('dq-adm-ov'); if (ovl) ovl.remove(); D.open(); }
+      else if (!$('dq-adm-ov')) D.login();
+    }
+    document.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (!target(e)) return;
+      fired = false; sx = e.clientX; sy = e.clientY; stop();
+      timer = setTimeout(function () { timer = null; fired = true; enterAdmin(); }, 3000);
+    }, true);
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { document.addEventListener(ev, stop, true); });
+    document.addEventListener('pointermove', function (e) { if (timer && (Math.abs(e.clientX - sx) > 12 || Math.abs(e.clientY - sy) > 12)) stop(); }, true);
+    document.addEventListener('contextmenu', function (e) { if ((timer || fired) && target(e)) e.preventDefault(); }, true);
+    document.addEventListener('click', function (e) { if (fired && target(e)) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); fired = false; } }, true);
+
+    /* aşağıdakı «Admin girişi» yazısı görünməsin */
+    var RX = /^\s*(?:🔐|🔒|🛡️)?\s*Admin\s*gir[iş]ş?i?\s*$/i, RX2 = /^\s*(?:🔐|🔒|🛡️)?\s*Admin\s+giri[şs]i?\s*$/i;
+    function hideAdminWord() {
+      var l = $('dq-adm-login'); if (l) l.classList.add('dqk-hide');
+      [].forEach.call(document.querySelectorAll('.v3-ft *, footer *, .footer-bar *, .footer-text *, #v3-home a, #v3-home button, #v3-home span'), function (el) {
+        if (el.children.length > 1 || el.closest('#dq-adm-ov,#dq-adm-bar,#v2-root,#admin-panel,.dq-edit')) return;
+        var t = el.textContent || ''; if (t.length < 40 && (RX.test(t) || RX2.test(t))) el.classList.add('dqk-hide');
+      });
+    }
+    setInterval(hideAdminWord, 1500); hideAdminWord();
+  })();
+
+  /* ═════════════ 6) BAŞLIQDAKI İSTİFADƏÇİ ADI → MENYU (Kabinet · Şifrə · Çıxış) ═════════════ */
+  (function () {
+    var menu = null;
+    function closeMenu() { if (menu) { menu.remove(); menu = null; } }
+    function openMenu(chip) {
+      closeMenu();
+      menu = document.createElement('div'); menu.id = 'dqk-menu'; menu.setAttribute('role', 'menu');
+      menu.innerHTML = '<button type="button" data-a="cab">👤 Kabinet</button><button type="button" data-a="pw">🔐 Şifrə təyin et / dəyiş</button><hr><button type="button" class="r" data-a="out">⎋ Çıxış</button>';
+      document.body.appendChild(menu);
+      var r = chip.getBoundingClientRect(), w = menu.offsetWidth, left = Math.min(Math.max(12, r.right - w), window.innerWidth - w - 12);
+      menu.style.top = Math.min(r.bottom + 8, window.innerHeight - menu.offsetHeight - 8) + 'px'; menu.style.left = left + 'px';
+      menu.onclick = function (e) {
+        var b = e.target.closest('button'); if (!b) return; var a = b.getAttribute('data-a'); closeMenu();
+        if (a === 'cab') { try { V3.go('kab'); } catch (x) { try { DQ.openCabinet(); } catch (y) {} } }
+        else if (a === 'pw') passwordFlow();
+        else if (a === 'out') { try { YQ2.logout(); } catch (x) { try { DQ.logout(); } catch (y) {} } try { localStorage.removeItem('dq_otp_ok'); } catch (z) {} }
+      };
+    }
+    document.addEventListener('click', function (e) {
+      var chip = e.target.closest && e.target.closest('#v3-home .v3-hd a[data-dqauth="user"]');
+      if (chip) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); if (menu) closeMenu(); else openMenu(chip); return; }
+      if (menu && !e.target.closest('#dqk-menu')) closeMenu();
+    }, true);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+    window.addEventListener('scroll', closeMenu, { passive: true }); window.addEventListener('resize', closeMenu);
+  })();
+
+  /* ═════════════ 7) «Lalə Əsədova» qeydlərinin silinməsi (yalnız admin girişi aktiv olanda, bir dəfə) ═════════════ */
+  (function () {
+    var TARGET = 'lale esedova', DONE = 'dqk_lale_removed', tries = 0, running = false;
+    function norm(s) {
+      return String(s || '').toLowerCase().replace(/ə/g, 'e').replace(/ı/g, 'i').replace(/i̇/g, 'i').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g')
+        .replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+    function same(n) { var a = norm(n); if (!a) return false; if (a === TARGET) return true; var p = a.split(' ').reverse().join(' '); return p === TARGET; }
+    function adminOk() { try { var s = JSON.parse(localStorage.getItem(ADMIN_SK) || 'null'); return !!(s && s.t && s.e > Date.now()); } catch (e) { return false; } }
+    async function del(id) { var r = await _supabase.from('dq_v2_store').delete().eq('id', id); if (r && r.error) throw r.error; }
+    async function purge() {
+      if (running || typeof V2 === 'undefined' || typeof _supabase === 'undefined') return false;
+      running = true;
+      try {
+        await V2.probe(); if (V2.mode !== 'cloud') return false;
+        var colls = ['regs', 'lxreg', 'lxpay'], hits = [], fins = {}, all = {};
+        for (var i = 0; i < colls.length; i++) { var l = []; try { l = (await V2.list(colls[i])) || []; } catch (e) {} all[colls[i]] = l; l.forEach(function (r) { if (same(r.name || r.student_name || r.fullname)) { hits.push(r._id); if (r.fin) fins[String(r.fin).toUpperCase()] = 1; } }); }
+        colls.forEach(function (c) { (all[c] || []).forEach(function (r) { if (r.fin && fins[String(r.fin).toUpperCase()] && hits.indexOf(r._id) < 0) hits.push(r._id); }); });
+        var n = 0, errs = 0;
+        for (var j = 0; j < hits.length; j++) { try { await del(hits[j]); n++; } catch (e) { errs++; } }
+        try {
+          var a = await _supabase.from('allowed_students').select('*');
+          if (a && a.data) for (var k = 0; k < a.data.length; k++) {
+            var row = a.data[k]; if (!same(row.student_name) && !(row.fin && fins[String(row.fin).toUpperCase()])) continue;
+            var q = _supabase.from('allowed_students').delete();
+            q = row.id != null ? q.eq('id', row.id) : q.eq('fin', row.fin).eq('student_name', row.student_name);
+            var d = await q; if (d && d.error) errs++; else n++;
+          }
+        } catch (e) { errs++; }
+        try { var c = DQ.cabinet && DQ.cabinet(); if (c && (same(c.name) || (c.fin && fins[String(c.fin).toUpperCase()]))) DQ.logout(); } catch (e) {}
+        if (!errs) { try { localStorage.setItem(DONE, '1'); } catch (e) {} if (n) toast('Lalə Əsədova silindi ✅'); return true; }
+        return false;
+      } catch (e) { console.warn('[dqk] təmizləmə', e); return false; }
+      finally { running = false; }
+    }
+    window.DQFIX = { removeLale: purge };
+    var iv = setInterval(async function () {
+      try { if (localStorage.getItem(DONE)) return clearInterval(iv); } catch (e) {}
+      if (!adminOk() || ++tries > 60) { if (tries > 60) clearInterval(iv); return; }
+      var ok = await purge(); if (ok) clearInterval(iv); else tries += 9;
+    }, 4000);
+  })();
+
+  /* ───────── yamaqları qoş (yükləndikcə) ───────── */
+  poll(wrapDraw, function () {}, 400);
+  poll(wrapRegister, function () {}, 400);
+  poll(wrapLXP, function () {}, 600);
+})();
+</script>
+
 
 
 
