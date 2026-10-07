@@ -1,54 +1,66 @@
-// Cloudflare Worker: /news?id=... linkləri üçün WhatsApp/Telegram önizləməsi (şəkil + başlıq + xülasə)
-const SB = "https://cpzwliqlgaplroscvduo.supabase.co";
-const KEY = "sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF";
+// Cloudflare Worker — xəbər linki (/news?id=...) üçün WhatsApp/Telegram önizləməsi (qapaq şəkli + başlıq)
+// Quraşdırma: Workers → exam (saytı verən worker) → Edit code → bu kodu əvvəlinə/üzərinə əlavə et.
+const SB = 'https://cpzwliqlgaplroscvduo.supabase.co';
+const KEY = 'sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF';
+const SITE = 'https://exam.dqplatform.workers.dev';
 
-async function getNews(id) {
-  const q = f => fetch(`${SB}/rest/v1/dq_v2_store?collection=eq.news&${f}&select=id,data&limit=1`,
-    { headers: { apikey: KEY, Authorization: "Bearer " + KEY } }).then(r => r.json()).catch(() => []);
-  let a = await q(`data->>slug=eq.${encodeURIComponent(id)}`);
-  if (!a.length && /^\d+$/.test(id)) a = await q(`id=eq.${id}`);
-  return a[0] ? a[0].data : null;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+async function findNews(id) {
+  const q = /^\d+$/.test(id) ? `or=(data->>slug.eq.${id},id.eq.${id})` : `data->>slug=eq.${encodeURIComponent(id)}`;
+  const r = await fetch(`${SB}/rest/v1/dq_v2_store?select=id,data&collection=eq.news&${q}&limit=1`, { headers: { apikey: KEY } });
+  if (!r.ok) return null;
+  const rows = await r.json();
+  return rows[0] ? { ...rows[0].data, _id: rows[0].id } : null;
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const id = url.searchParams.get("id");
+    const pass = () => (env.ASSETS ? env.ASSETS.fetch(request) : fetch(request));
 
-    // Önizləmə şəkli: verilənlər bazasındakı base64 şəkli real şəkil kimi qaytarır
-    if (url.pathname === "/og" && id) {
-      const n = await getNews(id);
-      const m = n && /^data:(image\/[\w+.-]+);base64,(.+)$/.exec(n.img || "");
-      if (m) {
-        const bin = Uint8Array.from(atob(m[2]), c => c.charCodeAt(0));
-        return new Response(bin, { headers: { "content-type": m[1], "cache-control": "public, max-age=3600" } });
-      }
-      if (n && /^https?:/.test(n.img || "")) return Response.redirect(n.img, 302);
-      return new Response("", { status: 404 });
+    // 1) Qapaq şəkli: data:image/jpeg;base64 → real JPEG
+    if (url.pathname === '/news-img') {
+      const n = await findNews(url.searchParams.get('id') || '');
+      const m = n && /^data:(image\/[a-z+]+);base64,(.+)$/s.exec(n.img || '');
+      if (!m) return Response.redirect(SITE + '/og-image.jpg', 302);
+      const bin = Uint8Array.from(atob(m[2]), c => c.charCodeAt(0));
+      return new Response(bin, { headers: { 'content-type': m[1], 'cache-control': 'public, max-age=86400' } });
     }
 
-    // Xəbər linki: əsas səhifəni qaytar, <head>-ə önizləmə teqləri əlavə et
-    if (url.pathname === "/news" && id) {
-      const page = await env.ASSETS.fetch(new Request(new URL("/", url), request));
-      const n = await getNews(id);
-      if (!n) return new Response(page.body, { status: 200, headers: page.headers });
-      const clip = (s, l) => String(s || "").replace(/\s+/g, " ").trim().slice(0, l);
-      const title = `DQPlatform - ${clip(n.title, 120)}`;
-      const desc = clip(n.sum || n.body, 200);
-      const img = `${url.origin}/og?id=${encodeURIComponent(id)}`;
-      const tag = (p, v) => `<meta property="${p}" content="${v.replace(/"/g, "&quot;")}">`;
-      return new HTMLRewriter()
-        .on('meta[property="og:title"]', { element: e => e.remove() })
-        .on('meta[property="og:description"]', { element: e => e.remove() })
-        .on('meta[property="og:type"]', { element: e => e.remove() })
-        .on("title", { element: e => e.setInnerContent(title) })
-        .on("head", { element: e => e.append(
-          tag("og:title", title) + tag("og:description", desc) + tag("og:type", "article") +
-          tag("og:url", url.href) + tag("og:image", img) + tag("og:image:width", "720") + tag("og:image:height", "900") +
-          '<meta name="twitter:card" content="summary_large_image">', { html: true }) })
-        .transform(new Response(page.body, { status: 200, headers: page.headers }));
+    // 2) Xəbər səhifəsi: bot-lar üçün OG meta, insanlar üçün saytın xəbərinə yönləndirmə
+    if (url.pathname.replace(/\/$/, '') === '/news') {
+      const id = url.searchParams.get('id') || '';
+      const n = id && await findNews(id);
+      if (!n) return pass();
+      const key = n.slug || n._id;
+      const desc = (n.sum || String(n.body || '').replace(/\s+/g, ' ')).slice(0, 180);
+      const img = n.img ? `${SITE}/news-img?id=${encodeURIComponent(key)}` : `${SITE}/og-image.jpg`;
+      const page = `${SITE}/news?id=${encodeURIComponent(key)}`;
+      const go = `${SITE}/?news=${encodeURIComponent(key)}`;
+      const html = `<!doctype html><html lang="az"><head><meta charset="utf-8">
+<title>${esc(n.title)} | DQPlatform</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="${esc(desc)}">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="DQPlatform">
+<meta property="og:title" content="${esc(n.title)}">
+<meta property="og:description" content="${esc(desc)}">
+<meta property="og:url" content="${esc(page)}">
+<meta property="og:image" content="${esc(img)}">
+<meta property="og:image:secure_url" content="${esc(img)}">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="720">
+<meta property="og:image:height" content="900">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(n.title)}">
+<meta name="twitter:description" content="${esc(desc)}">
+<meta name="twitter:image" content="${esc(img)}">
+<meta http-equiv="refresh" content="0;url=${esc(go)}">
+</head><body><script>location.replace(${JSON.stringify(go)})</script><a href="${esc(go)}">${esc(n.title)}</a></body></html>`;
+      return new Response(html, { headers: { 'content-type': 'text/html;charset=utf-8', 'cache-control': 'public, max-age=300' } });
     }
 
-    return env.ASSETS.fetch(request);
+    return pass();
   }
 };
