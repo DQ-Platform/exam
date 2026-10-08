@@ -160,3 +160,34 @@ export default {
     return pass();
   }
 }
+/* Cloudflare Worker — mövcud worker kodunuza bu marşrutları əlavə edin.
+   Vars: SUPABASE_URL, SUPABASE_KEY, VAPID_PUBLIC, VAPID_SUBJECT(email) | Secrets: VAPID_PRIVATE, ADMIN_KEY (=admin şifrəsi) */
+const b64u=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const unb64u=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-s.length%4)%4)),c=>c.charCodeAt(0));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sb=(env,q,init={})=>fetch(`${env.SUPABASE_URL}/rest/v1/dq_v2_store?${q}`,{...init,headers:{apikey:env.SUPABASE_KEY,Authorization:'Bearer '+env.SUPABASE_KEY}});
+const baku=(d,o)=>new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Baku',...o}).format(new Date(d));
+const dmy=d=>baku(d,{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'.'),hm=d=>baku(d,{hour:'2-digit',minute:'2-digit',hour12:false});
+async function exam(env){const l=(await (await sb(env,'collection=eq.liveexams&order=id.desc&limit=10&select=id,data')).json()).map(r=>({...r.data,_id:r.id}));
+return l.find(x=>x.status!=='Bitib'&&(!x.end||new Date(x.end)>Date.now()))||l[0]}
+async function jwt(aud,env){const p=unb64u(env.VAPID_PUBLIC),key=await crypto.subtle.importKey('jwk',{kty:'EC',crv:'P-256',x:b64u(p.slice(1,33)),y:b64u(p.slice(33,65)),d:env.VAPID_PRIVATE},{name:'ECDSA',namedCurve:'P-256'},false,['sign']);
+const e=o=>b64u(new TextEncoder().encode(JSON.stringify(o))),u=e({typ:'JWT',alg:'ES256'})+'.'+e({aud,exp:Math.floor(Date.now()/864e2*864e2/1e3)+43200,sub:'mailto:'+env.VAPID_SUBJECT});
+return u+'.'+b64u(await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},key,new TextEncoder().encode(u)))}
+export default{async fetch(req,env){const u=new URL(req.url);
+if(u.pathname==='/qeydiyyat'){const x=await exam(env).catch(()=>null);
+const title=x?`📢 ${x.type||'Qəbul tipli sınaq'} — ${x.catline||x.cat}`:'📢 DQplatform — Sınaq qeydiyyatı';
+const desc=x?`📅 ${dmy(x.start)} · ${hm(x.start)}–${hm(x.end||x.start)}\n🔒 Yalnız qeydiyyatdan keçmiş tələbələr · FİN kod ilə\n📝 Qeydiyyat üçün keçidə daxil olun`:'Qeydiyyat üçün keçidə daxil olun';
+const img=x&&x.cover?`${u.origin}/cover/${x._id}.jpg`:`${u.origin}/og-image.jpg`;
+return new Response(`<!doctype html><html lang="az"><head><meta charset="utf-8"><title>${esc(title)}</title><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta property="og:type" content="website"><meta property="og:site_name" content="DQplatform"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${u.origin}/qeydiyyat"><meta property="og:image" content="${img}"><meta property="og:image:secure_url" content="${img}">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${img}"><script>location.replace('/?reg=1')</script><noscript><meta http-equiv="refresh" content="0;url=/?reg=1"></noscript></head><body style="font-family:system-ui;text-align:center;padding:40px">Yönləndirilir…</body></html>`,{headers:{'content-type':'text/html;charset=utf-8','cache-control':'public,max-age=120'}})}
+const cm=u.pathname.match(/^\/cover\/(latest|\d+)\.jpg$/);
+if(cm){const x=cm[1]==='latest'?await exam(env):(await (await sb(env,`collection=eq.liveexams&id=eq.${cm[1]}&select=id,data`)).json()).map(r=>({...r.data}))[0];
+const m=x&&String(x.cover||'').match(/^data:(image\/\w+);base64,(.+)$/);if(!m)return Response.redirect(u.origin+'/og-image.jpg',302);
+return new Response(unb64u(m[2].replace(/\+/g,'-').replace(/\//g,'_')),{headers:{'content-type':m[1],'cache-control':'public,max-age=3600'}})}
+if(u.pathname==='/push/notify'&&req.method==='POST'){if(req.headers.get('x-admin-key')!==env.ADMIN_KEY)return new Response('forbidden',{status:403});
+const subs=(await (await sb(env,'collection=eq.push_subs&select=id,data&limit=2000')).json());let sent=0;
+await Promise.all(subs.map(async s=>{try{const a=new URL(s.data.endpoint).origin,r=await fetch(s.data.endpoint,{method:'POST',headers:{Authorization:`vapid t=${await jwt(a,env)}, k=${env.VAPID_PUBLIC}`,TTL:'86400',Urgency:'high','Content-Length':'0'}});
+r.ok?sent++:(r.status===404||r.status===410)&&await sb(env,`id=eq.${s.id}`,{method:'DELETE'})}catch{}}));
+return Response.json({sent,total:subs.length})}
+return env.ASSETS.fetch(req)}};
