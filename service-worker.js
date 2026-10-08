@@ -4,7 +4,7 @@ const CORE = ['./', 'manifest.json', 'icon-192.png', 'icon-512.png', 'favicon.pn
 const SB = 'https://cpzwliqlgaplroscvduo.supabase.co';
 const SB_KEY = 'sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF';
 /* Worker-in özünə məxsus marşrutları keşləmə / toxunma */
-const SKIP = /^\/(news|news-img|news-debug|qeydiyyat|test|testler|sinaq|s%C4%B1naq|s\u0131naq|cover|push)(\/|$|\?)/i;
+const SKIP = /^\/(news|news-img|news-debug|qeydiyyat|cover|push)(\/|$|\?)/;
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
