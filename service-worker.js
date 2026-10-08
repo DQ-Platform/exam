@@ -133,3 +133,21 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
+/* service-worker.js faylınızın SONUNA əlavə edin (mövcud kodu silməyin) */
+self.addEventListener('push', function (event) {
+  var d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = { body: event.data && event.data.text() }; }
+  event.waitUntil(self.registration.showNotification(d.title || 'DQ Platform', {
+    body: d.body || '', icon: d.icon || 'icon-512.png', badge: d.badge || 'icon-512.png',
+    data: { url: d.url || './' }, tag: d.tag || undefined
+  }));
+});
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  var url = new URL((event.notification.data && event.notification.data.url) || './', self.registration.scope).href;
+  event.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
+    for (var i = 0; i < list.length; i++) if (list[i].url.indexOf(self.registration.scope) === 0 && 'focus' in list[i]) { list[i].navigate(url); return list[i].focus(); }
+    return clients.openWindow(url);
+  }));
+});
+
