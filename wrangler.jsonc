@@ -1,6 +1,12 @@
 {
+  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "exam",
   "main": "worker.js",
-  "compatibility_date": "2025-01-01",
-  "assets": { "directory": "./", "binding": "ASSETS" }
+  "compatibility_date": "2025-10-01",
+  "assets": {
+    "directory": "./",
+    "binding": "ASSETS",
+    "run_worker_first": ["/news", "/news-img", "/news-debug", "/qeydiyyat", "/test", "/sinaq", "/s%C4%B1naq", "/sınaq", "/cover/*", "/push/*"]
+  },
+  "observability": { "enabled": true }
 }
