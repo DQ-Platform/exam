@@ -2517,6 +2517,241 @@ var Y=window.Y2={page:"home",tab:"pk",flt:"all",qf:"all",view:"",D:{},R:[],imp:n
   };
 })();
 </script>
+    <!-- ===== YSL2 PANEL + GİZLİ GİRİŞ (yamaq) — </body>-dən əvvəl yapışdırın ===== -->
+<style id="y2-css">
+#dq-sec-box{display:none;margin:0 0 14px;text-align:left}#dq-sec-box.on{display:block}
+#dq-sec-box .code-input{text-align:center;letter-spacing:2px}#dq-sec-box .btn{width:100%;margin-top:8px;display:none}#dq-sec-box.ok .btn{display:block}
+.dq-ysl{display:inline-block;margin-right:8px;padding:2px 11px;border-radius:999px;background:#0a2f7a;color:#d9a441;font-weight:800;font-size:12px;letter-spacing:1px;vertical-align:middle}
+#y2{position:fixed;inset:0;z-index:8100;background:#f8fafc;display:none;overflow:auto;font-family:Inter,system-ui,sans-serif;color:#0f172a;text-align:left;-webkit-overflow-scrolling:touch}
+#y2 *{box-sizing:border-box;user-select:text}#y2 h1{font-size:28px;margin:0 0 4px;text-align:left}#y2 h2{font-size:19px;margin:22px 0 10px;text-align:left}#y2 h3{text-align:left;margin:0 0 10px}
+.y2-top{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+.y2-logo{font-weight:800;font-size:23px}.y2-logo i{color:#0b5fff;font-style:normal}
+.y2-lay{display:flex;min-height:calc(100vh - 57px)}
+.y2-nav{width:250px;flex:none;background:#fff;border-right:1px solid #e2e8f0;padding:12px;position:sticky;top:57px;align-self:flex-start;height:calc(100vh - 57px);overflow:auto}
+.y2-nav a{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;font-weight:600;color:#475569;cursor:pointer;margin-bottom:4px}
+.y2-nav a.on{background:#eaf1ff;color:#0b5fff;box-shadow:inset 3px 0 #0b5fff}.y2-nav small{background:#eef2f7;border-radius:99px;padding:2px 8px;font-size:11px}
+.y2-main{flex:1;min-width:0;padding:24px 20px 90px;max-width:1100px}
+.y2-sub,.y2-mut{color:#64748b;font-size:14px}
+.y2-st{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:18px 0}
+.y2-sc,.y2-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin-bottom:12px}
+.y2-sc span{font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase}.y2-sc b{display:block;font-size:28px;margin-top:4px}.y2-sc small{color:#64748b}
+.y2-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.y2-b{border:0;background:#0b5fff;color:#fff;border-radius:10px;padding:11px 18px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+.y2-b.o{background:#fff;color:#0f172a;border:1px solid #dbe3ee}.y2-b.r{background:#fff;color:#dc2626;border:1px solid #fecaca}.y2-b.s{padding:7px 12px;font-size:12.5px}.y2-b:disabled{opacity:.6}
+.y2-chip{display:inline-block;background:#eef2f7;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700}.y2-chip.b{background:#eaf1ff;color:#0b5fff}
+.s-check{background:#fff3e0;color:#b45309}.s-ready{background:#dcfce7;color:#166534}.s-ok{background:#dbeafe;color:#1d4ed8}.s-rej{background:#fee2e2;color:#b91c1c}
+.y2-in{width:100%;padding:11px 12px;border:1px solid #dbe3ee;border-radius:10px;font:inherit;font-size:14px;background:#fff;margin:4px 0 10px}
+.y2-tbl{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;font-size:14px}
+.y2-tbl th{text-align:left;font-size:12px;color:#64748b;padding:12px;background:#f8fafc;text-transform:uppercase}.y2-tbl td{padding:12px;border-top:1px solid #eef2f7}
+.y2-w{overflow-x:auto}.y2-empty{text-align:center;color:#64748b;padding:34px 10px;background:#fff;border:1px dashed #cbd5e1;border-radius:14px}
+.y2-tabs{display:inline-flex;background:#eef2f7;border-radius:12px;padding:4px;margin:14px 0;flex-wrap:wrap}.y2-tabs button{border:0;background:none;padding:9px 16px;border-radius:9px;font-weight:700;cursor:pointer;color:#475569;font-family:inherit}.y2-tabs .on{background:#fff;color:#0f172a;box-shadow:0 1px 4px #0001}
+.y2-drop{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;border:2px dashed #7aa7ff;background:#f0f6ff;border-radius:16px;padding:30px 14px;cursor:pointer;margin:10px 0}.y2-drop i{font-size:26px;color:#0b5fff}.y2-drop span{font-size:13px;color:#64748b}
+.y2-tags{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}.y2-qt{font-size:16px;margin:10px 0;white-space:pre-line}
+.y2-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.y2-opt{border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;cursor:pointer;display:flex;gap:10px;align-items:center;background:#fff}.y2-opt b{background:#f1f5f9;border-radius:6px;padding:2px 8px}.y2-opt.c{background:#ecfdf5;border-color:#6ee7b7}.y2-opt.c em{margin-left:auto;font-style:normal;font-size:11px;font-weight:800;color:#047857}
+.y2-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.y2-chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.y2-chips button{border:1px solid #dbe3ee;background:#fff;border-radius:99px;padding:7px 14px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}.y2-chips .on{background:#0b5fff;color:#fff;border-color:#0b5fff}
+.y2-foot{position:sticky;bottom:0;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;box-shadow:0 -4px 14px #0001}
+.y2-md{position:fixed;inset:0;z-index:20;background:#0f172a99;display:flex;align-items:flex-start;justify-content:center;padding:20px 12px;overflow:auto}.y2-md>div{background:#fff;border-radius:18px;padding:20px;width:100%;max-width:640px;margin:auto}
+.y2-md label{font-weight:700;font-size:13px}.y2-orow{display:flex;align-items:center;gap:8px}.y2-orow .y2-in{margin:4px 0}.y2-g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.y2-steps{display:flex;gap:10px;margin:10px 0 14px}.y2-steps b{flex:1;background:#f1f5f9;border-radius:10px;padding:10px;font-size:13px;color:#64748b}.y2-steps .on{background:#eaf1ff;color:#0b5fff}
+.y2-info{border-left:4px solid #0b5fff;background:#f8fafc;border-radius:8px;padding:10px 12px;font-size:14px;margin:8px 0}
+.y2-pick{max-height:260px;overflow:auto;border:1px solid #e2e8f0;border-radius:10px;padding:6px}.y2-pick label{display:flex;gap:8px;padding:6px;font-weight:500}
+.y2-bar{height:8px;background:#e2e8f0;border-radius:9px;overflow:hidden;margin:14px 0}.y2-bar i{display:block;height:100%;width:35%;background:#0b5fff;border-radius:9px;animation:y2s 1.2s ease-in-out infinite}@keyframes y2s{0%{margin-left:-35%}100%{margin-left:100%}}
+@media(max-width:820px){.y2-lay{display:block}.y2-nav{width:auto;height:auto;top:57px;z-index:4;display:flex;gap:6px;overflow-x:auto;border-right:0;border-bottom:1px solid #e2e8f0;padding:8px}.y2-nav a{white-space:nowrap;margin:0;gap:8px}.y2-nav a.on{box-shadow:none}.y2-opts{grid-template-columns:1fr}.y2-main{padding:18px 14px 90px}}
+</style>
+<script id="y2-panel">
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i)},e=function(s){return V2.esc(s)};
+var C=["ysl2_q","ysl2_topic","ysl2_pkg","ysl2_quiz","ysl2_exam","ysl2_group","ysl2_imp"];
+var SUBJ=["Azərbaycan dili","Qanunvericilik","İnformatika","Məntiq"],QST=["Aktiv","Qaralama","Bağlanıb","Arxiv"],L="ABCDE";
+var LBL={check:"Yoxlanılmalıdır",ready:"Hazırdır",ok:"Təsdiqləndi",rej:"Rədd edildi"};
+var NAV=[["home","fa-house","İcmal"],["bank","fa-file-lines","Sual bankı"],["pdf","fa-upload","PDF idxalı"],["quiz","fa-clock","Quizlər"],["exam","fa-file-pen","İmtahanlar"],["group","fa-user-group","Qruplar"],["res","fa-chart-simple","Nəticələr"],["prof","fa-user-gear","Profil"]];
+var cp=function(q){var r=Object.assign({},q);delete r._id;delete r.st;return r};
+var fd=function(x){return x?new Date(x).toLocaleString("az-AZ"):"—"};
+var st=function(t,n,u){return '<div class="y2-sc"><span>'+t+'</span><b>'+n+'</b><small>'+(u||"")+'</small></div>'};
+var Y=window.Y2={page:"home",tab:"pk",flt:"all",qf:"all",view:"",D:{},R:[],imp:null,file:null,ex:null,
+ async load(){var r=await Promise.all(C.map(function(c){return V2.list(c)}));C.forEach(function(c,i){Y.D[c]=r[i]})},
+ async open(){var r=$("y2");if(!r){r=document.createElement("div");r.id="y2";document.body.appendChild(r)}r.style.display="block";document.body.style.overflow="hidden";Y.view="";await Y.go("home")},
+ close(){var r=$("y2");if(r)r.style.display="none";document.body.style.overflow=""},
+ logout(){Y.close();window.__dqSecretAdmin=false;try{localStorage.removeItem("dq_admin_logged")}catch(x){}try{showScreen("v3-home")}catch(x){}},
+ async go(p){Y.page=p;Y.view="";if(p==="res"){try{var r=await _supabase.from("exam_results").select("*").order("created_at",{ascending:false}).limit(300);Y.R=r.data||[]}catch(x){Y.R=[]}}await Y.load();Y.draw()},
+ draw(){var D=Y.D,sc=$("y2").scrollTop,cnt={bank:D.ysl2_q.length,quiz:D.ysl2_quiz.length,exam:D.ysl2_exam.length,group:D.ysl2_group.length};
+  var body=Y["p_"+Y.page]();
+  $("y2").innerHTML='<div class="y2-top"><div class="y2-logo">ysl2<i>.</i></div><button class="y2-b o s" onclick="Y2.logout()"><i class="fa-solid fa-right-from-bracket"></i> Çıxış</button></div><div class="y2-lay"><nav class="y2-nav">'+NAV.map(function(n){return '<a class="'+(Y.page===n[0]?"on":"")+'" onclick="Y2.go(\''+n[0]+'\')"><span><i class="fa-solid '+n[1]+'"></i>&nbsp; '+n[2]+'</span>'+(cnt[n[0]]!==undefined?'<small>'+cnt[n[0]]+'</small>':n[0]==="pdf"?'<small>AI</small>':'')+'</a>'}).join("")+'</nav><main class="y2-main">'+body+'</main></div>';
+  $("y2").scrollTop=sc},
+ modal(h){Y.cm();var m=document.createElement("div");m.className="y2-md";m.id="y2-md";m.innerHTML="<div>"+h+"</div>";m.onclick=function(ev){if(ev.target===m)Y.cm()};$("y2").appendChild(m)},
+ cm(){var m=$("y2-md");if(m)m.remove()},
+ filt(el,sel){var q=el.value.toLowerCase();document.querySelectorAll(sel).forEach(function(n){n.style.display=n.textContent.toLowerCase().indexOf(q)>-1?"":"none"})},
+ async del(c,id){if(!confirm("Silinsin?"))return;await V2.probe();if(V2.mode==="cloud")await _supabase.from("dq_v2_store").delete().eq("id",id);else localStorage.setItem("dq_v2_"+c,JSON.stringify((await V2.list(c)).filter(function(x){return String(x._id)!==String(id)})));await Y.go(Y.page)},
+ /* ---------- İCMAL ---------- */
+ p_home(){var D=Y.D,mem=D.ysl2_group.reduce(function(a,g){return a+(g.members||[]).length},0);
+  return '<h1>Xoş gəldiniz!</h1><p class="y2-sub">Suallarınızı, quizlərinizi və nəticələri idarə edin.</p><div class="y2-st">'+st("Sual bankı",D.ysl2_q.length,"sual")+st("Quizlər",D.ysl2_quiz.length,"quiz")+st("İmtahanlar",D.ysl2_exam.length,"imtahan")+st("Tələbələr",mem,"tələbə")+'</div><div class="y2-row"><h2>Sürətli əməliyyatlar</h2><div class="y2-act"><button class="y2-b" onclick="Y2.quizForm()">+ Yeni quiz</button><button class="y2-b o" onclick="Y2.qForm()">+ Yeni sual</button><button class="y2-b o" onclick="Y2.go(\'pdf\')">✦ PDF-dən sual idxalı</button></div></div><h2>Son quizlər</h2>'+Y.quizTbl(D.ysl2_quiz.slice(0,5),false)},
+ /* ---------- SUAL BANKI ---------- */
+ p_bank(){var D=Y.D,t=Y.tab,h='<h1>Sual Bankı</h1><p class="y2-sub">Təyin olunmuş fənlər üzrə sualların siyahısı və axtarışı.</p><div class="y2-act"><button class="y2-b o" onclick="Y2.go(\'pdf\')">✦ PDF-dən sual idxalı</button><button class="y2-b o" onclick="Y2.qForm()">+ Yeni sual</button><button class="y2-b o" onclick="Y2.pkgForm()">Paket yarat</button></div>';
+  h+='<div class="y2-tabs">'+[["pk","Sual Paketləri ("+D.ysl2_pkg.length+")"],["qs","Suallar ("+D.ysl2_q.length+")"],["lib","Kitabxana"]].map(function(x){return '<button class="'+(t===x[0]?"on":"")+'" onclick="Y2.tab=\''+x[0]+'\';Y2.draw()">'+x[1]+'</button>'}).join("")+'</div>';
+  if(t==="pk")h+=D.ysl2_pkg.length?D.ysl2_pkg.map(function(p){return '<div class="y2-card y2-row"><div><b>'+e(p.name)+'</b><div class="y2-mut">'+p.qs.length+' sual · '+fd(p.ts)+(p.qs.length===100?' · <span class="y2-chip s-ready">100 aktiv</span>':'')+'</div></div><button class="y2-b r s" onclick="Y2.del(\'ysl2_pkg\','+JSON.stringify(p._id)+')">Sil</button></div>'}).join(""):'<div class="y2-empty"><b>Hələ sual paketi yoxdur.</b><p>PDF idxal etdikdən sonra təsdiqlənmiş suallardan paket yaradın.</p><button class="y2-b" onclick="Y2.go(\'pdf\')">PDF-dən sual idxalı</button></div>';
+  if(t==="qs")h+='<input class="y2-in" placeholder="Sual axtar..." oninput="Y2.filt(this,\'.y2-bq\')">'+(D.ysl2_q.length?D.ysl2_q.map(function(q){return '<div class="y2-card y2-bq"><div class="y2-tags"><span class="y2-chip b">'+e(q.subj)+'</span>'+(q.topic&&q.topic!==q.subj?'<span class="y2-chip">'+e(q.topic)+'</span>':'')+'</div><p class="y2-qt">'+e(q.q)+'</p><div class="y2-opts">'+q.opts.map(function(o,j){return '<div class="y2-opt '+(q.correct===j?"c":"")+'"><b>'+L[j]+'</b> '+e(o)+'</div>'}).join("")+'</div><div class="y2-act"><button class="y2-b o s" onclick="Y2.edBank('+JSON.stringify(q._id)+')">Redaktə et</button><button class="y2-b r s" onclick="Y2.del(\'ysl2_q\','+JSON.stringify(q._id)+')">Sil</button></div></div>'}).join(""):'<div class="y2-empty">Bankda sual yoxdur.</div>');
+  if(t==="lib")h+='<div class="y2-card"><span class="y2-chip b">KURS KİTABXANASI</span><h2>Quizlərinizi mövzulara ayırın</h2><div class="y2-row"><div><span class="y2-mut">Mövzu</span> <b style="font-size:26px">'+D.ysl2_topic.length+'</b> &nbsp; <span class="y2-mut">Quiz</span> <b style="font-size:26px">'+D.ysl2_quiz.length+'</b></div><button class="y2-b" onclick="Y2.topicForm()">+ Yeni mövzu</button></div></div>'+(D.ysl2_topic.length?D.ysl2_topic.map(function(p){var n=D.ysl2_quiz.filter(function(q){return q.topic===p.name}).length;return '<div class="y2-card y2-row"><div><b>'+e(p.name)+'</b><div class="y2-mut">'+e(p.subj)+' · '+(n?n+" quiz":"Quiz yoxdur")+'</div></div><div class="y2-act"><button class="y2-b o s" onclick="Y2.renTopic('+JSON.stringify(p._id)+')">Adı dəyiş</button><button class="y2-b r s" onclick="Y2.del(\'ysl2_topic\','+JSON.stringify(p._id)+')">Sil</button></div></div>'}).join(""):'<div class="y2-empty">Hələ mövzu yoxdur.</div>');
+  return h},
+ topicForm(){Y.modal('<h3>Yeni Mövzu Əlavə Et</h3><label>Aid olduğu fənn</label><select id="y2-ts" class="y2-in">'+SUBJ.map(function(s){return "<option>"+s+"</option>"}).join("")+'</select><label>Mövzu adı</label><input id="y2-tn" class="y2-in" placeholder="Məs. Azərbaycan Respublikasının Konstitusiyası"><div class="y2-act"><button class="y2-b o" onclick="Y2.cm()">İmtina</button><button class="y2-b" onclick="Y2.topicSave()">Mövzunu yarat</button></div>')},
+ async topicSave(){var n=$("y2-tn").value.trim();if(!n)return alert("Mövzu adı yazın.");await V2.put("ysl2_topic",{name:n,subj:$("y2-ts").value});V2.toast("Mövzu uğurla yaradıldı ✅");Y.cm();Y.tab="lib";Y.go("bank")},
+ async renTopic(id){var p=Y.D.ysl2_topic.find(function(x){return String(x._id)===String(id)}),n=prompt("Yeni ad:",p.name);if(!n)return;await V2.put("ysl2_topic",Object.assign({},p,{name:n.trim()}),id);Y.go("bank")},
+ /* ---------- SUAL FORMASI ---------- */
+ qModal(q,cb,title,need){Y._cb=cb;Y._need=need;var o=q.opts||[];Y.modal('<h3>'+title+'</h3><label>Fənn</label><select id="y2-qs" class="y2-in">'+SUBJ.map(function(s){return "<option "+(s===q.subj?"selected":"")+">"+s+"</option>"}).join("")+'</select><label>Sual mətni</label><textarea id="y2-qt" class="y2-in" rows="4">'+e(q.q||"")+'</textarea><label>Variantlar (düzgün olanı seçin)</label>'+[0,1,2,3,4].map(function(j){return '<div class="y2-orow"><input type="radio" name="y2-cr" value="'+j+'" '+(q.correct===j?"checked":"")+'><b>'+L[j]+'</b><input class="y2-in" id="y2-o'+j+'" value="'+e(o[j]||"")+'" placeholder="Variant '+L[j]+(j===4?" (ixtiyari)":"")+'"></div>'}).join("")+'<div class="y2-act"><button class="y2-b" onclick="Y2.qSave()">Yadda saxla</button><button class="y2-b o" onclick="Y2.cm()">İmtina</button></div>')},
+ qSave(){var o=[0,1,2,3,4].map(function(j){return $("y2-o"+j).value.trim()});while(o.length&&!o[o.length-1])o.pop();var q=$("y2-qt").value.trim(),r=document.querySelector("input[name=y2-cr]:checked"),c=r?+r.value:-1;
+  if(!q||o.length<2)return alert("Sual mətni və ən azı 2 variant lazımdır.");if(c>=o.length)return alert("Düzgün cavab boş variantdır.");if(Y._need&&c<0)return alert("Düzgün cavabı seçin.");
+  var cb=Y._cb,s=$("y2-qs").value;Y.cm();cb({q:q,opts:o,correct:c,subj:s})},
+ qForm(){Y.qModal({subj:SUBJ[0],opts:["","","",""],correct:-1},async function(u){await V2.put("ysl2_q",Object.assign({},u,{topic:u.subj,imp:"əl ilə"}));V2.toast("Sual əlavə olundu ✅");Y.page="bank";Y.tab="qs";Y.go("bank")},"Yeni sual",true)},
+ edBank(id){var r=Y.D.ysl2_q.find(function(x){return String(x._id)===String(id)});Y.qModal(r,async function(u){await V2.put("ysl2_q",Object.assign({},r,u),id);Y.go("bank")},"Sualı redaktə et",true)},
+ pick(qs,n){return '<div class="y2-pick">'+(qs.map(function(q,i){return '<label><input type="checkbox" name="'+n+'" value="'+i+'"><span><b>'+e(q.subj||"")+'</b> '+e(String(q.q).slice(0,90))+'</span></label>'}).join("")||'<p class="y2-mut">Bankda təsdiqlənmiş sual yoxdur.</p>')+'</div>'},
+ picked(qs,n){return Array.prototype.map.call(document.querySelectorAll("input[name="+n+"]:checked"),function(i){return qs[+i.value]}).map(cp)},
+ pkgForm(){Y.modal('<h3>Yeni sual paketi</h3><label>Paket adı</label><input id="y2-pn" class="y2-in" placeholder="Məs. Sınaq 1 (100 sual)"><label>Suallar</label>'+Y.pick(Y.D.ysl2_q,"y2-pp")+'<div class="y2-act"><button class="y2-b" onclick="Y2.pkgSave()">Paketi yarat</button><button class="y2-b o" onclick="Y2.cm()">İmtina</button></div>')},
+ async pkgSave(){var n=$("y2-pn").value.trim(),qs=Y.picked(Y.D.ysl2_q,"y2-pp");if(!n||!qs.length)return alert("Ad yazın və sual seçin.");await V2.put("ysl2_pkg",{name:n,qs:qs,ts:new Date().toISOString()});Y.cm();V2.toast("Paket yaradıldı ✅");Y.tab="pk";Y.go("bank")},
+ /* ---------- PDF İDXALI (AI) ---------- */
+ p_pdf(){if(Y.view==="rev"&&Y.imp)return Y.review();var I=Y.D.ysl2_imp,tot=I.reduce(function(a,x){return a+x.qs.length},0),ap=I.reduce(function(a,x){return a+x.qs.filter(function(q){return q.st==="ok"}).length},0),m=localStorage.getItem("ysl2_model")||"gemini-2.5-flash";
+  return '<span class="y2-chip b">SÜNİ İNTELLEKT</span> <span class="y2-mut">Google '+e(m)+'</span><h1>PDF-dən Sual İdxalı</h1><p class="y2-sub">Test kitabçalarından və imtahan vərəqlərindən sualları, variantları və düzgün cavabları avtomatik tanıyıb sual bankına köçürün.</p><div class="y2-st">'+st("Cəmi idxal sənədləri",I.length,"sənəd")+st("Aşkarlanan suallar",tot,"sual")+st("Təsdiqlənmiş suallar",ap,"sual")+st("AI təhlil modeli","",e(m))+'</div><h2>Yeni PDF faylı yüklə</h2><label class="y2-drop"><input type="file" accept="application/pdf" hidden onchange="Y2.pickF(this)"><i class="fa-solid fa-upload"></i><b>PDF sənədini seçin</b><span>Maksimum 10 MB. Süni intellekt sualları, variantları və düzgün cavabları ayıracaq.</span></label><div id="y2-file">'+Y.fileRow()+'</div><div class="y2-row"><h2>İdxal Tarixçəsi <span class="y2-chip b">'+I.length+' sənəd</span></h2>'+(I.length?'<button class="y2-b r s" onclick="Y2.clearImp()">Tarixçəni təmizlə</button>':'')+'</div>'+(I.length?'<div class="y2-w"><table class="y2-tbl"><tr><th>Sənəd adı</th><th>Suallar</th><th>Təsdiqli</th><th>Tarix</th><th></th></tr>'+I.map(function(x){return '<tr><td>'+e(x.name)+'</td><td>'+x.qs.length+'</td><td>'+x.qs.filter(function(q){return q.st==="ok"}).length+'</td><td>'+fd(x.ts)+'</td><td><button class="y2-b o s" onclick="Y2.openImp('+JSON.stringify(x._id)+')">Aç</button> <button class="y2-b r s" onclick="Y2.del(\'ysl2_imp\','+JSON.stringify(x._id)+')">Sil</button></td></tr>'}).join("")+'</table></div>':'<div class="y2-empty"><b>Hələ heç bir PDF idxal edilməyib.</b></div>')},
+ fileRow(){var f=Y.file;return f?'<div class="y2-card y2-row"><div><b>'+e(f.name)+'</b><div class="y2-mut">'+(f.size/1024).toFixed(1)+' KB · yükləməyə hazırdır</div></div><div class="y2-act"><button class="y2-b" onclick="Y2.analyze()">Yüklə və Təhlil Et</button><button class="y2-b o" onclick="Y2.file=null;Y2.draw()">✕</button></div></div>':""},
+ pickF(i){var f=i.files[0];if(!f)return;if(f.size>10*1048576)return alert("Fayl 10 MB-dan böyükdür.");Y.file=f;$("y2-file").innerHTML=Y.fileRow()},
+ openImp(id){Y.imp=Y.D.ysl2_imp.find(function(x){return String(x._id)===String(id)});Y.view="rev";Y.flt="all";Y.draw()},
+ async clearImp(){if(!confirm("Bütün idxal tarixçəsi silinsin? Bankdakı suallar toxunulmaz qalacaq."))return;await V2.probe();if(V2.mode==="cloud")await _supabase.from("dq_v2_store").delete().eq("collection","ysl2_imp");else localStorage.removeItem("dq_v2_ysl2_imp");Y.go("pdf")},
+ async analyze(){var f=Y.file,key=localStorage.getItem("ysl2_key"),model=localStorage.getItem("ysl2_model")||"gemini-2.5-flash";
+  if(!key){alert("Əvvəlcə Profil bölməsində Gemini API açarını daxil edin.");return Y.go("prof")}
+  Y.modal('<h3>PDF Sənəd Təhlil Edilir</h3><p class="y2-mut">Süni intellekt sənədi oxuyur, sualları, variantları və düzgün cavabları çıxarır. Təhlil bitənədək bu pəncərəni açıq saxlayın.</p><div class="y2-bar"><i></i></div>');
+  try{var b64=await new Promise(function(r){var fr=new FileReader;fr.onload=function(){r(fr.result.split(",")[1])};fr.readAsDataURL(f)});
+   var pr='Bu PDF test sənədindəki BÜTÜN sualları çıxar. Yalnız JSON massivi qaytar: [{"q":"sual mətni","opts":["variant mətni",...],"correct":düzgün variantın indeksi (0-dan başlayır) və ya cavab sənəddə göstərilməyibsə -1,"subj":"Azərbaycan dili|Qanunvericilik|İnformatika|Məntiq","page":səhifə nömrəsi,"exp":"qısa izah"}]. Variantlardan A), B) kimi hərf prefikslərini sil. Şəkil və ya cədvəl lazım olan sualın mətnində bunu qeyd et. Heç nə uydurma.';
+   var res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+model+":generateContent?key="+encodeURIComponent(key),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{inline_data:{mime_type:"application/pdf",data:b64}},{text:pr}]}],generationConfig:{responseMimeType:"application/json",temperature:0.1,maxOutputTokens:65000}})});
+   var j=await res.json();if(!res.ok)throw new Error(j.error&&j.error.message||("HTTP "+res.status));
+   var t=j.candidates[0].content.parts.map(function(p){return p.text||""}).join("").replace(/```json|```/g,"").trim(),arr=JSON.parse(t);
+   var qs=arr.filter(function(x){return x&&x.q&&Array.isArray(x.opts)&&x.opts.length>1}).map(function(x){var c=Number.isInteger(x.correct)&&x.correct>=0&&x.correct<x.opts.length?x.correct:-1;return{q:String(x.q),opts:x.opts.map(String),correct:c,subj:SUBJ.indexOf(x.subj)>-1?x.subj:SUBJ[0],page:x.page||null,exp:x.exp||"",st:c>=0?"ready":"check"}});
+   if(!qs.length)throw new Error("Sənəddə sual tapılmadı.");
+   var o={name:f.name,ts:new Date().toISOString(),qs:qs,count:qs.length};await V2.put("ysl2_imp",o);await Y.load();Y.imp=Y.D.ysl2_imp.find(function(x){return x.ts===o.ts});Y.file=null;Y.view="rev";Y.flt="all";Y.cm();Y.draw()
+  }catch(err){Y.cm();alert("Təhlil alınmadı: "+err.message)}},
+ review(){var I=Y.imp,qs=I.qs,n=function(k){return qs.filter(function(q){return q.st===k}).length},f=Y.flt;
+  var chip=function(k,l,c){return '<button class="'+(f===k?"on":"")+'" onclick="Y2.flt=\''+k+'\';Y2.draw()">'+l+' '+c+'</button>'};
+  return '<div class="y2-act"><button class="y2-b o s" onclick="Y2.view=\'\';Y2.draw()">← İdxal siyahısına qayıt</button><span class="y2-chip">'+e(I.name)+'</span></div><h1>PDF-dən Sual Yoxlanışı və Təsdiqi</h1><div class="y2-act"><button class="y2-b" onclick="Y2.bulk()">✓ Düzgünləri Toplu Təsdiqlə</button></div><div class="y2-st">'+st("Aşkar edildi",qs.length,"sual")+st("Hazırdır",n("ready"),"hazır")+st("Yoxlanmalıdır",n("check"),"sual")+st("Rədd edildi",n("rej"),"sual")+'</div><div class="y2-chips">'+chip("all","Hamısı",qs.length)+chip("check","Yoxlanılmalıdır",n("check"))+chip("ready","Hazırdır",n("ready"))+chip("ok","Təsdiqli",n("ok"))+chip("rej","Rədd edilib",n("rej"))+'</div><input class="y2-in" placeholder="Sual mətni üzrə axtarış..." oninput="Y2.filt(this,\'.y2-qc\')">'+qs.map(function(q,i){return f==="all"||q.st===f?Y.qcard(q,i):""}).join("")+'<div class="y2-foot"><b>Təsdiqlənmiş Suallar: '+n("ok")+' / '+qs.length+'</b><button class="y2-b" onclick="Y2.mkPkg()">Bu sualları Sual Paketi et ('+n("ok")+')</button></div>'},
+ qcard(q,i){return '<div class="y2-card y2-qc"><div class="y2-tags"><span class="y2-chip b">Sual #'+(i+1)+'</span><span class="y2-chip">Səhifə '+(q.page||"—")+'</span><span class="y2-chip s-'+q.st+'">'+LBL[q.st]+'</span><span class="y2-mut" style="margin-left:auto">Fənn: '+e(q.subj)+'</span></div><p class="y2-qt">'+e(q.q)+'</p>'+(q.correct<0?'<div class="y2-info" style="border-color:#f59e0b">Düzgün cavab avtomatik müəyyən edilmədi — variantlardan birinə klikləyərək təyin edin.</div>':'')+'<div class="y2-mut" style="font-size:12px">VARİANTLAR (düzgün cavabı dəyişmək üçün klikləyin)</div><div class="y2-opts">'+q.opts.map(function(o,j){return '<div class="y2-opt '+(q.correct===j?"c":"")+'" onclick="Y2.setC('+i+','+j+')"><b>'+L[j]+'</b> '+e(o)+(q.correct===j?'<em>✓ DÜZGÜN</em>':'')+'</div>'}).join("")+'</div><div class="y2-act"><button class="y2-b" onclick="Y2.appr('+i+')">✓ Təsdiqlə</button><button class="y2-b o" onclick="Y2.edQ('+i+')">Redaktə et</button><button class="y2-b o" onclick="Y2.rejQ('+i+')">× Rədd et</button></div></div>'},
+ async sync(){await V2.put("ysl2_imp",Y.imp,Y.imp._id);await Y.load();Y.imp=Y.D.ysl2_imp.find(function(x){return String(x._id)===String(Y.imp._id)})||Y.imp;Y.draw()},
+ setC(i,j){var q=Y.imp.qs[i];if(q.st==="ok")return V2.toast("Təsdiqlənmiş sualı Sual bankından redaktə edin");q.correct=j;if(q.st==="check"||q.st==="rej")q.st="ready";Y.sync()},
+ async approve(q){await V2.put("ysl2_q",Object.assign(cp(q),{topic:q.subj,imp:Y.imp.name}));q.st="ok"},
+ async appr(i){var q=Y.imp.qs[i];if(q.st==="ok")return;if(q.correct<0)return alert("Əvvəlcə düzgün cavabı seçin.");await Y.approve(q);Y.sync()},
+ async bulk(){var l=Y.imp.qs.filter(function(q){return q.st==="ready"});if(!l.length)return alert("Təsdiqə hazır sual yoxdur.");for(var k=0;k<l.length;k++)await Y.approve(l[k]);V2.toast(l.length+" sual təsdiqləndi ✅");Y.sync()},
+ rejQ(i){Y.imp.qs[i].st="rej";Y.sync()},
+ edQ(i){var q=Y.imp.qs[i];Y.qModal(q,function(u){Object.assign(q,u);if(q.st!=="ok")q.st=q.correct>=0?"ready":"check";Y.sync()},"Sualı redaktə et",false)},
+ async mkPkg(){var ok=Y.imp.qs.filter(function(q){return q.st==="ok"});if(!ok.length)return alert("Əvvəlcə sualları təsdiqləyin.");var n=prompt("Paket adı:",Y.imp.name.replace(/\.pdf$/i,""));if(!n)return;await V2.put("ysl2_pkg",{name:n.trim(),qs:ok.map(cp),ts:new Date().toISOString()});V2.toast("Sual paketi yaradıldı ✅");Y.tab="pk";Y.go("bank")},
+ /* ---------- QUİZLƏR ---------- */
+ quizTbl(l,act){return l.length?'<div class="y2-w"><table class="y2-tbl"><tr><th>Quiz başlığı</th><th>Tarix</th><th>Müddət</th><th>Suallar</th><th>Status</th>'+(act?'<th></th>':'')+'</tr>'+l.map(function(x){return '<tr class="y2-qz"><td><b>'+e(x.title)+'</b><div class="y2-mut">'+e(x.topic||"")+'</div></td><td>'+fd(x.ts)+'</td><td>'+x.dur+' dəq</td><td>'+x.qs.length+'</td><td>'+(act?'<select class="y2-in" style="margin:0" onchange="Y2.quizSt('+JSON.stringify(x._id)+',this.value)">'+QST.map(function(s){return "<option "+(s===x.status?"selected":"")+">"+s+"</option>"}).join("")+'</select>':'<span class="y2-chip">'+e(x.status)+'</span>')+'</td>'+(act?'<td><button class="y2-b r s" onclick="Y2.del(\'ysl2_quiz\','+JSON.stringify(x._id)+')">Sil</button></td>':'')+'</tr>'}).join("")+'</table></div>':'<div class="y2-empty"><b>Hələ quiz yaradılmayıb.</b><p>Sualları seçərək ilk quizinizi yaradın.</p><button class="y2-b" onclick="Y2.quizForm()">+ Yeni quiz</button></div>'},
+ p_quiz(){var l=Y.D.ysl2_quiz.filter(function(x){return Y.qf==="all"||x.status===Y.qf});return '<h1>Quizlər <span class="y2-chip b">MÜƏLLİM SINAQLARI</span></h1><p class="y2-sub">Müəllim sınaqları: tələbələr və qruplar üçün xüsusi hazırlanmış sınaq testləri.</p><div class="y2-act"><button class="y2-b o" onclick="Y2.go(\'exam\')">İmtahanlar</button><button class="y2-b" onclick="Y2.quizForm()">+ Yeni quiz</button></div><div class="y2-row" style="margin:14px 0"><input class="y2-in" style="max-width:340px;margin:0" placeholder="Quiz başlığında axtarış..." oninput="Y2.filt(this,\'.y2-qz\')"><select class="y2-in" style="max-width:200px;margin:0" onchange="Y2.qf=this.value;Y2.draw()"><option value="all">Bütün statuslar</option>'+QST.map(function(s){return "<option "+(Y.qf===s?"selected":"")+">"+s+"</option>"}).join("")+'</select><span class="y2-chip">'+l.length+' quiz</span></div>'+Y.quizTbl(l,true)},
+ quizForm(){var D=Y.D;Y.modal('<h3>Yeni quiz</h3><label>Başlıq</label><input id="y2-qn" class="y2-in"><div class="y2-g3"><div><label>Mövzu</label><select id="y2-qtp" class="y2-in"><option value="">—</option>'+D.ysl2_topic.map(function(t){return "<option>"+e(t.name)+"</option>"}).join("")+'</select></div><div><label>Müddət (dəq)</label><input id="y2-qd" type="number" class="y2-in" value="30"></div><div><label>Status</label><select id="y2-qst" class="y2-in">'+QST.map(function(s){return "<option>"+s+"</option>"}).join("")+'</select></div></div><label>Suallar</label>'+Y.pick(D.ysl2_q,"y2-qp")+'<div class="y2-act"><button class="y2-b" onclick="Y2.quizSave()">Quizi yarat</button><button class="y2-b o" onclick="Y2.cm()">İmtina</button></div>')},
+ async quizSave(){var t=$("y2-qn").value.trim(),qs=Y.picked(Y.D.ysl2_q,"y2-qp");if(!t||!qs.length)return alert("Başlıq yazın və sual seçin.");await V2.put("ysl2_quiz",{title:t,topic:$("y2-qtp").value,dur:+$("y2-qd").value||30,status:$("y2-qst").value,qs:qs,ts:new Date().toISOString()});Y.cm();V2.toast("Quiz yaradıldı ✅");Y.go("quiz")},
+ async quizSt(id,v){var r=Y.D.ysl2_quiz.find(function(x){return String(x._id)===String(id)});await V2.put("ysl2_quiz",Object.assign({},r,{status:v}),id);V2.toast("Status dəyişdi")},
+ /* ---------- İMTAHANLAR ---------- */
+ p_exam(){var l=Y.D.ysl2_exam;return '<div class="y2-row"><div><h1>İmtahanlar <span class="y2-chip b">MÜƏLLİM İMTAHANLARI</span></h1><p class="y2-sub">100 sualliq imtahanlarınızı idarə edin və tələbələrlə paylaşın.</p></div><div class="y2-act"><button class="y2-b o" onclick="Y2.go(\'quiz\')">Quizlər</button><button class="y2-b" onclick="Y2.ex=null;Y2.exStep1()">+ Yeni imtahan</button></div></div><input class="y2-in" placeholder="İmtahan başlığında axtarış..." oninput="Y2.filt(this,\'.y2-ex\')">'+(l.length?'<div class="y2-w"><table class="y2-tbl"><tr><th>İmtahan başlığı</th><th>Tarix</th><th>Müddət</th><th>Suallar</th><th>Giriş kodu</th><th></th></tr>'+l.map(function(x){return '<tr class="y2-ex"><td><b>'+e(x.name)+'</b><div class="y2-mut">'+e(x.pkg)+'</div></td><td>'+fd(x.start)+'<div class="y2-mut">→ '+fd(x.end)+'</div></td><td>'+x.dur+' dəq</td><td>'+x.count+'</td><td><b>'+e(x.code)+'</b></td><td><button class="y2-b r s" onclick="Y2.del(\'ysl2_exam\','+JSON.stringify(x._id)+')">Sil</button></td></tr>'}).join("")+'</table></div>':'<div class="y2-empty">Hələ imtahan yaratmamısınız. 100 sualliq paketdən ilk imtahanınızı yaradın.</div>')},
+ exStep1(){var x=Y.ex=Y.ex||{};Y.modal('<h3>Yeni İmtahan Yarat</h3><p class="y2-mut">İmtahanınızı 2 addımda qurun və tələbələrlə paylaşın.</p><div class="y2-steps"><b class="on">1 İmtahan Məlumatları</b><b>2 Sualların Seçimi</b></div><label>İmtahan Adı *</label><input id="y2-en" class="y2-in" value="'+e(x.name||"")+'" placeholder="Məs. Ümumi sınaq imtahanı"><div class="y2-g3"><div><label>Müddət (dəqiqə)</label><input id="y2-ed" type="number" class="y2-in" value="'+(x.dur||180)+'"></div><div><label>Başlama vaxtı</label><input id="y2-es" type="datetime-local" class="y2-in" value="'+(x.start||"")+'"></div><div><label>Bitmə vaxtı</label><input id="y2-ee" type="datetime-local" class="y2-in" value="'+(x.end||"")+'"></div></div><div class="y2-info">Növbəti addımda imtahan üçün 100 sualliq paket seçəcəksiniz.</div><div class="y2-act"><button class="y2-b o" onclick="Y2.cm()">İmtina</button><button class="y2-b" onclick="Y2.exStep2()">Növbəti addım →</button></div>')},
+ exStep2(){var x=Y.ex;if($("y2-en")){x.name=$("y2-en").value.trim();x.dur=+$("y2-ed").value||180;x.start=$("y2-es").value;x.end=$("y2-ee").value;if(!x.name)return alert("İmtahan adını yazın.")}
+  var P=Y.D.ysl2_pkg.filter(function(p){return p.qs.length===100});
+  Y.modal('<h3>Yeni İmtahan Yarat</h3><div class="y2-steps"><b>1 İmtahan Məlumatları</b><b class="on">2 Sualların Seçimi</b></div><div class="y2-info"><b>Məlumat:</b> İmtahan üçün 100 aktiv sualdan ibarət bir <b>Sual Paketi</b> seçin.</div>'+(P.length?'<div class="y2-pick">'+P.map(function(p,i){return '<label><input type="radio" name="y2-ep" value="'+i+'"'+(i===0?" checked":"")+'><span><b>'+e(p.name)+'</b> · 100 sual</span></label>'}).join("")+'</div>':'<div class="y2-empty"><b>100 aktiv sualliq paket tapılmadı</b><p>İmtahanda yalnız 100 sualdan ibarət paketlər istifadə oluna bilər.</p><button class="y2-b o" onclick="Y2.cm();Y2.go(\'pdf\')">PDF-dən sual paketi yarat</button></div>')+'<div class="y2-act"><button class="y2-b o" onclick="Y2.exStep1()">← Geri</button><button class="y2-b o" onclick="Y2.cm()">İmtina</button>'+(P.length?'<button class="y2-b" onclick="Y2.exSave()">İmtahanı yarat və dərc et</button>':'')+'</div>')},
+ async exSave(){var P=Y.D.ysl2_pkg.filter(function(p){return p.qs.length===100}),r=document.querySelector("input[name=y2-ep]:checked");if(!r)return;var p=P[+r.value],x=Y.ex,code=V2.genCode();
+  await V2.put("ysl2_exam",{name:x.name,dur:x.dur,start:x.start,end:x.end,pkg:p.name,count:100,code:code,qs:p.qs,status:"Aktiv",ts:new Date().toISOString()});
+  await V2.put("sessions",{name:x.name,cat:"BA",type:"Qəbul tipli imtahan",templates:[p.name],questions:p.qs.map(function(q){return{type:"mcq",text:q.q,qimg:null,cat:"BA",note:q.exp||"",correct:q.correct,opts:q.opts.map(function(t){return{text:t,img:null}})}}),count:100,restricted:false,students:[],dur:x.dur,entry:"code",code:code,status:"Aktiv",date:V2.date()});
+  Y.cm();Y.ex=null;V2.toast("İmtahan dərc olundu. Kod: "+code);Y.go("exam")},
+ /* ---------- QRUPLAR ---------- */
+ p_group(){var l=Y.D.ysl2_group;return '<div class="y2-row"><div><h1>Qruplar</h1><p class="y2-sub">Tələbə qruplarını idarə edin.</p></div><button class="y2-b" onclick="Y2.grForm()">+ Yeni qrup</button></div>'+(l.length?l.map(function(g){return '<div class="y2-card y2-row"><div><b>'+e(g.name)+'</b><div class="y2-mut">'+(g.members||[]).length+' tələbə</div><div style="font-size:13px;margin-top:4px">'+(g.members||[]).map(e).join(", ")+'</div></div><button class="y2-b r s" onclick="Y2.del(\'ysl2_group\','+JSON.stringify(g._id)+')">Sil</button></div>'}).join(""):'<div class="y2-empty">Hələ qrup yoxdur.</div>')},
+ grForm(){Y.modal('<h3>Yeni qrup</h3><label>Qrup adı</label><input id="y2-gn" class="y2-in"><label>Tələbələr (hər sətirdə bir ad)</label><textarea id="y2-gm" class="y2-in" rows="6"></textarea><div class="y2-act"><button class="y2-b" onclick="Y2.grSave()">Yarat</button><button class="y2-b o" onclick="Y2.cm()">İmtina</button></div>')},
+ async grSave(){var n=$("y2-gn").value.trim();if(!n)return alert("Qrup adı yazın.");await V2.put("ysl2_group",{name:n,members:$("y2-gm").value.split("\n").map(function(s){return s.trim()}).filter(Boolean),ts:new Date().toISOString()});Y.cm();Y.go("group")},
+ /* ---------- NƏTİCƏLƏR ---------- */
+ p_res(){var R=Y.R;return '<h1>Nəticələr</h1><p class="y2-sub">İştirakçıların imtahan nəticələri.</p><input class="y2-in" placeholder="FİN və ya imtahan üzrə axtarış..." oninput="Y2.filt(this,\'.y2-rs\')">'+(R.length?'<div class="y2-w"><table class="y2-tbl"><tr><th>İştirakçı</th><th>İmtahan</th><th>Kateqoriya</th><th>Bal</th><th>✅ / ❌</th><th>Tarix</th></tr>'+R.map(function(r){return '<tr class="y2-rs"><td>'+e(r.student_name||r.name||"")+' <span class="y2-mut">'+e(r.fin||"")+'</span></td><td>№'+e(r.exam_no)+'</td><td>'+e(r.category)+'</td><td><b>'+e(r.score)+'</b></td><td>'+e(r.correct_count)+' / '+e(r.wrong_count)+'</td><td>'+fd(r.created_at)+'</td></tr>'}).join("")+'</table></div>':'<div class="y2-empty">Heç bir iştirakçı yoxdur.</div>')},
+ /* ---------- PROFİL / AI ---------- */
+ p_prof(){var m=localStorage.getItem("ysl2_model")||"gemini-2.5-flash";return '<h1>Profil</h1><p class="y2-sub">Süni intellekt (Gemini) ayarları.</p><div class="y2-card"><h3>Gemini API açarı</h3><div class="y2-info">Açarı <b>aistudio.google.com/apikey</b> ünvanından pulsuz alın və bura yapışdırın. Açar yalnız bu cihazın brauzerində saxlanılır.</div><label>API açarı</label><input id="y2-k" type="password" class="y2-in" autocomplete="off" value="'+e(localStorage.getItem("ysl2_key")||"")+'" placeholder="AIza..."><label>Model</label><select id="y2-m" class="y2-in">'+["gemini-2.5-flash","gemini-2.5-pro","gemini-2.0-flash"].map(function(x){return "<option "+(x===m?"selected":"")+">"+x+"</option>"}).join("")+'</select><div class="y2-act"><button class="y2-b" onclick="Y2.saveK()">Yadda saxla</button><button class="y2-b o" onclick="Y2.testK()">Bağlantını yoxla</button></div></div>'},
+ saveK(){localStorage.setItem("ysl2_key",$("y2-k").value.trim());localStorage.setItem("ysl2_model",$("y2-m").value);V2.toast("Saxlanıldı ✅")},
+ async testK(){Y.saveK();try{var r=await fetch("https://generativelanguage.googleapis.com/v1beta/models?key="+encodeURIComponent(localStorage.getItem("ysl2_key")||""));V2.toast(r.ok?"AI bağlantısı işləyir ✅":"Açar yanlışdır ❌")}catch(x){V2.toast("Şəbəkə xətası ❌")}}
+};
+})();
+</script>
+
+
+<style id="dq-auth-css">
+.dq-or{display:flex;align-items:center;gap:10px;color:#94a3b8;font-size:13px;margin:12px 0}.dq-or:before,.dq-or:after{content:"";flex:1;height:1px;background:#e2e8f0}
+.dq-gbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border:1px solid #dbe3ee;border-radius:12px;background:#fff;color:#0f172a;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit}
+.dq-rem{display:flex;align-items:center;gap:8px;margin:6px 0 12px;font-size:14px;color:#334155}.dq-rem input{width:18px;height:18px}
+#dq-sec-ov{position:fixed;inset:0;z-index:9000;background:#0f172acc;display:flex;align-items:center;justify-content:center;padding:16px}
+#dq-sec-ov .c{background:#fff;border-radius:18px;padding:20px;width:100%;max-width:380px;text-align:left}
+#dq-sec-ov .inf{font-size:14px;color:#475569;margin:0 0 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#dq-sec-ov input{width:100%;padding:12px;border:1px solid #dbe3ee;border-radius:10px;font-size:16px;text-align:center;letter-spacing:2px}
+#dq-sec-ov .tg{display:inline-block;padding:4px 14px;border-radius:99px;background:#0a2f7a;color:#d9a441;font-weight:800;font-size:13px;cursor:pointer;animation:dqPop .3s ease both}
+#dq-sec-ov .x{width:100%;margin-top:12px;padding:11px;border:1px solid #dbe3ee;background:#fff;border-radius:10px;font-weight:700;cursor:pointer}
+.dq-nosel{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none}
+</style>
+<script id="dq-auth-patch">
+(function(){
+  var CODE="yuniss2003",$=function(i){return document.getElementById(i)};
+  var G='<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.8 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>';
+  /* 1) Giriş/Qeydiyyat pəncərəsinə Google + "Məni 90 gün xatırla" */
+  function deco(){
+    var m=$("yq-m");if(!m||m.querySelector(".dq-gbtn"))return;
+    var b=m.querySelector('button[onclick*="YQ.register"],button[onclick*="YQ.login"]');if(!b)return;
+    var reg=/YQ\.register/.test(b.getAttribute("onclick"));
+    if(!reg){
+      b.innerHTML='Daxil ol &rarr;';
+      var r=document.createElement("label");r.className="dq-rem";r.innerHTML='<input type="checkbox" id="dq-rem90" checked> Məni 90 gün xatırla';
+      b.parentNode.insertBefore(r,b);
+      b.addEventListener("click",function(){try{var c=$("dq-rem90").checked;localStorage.setItem("dq_remember90",c?String(Date.now()+90*864e5):"")}catch(e){}},true);
+    }
+    var w=document.createElement("div");
+    w.innerHTML='<div class="dq-or">və ya</div><button type="button" id="dq-gbtn" class="dq-gbtn">'+G+' Google ilə daxil ol</button>';
+    var sw=m.querySelector(".dq-sw");
+    (sw?sw.parentNode:b.parentNode).insertBefore(w,sw||b.nextSibling);
+  }
+  setInterval(deco,300);
+  /* 2) Kabinet / Daxil ol düyməsinə 1 toxunuş → Qeydiyyat pəncərəsi */
+  document.addEventListener("click",function(e){
+    var el=e.target.closest&&e.target.closest('#v3-home .v3-hd a[data-dqauth="guest"], #login-screen .dq-primary');if(!el)return;
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    try{YQ.open("reg")}catch(x){}
+  },true);
+  /* 3) "2026" yazısına 3 saniyə basılı tutma → kod pəncərəsi */
+  var T=null,sx=0,sy=0;
+  function hit(t){return t&&t.closest&&t.closest("#v3-home")&&/2026/.test(t.textContent||"")&&(t.textContent||"").length<160}
+  function stop(){clearTimeout(T);T=null}
+  document.addEventListener("contextmenu",function(e){if(hit(e.target))e.preventDefault()},true);
+  document.addEventListener("pointerdown",function(e){
+    if(!hit(e.target))return;sx=e.clientX;sy=e.clientY;e.target.classList.add("dq-nosel");stop();
+    T=setTimeout(function(){T=null;secret()},3000)},true);
+  document.addEventListener("pointermove",function(e){if(T&&(Math.abs(e.clientX-sx)>12||Math.abs(e.clientY-sy)>12))stop()},true);
+  ["pointerup","pointercancel"].forEach(function(n){document.addEventListener(n,stop,true)});
+  function secret(){
+    if($("dq-sec-ov"))return;
+    var o=document.createElement("div");o.id="dq-sec-ov";
+    o.innerHTML='<div class="c"><p class="inf" id="dq-sec-info">Giriş məlumatını daxil edin.</p><input type="password" id="dq-sec-in" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Kod"><button class="x" type="button">Bağla</button></div>';
+    document.body.appendChild(o);
+    var inf=$("dq-sec-info"),inp=$("dq-sec-in");
+    function close(){o.remove()}
+    o.querySelector(".x").onclick=close;o.addEventListener("click",function(e){if(e.target===o)close()});
+    inp.addEventListener("input",function(){
+      var ok=inp.value.trim()===CODE,a=inf.querySelector(".t1"),b=inf.querySelector(".t2");
+      if(ok&&!a){a=document.createElement("span");a.className="tg t1";a.textContent="ysl2";a.onclick=function(){close();Y2.open()};inf.insertBefore(a,inf.firstChild);
+        b=document.createElement("span");b.className="tg t2";b.textContent="77";b.onclick=function(){close();try{V2.open()}catch(x){alert("Panel yüklənmədi")}};inf.appendChild(b)}
+      if(!ok){a&&a.remove();b&&b.remove()}
+    });
+    setTimeout(function(){inp.focus()},80);
+  }
+
+  /* Google girişi: əvvəlcə Supabase-də provayderin qoşulu olduğunu yoxla */
+  document.addEventListener("click",async function(e){
+    var b=e.target.closest&&e.target.closest("#dq-gbtn");if(!b)return;
+    e.preventDefault();e.stopPropagation();
+    if(/FBAN|FBAV|Instagram|Messenger|TikTok|Snapchat|; wv\)|\bLine\//i.test(navigator.userAgent||"")){alert("Google ilə giriş bu tətbiqin daxili brauzerində işləmir. Səhifəni Chrome və ya Safari-də açın.");return}
+    var old=b.innerHTML;b.disabled=true;b.textContent="Yoxlanılır...";
+    try{
+      var r=await fetch(SUPABASE_URL+"/auth/v1/settings",{headers:{apikey:SUPABASE_KEY}}),s=await r.json();
+      if(s&&s.external&&s.external.google===false){b.disabled=false;b.innerHTML=old;alert("Google ilə giriş hələ qoşulmayıb. Supabase → Authentication → Providers → Google bölməsində Google-u aktivləşdirin.");return}
+    }catch(x){}
+    b.disabled=false;b.innerHTML=old;
+    try{sessionStorage.setItem("dq_g","1")}catch(x){}
+    location.href=SUPABASE_URL+"/auth/v1/authorize?provider=google&prompt=select_account&redirect_to="+encodeURIComponent(location.href.split("#")[0].split("?")[0]);
+  },true);
+})();
+</script>
+
 
 
 </body>
