@@ -21,8 +21,8 @@
    ===================================================================== */
 (function () {
   "use strict";
-  if (window.__dqGate) return;
-  window.__dqGate = 1;
+  if (window.__dqLoadGate) return;
+  window.__dqLoadGate = 1;
 
   var D = document, H = D.documentElement, T0 = performance.now();
   var CFG = window.DQ_GATE || {};
