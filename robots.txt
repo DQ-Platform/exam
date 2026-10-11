@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /push/
+
+Sitemap: https://exam.dqplatform.workers.dev/sitemap.xml
