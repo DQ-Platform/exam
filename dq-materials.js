@@ -1,5 +1,5 @@
 /* =====================================================================
-   DQ Materials v1.0 — Dərs materialları: etibarlı «Aç» / «Yüklə»
+   DQ Materials v1.1 — Dərs materialları: etibarlı «Aç» / «Yüklə»
    ---------------------------------------------------------------------
    app.js, dq-core.js və dq-admin.js-dən SONRA qoşulur.
 
@@ -94,6 +94,7 @@
     "#dqm-ov .c{width:min(100%,360px);padding:24px 22px 20px;border-radius:22px;background:#fff;color:#0a2f7a;text-align:center;box-shadow:0 30px 70px -20px rgba(0,0,0,.6);animation:dqmPop .35s cubic-bezier(.22,.9,.24,1)}",
     "#dqm-ov .ic{width:54px;height:54px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;font-size:26px;background:#eaf1fc}",
     "#dqm-ov .ic i{width:30px;height:30px;border-radius:50%;border:3.5px solid #cfdcf2;border-top-color:#2f63bd;animation:dqmSp .8s linear infinite}",
+    "#dqm-ov .ic em{display:none;font-style:normal}#dqm-ov.err .ic em{display:block}",
     "#dqm-ov.err .ic{background:#fee2e2}#dqm-ov.err .ic i{display:none}",
     "#dqm-ov .t{display:block;font:800 16px/1.35 inherit;margin-bottom:12px;overflow-wrap:anywhere}",
     "#dqm-ov .bar{height:8px;border-radius:99px;background:#e3eaf7;overflow:hidden}",
@@ -144,6 +145,7 @@
   function msgOf(e) {
     var s = e && e.http;
     var tech = e ? (e.http ? " (HTTP " + e.http + (e.code ? ", " + e.code : "") + ")" : (e.message ? " (" + e.message + ")" : "")) : "";
+    if (e && e.timeout) return "Server fayla cavab vermədi (25 san). Fayl bazada böyük həcmli saxlanıla bilər — admin faylı Storage-ə (materials.sql) yenidən yükləməlidir.";
     if (s === 401 || s === 403) return "Faylı oxumağa icazə yoxdur. Admin: Supabase-də dq_v2_store və storage üçün SELECT qaydasını yoxlayın." + tech;
     if (s === 404 || s === 406) return "Fayl bazada tapılmadı. Admin onu silmiş ola bilər." + tech;
     if (s === 408 || s === 504 || e && e.code === "57014") return "Server fayla gec cavab verdi. Bir az sonra yenidən cəhd edin." + tech;
@@ -181,22 +183,41 @@
     }
     return new Blob(parts, { type: "application/pdf" });
   }
+  /* Server cavab verməzsə səhifə sonsuz "gözlənilir"də qalmasın:
+     ilk bayt üçün FIRST_MS, sonra axın dayanarsa STALL_MS */
+  var FIRST_MS = 25000, STALL_MS = 20000;
+  function guard(outer) {
+    var c = new AbortController(), t = 0, hit = false;
+    function arm(ms) { clearTimeout(t); t = setTimeout(function () { hit = true; c.abort(); }, ms); }
+    if (outer) { if (outer.aborted) c.abort(); else outer.addEventListener("abort", function () { c.abort(); }, { once: true }); }
+    arm(FIRST_MS);
+    return { signal: c.signal, bump: function () { arm(STALL_MS); }, stop: function () { clearTimeout(t); }, hit: function () { return hit; } };
+  }
   async function fetchOnce(id, signal, prog) {
-    var q = SB + "/rest/v1/dq_v2_store?select=title:data->>title,name:data->>name,url:data->>url,data:data->>data&id=eq." + encodeURIComponent(id);
-    var res = await fetch(q, {
-      headers: { apikey: KEY, Authorization: "Bearer " + KEY, Accept: "application/vnd.pgrst.object+json" },
-      signal: signal
-    });
-    if (!res.ok) { var t = ""; try { t = await res.text(); } catch (x) { } throw httpErr(res.status, t); }
-    var raw = await readStream(res, prog), row = JSON.parse(new TextDecoder().decode(raw));
-    if (row.url) {                                         /* Storage-dəki fayl (CDN) */
-      var r2 = await fetch(row.url, { signal: signal });
-      if (!r2.ok) throw httpErr(r2.status, "");
-      var bytes = await readStream(r2, prog);
-      return { blob: new Blob([bytes], { type: "application/pdf" }), name: row.name, title: row.title };
-    }
-    if (!row.data) { var ne = new Error("nodata"); ne.nodata = 1; throw ne; }
-    return { blob: b64Blob(row.data), name: row.name, title: row.title };
+    var g = guard(signal);
+    var p2 = function (a, b) { g.bump(); prog && prog(a, b); };
+    try {
+      var q = SB + "/rest/v1/dq_v2_store?select=title:data->>title,name:data->>name,url:data->>url,data:data->>data&id=eq." + encodeURIComponent(id);
+      var res = await fetch(q, {
+        headers: { apikey: KEY, Authorization: "Bearer " + KEY, Accept: "application/vnd.pgrst.object+json" },
+        signal: g.signal
+      });
+      g.bump();
+      if (!res.ok) { var t = ""; try { t = await res.text(); } catch (x) { } throw httpErr(res.status, t); }
+      var raw = await readStream(res, p2), row = JSON.parse(new TextDecoder().decode(raw));
+      if (row.url) {                                         /* Storage-dəki fayl (CDN) */
+        g.bump();
+        var r2 = await fetch(row.url, { signal: g.signal });
+        if (!r2.ok) throw httpErr(r2.status, "");
+        var bytes = await readStream(r2, p2);
+        return { blob: new Blob([bytes], { type: "application/pdf" }), name: row.name, title: row.title };
+      }
+      if (!row.data) { var ne = new Error("nodata"); ne.nodata = 1; throw ne; }
+      return { blob: b64Blob(row.data), name: row.name, title: row.title };
+    } catch (e) {
+      if (g.hit()) { var te = new Error("timeout"); te.timeout = 1; throw te; }
+      throw e;
+    } finally { g.stop(); }
   }
   async function fetchFile(id, signal, prog) {
     var key = String(id);
@@ -204,6 +225,7 @@
     var last;
     for (var i = 0; i < 3; i++) {
       try {
+        prog && prog(0, 0, i + 1);
         var f = await fetchOnce(id, signal, prog);
         if (cache.size >= CACHE_MAX) cache.delete(cache.keys().next().value);
         cache.set(key, f);
@@ -211,6 +233,7 @@
       } catch (e) {
         last = e;
         if (e && e.name === "AbortError") throw e;
+        if (e && e.timeout && i >= 1) throw e;
         if (e && ((e.http && e.http < 500 && e.http !== 408 && e.http !== 429) || e.nodata)) throw e;
         await sleep(500 * (i + 1) * (i + 1));
       }
@@ -226,7 +249,7 @@
     if (!e) {
       e = D.createElement("div"); e.id = "dqm-ov";
       e.setAttribute("role", "alertdialog");
-      e.innerHTML = '<div class="c"><div class="ic"><i></i>⚠️</div><b class="t"></b><div class="bar"><i></i></div><small class="s"></small><div class="a"></div></div>';
+      e.innerHTML = '<div class="c"><div class="ic"><i></i><em>⚠️</em></div><b class="t"></b><div class="bar"><i></i></div><small class="s"></small><div class="a"></div></div>';
       D.body.appendChild(e);
     }
     return e;
@@ -240,8 +263,9 @@
     var bar = e.querySelector(".bar"); bar.className = "bar ind"; bar.firstChild.style.width = "0";
     var a = e.querySelector(".a"); a.innerHTML = '<button type="button">Ləğv et</button>';
     a.firstChild.onclick = onCancel;
-    return function (got, total) {
+    return function (got, total, att) {
       var s = e.querySelector(".s");
+      if (att) { if (att > 1) s.textContent = "Yenidən cəhd " + att + " / 3…"; return; }
       if (total > 0) { bar.className = "bar"; bar.firstChild.style.width = Math.min(100, got / total * 100) + "%"; s.textContent = mb(got) + " / " + mb(total); }
       else s.textContent = got ? mb(got) + " yükləndi…" : "Server cavabı gözlənilir…";
     };
