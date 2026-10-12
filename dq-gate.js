@@ -26,7 +26,7 @@
 (function () {
   "use strict";
   if (window.__dqLoadGate) return;
-  window.__dqLoadGate = 5;
+  window.__dqLoadGate = 6;
 
   var D = document, H = D.documentElement, T0 = performance.now();
   var CFG = window.DQ_GATE || {};
@@ -47,7 +47,9 @@
 
   var st = D.createElement("style");
   st.id = "dq-gate-css";
-  st.textContent = "html.dq-hold .dql-in{animation:none!important;opacity:1!important;transform:none!important}";
+  st.textContent = "html.dq-hold .dql-in{animation:none!important;opacity:1!important;transform:none!important}" +
+    /* bloklar növbə ilə "doğulmasın": açılışda bütün səhifə eyni anda, tam görünsün */
+    "html.dq-hold .dq-rv,html.dq-instant .dq-rv{opacity:1!important;transform:none!important;transition:none!important}";
   (D.head || H).appendChild(st);
 
   /* ---- aktiv (görünən) vaxt saatı: gizli tabda CAP sayılmır ---- */
@@ -164,6 +166,9 @@
             delete pend[key];
             if (r.ok && CACHE_COLS.test(url)) cache[key] = { t: performance.now(), m: r };
           }
+          if (r.ok && /collection=eq\.countdown(&|$)/.test(url)) {      /* geri sayım qeydini yadda saxla: DOM-da olmalıdırmı? */
+            try { r.clone().json().then(function (a) { window.__dqCDrows = a; }, function () { }); } catch (e) { }
+          }
           return r;
         }, function (e) { if (gen === pend) delete pend[key]; throw e; });
         pend[key] = real;
@@ -201,6 +206,32 @@
       Hm.build = nb;
       builds.hooked = true;
     } catch (e) { }
+  }
+
+  /* ---- 3c) Gözlənilən blokların yoxlanması və lazım olsa yenidən qurulması ---- */
+  function cdExpected() {
+    try {
+      var rows = window.__dqCDrows;
+      if (!rows || !rows.length || !window.DQCD || !DQCD.norm || !DQCD.state) return false;
+      var rec = Object.assign({}, rows[0].data, { _id: rows[0].id });
+      var c = DQCD.norm(rec);
+      if (!c.on) return false;
+      var k = DQCD.state(c, Date.now()).k;
+      return k === "run" || k === "done";
+    } catch (e) { return false; }
+  }
+  var kick = { cd: 0, cdT: 0, st: 0, stT: 0 };
+  function kickMissing(h, now) {
+    /* geri sayım bazada aktivdir, amma DOM-da yoxdur (ana səhifə yenidən qurulanda silinib) → yenidən qur */
+    if (cdExpected() && !h.querySelector("#dq-count") && kick.cd < 6 && now - kick.cdT > 1500) {
+      kick.cd++; kick.cdT = now;
+      try { DQCD.mount(); } catch (e) { }
+    }
+    /* statistika kartları: bir dəfə yenidən cəhd */
+    if (!h.querySelector("#dq-stats") && !kick.st && window.DQST && DQST.mount) {
+      kick.st = 1; kick.stT = now;
+      try { DQST.mount(); } catch (e) { }
+    }
   }
 
   /* ---- 4) Məlumat + şrift hazırlığı ---- */
@@ -269,7 +300,18 @@
     function open() {
       if (opened) return;
       opened = true;
+      H.classList.add("dq-instant");                 /* animasiyasız, tam görünən səhifə */
       H.classList.remove("dq-hold");
+      setTimeout(function () { H.classList.remove("dq-instant"); }, 3000);
+      /* açılışdan sonra 10 san: geri sayım və ya footer itibsə, özü bərpa olunsun */
+      var heal = 0, hi = setInterval(function () {
+        try {
+          var hm = D.getElementById("v3-home");
+          if (!hm || ++heal > 14) { clearInterval(hi); return; }
+          if (cdExpected() && !hm.querySelector("#dq-count") && window.DQCD) DQCD.mount();
+          if (!hm.querySelector("#dq-stats") && heal === 4 && window.DQST && DQST.mount) DQST.mount();
+        } catch (e) { }
+      }, 700);
       /* iki kadr gözlə: brauzer tam səhifəni çəkib bitirsin, sonra splash solsun */
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
@@ -335,7 +377,12 @@
       (builds.started === 0 && now - tRender >= 6000);
     stg.build = buildOk;
 
-    var blocksOk = core && netIdle && imgs && buildOk;
+    if (buildOk && netIdle) kickMissing(h, now);
+    var cdOk = !cdExpected() || !!h.querySelector("#dq-count");
+    var stOk = !kick.st || now - kick.stT >= 2500 || !!h.querySelector("#dq-stats");   /* kick-dən sonra 2.5 san verək */
+    stg.cd = cdOk;
+
+    var blocksOk = core && netIdle && imgs && buildOk && cdOk && stOk;
     stg.blocks = blocksOk;
     if (dataOk && fontsOk && blocksOk &&
       D.readyState === "complete" &&
