@@ -1,5 +1,5 @@
 /* =====================================================================
-   DQ Materials v1.1 — Dərs materialları: etibarlı «Aç» / «Yüklə»
+   DQ Materials v1.2 — Dərs materialları: etibarlı «Aç» / «Yüklə»
    ---------------------------------------------------------------------
    app.js, dq-core.js və dq-admin.js-dən SONRA qoşulur.
 
@@ -473,12 +473,37 @@
   /* ------------------------------------------------------------------
      Admin: Storage-ə yükləmə
   ------------------------------------------------------------------ */
-  function adminTok() {
-    try { var s = JSON.parse(localStorage.getItem(ADM_TOK) || "null"); return s && s.e > Date.now() ? s.t : null; } catch (e) { return null; }
+  /* Token mənbələri (ardıcıllıqla): 1) dq_adm_tok (etibarlıdırsa), 2) Supabase
+     sessiyası (müddəti bitibsə avtomatik yenilənir), 3) köhnə açar formaları. */
+  function jwtExp(t) {
+    try { return JSON.parse(atob(String(t).split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).exp * 1000; } catch (e) { return 0; }
+  }
+  async function adminTok() {
+    try {
+      var s = JSON.parse(localStorage.getItem(ADM_TOK) || "null");
+      if (typeof s === "string") s = { t: s, e: jwtExp(s) };
+      if (s && s.t && (s.e || jwtExp(s.t)) > Date.now() + 15000) return s.t;
+    } catch (e) { }
+    try {
+      if (typeof _supabase !== "undefined" && _supabase.auth) {
+        var r = await _supabase.auth.getSession();
+        var ss = r && r.data && r.data.session;
+        if (ss && ss.access_token) {
+          if (ss.expires_at && ss.expires_at * 1000 < Date.now() + 15000) {
+            var rr = await _supabase.auth.refreshSession();
+            ss = rr && rr.data && rr.data.session;
+          }
+          if (ss && ss.access_token) {
+            try { localStorage.setItem(ADM_TOK, JSON.stringify({ t: ss.access_token, e: jwtExp(ss.access_token) })); } catch (e) { }
+            return ss.access_token;
+          }
+        }
+      }
+    } catch (e) { }
+    return null;
   }
   function xhrUpload(path, file, prog) {
-    return new Promise(function (res, rej) {
-      var tok = adminTok();
+    return adminTok().then(function (tok) { return new Promise(function (res, rej) {
       if (!tok) return rej(Object.assign(new Error("Admin sessiyası bitib — yenidən daxil olun"), { auth: 1 }));
       var x = new XMLHttpRequest();
       x.open("POST", SB + "/storage/v1/object/" + BUCKET + "/" + path);
@@ -489,16 +514,20 @@
       x.upload.onprogress = function (e) { e.lengthComputable && prog && prog(e.loaded / e.total); };
       x.onload = function () {
         if (x.status >= 200 && x.status < 300) return res();
+        if (x.status === 401) return rej(Object.assign(new Error("Admin sessiyası bitib — yenidən daxil olun"), { auth: 1, status: 401 }));
         var m = ""; try { m = JSON.parse(x.responseText); m = m.message || m.error || ""; } catch (e) { m = x.responseText; }
         rej(Object.assign(new Error(m || ("HTTP " + x.status)), { status: x.status }));
       };
       x.onerror = function () { rej(new Error("Şəbəkə xətası")); };
       x.send(file);
-    });
+    }); });
   }
   function storageDel(path) {
-    var tok = adminTok(); if (!tok || !path) return Promise.resolve();
-    return fetch(SB + "/storage/v1/object/" + BUCKET + "/" + path, { method: "DELETE", headers: { apikey: KEY, Authorization: "Bearer " + tok } }).catch(function () { });
+    if (!path) return Promise.resolve();
+    return adminTok().then(function (tok) {
+      if (!tok) return;
+      return fetch(SB + "/storage/v1/object/" + BUCKET + "/" + path, { method: "DELETE", headers: { apikey: KEY, Authorization: "Bearer " + tok } });
+    }).catch(function () { });
   }
   function readB64(file) {
     return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.onerror = rej; fr.readAsDataURL(file); });
@@ -517,7 +546,7 @@
       if (rows[i].file.size > STORAGE_MAX) return alert('"' + nm + '" faylı ' + STORAGE_MAX / 1e6 + " MB-dan böyükdür.");
     }
     await V2.probe();
-    var prog = DM.$("dm-prog"), btn = DM.$("dm-up"), ok = 0, fail = [], legacyUsed = 0;
+    var prog = DM.$("dm-prog"), btn = DM.$("dm-up"), ok = 0, fail = [], legacyUsed = 0, authLost = false;
     btn.disabled = true;
     try {
       for (var k = 0; k < rows.length; k++) {
@@ -525,21 +554,21 @@
         var tag = (k + 1) + " / " + rows.length;
         prog.textContent = "Yüklənir " + tag + " …";
         var rec = { title: title, sub: sub, no: no, name: file.name, size: file.size, ts: new Date().toISOString() }, path = null;
-        if (V2.mode === "cloud" && storageOK !== false) {
+        if (V2.mode === "cloud" && storageOK !== false && !authLost) {
           var p = "pdf/" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8) + ".pdf";
           try {
             await xhrUpload(p, file, function (f) { prog.textContent = "Yüklənir " + tag + " · " + Math.round(f * 100) + "%"; });
             path = p; storageOK = true;
             rec.url = SB + "/storage/v1/object/public/" + BUCKET + "/" + p; rec.path = p;
           } catch (e) {
-            if (e.auth) { fail.push(title + ": " + e.message); break; }
-            storageOK = false;                              /* bucket yoxdur / icazə yoxdur → köhnə üsul */
+            if (e.auth) { authLost = true; }                /* token yoxdur: Storage bu dəfə atlanır, baza yolu ilə davam */
+            else storageOK = false;                         /* bucket yoxdur / icazə yoxdur → köhnə üsul */
             console.warn("[dq-materials] Storage alınmadı, köhnə üsula keçilir:", e.message);
           }
         }
         if (!path) {
           if (V2.mode === "cloud" ? file.size > LEGACY_MAX : file.size > 4e6) {
-            fail.push(title + ": Storage qurulmayıb (materials.sql), köhnə üsul isə " + (V2.mode === "cloud" ? 10 : 4) + " MB-dan böyük faylı qəbul etmir");
+            fail.push(title + ": " + (authLost ? "admin sessiyası bitib — yenidən daxil olun (Storage-ə yükləmək üçün lazımdır)" : "Storage qurulmayıb (materials.sql)") + "; ehtiyat üsul " + (V2.mode === "cloud" ? 10 : 4) + " MB-dan böyük faylı qəbul etmir");
             continue;
           }
           rec.data = await readB64(file); legacyUsed++;
@@ -555,6 +584,7 @@
     try { DM.renumber(); } catch (e) { }
     if (ok) toast(ok + " material əlavə olundu ✅" + (legacyUsed ? " (köhnə üsul)" : ""));
     if (fail.length) alert("❌ Yazılmayanlar:\n" + fail.join("\n"));
+    else if (legacyUsed && authLost) toast("Admin sessiyası yenilənmədi — fayl ehtiyat üsulla yazıldı. Yenidən daxil olun");
     else if (legacyUsed && storageOK === false) toast("Məsləhət: materials.sql-i işlədin — fayllar daha sürətli açılar");
     try { await DM.load(); } catch (e) { }
   }
