@@ -4013,8 +4013,10 @@ setInterval(wrap,700);wrap();
     at: "",
     note: "",
     secs: true,
-    done: "İmtahan başlayıb. Uğurlar!",
+    done: "🍀 Uğurlar!",
     hide: 3,
+    wish: 12,
+    list: [],
     btn: "",
     url: ""
   };
@@ -4053,15 +4055,32 @@ setInterval(wrap,700);wrap();
     c.hide = isNaN(h) ? DEF.hide : Math.max(0, Math.min(365, h));
     c.title = String(c.title || DEF.title).trim() || DEF.title;
     c.at = String(c.at || "");
+    var w = parseInt(c.wish, 10);
+    c.wish = isNaN(w) ? DEF.wish : Math.max(0, Math.min(720, w));
+    /* əvvəlcədən yazılmış növbəti imtahanlar */
+    c.list = (Array.isArray(c.list) ? c.list : []).map(function (x) {
+      return x ? { title: String(x.title || "").trim().slice(0, 120), at: String(x.at || ""), note: String(x.note || "").trim().slice(0, 160) } : null;
+    }).filter(function (x) { return x && !isNaN(toMs(x.at)); });
     return c;
   }
+  /* Bütün imtahanlar (əsas + növbəti) tarix üzrə sıralanır */
+  function items(c) {
+    var a = [];
+    if (!isNaN(toMs(c.at))) a.push({ title: c.title, at: c.at, note: c.note, t: toMs(c.at) });
+    (c.list || []).forEach(function (x) {
+      a.push({ title: x.title || c.title, at: x.at, note: x.note, t: toMs(x.at) });
+    });
+    return a.sort(function (x, y) { return x.t - y.t; });
+  }
+  /* Hansı imtahan göstərilir: gələcək olan ən yaxın; imtahan keçəndən sonra
+     "Uğurlar" yazısı c.wish saat qalır, sonra taymer avtomatik növbəti imtahana keçir */
   function state(c, now) {
-    var t = toMs(c.at);
-    if (isNaN(t)) return { k: "none" };
-    var d = t - now;
-    if (d > 0) return { k: "run", t: t, d: d };
-    if (c.hide > 0 && now - t > c.hide * D) return { k: "gone", t: t };
-    return { k: "done", t: t };
+    var a = items(c), p = null, n = null, i;
+    for (i = 0; i < a.length; i++) { if (a[i].t <= now) p = a[i]; else if (!n) n = a[i]; }
+    if (!p && !n) return { k: "none" };
+    if (n && (!p || now - p.t >= c.wish * H)) return { k: "run", t: n.t, d: n.t - now, it: n };
+    if (!n && c.hide > 0 && now - p.t > c.hide * D) return { k: "gone", t: p.t, it: p };
+    return { k: "done", t: p.t, it: p, next: n };
   }
 
   /* ---------- kartın çəkilməsi ---------- */
@@ -4072,19 +4091,21 @@ setInterval(wrap,700);wrap();
     var cells = [["d", "Gün"], ["h", "Saat"], ["m", "Dəqiqə"]];
     if (c.secs) cells.push(["s", "Saniyə"]);
     var url = safeUrl(c.url), btn = String(c.btn || "").trim();
-    var sub = "📅 " + fmtDate(st.t) + " (Bakı vaxtı)" + (c.note ? " · " + esc(c.note) : "");
+    var it = st.it || { title: c.title, note: c.note };
+    var sub = "📅 " + fmtDate(st.t) + " (Bakı vaxtı)" + (it.note ? " · " + esc(it.note) : "");
     var badge = !c.on ? '<span class="dqcd-off">Gizlidir</span>' : "";
     el.className = "dqcd" + (st.k === "done" ? " is-done" : "");
     el.innerHTML =
       '<div class="dqcd-in">' +
       '<div class="dqcd-hd"><span class="dqcd-ic" aria-hidden="true"><i class="fa-solid fa-hourglass-half"></i></span>' +
-      '<div class="dqcd-tx"><div class="dqcd-t">' + esc(c.title) + badge + '</div><div class="dqcd-d">' + sub + "</div></div></div>" +
+      '<div class="dqcd-tx"><div class="dqcd-t">' + esc(it.title) + badge + '</div><div class="dqcd-d">' + sub + "</div></div></div>" +
       (st.k === "run"
-        ? '<div class="dqcd-cells" role="timer" aria-label="' + esc(c.title) + '">' +
+        ? '<div class="dqcd-cells" role="timer" aria-label="' + esc(it.title) + '">' +
         cells.map(function (x) {
           return '<div class="dqcd-c"><b data-u="' + x[0] + '">00</b><small>' + x[1] + "</small></div>";
         }).join("") + "</div>"
-        : '<div class="dqcd-fin">' + esc(c.done || DEF.done) + "</div>") +
+        : '<div class="dqcd-fin">' + esc(c.done || DEF.done) + "</div>" +
+        (st.next ? '<div class="dqcd-nx">Növbəti: <b>' + esc(st.next.title) + "</b> · " + fmtDate(st.next.t) + "</div>" : "")) +
       (url && btn ? '<a class="dqcd-btn" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(btn) + " →</a>" : "") +
       "</div>";
     if (st.k === "run") {
@@ -4102,6 +4123,11 @@ setInterval(wrap,700);wrap();
       };
       run();
       el.__tm = setInterval(run, 1000);
+    } else if (st.k === "done" && st.next) {
+      /* "Uğurlar" müddəti bitəndə avtomatik növbəti imtahana keç */
+      el.__tm = setInterval(function () {
+        if (state(c, Date.now()).k !== "done") draw(el, c, force);
+      }, 15000);
     }
     return true;
   }
@@ -4147,7 +4173,9 @@ setInterval(wrap,700);wrap();
       '<label class="dqcd-l">Əlavə qeyd (istəyə bağlı: imtahan növü, yer və s.)<input class="form-control" data-f="note" maxlength="160" placeholder="Məs: Dövlət qulluğuna qəbul imtahanı"></label>' +
       '<label class="dqcd-sw"><input type="checkbox" data-f="secs"> <span>Saniyəni göstər</span></label>' +
       '<label class="dqcd-l">İmtahan vaxtı çatdıqda göstəriləcək mətn<input class="form-control" data-f="done" maxlength="140"></label>' +
-      '<label class="dqcd-l">İmtahandan sonra neçə gün göstərilsin <small>(0 = silinənədək)</small><input class="form-control" type="number" min="0" max="365" data-f="hide"></label>' +
+      '<label class="dqcd-l">Növbəti imtahana keçməzdən əvvəl «Uğurlar» yazısı neçə saat qalsın <small>(0 = dərhal keç)</small><input class="form-control" type="number" min="0" max="720" data-f="wish"></label>' +
+      '<div class="dqcd-ls"><b>📅 Növbəti imtahanlar</b><small class="dqcd-help">Ad və tarixi əvvəlcədən yazın. Hazırkı imtahan keçəndən sonra taymer özü ən yaxın növbəti imtahana keçəcək.</small><div data-r="list"></div><button type="button" class="btn btn-secondary" data-a="add">➕ İmtahan əlavə et</button></div>' +
+      '<label class="dqcd-l">Sonuncu imtahandan sonra neçə gün göstərilsin <small>(0 = silinənədək)</small><input class="form-control" type="number" min="0" max="365" data-f="hide"></label>' +
       '<div class="dqcd-two">' +
       '<label class="dqcd-l">Düymə mətni (istəyə bağlı)<input class="form-control" data-f="btn" maxlength="40" placeholder="Məs: DİM-in saytı"></label>' +
       '<label class="dqcd-l">Düymə linki<input class="form-control" data-f="url" maxlength="300" placeholder="https://..."></label>' +
@@ -4166,14 +4194,38 @@ setInterval(wrap,700);wrap();
     var f = function (k) { return host.querySelector('[data-f="' + k + '"]'); };
     f("on").checked = !!c.on;
     f("secs").checked = !!c.secs;
-    ["title", "at", "note", "done", "hide", "btn", "url"].forEach(function (k) { f(k).value = c[k] == null ? "" : c[k]; });
+    ["title", "at", "note", "done", "hide", "wish", "btn", "url"].forEach(function (k) { f(k).value = c[k] == null ? "" : c[k]; });
+    var box = host.querySelector('[data-r="list"]');
+    box.innerHTML = "";
+    (c.list || []).forEach(function (x) { addRow(host, x); });
+  }
+  function addRow(host, x) {
+    x = x || {};
+    var r = document.createElement("div");
+    r.className = "dqcd-row";
+    r.innerHTML = '<input class="form-control" data-l="title" maxlength="120" placeholder="Başlıq (kartda göründüyü kimi), məs: Sürücülük imtahanına qalan vaxt">' +
+      '<input class="form-control" type="datetime-local" data-l="at">' +
+      '<input class="form-control" data-l="note" maxlength="160" placeholder="Qeyd (istəyə bağlı)">' +
+      '<button type="button" class="btn btn-danger" data-a="del" title="Sil">✕</button>';
+    r.querySelector('[data-l="title"]').value = x.title || "";
+    r.querySelector('[data-l="at"]').value = x.at || "";
+    r.querySelector('[data-l="note"]').value = x.note || "";
+    host.querySelector('[data-r="list"]').appendChild(r);
+    return r;
+  }
+  function readList(host) {
+    return [].map.call(host.querySelectorAll(".dqcd-row"), function (r) {
+      var g = function (k) { return r.querySelector('[data-l="' + k + '"]').value; };
+      return { title: g("title"), at: g("at"), note: g("note") };
+    });
   }
   function read(host) {
     var f = function (k) { return host.querySelector('[data-f="' + k + '"]'); };
     return norm({
       on: f("on").checked, secs: f("secs").checked, title: f("title").value,
       at: f("at").value, note: f("note").value.trim(), done: f("done").value.trim(),
-      hide: f("hide").value, btn: f("btn").value.trim(), url: f("url").value.trim()
+      hide: f("hide").value, wish: f("wish").value, list: readList(host),
+      btn: f("btn").value.trim(), url: f("url").value.trim()
     });
   }
   function msg(host, t, kind) {
@@ -4204,17 +4256,21 @@ setInterval(wrap,700);wrap();
       if (!b) return;
       var a = b.getAttribute("data-a");
       if (b.disabled) return;
+      if (a === "add") { addRow(host).querySelector("input").focus(); return; }
+      if (a === "del") { var rw = b.closest(".dqcd-row"); rw && rw.remove(); repaint(); return; }
       if (a === "save") {
         var c = read(host);
-        if (c.on && isNaN(toMs(c.at))) { msg(host, "Tarix və saatı seçin.", "err"); return; }
+        var bad = readList(host).some(function (x) { return (x.title.trim() || x.note.trim()) && isNaN(toMs(x.at)) || (!x.title.trim() && !isNaN(toMs(x.at))); });
+        if (bad) { msg(host, "Növbəti imtahanlarda hər sətir üçün həm başlıq, həm tarix yazın.", "err"); return; }
+        if (c.on && !items(c).length) { msg(host, "Tarix və saatı seçin.", "err"); return; }
         if (c.btn && !safeUrl(c.url)) { msg(host, "Düymə üçün düzgün link daxil edin (https://...).", "err"); return; }
         if (!c.btn) c.url = "";
         b.disabled = true; msg(host, "Yadda saxlanılır…");
         try {
           await V2.put(COL, c, S.rec && S.rec._id);
           var after = await load();
-          if (after.at !== c.at || after.title !== c.title) throw new Error("Yazılan məlumat təsdiqlənmədi");
-          var past = !isNaN(toMs(c.at)) && toMs(c.at) < Date.now();
+          if (after.at !== c.at || after.title !== c.title || after.list.length !== c.list.length) throw new Error("Yazılan məlumat təsdiqlənmədi");
+          var past = items(c).length && items(c)[items(c).length - 1].t < Date.now();
           msg(host, past ? "Saxlanıldı. Qeyd: seçilən tarix keçmişdədir, kart yalnız «" + c.done + "» mətni ilə göstəriləcək." : "Saxlanıldı ✅ Dəyişiklik ana səhifəyə tətbiq olundu.", "ok");
           toast("Geri sayım saxlanıldı ✅");
           mount();
