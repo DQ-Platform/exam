@@ -1,5 +1,5 @@
 /* =====================================================================
-   DQ Materials v1.2 — Dərs materialları: etibarlı «Aç» / «Yüklə»
+   DQ Materials v1.3 — Dərs materialları: etibarlı «Aç» / «Yüklə»
    ---------------------------------------------------------------------
    app.js, dq-core.js və dq-admin.js-dən SONRA qoşulur.
 
@@ -479,6 +479,7 @@
     try { return JSON.parse(atob(String(t).split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).exp * 1000; } catch (e) { return 0; }
   }
   async function adminTok() {
+    try { if (typeof window.__dqAdminToken === "function") { var ft = await window.__dqAdminToken(); if (ft) return ft; } } catch (e) { }
     try {
       var s = JSON.parse(localStorage.getItem(ADM_TOK) || "null");
       if (typeof s === "string") s = { t: s, e: jwtExp(s) };
