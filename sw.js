@@ -2,7 +2,7 @@
    Statik fayllar: keşdən dərhal + arxa fonda yenilənmə. HTML: əvvəl şəbəkə, olmasa keş.
    Supabase / API sorğularına toxunmur (məlumat həmişə təzə qalır). */
 const V = "dq-v1";
-const CORE = ["/", "/index.html", "/app.js?v=20"];
+const CORE = ["/", "/index.html", "/app.js?v=21"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(CORE).catch(() => {})).then(() => self.skipWaiting()));
 });
