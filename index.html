@@ -3809,9 +3809,11 @@ function makeFooter(h){
  h.appendChild(f);
  try{if(window.HOME&&HOME.fab)HOME.fab()}catch(e){}
  return f}
-function makeStats(h,ft){
+function makeStats(h,ft,vv){
  var c=null;try{c=JSON.parse(localStorage.getItem("dq_stats_cache_v2")||"null")}catch(e){}
+ if(vv)c={v:vv};
  if(!c||!c.v)return;
+ if(h.querySelector("#dq-stats"))return;
  var L=[["users","fa-users","\u0130stifad\u0259\u00e7i say\u0131"],["exams","fa-file-pen","\u0130mtahan say\u0131"],["mocks","fa-graduation-cap","S\u0131naq say\u0131"],["qs","fa-circle-question","Sual say\u0131"]];
  var b=D.createElement("div");b.id="dq-stats";b.className="dqst";
  b.innerHTML=L.map(function(x){var n=+c.v[x[0]]||0;
@@ -3838,11 +3840,12 @@ function run(){
  else if(!shown(ft))force(ft,h);
  var st=h.querySelector("#dq-stats");
  if(!st){sTry++;
-  if(sTry===1||sTry===3){try{if(window.DQST&&DQST.mount)DQST.mount(true)}catch(e){}}
-  else if(sTry>=5&&!calcing){calcing=true;
-   calc().then(function(){var h2=home();if(h2&&!h2.querySelector("#dq-stats"))makeStats(h2,h2.querySelector(".v3-ft"))}).then(function(){calcing=false},function(){calcing=false})}}
+  if(sTry===1){try{if(window.DQST&&DQST.mount)DQST.mount(true)}catch(e){}}
+  var h1=home();if(h1&&!h1.querySelector("#dq-stats")){makeStats(h1,h1.querySelector(".v3-ft"))}
+  if(!calcing&&!(home()||h).querySelector("#dq-stats")||(!calcing&&sTry<=2)){calcing=true;
+   calc().then(function(v){var h2=home();if(h2){var o=h2.querySelector("#dq-stats");if(o)o.remove();makeStats(h2,h2.querySelector(".v3-ft"),v)}}).then(function(){calcing=false},function(){calcing=false})}}
  else if(!shown(st))force(st,h)}
-setInterval(run,3000);
+setInterval(run,3000);[400,1200,2200].forEach(function(t){setTimeout(run,t)});
 D.addEventListener("visibilitychange",function(){if(!D.hidden)setTimeout(run,300)});
 addEventListener("pageshow",function(){setTimeout(run,300)});
 })();
