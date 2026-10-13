@@ -3750,7 +3750,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 
 
 
-<script src="app.js?v=23"></script>
+<script src="app.js?v=24"></script>
 <script src="dq-lock.js?v=1"></script>
 <script src="yspro.js?v=1"></script>
 <script src="dq-core.js?v=3"></script>
@@ -3758,6 +3758,34 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <script src="dq-materials.js?v=3"></script>
 <script src="dq-live.js?v=1"></script>
 <script src="chatbot.js?v=1" defer></script>
+<style id="dq-fix-link-css">
+.dq-linkbtn{display:flex;align-items:center;justify-content:center;gap:8px;margin:16px 0 4px;padding:13px 18px;border-radius:14px;background:linear-gradient(135deg,#1e4fa3,#2f63bd);color:#fff!important;font-weight:800;font-size:15px;line-height:1.3;text-align:center;text-decoration:none!important;box-shadow:0 8px 20px #1e4fa359;-webkit-tap-highlight-color:transparent}
+.dq-linkbtn:active{transform:scale(.98)}
+.nw-dc p a,.dqn-tx a{color:#1e4fa3;text-decoration:underline;word-break:break-all;-webkit-user-select:text;user-select:text}
+</style>
+<script id="dq-fix-home-heal">
+/* Ana səhifədə statistika kartları və footer gec/gizli qalarsa, avtomatik bərpa edir */
+(function(){"use strict";
+var D=document,seen=new WeakMap(),tries=0;
+function home(){return D.getElementById("v3-home")}
+function reveal(){var h=home();if(!h)return;var now=Date.now();
+ [].forEach.call(h.children,function(k){
+  if(!k.classList||!k.classList.contains("dq-rv")||k.classList.contains("in"))return;
+  var t=seen.get(k);if(!t){seen.set(k,now);return}
+  if(now-t>2500)k.classList.add("in")})}
+function stats(){var h=home();if(!h||!h.classList.contains("active")||D.hidden)return;
+ if(h.querySelector("#dq-stats")||!h.querySelector(".v3-hero")||tries>=4)return;
+ if(window.DQST&&window.DQST.mount){tries++;try{window.DQST.mount(true)}catch(e){}}}
+function tick(){reveal();stats()}
+[3000,5000,8000,12000,18000,30000].forEach(function(ms){setTimeout(tick,ms)});
+D.addEventListener("visibilitychange",function(){if(!D.hidden)setTimeout(tick,400)});
+addEventListener("pageshow",function(){setTimeout(tick,400)});
+addEventListener("scroll",function(){setTimeout(reveal,2600)},{passive:true,once:true});
+function watch(){var h=home();if(!h){setTimeout(watch,500);return}
+ var t=0;new MutationObserver(function(){clearTimeout(t);t=setTimeout(tick,3000)}).observe(h,{childList:true})}
+watch();
+})();
+</script>
 <style id="dq-home-polish-css">
 /* ===== DQ Home Polish ===== */
 /* 1) Sağ kartın şəkli: üzən ikon yazının üstünə düşmür, yazı həmişə aydın oxunur */
