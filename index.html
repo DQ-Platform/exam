@@ -4288,5 +4288,55 @@ p{text-wrap:pretty}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 </style>
+<style id="dq-home-match">
+/* ===== Ana səhifə: şəkildəki düzülüş (qeydiyyat zolağı → 2 kart → geri sayım → statistika → footer) ===== */
+@media(min-width:600px){
+ html #v3-home.active{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:flex-start!important;align-content:flex-start!important;column-gap:22px!important}
+ html #v3-home.active>*{width:100%}
+ /* sıra: banner (3) → sol kart (4) + sağ kart (5) → geri sayım (6) → statistika (7) → footer (9) */
+ html #v3-home.active>#lxp-ban{order:3}
+ html #v3-home.active>#dt-home{order:4}
+ html #v3-home.active>#dt-grid{order:5}
+ html #v3-home.active>#dq-count{order:6}
+ html #v3-home.active>#dq-stats{order:7}
+ html #v3-home.active>.v3-ft{order:9}
+ /* qeydiyyat zolağı */
+ html #v3-home #lxp-ban{width:calc(100% - 52px)!important;max-width:1180px!important;margin:26px auto 0!important;padding:0!important;box-sizing:border-box}
+ html #v3-home #lxp-ban .lxp-bi{flex-wrap:nowrap!important;padding:18px 20px!important;border-radius:22px!important;background:linear-gradient(110deg,#17154a,#2e2a86 55%,#5b4f6e)!important;box-shadow:0 14px 34px #1e1b4b47!important}
+ html #v3-home #lxp-ban b{font-size:19px;font-weight:800}
+ html #v3-home #lxp-ban span{font-size:14px;opacity:.9}
+ html #v3-home #lxp-ban button{width:auto!important;flex:0 0 auto!important;padding:13px 28px!important;border-radius:14px!important;background:linear-gradient(135deg,#fcd34d,#f59e0b)!important;color:#4a3000!important;font-weight:800;box-shadow:0 6px 16px #f59e0b55!important}
+ /* 600–820px: kartlar alt-alta, tam en */
+ html #v3-home.active:not(.dq11-noex)>#dt-home,
+ html #v3-home.active:not(.dq11-noex)>#dt-grid{width:calc(100% - 32px)!important;max-width:none!important;padding:0!important;margin:16px auto 0!important;display:flex!important}
+ /* geri sayım zolağı */
+ html #v3-home #dq-count.dqcd{width:calc(100% - 52px)!important;max-width:1180px!important;margin:6px auto 0!important;box-sizing:border-box}
+ html #v3-home #dq-count .dqcd-in{border-radius:22px!important}
+ /* statistika kartları: 4 yan-yana, geri sayımla eyni en */
+ html #v3-home #dq-stats.dqst{width:calc(100% - 52px)!important;max-width:1180px!important;gap:14px!important;margin:62px auto 60px!important}
+ html #v3-home #dq-stats.dqst .dqst-c{padding:20px 8px 16px!important;border-radius:20px!important}
+ html #v3-home #dq-stats.dqst .dqst-c b{font-size:30px!important}
+ html #v3-home #dq-stats.dqst .dqst-c small{font-size:12.5px!important}
+}
+@media(min-width:821px){
+ /* iki kart: sol = Günün tövsiyə testi, sağ = Sınaq; bərabər hündürlük, üst-üstə düşmür */
+ html #v3-home.active:not(.dq11-noex)>#dt-home,
+ html #v3-home.active:not(.dq11-noex)>#dt-grid{width:calc((100% - 54px)/2)!important;max-width:none!important;padding:0!important;margin-top:22px!important;margin-bottom:0!important;align-self:stretch!important}
+ html #v3-home.active:not(.dq11-noex)>#dt-home{margin-left:16px!important;margin-right:0!important}
+ html #v3-home.active:not(.dq11-noex)>#dt-grid{margin-left:0!important;margin-right:16px!important;display:flex!important}
+ html #v3-home.active:not(.dq-nogrid)>#dt-grid .lx-on{grid-template-columns:minmax(0,1fr)!important}
+ html #v3-home #dt-home .dt-day{height:100%!important;border-radius:28px!important;overflow:hidden}
+ html #v3-home #dt-grid .lx-card{border-radius:22px!important}
+}
+/* dar ekran (telefon): tək sütun, eyni sıra */
+@media(max-width:599px){
+ html #v3-home.active>#lxp-ban{order:3}
+ html #v3-home.active>#dt-home{order:4}
+ html #v3-home.active>#dt-grid{order:5}
+ html #v3-home.active>#dq-count{order:6}
+ html #v3-home.active>#dq-stats{order:7}
+ html #v3-home.active>.v3-ft{order:9}
+}
+</style>
 </body>
 </html>
