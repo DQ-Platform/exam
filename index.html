@@ -2264,6 +2264,19 @@ html.dq-hold:not(.dq13-dark){background:#061a47}
 /* Görünüş panelində 3 düymə: Gündüz · Gecə · Sistem */
 #dq13-pn .seg button{padding:9px 4px;font-size:12px;white-space:nowrap}
 </style>
+<style id="dq-timer-css">
+/* Taymer həmişə ekranın yuxarısında qalır (uzun sual/şəkil scroll olunsa belə) */
+#exam-screen .exam-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:1000;box-shadow:0 6px 18px rgba(15,23,42,.22)}
+#exam-screen .timer-box{flex:none;min-height:36px}
+#exam-screen .timer{display:inline-block;min-width:84px;text-align:center;font-variant-numeric:tabular-nums;transition:color .3s}
+#exam-screen .timer.is-low{color:#fbbf24}
+#exam-screen .timer.is-crit{color:#f87171;animation:dqTimerPulse 1s ease-in-out infinite}
+#exam-screen .timer-box.is-hidden .timer{display:none}
+#exam-screen .timer-box.is-hidden:before{content:"Vaxt gizlədilib";font-size:12px;font-weight:600;color:#cbd5e1}
+#exam-screen .eye-toggle-btn{padding:6px;margin:-6px}
+@keyframes dqTimerPulse{0%,100%{opacity:1}50%{opacity:.45}}
+@media(max-width:600px){#exam-screen .exam-header{padding:10px 12px;gap:8px}#active-exam-title{font-size:13px;line-height:1.3;min-width:0}}
+</style>
 </head>
 <body class="v3on" oncontextmenu="return false;">
 <noscript><p>DQPlatform Exam (DQPlatform.exam) — Azərbaycanda dövlət qulluğuna qəbul üçün onlayn sınaq, fənn testləri və qanunvericilik hazırlığı platforması. Saytdan istifadə üçün JavaScript-i aktiv edin.</p></noscript>
@@ -2400,8 +2413,8 @@ window.__dqSplashCalc=calc;window.DQSplash={complete:complete};
 <div class="exam-header">
 <span id="active-exam-title">Dövlət Qulluğu Vəzifələri Üzrə Sınaq</span>
 <div class="timer-box">
-<span class="timer" id="timer">03:00:00</span>
-<i class="fa-solid fa-eye eye-toggle-btn" id="timer-eye-btn" onclick="toggleTimerVisibility()" title="Vaxtı gizlə / göstər"></i>
+<span class="timer" id="timer" role="timer" aria-live="off">03:00:00</span>
+<i class="fa-solid fa-eye eye-toggle-btn" id="timer-eye-btn" role="button" tabindex="0" aria-label="Vaxtı gizlə / göstər" onclick="toggleTimerVisibility()" onkeydown="(event.key==='Enter'||event.key===' ')&&(event.preventDefault(),toggleTimerVisibility())" title="Vaxtı gizlə / göstər"></i>
 </div>
 </div>
 <div class="exam-layout">
