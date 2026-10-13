@@ -3759,6 +3759,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <script src="dq-live.js?v=1"></script>
 <script src="chatbot.js?v=1" defer></script>
 <style id="dq-fix-link-css">
+#v3-home .v3-ft{min-height:0!important;margin-bottom:0!important}
 .dq-linkbtn{display:flex;align-items:center;justify-content:center;gap:8px;margin:16px 0 4px;padding:13px 18px;border-radius:14px;background:linear-gradient(135deg,#1e4fa3,#2f63bd);color:#fff!important;font-weight:800;font-size:15px;line-height:1.3;text-align:center;text-decoration:none!important;box-shadow:0 8px 20px #1e4fa359;-webkit-tap-highlight-color:transparent}
 .dq-linkbtn:active{transform:scale(.98)}
 .nw-dc p a,.dqn-tx a{color:#1e4fa3;text-decoration:underline;word-break:break-all;-webkit-user-select:text;user-select:text}
@@ -3816,6 +3817,16 @@ function makeStats(h,ft){
  b.innerHTML=L.map(function(x){var n=+c.v[x[0]]||0;
   return'<div class="dqst-c"><span class="dqst-ic"><i class="fa-solid '+x[1]+'"></i></span><b>'+n+(n?"+":"")+'</b><small>'+x[2]+'</small></div>'}).join("");
  h.insertBefore(b,ft||null)}
+var sTry=0,calcing=false;
+async function calc(){var v={users:0,exams:0,mocks:0,qs:0};
+ try{var r=await _supabase.from("exam_questions").select("*",{count:"exact",head:true});v.qs=r&&r.count||0}catch(e){}
+ try{var regs=(await V2.list("regs")).filter(function(x){return x.status==="approved"}).length;
+  var r2=await _supabase.from("allowed_students").select("*",{count:"exact",head:true});v.users=Math.max(regs,r2&&r2.count||0)}catch(e){}
+ try{var res=await _supabase.from("exam_questions").select("exam_id,category").limit(20000),ex={},sn={};
+  ((res&&res.data)||[]).forEach(function(q){ex[q.exam_id]=1;sn[q.exam_id+"|"+q.category]=1});
+  v.exams=Object.keys(ex).length;v.mocks=Object.keys(sn).length}catch(e){}
+ try{localStorage.setItem("dq_stats_cache_v2",JSON.stringify({t:Date.now(),v:v}))}catch(e){}
+ return v}
 var runs=0;
 function run(){
  var h=home();
@@ -3826,7 +3837,10 @@ function run(){
  if(!ft)ft=makeFooter(h);
  else if(!shown(ft))force(ft,h);
  var st=h.querySelector("#dq-stats");
- if(!st){if(runs>3)makeStats(h,ft)}
+ if(!st){sTry++;
+  if(sTry===1||sTry===3){try{if(window.DQST&&DQST.mount)DQST.mount(true)}catch(e){}}
+  else if(sTry>=5&&!calcing){calcing=true;
+   calc().then(function(){var h2=home();if(h2&&!h2.querySelector("#dq-stats"))makeStats(h2,h2.querySelector(".v3-ft"))}).then(function(){calcing=false},function(){calcing=false})}}
  else if(!shown(st))force(st,h)}
 setInterval(run,3000);
 D.addEventListener("visibilitychange",function(){if(!D.hidden)setTimeout(run,300)});
