@@ -4293,15 +4293,15 @@ p{text-wrap:pretty}
 @media(min-width:600px){
  html #v3-home.active{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:flex-start!important;align-content:flex-start!important;column-gap:22px!important}
  html #v3-home.active>*{width:100%}
- /* sıra: banner (3) → sol kart (4) + sağ kart (5) → geri sayım (6) → statistika (7) → footer (9) */
+ /* sıra: geri sayım (1) → banner (3) → sol kart (4) + sağ kart (5) → statistika (7) → footer (9) */
  html #v3-home.active>#lxp-ban{order:3}
  html #v3-home.active>#dt-home{order:4}
  html #v3-home.active>#dt-grid{order:5}
- html #v3-home.active>#dq-count{order:6}
+ html #v3-home.active>#dq-count{order:1}
  html #v3-home.active>#dq-stats{order:7}
  html #v3-home.active>.v3-ft{order:9}
  /* qeydiyyat zolağı */
- html #v3-home #lxp-ban{width:calc(100% - 52px)!important;max-width:1180px!important;margin:26px auto 0!important;padding:0!important;box-sizing:border-box}
+ html #v3-home #lxp-ban{width:calc(100% - 52px)!important;max-width:1180px!important;margin:16px auto 0!important;padding:0!important;box-sizing:border-box}
  html #v3-home #lxp-ban .lxp-bi{flex-wrap:nowrap!important;padding:18px 20px!important;border-radius:22px!important;background:linear-gradient(110deg,#17154a,#2e2a86 55%,#5b4f6e)!important;box-shadow:0 14px 34px #1e1b4b47!important}
  html #v3-home #lxp-ban b{font-size:19px;font-weight:800}
  html #v3-home #lxp-ban span{font-size:14px;opacity:.9}
@@ -4310,10 +4310,10 @@ p{text-wrap:pretty}
  html #v3-home.active:not(.dq11-noex)>#dt-home,
  html #v3-home.active:not(.dq11-noex)>#dt-grid{width:calc(100% - 32px)!important;max-width:none!important;padding:0!important;margin:16px auto 0!important;display:flex!important}
  /* geri sayım zolağı */
- html #v3-home #dq-count.dqcd{width:calc(100% - 52px)!important;max-width:1180px!important;margin:6px auto 0!important;box-sizing:border-box}
+ html #v3-home #dq-count.dqcd{width:calc(100% - 52px)!important;max-width:1180px!important;margin:12px auto 0!important;box-sizing:border-box}
  html #v3-home #dq-count .dqcd-in{border-radius:22px!important}
  /* statistika kartları: 4 yan-yana, geri sayımla eyni en */
- html #v3-home #dq-stats.dqst{width:calc(100% - 52px)!important;max-width:1180px!important;gap:14px!important;margin:62px auto 60px!important}
+ html #v3-home #dq-stats.dqst{width:calc(100% - 52px)!important;max-width:1180px!important;gap:14px!important;margin:22px auto 60px!important}
  html #v3-home #dq-stats.dqst .dqst-c{padding:20px 8px 16px!important;border-radius:20px!important}
  html #v3-home #dq-stats.dqst .dqst-c b{font-size:30px!important}
  html #v3-home #dq-stats.dqst .dqst-c small{font-size:12.5px!important}
@@ -4333,7 +4333,7 @@ p{text-wrap:pretty}
  html #v3-home.active>#lxp-ban{order:3}
  html #v3-home.active>#dt-home{order:4}
  html #v3-home.active>#dt-grid{order:5}
- html #v3-home.active>#dq-count{order:6}
+ html #v3-home.active>#dq-count{order:1}
  html #v3-home.active>#dq-stats{order:7}
  html #v3-home.active>.v3-ft{order:9}
 }
