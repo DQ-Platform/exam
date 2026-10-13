@@ -5999,8 +5999,11 @@ async function route(){
   if(pfin){
     for(var i=0;i<cand.length;i++){try{if(await permRow(pfin,cand[i])){await auto(cand[i],q.get("pad")||"",pfin);return}}catch(e){}}
     toast("Hazırda sizin üçün aktiv sessiya tapılmadı.");DQSESS.open();return}
-  if(cand.length===1)open(cand[0]);else DQSESS.open()}
-var n=0;(function wait(){if(ready()){setTimeout(route,2600);return}if(++n<80)setTimeout(wait,250)})();
+  if(cand.length===1){open(cand[0]);return}
+  /* Aktiv sessiya kartı olmasa da: link bir sınaq + bir qrup göstərirsə, giriş formu birbaşa açılır (icazə yenə FİN ilə yoxlanılır) */
+  if(!cand.length&&cats.length===1&&nos.length===1){open({exam_no:nos[0],cat:cats[0],title:"Sınaq "+nos[0]});return}
+  DQSESS.open()}
+var n=0;(function wait(){if(ready()){setTimeout(route,1200);return}if(++n<80)setTimeout(wait,250)})();
 })();
 ;
 
