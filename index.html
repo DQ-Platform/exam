@@ -3764,6 +3764,14 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 .dq-linkbtn:active{transform:scale(.98)}
 .nw-dc p a,.dqn-tx a{color:#1e4fa3;text-decoration:underline;word-break:break-all;-webkit-user-select:text;user-select:text}
 </style>
+<style id="dq-stats-row-fix">
+/* Statistika kartları: həmişə 4 kart yan-yana, footer-dən əvvəl (nümunə şəkil kimi) */
+#v3-home #dq-stats.dqst,#dq-stats.dqst{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:14px!important;max-width:none!important;width:auto!important;margin:22px 26px 34px!important;padding:0!important;grid-auto-flow:row!important}
+#dq-stats.dqst .dqst-c{width:auto!important;min-width:0!important;height:auto!important;min-height:0!important;margin:0!important;padding:20px 8px 18px!important;flex:none!important;grid-column:auto!important;grid-row:auto!important}
+#dq-stats.dqst .dqst-c b{font-size:34px!important}
+@media(max-width:860px){#dq-stats.dqst{gap:10px!important;margin:18px 14px 28px!important}#dq-stats.dqst .dqst-c{padding:14px 4px 12px!important;border-radius:14px!important}#dq-stats.dqst .dqst-c b{font-size:24px!important}#dq-stats.dqst .dqst-ic{width:34px!important;height:34px!important;font-size:15px!important}}
+@media(max-width:560px){#dq-stats.dqst{gap:6px!important;margin:14px 8px 24px!important}#dq-stats.dqst .dqst-c{padding:10px 2px 9px!important;border-radius:12px!important;gap:4px!important}#dq-stats.dqst .dqst-c b{font-size:17px!important}#dq-stats.dqst .dqst-c small{font-size:9.5px!important;line-height:1.2}#dq-stats.dqst .dqst-ic{width:26px!important;height:26px!important;font-size:12px!important;border-radius:8px!important}}
+</style>
 <script id="dq-fix-home-heal">
 /* Ana səhifədə statistika kartları və footer gec/gizli qalarsa, avtomatik bərpa edir */
 (function(){"use strict";
