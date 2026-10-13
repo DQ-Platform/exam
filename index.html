@@ -80,11 +80,25 @@ if(NMO){
   PMO.prototype.takeRecords=function(){return this.__t()};
   window.MutationObserver=PMO;
 }
-var SI=window.setInterval;
+/* Adaptiv interval: DOM-yamaq dövrələri (hook/fix/sync/repair...) səhifə sakit olanda ~2 san-də bir işləyir.
+   Toxunuş, klik, naviqasiya və ya yeni DOM düyünü görünəndə dərhal əvvəlki sürətə qayıdır (2,5 san).
+   Zaman/sayğac kimi görünən (Date, tick, left, ++/--, finish...) dövrələrə TOXUNULMUR. */
+var SI=window.setInterval,CRIT=/Date|Timer|tick|left|[+-]{2}|\+=|-=|count|remain|finish|TICK|DUR|elapsed|secs?\b|\bend/i,
+    hot=Date.now()+12000;
+function warm(){var t=Date.now()+2500;if(t>hot)hot=t}
+["pointerdown","touchstart","keydown","input","change","click","popstate","hashchange","focusin","visibilitychange"].forEach(function(e){try{addEventListener(e,warm,{passive:true,capture:true})}catch(_){}});
+try{if(NMO)new NMO(function(l){for(var i=0;i<l.length;i++)if(l[i].addedNodes.length){warm();return}}).observe(document.documentElement,{childList:true,subtree:true})}catch(_){}
 window.setInterval=function(fn,d){
-  if(typeof fn==="function"&&d>=200&&d<1000){
-    var a=Array.prototype.slice.call(arguments,2);
-    return SI(function(){if(document.hidden)return;fn.apply(this,a)},d<300?300:d)
+  if(typeof fn==="function"&&d>=200&&d<1500){
+    var a=Array.prototype.slice.call(arguments,2),p=d<300?300:d,crit=!1,n=0,every;
+    try{crit=CRIT.test(Function.prototype.toString.call(fn))}catch(_){crit=!0}
+    every=Math.max(1,Math.ceil(2000/p));
+    (window.__dqIv=window.__dqIv||[]).push({d:p,crit:crit,name:fn.name||""});
+    return SI(function(){
+      if(d<1000&&document.hidden)return;
+      if(!crit&&Date.now()>hot&&(++n%every))return;
+      fn.apply(this,a)
+    },p)
   }
   return SI.apply(window,arguments)
 };
@@ -103,7 +117,7 @@ function go(u,n){return fetch(u,{headers:{apikey:K}}).then(function(r){if(r.stat
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<script id="dq11-early">(function(){try{var N=window.MutationObserver;if(N&&!N.__dq11){var W=function(cb){var rec=[],pend=0,self=null,run=function(){pend=0;var r=rec;if(rec=[],r.length)try{cb.call(self,r,self)}catch(e){console.error(e)}};self=new N(function(records){for(var i=0;i<records.length;i++)rec.push(records[i]);pend||(pend=1,requestAnimationFrame(run),setTimeout(function(){pend&&run()},40))});var d=self.disconnect,t=self.takeRecords;return self.disconnect=function(){return rec=[],d.call(self)},self.takeRecords=function(){var a=t.call(self).concat(rec);return rec=[],a},self};W.prototype=N.prototype,W.__dq11=1,window.MutationObserver=W}}catch{}var S={pdf:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",ocr:"https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"},P={};window.__dqLibs=function(k){return k==="pdf"&&window.pdfjsLib||k==="ocr"&&window.Tesseract?Promise.resolve():P[k]?P[k]:P[k]=new Promise(function(ok,no){var sc=document.createElement("script");sc.src=S[k],sc.async=!0,sc.onload=function(){try{k==="pdf"&&(pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js")}catch{}ok()},sc.onerror=function(){delete P[k],no(new Error("Kitabxana yüklənmədi — internet bağlantısını yoxlayın."))},document.head.appendChild(sc)})}})();</script>
+<script id="dq11-early">(function(){try{var N=window.MutationObserver;if(N&&!N.__dq11){var W=function(cb){var rec=[],pend=0,last=0,self=null,run=function(){pend=0;last=performance.now();var r=rec;if(rec=[],r.length)try{cb.call(self,r,self)}catch(e){console.error(e)}};self=new N(function(records){for(var i=0;i<records.length;i++){var r=records[i],t=r.target,e=t&&t.nodeType===1?t:t&&t.parentElement;if(e&&e.id!=="dq-splash"&&e.closest&&e.closest("#dq-splash"))continue;rec.push(r)}if(!rec.length)return;if(!pend){pend=1;var gap=performance.now()-last;gap>=200?(requestAnimationFrame(run),setTimeout(function(){pend&&run()},40)):setTimeout(function(){pend&&run()},200-gap)}});var d=self.disconnect,t=self.takeRecords;return self.disconnect=function(){return rec=[],d.call(self)},self.takeRecords=function(){var a=t.call(self).concat(rec);return rec=[],a},self};W.prototype=N.prototype,W.__dq11=1,window.MutationObserver=W}}catch{}var S={pdf:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",ocr:"https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"},P={};window.__dqLibs=function(k){return k==="pdf"&&window.pdfjsLib||k==="ocr"&&window.Tesseract?Promise.resolve():P[k]?P[k]:P[k]=new Promise(function(ok,no){var sc=document.createElement("script");sc.src=S[k],sc.async=!0,sc.onload=function(){try{k==="pdf"&&(pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js")}catch{}ok()},sc.onerror=function(){delete P[k],no(new Error("Kitabxana yüklənmədi — internet bağlantısını yoxlayın."))},document.head.appendChild(sc)})}})();</script>
 <meta name="author" content="Yunis İmanov">
 <meta name="google-site-verification" content="googleb1b3a92566520cae" />
 <title>DQPlatform Exam – Dövlət Qulluğu Onlayn Sınaq Platforması</title>
@@ -1691,7 +1705,7 @@ body.dqh-split #dq-pwa-wrap,body.dqh-split #dq-cookie{display:none!important}
 #dqpf .oath input{width:20px;height:20px;margin-top:2px;accent-color:#1f1b4d;flex:none}
 #dqpf .who{font-size:13px;color:#6b6f85;text-align:center;margin-top:14px}
 </style>
-<link rel="preload" as="script" href="app.js?v=21">
+<link rel="preload" as="script" href="app.js?v=23">
 <style id="dq-tlx-gate-css">
 /* «Tezliklə əlavə olunacaq» pəncərəsi */
 #tlx-soon{position:fixed;inset:0;z-index:2147483200;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(4,12,32,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;transition:opacity .28s ease}
@@ -1779,10 +1793,10 @@ window.DQBOOT={gate:gate,idle:idle};
   try { seen = sessionStorage.getItem("dq_gate_seen") === "1"; } catch (e) { }
 
   window.__dqGateStage = { render: false, data: false, fonts: false, load: false, blocks: false, net: false };
-  var CAP = CFG.cap || 30000;                                        /* aktiv (görünən) vaxtla mütləq maksimum */
-  var MIN = CFG.min != null ? CFG.min : (seen ? 600 : 1200);        /* ilk render-dən sonra minimum */
-  var QUIET = CFG.quiet != null ? CFG.quiet : (seen ? 600 : 800);   /* DOM dəyişməsiz müddət */
-  var NETQ = CFG.net != null ? CFG.net : 900;                       /* son şəbəkə cavabından sonra gözləmə
+  var CAP = CFG.cap || 5000;                                        /* aktiv (görünən) vaxtla mütləq maksimum */
+  var MIN = CFG.min != null ? CFG.min : (seen ? 150 : 250);        /* ilk render-dən sonra minimum */
+  var QUIET = CFG.quiet != null ? CFG.quiet : (seen ? 120 : 180);   /* DOM dəyişməsiz müddət */
+  var NETQ = CFG.net != null ? CFG.net : 400;                       /* son şəbəkə cavabından sonra gözləmə
                                                                        (modulların 800ms-lik yerləşdirmə dövrünü əhatə edir) */
 
   var holding = true, timer = 0, resolveReady;
@@ -2011,7 +2025,7 @@ window.DQBOOT={gate:gate,idle:idle};
   })();
 
   /* ---- 5) Ana səhifə vəziyyəti ---- */
-  var tRender = 0, lastSig = "", tChange = performance.now();
+  var tRender = 0, lastSig = "", tChange = performance.now(), tSig = 0;
 
   function realRender(h) {
     if (!h) return false;
@@ -2105,7 +2119,7 @@ window.DQBOOT={gate:gate,idle:idle};
     var now = performance.now();
     var h = D.getElementById("v3-home");
     if (!h) return;
-    var s = sig(h);
+    var s = (now - tSig < 120 && lastSig) ? lastSig : (tSig = now, sig(h));
     if (s !== lastSig) { lastSig = s; tChange = now; }
 
     var stg = window.__dqGateStage;
@@ -2120,23 +2134,23 @@ window.DQBOOT={gate:gate,idle:idle};
     /* şəbəkə sakitliyi: yolda sorğu yoxdur + son cavabdan NETQ keçib.
        Heç sorğu getməyibsə (hamısı keşdən), modulların yerləşməsi üçün 1.6 san gözlə */
     var netIdle = inflight === 0 && now - lastNetEnd >= NETQ &&
-      (netCount > 0 || now - tRender >= 1600);
+      (netCount > 0 || now - tRender >= 450);
     stg.net = netIdle;
 
     /* şəkillər (ən çox 4 san gözləyirik) */
-    var imgs = imgsReady(h) || now - tRender > 4000;
+    var imgs = imgsReady(h) || now - tRender > 1200;
 
     /* ana səhifə qurulub bitib: son build-dən 1.9 san sonra (HOME.order 700/1800ms yenidən düzür).
        6 san ərzində heç build başlamayıbsa bu şərt ləğv olunur */
     hookBuild();
     var buildOk = !builds.hooked ||
-      (builds.run === 0 && builds.done >= 1 && now - builds.lastEnd >= 1900) ||
-      (builds.started === 0 && now - tRender >= 6000);
+      (builds.run === 0 && builds.done >= 1 && now - builds.lastEnd >= 350) ||
+      (builds.started === 0 && now - tRender >= 2500);
     stg.build = buildOk;
 
     if (buildOk && netIdle) kickMissing(h, now);
     var cdOk = !cdExpected() || !!h.querySelector("#dq-count");
-    var stOk = !kick.st || now - kick.stT >= 2500 || !!h.querySelector("#dq-stats");   /* kick-dən sonra 2.5 san verək */
+    var stOk = !kick.st || now - kick.stT >= 1000 || !!h.querySelector("#dq-stats");   /* kick-dən sonra 2.5 san verək */
     stg.cd = cdOk;
 
     var blocksOk = core && netIdle && imgs && buildOk && cdOk && stOk;
@@ -2248,8 +2262,8 @@ MSG=[[0,"Platforma hazırlanır…"],[22,"Suallar yüklənir…"],[48,"Kabinet y
 function calc(ms){return 92*(1-Math.exp(-ms/2400))}
 /* real mərhələlər: ana səhifə çəkilib · məlumat gəlib · şriftlər · səhifə yüklənib → hər biri tavanı qaldırır (50→92) */
 function cap(){var g=window.__dqGateStage||{};return 50+8.4*((g.render?1:0)+(g.data?1:0)+(g.fonts?1:0)+(g.load?1:0)+(g.blocks?1:0))}
-function paint(p){p=Math.min(100,Math.round(p));if(p===last)return;last=p;pc.textContent=p+"%";
- for(var nx=-1,i=0;i<bub.length;i++){var on=p>=TH[i];bub[i].className=on?"on":nx<0?"nx":"";if(!on&&nx<0)nx=i}
+function paint(p){p=Math.min(100,Math.round(p));if(p===last)return;last=p;var pt=pc.firstChild;pt&&pt.nodeType===3?pt.data=p+"%":pc.textContent=p+"%";
+ for(var nx=-1,i=0;i<bub.length;i++){var on=p>=TH[i];var cn=on?"on":nx<0?"nx":"";bub[i].className!==cn&&(bub[i].className=cn);if(!on&&nx<0)nx=i}
  for(var m=MSG[0][1],j=0;j<MSG.length;j++)if(p>=MSG[j][0])m=MSG[j][1];
  if(p>=100)m="Xoş gəlmisiniz!";else if(performance.now()-t0>12e3)m="Əlaqə yavaşdır, bir az gözləyin…";
  if(m!==lastMsg){lastMsg=m;msg.textContent=m;msg.classList.remove("sw");void msg.offsetWidth;msg.classList.add("sw")}}
@@ -2257,10 +2271,10 @@ function loop(now){if(done||comp||!document.body.contains(sp))return;
  var t=Math.min(calc(now-t0),cap());if(cur<t)cur=Math.min(t,cur+Math.max(.15,(t-cur)*.07));
  paint(cur);raf=requestAnimationFrame(loop)}
 function complete(cb){if(done||comp){cb&&cb();return}comp=true;cancelAnimationFrame(raf);
- var from=cur,ts=performance.now(),D=Math.max(250,Math.min(700,(100-from)*14));
+ var from=cur,ts=performance.now(),D=Math.max(120,Math.min(260,(100-from)*6));
  (function step(now){var k=Math.min(1,(now-ts)/D);paint(from+(100-from)*(1-Math.pow(1-k,3)));
   if(k<1){requestAnimationFrame(step);return}
-  paint(100);setTimeout(function(){done=true;cb&&cb()},450)})(ts)}
+  paint(100);setTimeout(function(){done=true;cb&&cb()},120)})(ts)}
 function finish(){if(done)return;done=true;cancelAnimationFrame(raf);paint(100)}
 new MutationObserver(function(){if(sp.classList.contains("off")&&!comp)finish()}).observe(sp,{attributes:true,attributeFilter:["class"]});
 paint(0);raf=requestAnimationFrame(loop);
@@ -3736,7 +3750,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 
 
 
-<script src="app.js?v=21"></script>
+<script src="app.js?v=23"></script>
 <script src="dq-lock.js?v=1"></script>
 <script src="yspro.js?v=1"></script>
 <script src="dq-core.js?v=3"></script>
@@ -3904,7 +3918,9 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   var RX_BELL_ID = /bell|bildiri|notif/;
   var RX_BELL_HTML = /\uD83D\uDD14|fa-bell|bi-bell/;
 
+  var lastScan = 0;
   function scan() {
+    var nw = performance.now(); if (nw - lastScan < 600) return; lastScan = nw;
     var list = document.body.querySelectorAll(':scope > *, :scope > * > *');
     for (var i = 0; i < list.length; i++) {
       var el = list[i];
@@ -3985,14 +4001,16 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     }
   }
 
-  var busy = false;
-  function refresh() {
+  var busy = false, lastRun = 0;
+  function refresh() {                       /* ən çox 250ms-də bir dəfə (əvvəl: hər kadrda) */
     if (busy) return;
     busy = true;
-    requestAnimationFrame(function () {
-      busy = false;
-      try { hideState(); adopt(); place(); } catch (e) { console.warn('[DQTools]', e); }
-    });
+    setTimeout(function () {
+      requestAnimationFrame(function () {
+        busy = false; lastRun = performance.now();
+        try { hideState(); adopt(); place(); } catch (e) { console.warn('[DQTools]', e); }
+      });
+    }, Math.max(0, 250 - (performance.now() - lastRun)));
   }
 
   /* ---------- Sürüşdürmə ---------- */
