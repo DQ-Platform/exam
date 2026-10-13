@@ -2644,7 +2644,15 @@ function hook(){
 }
 if(!hook()){document.addEventListener("DOMContentLoaded",hook)}
 
-window.TLX={v2:true,subjects:TLX_SUBJECTS,config:CFG,refresh:function(){buildData();var r=$("v3-tests"),p=r&&r.querySelector(".tlx");p&&p.remove();enhance()}};
+window.TLX={v2:true,subjects:TLX_SUBJECTS,config:CFG,refresh:function(){buildData();var r=$("v3-tests"),p=r&&r.querySelector(".tlx");p&&p.remove();enhance()},
+  /* DQB: konkret fənn/mövzu testini başladır (ana səhifədəki «Günün tövsiyə testi» üçün) */
+  begin:function(sn,tn,op){var s=DATA.filter(function(x){return x.name===sn})[0],t=s&&s.topics.filter(function(x){return x.name===tn})[0];if(t)begin(s,t,op||document.body)},
+  /* DQB: hər gün üçün karuseldən təsadüfi (hamı üçün eyni) mövzu testi seçir; sualı olmayan mövzular seçilmir */
+  daily:function(){var pool=[];DATA.forEach(function(s){s.topics.forEach(function(t){if(t.qs.length)pool.push({s:s,t:t})})});if(!pool.length)return null;
+    var hs=function(str){var x=2166136261;for(var i=0;i<str.length;i++){x^=str.charCodeAt(i);x=Math.imul(x,16777619)}return x>>>0},
+        ky=function(d){return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()},d=new Date(),y=new Date(d.getTime()-864e5),
+        i=hs(ky(d))%pool.length;if(pool.length>1&&i===hs(ky(y))%pool.length)i=(i+1)%pool.length;
+    var p=pool[i];return{subject:p.s.name,topic:p.t.name,icon:p.s.icon,grad:p.s.grad,n:p.t.qs.length,mins:p.t.time>0?p.t.time:Math.max(1,Math.round(p.t.qs.length*CFG.minPerQuestion))}}};
 })();
 ;
 
