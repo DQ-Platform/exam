@@ -5606,20 +5606,14 @@ function link(d){
   return base()+"?"+p.toString();
 }
 function text(d,withFin,plain){
-  var cats=uniq([].concat.apply([],d.exams.map(function(e){return e.cats}))),nos=d.exams.map(function(e){return e.no}).sort(function(a,b){return a-b});
-  var what=(nos.length?"Sınaq "+nos.join(", "):"Sınaq")+(cats.length?" ("+cats.join(", ")+" qrupu)":"");
+  var cats=uniq([].concat.apply([],d.exams.map(function(e){return e.cats}))),nos=uniq(d.exams.map(function(e){return String(e.no)})).sort(function(a,b){return a-b});
+  var what="sınaq"+(nos.length?" "+nos.join(", "):"")+(cats.length?" ("+cats.join(", ")+(cats.length>1?" qrupları)":" qrupu)"):"");
   var nm=(d.name||"").trim();
-  var t="✅ *İştirak icazəniz təsdiqləndi*\n\n"
-   +"Hörmətli "+(nm?nm:"iştirakçı")+",\n\n"
-   +"*"+what+"* üçün iştirak icazəniz verilmişdir.\n\n"
-   +"🔗 *İmtahana giriş linki:*\n"+link(d)+"\n\n"
-   +(withFin?"🔑 *FİN kodunuz:* "+d.fin+"\n\n":"🔑 Giriş zamanı FİN kodunuzu daxil etməlisiniz.\n\n")
-   +"📌 *Vacib qeydlər:*\n"
-   +"• Link və FİN kod yalnız sizin üçündür, başqası ilə paylaşmayın.\n"
-   +"• Sınaq suallarını qruplara və ya üçüncü şəxslərə göndərmək qadağandır.\n"
-   +"• Sınaq xüsusi hazırlanıb və hər iştirakçı qeydiyyatdan keçərək qoşulub.\n\n"
-   +"Uğurlar arzulayırıq!\n*DQ Platform*";
-  return plain?t.replace(/\*/g,""):t;
+  return "Salam, "+(nm||"hörmətli iştirakçı")+"!\n\n"
+   +"Sizə "+what+" üçün iştirak icazəsi verildi ✅\n\n"
+   +"Daxil olmaq üçün linkə keçin:\n"+link(d)+"\n\n"
+   +(withFin?"FİN kodunuz: "+d.fin:"Giriş zamanı FİN kodunuzu daxil etməlisiniz.")+"\n\n"
+   +"⚠️ Xatırlatma: sualları qruplara və başqalarına göndərmək qadağandır. Sınaq zəhmətlə hazırlanıb və hər kəs ödəniş edib qoşulub. Linki də başqasına verməyin.";
 }
 function ensure(){
   var o=document.getElementById("dqsh-ov");if(o)return o;
@@ -6105,4 +6099,43 @@ try{new MutationObserver(add).observe(document.body,{childList:true,subtree:true
     if (h) { try { new MutationObserver(go).observe(h, { childList: true }); } catch (e) { } go(); }
     else if (tr++ < 80) setTimeout(wait, 250);
   })();
+})();
+
+
+/* ===== dq-home-tail-v2 ===== */
+/* Ana səhifənin aşağı hissəsi: geri sayım → 4 statistika kartı yan-yana → footer (2-ci şəkildəki kimi).
+   Başqa modulun CSS-i və ya inline stili kartları alt-alta salarsa, dərhal geri qaytarılır. */
+(function () {
+  "use strict";
+  if (window.__dqTailV2) return;
+  window.__dqTailV2 = 1;
+  var css =
+    "#v3-home #dq-stats#dq-stats.dqst{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-auto-flow:row!important;gap:12px!important;box-sizing:border-box!important;width:calc(100% - 28px)!important;max-width:932px!important;flex:0 0 auto!important;margin:18px auto 40px!important;padding:0!important;align-self:center!important}" +
+    "#v3-home #dq-stats#dq-stats.dqst .dqst-c{display:flex!important;flex-direction:column!important;align-items:center!important;width:auto!important;min-width:0!important;height:auto!important;min-height:0!important;margin:0!important;flex:none!important;grid-column:auto!important;grid-row:auto!important;padding:16px 6px 14px!important;border-radius:16px!important}" +
+    "#v3-home #dq-stats#dq-stats.dqst .dqst-c b{font-size:28px!important}" +
+    "#v3-home #dq-stats#dq-stats.dqst .dqst-c small{font-size:12px!important}" +
+    "@media(max-width:860px){#v3-home #dq-stats#dq-stats.dqst{gap:12px!important}#v3-home #dq-stats#dq-stats.dqst .dqst-c{padding:14px 4px 12px!important}#v3-home #dq-stats#dq-stats.dqst .dqst-c b{font-size:24px!important}#v3-home #dq-stats#dq-stats.dqst .dqst-ic{width:34px!important;height:34px!important;font-size:15px!important}}" +
+    "@media(max-width:560px){#v3-home #dq-stats#dq-stats.dqst{gap:6px!important;width:calc(100% - 16px)!important;margin:14px auto 28px!important}#v3-home #dq-stats#dq-stats.dqst .dqst-c{padding:10px 2px 9px!important;border-radius:12px!important;gap:4px!important}#v3-home #dq-stats#dq-stats.dqst .dqst-c b{font-size:17px!important}#v3-home #dq-stats#dq-stats.dqst .dqst-c small{font-size:9.5px!important;line-height:1.2}#v3-home #dq-stats#dq-stats.dqst .dqst-ic{width:26px!important;height:26px!important;font-size:12px!important;border-radius:8px!important}}";
+  function addCss() {
+    var st = document.getElementById("dq-home-tail-v2");
+    if (!st) {
+      st = document.createElement("style");
+      st.id = "dq-home-tail-v2";
+      st.textContent = css;
+    }
+    if (document.head.lastElementChild !== st) document.head.appendChild(st);
+  }
+  function enforce() {
+    try {
+      var el = document.getElementById("dq-stats");
+      if (!el || !el.offsetParent) return;
+      if (getComputedStyle(el).display !== "grid") {
+        el.style.setProperty("display", "grid", "important");
+        el.style.setProperty("grid-template-columns", "repeat(4,minmax(0,1fr))", "important");
+      }
+    } catch (e) { }
+  }
+  addCss();
+  window.addEventListener("load", addCss);
+  setInterval(enforce, 1000);
 })();
