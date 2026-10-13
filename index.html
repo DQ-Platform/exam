@@ -3784,7 +3784,7 @@ function reveal(){var h=home();if(!h)return;var now=Date.now();
   var t=seen.get(k);if(!t){seen.set(k,now);return}
   if(now-t>2500)k.classList.add("in")})}
 function stats(){var h=home();if(!h||!h.classList.contains("active")||D.hidden)return;
- if(h.querySelector("#dq-stats")||!h.querySelector(".v3-hero")||tries>=4)return;
+ if(h.querySelector("#dq-stats")||!(h.querySelector(".v3-hero")||h.querySelector("#dt-home")||h.querySelector("#dt-grid")||h.querySelector(".v3-ft"))||tries>=4)return;
  if(window.DQST&&window.DQST.mount){tries++;try{window.DQST.mount(true)}catch(e){}}}
 function tick(){reveal();stats()}
 [3000,5000,8000,12000,18000,30000].forEach(function(ms){setTimeout(tick,ms)});
@@ -3828,7 +3828,7 @@ function makeStats(h,ft,vv){
  b.innerHTML=L.map(function(x){var n=+c.v[x[0]]||0;
   return'<div class="dqst-c"><span class="dqst-ic"><i class="fa-solid '+x[1]+'"></i></span><b>'+n+(n?"+":"")+'</b><small>'+x[2]+'</small></div>'}).join("");
  var cd=h.querySelector("#dq-count"),anc=cd;while(anc&&anc.parentElement&&anc.parentElement!==h)anc=anc.parentElement;
- if(anc&&anc.parentElement===h)h.insertBefore(b,anc);else h.insertBefore(b,ft||null)}
+ if(anc&&anc.parentElement===h)h.insertBefore(b,anc.nextSibling);else h.insertBefore(b,ft||null)}
 var sTry=0,cdTry=0,calcing=false;
 async function calc(){var v={users:0,exams:0,mocks:0,qs:0};
  try{var r=await _supabase.from("exam_questions").select("*",{count:"exact",head:true});v.qs=r&&r.count||0}catch(e){}
