@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>DQ Platform – İmtahana giriş</title>
+<style>
+html,body{height:100%;margin:0}
+body{display:flex;align-items:center;justify-content:center;background:#f1f5f9;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#0f2c52;text-align:center;padding:16px;box-sizing:border-box}
+.b{max-width:380px;background:#fff;border-radius:16px;padding:28px 22px;box-shadow:0 10px 30px rgba(15,44,82,.12)}
+.sp{width:34px;height:34px;margin:0 auto 14px;border:4px solid #dbe5f5;border-top-color:#1d4f91;border-radius:50%;animation:r .8s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
+a{display:inline-block;margin-top:14px;padding:11px 20px;border-radius:12px;background:#0f2c52;color:#fff;text-decoration:none;font-weight:700}
+p{margin:6px 0;font-size:14px;color:#475569}
+</style>
+</head>
+<body>
+<div class="b">
+  <div class="sp"></div>
+  <h3 style="margin:0 0 6px">İmtahana yönləndirilirsiniz…</h3>
+  <p>Bir neçə saniyə gözləyin.</p>
+  <a id="go" href="https://exam.dqplatform.workers.dev/">Əgər keçid olmadısa, bura basın</a>
+</div>
+<script>
+(function(){
+  /* Köhnə linklər: imtahan-giris.html?qrup=BB&sinaq=1  →  əsas sayt: /?giris=1&qrup=BB&sinaq=1 */
+  var BASE="https://exam.dqplatform.workers.dev/";
+  var q=new URLSearchParams(location.search);
+  if(!q.has("pfin")&&!q.has("giris"))q.set("giris","1");
+  var url=BASE+"?"+q.toString();
+  var a=document.getElementById("go");if(a)a.href=url;
+  location.replace(url);
+})();
+</script>
+<noscript><meta http-equiv="refresh" content="0;url=https://exam.dqplatform.workers.dev/?giris=1"></noscript>
+</body>
+</html>
