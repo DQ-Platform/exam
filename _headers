@@ -1,0 +1,26 @@
+# DQ Platform — keşləmə qaydaları (Cloudflare static assets).
+# Skriptlər index.html-də ?v=N ilə çağırılır: fayl dəyişəndə N-i artırın.
+# Hər fayl üçün aralıq maksimum köhnəlmə = 1 saat, sonra arxa fonda yenilənir.
+/app.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/yspro.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/dq-core.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/dq-hero.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/dq-live.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/dq-lock.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/dq-materials.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/dq-net.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/chatbot.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+# Service worker həmişə təzə yoxlanmalıdır
+/sw.js
+  Cache-Control: no-cache
+/service-worker.js
+  Cache-Control: no-cache
