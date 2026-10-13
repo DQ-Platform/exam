@@ -2469,7 +2469,7 @@ window.__dqSplashCalc=calc;window.DQSplash={complete:complete};
 <div class="admin-nav-card" onclick="switchAdminTab('redakte')"><span class="icon">✏️</span> Redaktə Mərkəzi</div>
 <div class="admin-nav-card" onclick="V2.open();V2.go('news')"><span class="icon">📢</span> İmtahan Elanı Paylaş</div>
 <div class="admin-nav-card" onclick="V2.open();V2.go('res')"><span class="icon">💬</span> Təəssüratlar (Təsdiq)</div>
-<div class="admin-nav-card" onclick="window.DQCD&&DQCD.openAdmin()" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">⏳</span> DİM Geri Sayım</div>
+<div class="admin-nav-card" onclick="window.DQCD&&DQCD.openAdmin()" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">⏳</span> Sayğac</div>
 <div class="admin-nav-card" onclick="window.DQST&&DQST.openAdmin()" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">📊</span> Ana Səhifə Statistikası</div>
 </div>
 <div id="mod-dimcd" class="admin-module-block"></div>
@@ -3750,7 +3750,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 
 
 
-<script src="app.js?v=25"></script>
+<script src="app.js?v=26"></script>
 <script src="dq-lock.js?v=1"></script>
 <script src="yspro.js?v=1"></script>
 <script src="dq-core.js?v=3"></script>
@@ -3828,7 +3828,7 @@ function makeStats(h,ft,vv){
  b.innerHTML=L.map(function(x){var n=+c.v[x[0]]||0;
   return'<div class="dqst-c"><span class="dqst-ic"><i class="fa-solid '+x[1]+'"></i></span><b>'+n+(n?"+":"")+'</b><small>'+x[2]+'</small></div>'}).join("");
  var cd=h.querySelector("#dq-count"),anc=cd;while(anc&&anc.parentElement&&anc.parentElement!==h)anc=anc.parentElement;
- if(anc&&anc.parentElement===h)h.insertBefore(b,anc.nextSibling);else h.insertBefore(b,ft||null)}
+ if(anc&&anc.parentElement===h)h.insertBefore(b,anc);else h.insertBefore(b,ft||null)}
 var sTry=0,cdTry=0,calcing=false;
 async function calc(){var v={users:0,exams:0,mocks:0,qs:0};
  try{var r=await _supabase.from("exam_questions").select("*",{count:"exact",head:true});v.qs=r&&r.count||0}catch(e){}
