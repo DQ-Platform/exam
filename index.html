@@ -4240,5 +4240,53 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 })();
 
 </script>
+<style id="dq-pro-polish">
+/* ===== DQ Pro Polish — son qat. Mövcud məntiqə toxunmur, yalnız görünüşü nizamlayır ===== */
+:root{--pro-ink:#0f1e45;--pro-line:#d6e0f2;--pro-r:18px;--pro-sh:0 1px 2px rgba(10,47,122,.06),0 10px 28px -12px rgba(10,47,122,.22)}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;scroll-padding-top:64px}
+body{font-feature-settings:"kern","liga";font-variant-numeric:tabular-nums}
+::selection{background:#2f63bd;color:#fff}
+button,a,[role=button],.btn{-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid rgba(47,99,189,.55)!important;outline-offset:2px!important;border-radius:6px}
+h1,h2,h3{letter-spacing:-.01em;text-wrap:balance}
+p{text-wrap:pretty}
+
+/* Kartlar: vahid radius, yumşaq çoxqatlı kölgə */
+#v3-home .lx-card,#v3-home .dt-day,#v3-home .v3-hero,.dqn-card,.exam-item-card,.dc-card,.dc-row{border-radius:var(--pro-r)!important;box-shadow:var(--pro-sh)!important}
+#v3-home .lx-card,#v3-home .dt-day{border:1px solid var(--pro-line)}
+
+/* Düymələr: vahid hündürlük və toxunma ölçüsü */
+#v3-home .v3-b,#v3-home .lx-go,#v3-home .lx-reg,#v3-home button{min-height:44px;font-weight:700;letter-spacing:.01em}
+#v3-home .v3-b:active,#v3-home button:active{transform:scale(.98)}
+
+/* Menyu: eyni şrift, sürüşdürülə bilən, kəsilmir */
+#v3-home .v3-nav{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;flex-wrap:nowrap!important}
+#v3-home .v3-nav::-webkit-scrollbar{display:none}
+#v3-home .v3-nav>a{flex:0 0 auto;white-space:nowrap;font-size:13px!important;line-height:1}
+#v3-home .v3-nav>.dq2-r,#v3-home .dq2-r{flex:0 0 auto;margin-left:auto}
+
+/* Statistika kartları: tam sətir, sıxışmır */
+#dq-stats.dqst .dqst-c{box-shadow:var(--pro-sh)}
+#dq-stats.dqst .dqst-c b{font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+/* Geri sayım: rəqəmlər sabit en */
+#dq-count .dqcd-c b{font-variant-numeric:tabular-nums}
+
+/* ===== Mobil: tək sütun, footer ekranın dibinə oturur ===== */
+@media(max-width:599px){
+ html #v3-home.active{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:stretch!important;min-height:100vh;min-height:100dvh}
+ html #v3-home.active:not(.dq11-noex)>#dt-grid,
+ html #v3-home.active:not(.dq11-noex)>#dt-home{width:calc(100% - 24px)!important;margin:12px auto 0!important;align-self:center!important}
+ html #v3-home.active:not(.dq-nogrid)>#dt-grid .lx-cv{height:150px!important;font-size:40px!important}
+ html #v3-home.active:not(.dq-nogrid)>#dt-grid .lx-bd{padding:14px!important}
+ html #v3-home.active:not(.dq-nogrid)>#dt-grid .lx-on{grid-template-columns:1fr!important}
+ html #v3-home .dt-day{height:auto!important}
+ html #v3-home .dt-day .cv{aspect-ratio:16/8}
+ html #v3-home .v3-ft{margin-top:auto!important;min-height:0!important;margin-bottom:0!important;padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px))}
+ #dq-stats.dqst{margin-bottom:24px!important}
+ #dq-stats.dqst .dqst-c small{font-size:10.5px!important}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
 </body>
 </html>
