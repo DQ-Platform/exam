@@ -3786,6 +3786,53 @@ function watch(){var h=home();if(!h){setTimeout(watch,500);return}
 watch();
 })();
 </script>
+<script id="dq-fix-foot-guard">
+/* Footer və statistika kartları: yoxdursa və ya gizlidirsə (opacity/display/visibility), avtomatik yaradır və göstərir */
+(function(){"use strict";
+var D=document,H=D.documentElement;
+function home(){return D.getElementById("v3-home")}
+function shown(el){
+ if(!el||!el.isConnected)return false;
+ for(var e=el;e&&e!==D.body;e=e.parentElement){var cs=getComputedStyle(e);
+  if(cs.display==="none"||cs.visibility==="hidden"||parseFloat(cs.opacity)<.6)return false}
+ return el.getBoundingClientRect().height>8}
+function force(el,h){
+ for(var e=el;e&&e!==h&&e!==D.body;e=e.parentElement){var cs=getComputedStyle(e);
+  if(e.classList&&e.classList.contains("dq-rv"))e.classList.add("in");
+  if(cs.display==="none")e.style.setProperty("display","block","important");
+  if(cs.visibility==="hidden")e.style.setProperty("visibility","visible","important");
+  if(parseFloat(cs.opacity)<1){e.style.setProperty("opacity","1","important");e.style.setProperty("transform","none","important")}}}
+function makeFooter(h){
+ var f=D.createElement("div");f.className="v3-ft dq-ft-fallback";
+ f.innerHTML='\u00a9 2026 DQ Platform \u2013 Developed by Yunis \u0130manov<div style="margin-top:16px;font-size:14px"><a style="color:#22c55e;cursor:pointer" onclick="V3.info(\'terms\')">\u0130stifad\u0259 \u015e\u0259rtl\u0259ri</a> &nbsp;|&nbsp; <a style="color:#22c55e;cursor:pointer" onclick="V3.info(\'priv\')">M\u0259xfilik Siyas\u0259ti</a></div>';
+ h.appendChild(f);
+ try{if(window.HOME&&HOME.fab)HOME.fab()}catch(e){}
+ return f}
+function makeStats(h,ft){
+ var c=null;try{c=JSON.parse(localStorage.getItem("dq_stats_cache_v2")||"null")}catch(e){}
+ if(!c||!c.v)return;
+ var L=[["users","fa-users","\u0130stifad\u0259\u00e7i say\u0131"],["exams","fa-file-pen","\u0130mtahan say\u0131"],["mocks","fa-graduation-cap","S\u0131naq say\u0131"],["qs","fa-circle-question","Sual say\u0131"]];
+ var b=D.createElement("div");b.id="dq-stats";b.className="dqst";
+ b.innerHTML=L.map(function(x){var n=+c.v[x[0]]||0;
+  return'<div class="dqst-c"><span class="dqst-ic"><i class="fa-solid '+x[1]+'"></i></span><b>'+n+(n?"+":"")+'</b><small>'+x[2]+'</small></div>'}).join("");
+ h.insertBefore(b,ft||null)}
+var runs=0;
+function run(){
+ var h=home();
+ if(!h||!h.classList.contains("active")||D.hidden||H.classList.contains("dq-hold"))return;
+ if(!h.querySelector(".v3-hero")&&!h.querySelector("#dt-home")&&!h.querySelector("#dq-count"))return;
+ runs++;
+ var ft=h.querySelector(".v3-ft");
+ if(!ft)ft=makeFooter(h);
+ else if(!shown(ft))force(ft,h);
+ var st=h.querySelector("#dq-stats");
+ if(!st){if(runs>3)makeStats(h,ft)}
+ else if(!shown(st))force(st,h)}
+setInterval(run,3000);
+D.addEventListener("visibilitychange",function(){if(!D.hidden)setTimeout(run,300)});
+addEventListener("pageshow",function(){setTimeout(run,300)});
+})();
+</script>
 <style id="dq-home-polish-css">
 /* ===== DQ Home Polish ===== */
 /* 1) Sağ kartın şəkli: üzən ikon yazının üstünə düşmür, yazı həmişə aydın oxunur */
