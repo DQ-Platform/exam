@@ -6248,10 +6248,7 @@ try{new MutationObserver(add).observe(document.body,{childList:true,subtree:true
     /* son ardıcıllıq: geri sayım → 4 statistika kartı → footer */
     var cd = $("dq-count"), st = $("dq-stats"), ft = h.querySelector(".v3-ft");
     if (!ft || ft.parentNode !== h) return;
-    if (cd && cd.parentNode === h) {
-      var want1 = st && st.parentNode === h ? st : ft;
-      if (cd.nextElementSibling !== want1) ft.before(cd);
-    }
+    /* geri sayım yuxarıda (banner üstündə) sabit qalır — DQCD.place() yerləşdirir; burada aşağı daşınmır */
     if (st && st.parentNode === h && st.nextElementSibling !== ft) ft.before(st);
   }
   function tick() {
