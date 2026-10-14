@@ -6,8 +6,7 @@
   if (window.DQH2) return;
   var D = document, $ = function (s, r) { return (r || D).querySelector(s); };
 
-  var CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Caveat:wght@600&display=swap');
+  var DOCCSS = `
 html body{--hn:#06112e;--hn2:#0c2260;--hg:#f6c453;--hg2:#e5a82c;--hf:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif}
 /* başlıq: tək tünd zolaq */
 html body #v3-home .v3-top{background:#040c22;font-family:var(--hf)}
@@ -20,7 +19,11 @@ html body #v3-home .v3-nav{background:var(--hn);border:0;border-bottom:1px solid
 html body #v3-home .v3-nav a{color:#d6def5;border-radius:0;background:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
 html body #v3-home .v3-nav a:hover{color:#fff;border-bottom-color:var(--hg)}
 
-/* hero */
+/* gecə rejimi saytda invert filtri ilə işləyir: tünd bölmələri ilkin rəngdə saxla */
+html.dq13-dark .h2-host[data-h2h="hero"],html.dq13-dark .h2-host[data-h2h="band"],html.dq13-dark #v3-home .v3-hd,html.dq13-dark #v3-home .v3-nav,html.dq13-dark #v3-home .v3-top{filter:invert(1) hue-rotate(180deg)}
+.h2-host{display:block}
+`;
+  var SHCSS = `/* hero */
 .h2-hero{position:relative;overflow:hidden;color:#fff;font-family:var(--hf);
  background:radial-gradient(60% 80% at 78% 55%,rgba(246,176,60,.22),transparent 62%),radial-gradient(70% 90% at 0 0,#12308a55,transparent 60%),linear-gradient(170deg,#0a1c52,var(--hn) 70%);
  padding:clamp(28px,5vw,64px) clamp(18px,5vw,56px) clamp(36px,5vw,64px)}
@@ -94,8 +97,6 @@ html body #v3-home .v3-nav a:hover{color:#fff;border-bottom-color:var(--hg)}
 .h2-band b{position:relative;z-index:1;font:800 clamp(20px,2.6vw,30px)/1.2 var(--hf);max-width:20em}
 
 @media(max-width:820px){.h2-vis{padding:10px 0}.h2-in{grid-template-columns:1fr}.h2-vis{margin-top:14px}.h2-books{display:none}.h2-note{position:static;transform:rotate(-3deg);margin-bottom:10px}.h2-lap{transform:none}.h2-wg div{border-left:0}}
-/* gecə rejimi saytda invert filtri ilə işləyir: tünd bölmələri ilkin rəngdə saxla */
-html.dq13-dark .h2-hero,html.dq13-dark .h2-band,html.dq13-dark #v3-home .v3-hd,html.dq13-dark #v3-home .v3-nav,html.dq13-dark #v3-home .v3-top{filter:invert(1) hue-rotate(180deg)}
 @media(prefers-reduced-motion:reduce){.h2-o,.h2-g s,.h2-o i,.h2-sc{transition:none}.h2-q.sw .h2-qt,.h2-q.sw .h2-os{animation:none}}
 `;
 
@@ -132,20 +133,20 @@ html.dq13-dark .h2-hero,html.dq13-dark .h2-band,html.dq13-dark #v3-home .v3-hd,h
   }
   /* kartı və cari sualı yenidən çək (səhifə yenidən qurulsa da vəziyyət qorunur) */
   function paint(fade) {
-    var q = $(".h2-q"); if (!q) return;
+    var q = hq(".h2-q"); if (!q) return;
     var Q = QS[qi]; cur = Q.n;
     $(".h2-qn", q).textContent = "Sual " + Q.n + " (" + Q.s + ")";
     $(".h2-qt", q).textContent = Q.t;
     var ch = done[Q.n]; 
     $(".h2-os", q).innerHTML = Q.o.map(function (t, i) { return '<div class="h2-o' + (ch === i ? " on" : "") + '"><i></i><b>' + "ABCDE"[i] + ")</b><span>" + t + "</span></div>"; }).join("");
     if (fade) { q.classList.remove("sw"); void q.offsetWidth; q.classList.add("sw"); }
-    [].forEach.call(D.querySelectorAll(".h2-g s"), function (c) { var n = +c.dataset.n; c.classList.toggle("d", done[n] != null); c.classList.toggle("c", n === cur); });
-    [].forEach.call(D.querySelectorAll(".h2-sec"), function (sec, i) {
+    [].forEach.call(hqa(".h2-g s"), function (c) { var n = +c.dataset.n; c.classList.toggle("d", done[n] != null); c.classList.toggle("c", n === cur); });
+    [].forEach.call(hqa(".h2-sec"), function (sec, i) {
       var k = 0; for (var n = SEC[i][1]; n <= SEC[i][2]; n++) if (done[n] != null) k++;
       $(".h2-cn", sec).textContent = k + " / " + (SEC[i][2] - SEC[i][1] + 1);
     });
     var si = 0; SEC.forEach(function (s, i) { if (cur >= s[1] && cur <= s[2]) si = i; });
-    var sc = $(".h2-sc"), sec = sc && sc.children[si]; if (sc && sec) sc.style.transform = "translateY(" + (-(sec.offsetTop - sc.offsetTop)) + "px)";
+    var sc = hq(".h2-sc"), sec = sc && sc.children[si]; if (sc && sec) sc.style.transform = "translateY(" + (-(sec.offsetTop - sc.offsetTop)) + "px)";
   }
   var WHY = [["🎯", "DİM modelinə uyğun", "Real imtahan formatına uyğun sınaqlar və suallar."], ["📊", "Nəticənin təhlili", "Hər sınaqdan sonra ətraflı nəticə analizi."], ["📖", "Zəngin materiallar", "Fənn üzrə aktual mövzular, testlər və izahlar."], ["📱", "Rahat istifadə", "Hər yerdə, hər zaman mobil və kompüterdən."]];
 
@@ -157,21 +158,36 @@ html.dq13-dark .h2-hero,html.dq13-dark .h2-band,html.dq13-dark #v3-home .v3-hd,h
     try { if (window.YQ && YQ.open) return YQ.open("in"); } catch (e) { }
     var b = [].filter.call(D.querySelectorAll("#v3-home .v3-hd .v3-r a,#v3-home .v3-hd .v3-r button"), function (x) { return /Daxil|Kabinet/i.test(x.textContent); })[0]; b && b.click();
   }
+  var H = {}, heroRoot = null;
+  function hq(q) { return heroRoot ? heroRoot.querySelector(q) : null; }
+  function hqa(q) { return heroRoot ? heroRoot.querySelectorAll(q) : []; }
+  function host(k, html) {
+    if (!H[k]) {
+      var h = D.createElement("div"); h.className = "h2-host"; h.id = "dq-h2-" + k; h.setAttribute("data-h2h", k);
+      var r = h.attachShadow({ mode: "open" }); r.innerHTML = "<style>:host{all:initial;display:block}" + SHCSS + "</style>" + html;
+      H[k] = h; if (k === "hero") heroRoot = r;
+    }
+    return H[k];
+  }
+  /* sayt #v3-home-u yenidən çəkəndə də eyni (saxlanmış) bloklar geri qoyulur: vəziyyət və görünüş sabit qalır */
   function mount() {
     var home = $("#v3-home"), nav = home && $(".v3-nav", home);
-    if (!nav || $(".h2-hero", home)) return;
-    var h = D.createElement("section"); h.className = "h2-hero"; h.innerHTML = heroHtml(); nav.insertAdjacentElement("afterend", h);
-    var why = D.createElement("section"); why.className = "h2-why";
-    why.innerHTML = "<h3>Niyə məhz DQ Platform?</h3><div class=\"h2-wg\">" + WHY.map(function (w) { return "<div><i>" + w[0] + "</i><b>" + w[1] + "</b><small>" + w[2] + "</small></div>"; }).join("") + "</div>";
-    var band = D.createElement("section"); band.className = "h2-band";
-    band.innerHTML = '<b>Dövlət qulluğu hədəfinə doğru ilk addımını at!</b><button type="button" class="h2-b g" data-h2="reg">Qeydiyyatdan keç ›</button>';
+    if (!nav) return;
+    [].forEach.call(D.querySelectorAll(".h2-hero,.h2-why,.h2-band"), function (x) { x.remove(); });
+    var fresh = !H.hero;
+    var hero = host("hero", '<section class="h2-hero">' + heroHtml().replace(/^<div class="h2-in">/, '<div class="h2-in">') + "</section>");
+    var why = host("why", '<section class="h2-why"><h3>Niyə məhz DQ Platform?</h3><div class="h2-wg">' + WHY.map(function (w) { return "<div><i>" + w[0] + "</i><b>" + w[1] + "</b><small>" + w[2] + "</small></div>"; }).join("") + "</div></section>");
+    var band = host("band", '<section class="h2-band"><b>Dövlət qulluğu hədəfinə doğru ilk addımını at!</b><button type="button" class="h2-b g" data-h2="reg">Qeydiyyatdan keç ›</button></section>');
+    ["hero", "why", "band"].forEach(function (k) { [].forEach.call(D.querySelectorAll('.h2-host[data-h2h="' + k + '"]'), function (x) { if (x !== H[k]) x.remove(); }); });
     var ft = $(".v3-ft", home);
-    if (ft) { ft.insertAdjacentElement("beforebegin", why); ft.insertAdjacentElement("beforebegin", band); } else { home.appendChild(why); home.appendChild(band); }
-    paint(false);
+    if (hero.parentNode !== home || hero.previousElementSibling !== nav) nav.insertAdjacentElement("afterend", hero);
+    if (ft) { if (why.parentNode !== home) ft.insertAdjacentElement("beforebegin", why); if (band.parentNode !== home) ft.insertAdjacentElement("beforebegin", band); }
+    else { if (why.parentNode !== home) home.appendChild(why); if (band.parentNode !== home) home.appendChild(band); }
+    if (fresh) paint(false);
   }
 
   D.addEventListener("click", function (e) {
-    var b = e.target.closest && e.target.closest("[data-h2]"); if (!b) return;
+    var b = (e.composedPath ? e.composedPath() : [e.target]).filter(function (n) { return n && n.dataset && n.dataset.h2; })[0]; if (!b) return;
     var k = b.dataset.h2;
     if (k === "exam" && !click(/sınaq/i)) { try { V3.go("exam"); } catch (x) { } }
     else if (k === "mat") click(/material/i);
@@ -182,12 +198,12 @@ html.dq13-dark .h2-hero,html.dq13-dark .h2-band,html.dq13-dark #v3-home .v3-hd,h
   var left = 2 * 3600 + 59 * 60 + 51, ph = 0, still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   function p2(n) { return (n < 10 ? "0" : "") + n; }
   setInterval(function () {
-    var t = $(".h2-tm"); if (!t) return;
+    var t = hq(".h2-tm"); if (!t) return;
     left = left > 0 ? left - 1 : 2 * 3600 + 59 * 60 + 51;
     t.textContent = p2(Math.floor(left / 3600)) + ":" + p2(Math.floor(left % 3600 / 60)) + ":" + p2(left % 60);
   }, 1000);
   if (!still) setInterval(function () {
-    if (!$(".h2-q")) return;
+    if (!hq(".h2-q")) return;
     if (ph === 0) { done[QS[qi].n] = QS[qi].a; paint(false); ph = 1; }
     else {
       qi = (qi + 1) % QS.length;
@@ -196,9 +212,12 @@ html.dq13-dark .h2-hero,html.dq13-dark .h2-band,html.dq13-dark #v3-home .v3-hd,h
     }
   }, 2300);
 
-  var st = D.createElement("style"); st.id = "dq-home2-css"; st.textContent = CSS; D.head.appendChild(st);
-  var raf = 0, obs = new MutationObserver(function () { if (raf) return; raf = requestAnimationFrame(function () { raf = 0; mount(); }); });
-  function boot() { var h = $("#v3-home"); if (h) { obs.observe(h, { childList: true, subtree: true }); mount(); } else setTimeout(boot, 300); }
-  boot();
+  var st = D.createElement("style"); st.id = "dq-home2-css"; st.textContent = DOCCSS; D.head.appendChild(st);
+  if (!D.getElementById("dq-home2-fonts")) { var fl = D.createElement("link"); fl.id = "dq-home2-fonts"; fl.rel = "stylesheet"; fl.href = "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap"; D.head.appendChild(fl); }
+  /* sayt bloku silsə belə dərhal (boyadan əvvəl) geri qoy + ehtiyat zamanlayıcı */
+  var queued = false;
+  function queue() { if (queued) return; queued = true; Promise.resolve().then(function () { queued = false; try { mount(); } catch (e) { console.warn("[DQH2]", e); } }); }
+  function boot() { if (D.body) { new MutationObserver(queue).observe(D.body, { childList: true, subtree: true }); mount(); } else setTimeout(boot, 50); }
+  boot(); setInterval(queue, 1500);
   window.DQH2 = { mount: mount };
 })();
