@@ -3788,8 +3788,78 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 
 
 
-<script src="app.js?v=28"></script>
-<script src="dq-birlesdirme.js?v=3"></script>
+<style id="dq-news-pro">
+/* ===== DQ news-pro: plavnı slayd keçidi, səliqəli şəkillər, alt kateqoriyalar, qapaq modulu ===== */
+/* 1) Yeniliklər slayderi — slaydlar üst-üstə yığılır, "display" əvəzinə opacity ilə yumşaq keçid (hündürlük tullanmır) */
+#dtn .dtn-st{display:grid;grid-template-columns:minmax(0,1fr)}
+#dtn .dtn-s{display:grid!important;grid-area:1/1;opacity:0;visibility:hidden;pointer-events:none;z-index:0;
+  transform:translateX(26px) scale(.985);animation:none!important;
+  transition:opacity .75s cubic-bezier(.4,0,.2,1),transform .85s cubic-bezier(.22,.61,.36,1),visibility 0s linear .75s}
+#dtn .dtn-s.on{opacity:1;visibility:visible;pointer-events:auto;z-index:1;transform:none;
+  transition:opacity .75s cubic-bezier(.4,0,.2,1),transform .85s cubic-bezier(.22,.61,.36,1),visibility 0s}
+#dtn .dtn-im{overflow:hidden;min-height:220px}
+#dtn .dtn-im img{object-fit:cover;object-position:center 22%;transform:scale(1.07);transition:transform 7s cubic-bezier(.2,.6,.3,1)}
+#dtn .dtn-s.on .dtn-im img{transform:scale(1)}
+#dtn .dtn-bd>*{opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease}
+#dtn .dtn-s.on .dtn-bd>*{opacity:1;transform:none}
+#dtn .dtn-s.on .dtn-bd>*:nth-child(1){transition-delay:.18s}
+#dtn .dtn-s.on .dtn-bd>*:nth-child(2){transition-delay:.26s}
+#dtn .dtn-s.on .dtn-bd>*:nth-child(3){transition-delay:.34s}
+#dtn .dtn-s.on .dtn-bd>*:nth-child(4){transition-delay:.42s}
+#dtn .dtn-dots i{transition:width .4s cubic-bezier(.4,0,.2,1),background-color .4s,opacity .4s}
+#dtn .dtn-new{z-index:2}
+@media(max-width:700px){#dtn .dtn-im{aspect-ratio:16/10;min-height:0}}
+@media(prefers-reduced-motion:reduce){#dtn .dtn-s,#dtn .dtn-s.on,#dtn .dtn-bd>*,#dtn .dtn-im img{transition-duration:.01s!important;transform:none!important}}
+
+/* 2) Xəbər siyahısı — vahid ölçülü səliqəli şəkillər (4:5, kəsilmə yuxarıdan) */
+#nw-pub .nw-card img.im{width:clamp(104px,24vw,190px)!important;aspect-ratio:4/5!important;height:auto!important;max-height:none!important;
+  object-fit:cover!important;object-position:center top;background:#eaf0fb;border-radius:16px;align-self:flex-start;flex:none;
+  box-shadow:0 8px 20px #0f172a1f;border:1px solid #0f172a0f}
+#nw-pub .nw-card{align-items:flex-start;min-height:0}
+#nw-pub .nw-card .nw-more{margin-top:4px}
+#nw-pub .nw-rc img,#nw-pub .dq2n-im img,#nw-pub .dq2n-r img{object-fit:cover;object-position:center top}
+
+/* 3) Kateqoriya və alt-kateqoriya çipləri */
+#nw-pub .nw-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+#nw-pub .nw-chips::-webkit-scrollbar{display:none}
+#nw-pub .nw-chip{white-space:nowrap;flex:none;transition:background-color .25s,color .25s,border-color .25s,transform .2s}
+#nw-pub .nw-subs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 0 14px;padding:2px 2px 4px;animation:nwSubIn .35s ease both}
+#nw-pub .nw-subs::-webkit-scrollbar{display:none}
+#nw-pub .nw-sub{flex:none;border:1px dashed #b8935a;background:#fffaf0;color:#7a5b2a;border-radius:999px;padding:7px 14px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background-color .25s,color .25s,transform .2s}
+#nw-pub .nw-sub.on{background:#b8935a;border-style:solid;color:#fff}
+#nw-pub .nw-sub:active{transform:scale(.96)}
+#nw-pub .nw-meta .tg2{background:#1e1b4b0f;color:#1e1b4b;border-radius:999px;padding:1px 9px;font-weight:700;letter-spacing:.2px}
+@keyframes nwSubIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* 4) Karusel admin: fənn qapaq şəkli bloku */
+.krs-cov{display:flex;gap:14px;align-items:center;margin-top:12px;padding-top:12px;border-top:1px dashed #cbd5e1}
+.krs-cv{flex:none;width:84px;aspect-ratio:5/7;border-radius:12px;background:#e2e8f0 center/cover no-repeat;display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:#64748b;text-align:center;box-shadow:0 6px 16px #0f172a22;border:1px solid #cbd5e1}
+.krs-cvb{display:flex;flex-direction:column;gap:6px;min-width:0}
+.krs-cvb small{color:#64748b;line-height:1.35}
+
+/* 5) Sistem qapaq şəkilləri paneli */
+#dqs-root{position:fixed;inset:0;z-index:2147483000;display:none;background:#0b1b3acc;backdrop-filter:blur(3px);overflow:auto;-webkit-overflow-scrolling:touch}
+#dqs-root.open{display:block}
+#dqs-root .dqs-p{max-width:760px;margin:28px auto;background:#fff;border-radius:22px;box-shadow:0 30px 80px #0008;overflow:hidden}
+#dqs-root .dqs-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 20px;background:linear-gradient(135deg,#0a2f7a,#2a5db8);color:#fff}
+#dqs-root .dqs-h b{font-size:17px}#dqs-root .dqs-h small{display:block;opacity:.8;font-weight:400}
+#dqs-root .dqs-b{padding:18px 20px;display:grid;gap:16px}
+#dqs-root .dqs-c{border:1px solid #e2e8f0;border-radius:16px;padding:14px;display:flex;gap:14px;align-items:center;background:#f8fafc}
+#dqs-root .dqs-pv{flex:none;width:150px;aspect-ratio:16/10;border-radius:12px;background:#e2e8f0 center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:12px;text-align:center;border:1px solid #cbd5e1}
+#dqs-root .dqs-tx{display:flex;flex-direction:column;gap:6px;min-width:0}
+#dqs-root .dqs-tx small{color:#64748b;line-height:1.35}
+#dqs-root .dqs-bt{border:0;border-radius:10px;padding:8px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;background:#e2e8f0;color:#0f172a}
+#dqs-root .dqs-bt.pri{background:#0a2f7a;color:#fff}#dqs-root .dqs-bt.blue{background:#2a5db8;color:#fff}#dqs-root .dqs-bt.red{background:#fee2e2;color:#b91c1c}
+#dqs-root .dqs-bt:disabled{opacity:.5;cursor:default}
+#dqs-root .dqs-row{display:flex;gap:8px;flex-wrap:wrap}
+#dqs-root .dqs-f{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid #e2e8f0;background:#f8fafc}
+#dqs-root .dqs-st{font-size:12px;color:#64748b;margin-right:auto;align-self:center}
+@media(max-width:560px){#dqs-root .dqs-p{margin:0;border-radius:0;min-height:100%}#dqs-root .dqs-c{flex-direction:column;align-items:stretch}#dqs-root .dqs-pv{width:100%}}
+</style>
+<script src="dq-qapaq.js?v=1"></script>
+<script src="app.js?v=29"></script>
+<script src="dq-birlesdirme.js?v=5"></script>
 <script src="dq-lock.js?v=1"></script>
 <script src="yspro.js?v=1"></script>
 <script src="dq-core.js?v=3"></script>
