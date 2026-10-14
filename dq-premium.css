@@ -1,0 +1,138 @@
+/* DQ Platform — dq-premium.css (v1)
+   Premium "bilet / boarding pass" dizaynı: İmtahanlar paneli (ds-*) + Qeydiyyat portalı (lxp-*).
+   Qoşulma: index.html-də </head>-dən əvvəl, app.js stillərindən SONRA:
+   <link rel="stylesheet" href="dq-premium.css?v=1">  */
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap');
+
+html body{
+  --pr-ink:#0a1440; --pr-ink2:#18246b; --pr-brass:#c29a4b; --pr-brass2:#f0dba6;
+  --pr-paper:#f3f5fb; --pr-line:#dfe3f1; --pr-live:#12b981;
+  --pr-disp:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --pr-body:'Figtree','Segoe UI',system-ui,sans-serif;
+}
+
+/* ============ İMTAHANLAR: bilet kartları ============ */
+html body .ds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:26px;align-items:start}
+html body .ds-c{
+  position:relative;border:0;border-radius:22px;padding:0;overflow:visible;
+  background:#fff;font-family:var(--pr-body);
+  box-shadow:0 1px 0 #fff inset,0 2px 4px rgba(10,20,64,.05),0 22px 40px -18px rgba(10,20,64,.35);
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;
+}
+html body .ds-c:hover{transform:translateY(-4px) rotate(-.4deg);box-shadow:0 2px 4px rgba(10,20,64,.05),0 34px 50px -20px rgba(10,20,64,.45)}
+html body .ds-c::before{display:none}
+
+/* yuxarı hissə: tünd bilet başlığı */
+html body .ds-top{
+  position:relative;margin:0;padding:20px 22px 62px;border-radius:22px 22px 0 0;align-items:flex-start;
+  background:radial-gradient(120% 140% at 100% 0,rgba(194,154,75,.38),transparent 55%),
+             linear-gradient(155deg,var(--pr-ink2),var(--pr-ink));
+  overflow:hidden;
+}
+html body .ds-top::after{ /* incə qızılı diaqonal toxuma */
+  content:"";position:absolute;inset:0;opacity:.09;pointer-events:none;
+  background:repeating-linear-gradient(115deg,#fff 0 1px,transparent 1px 11px);
+}
+html body .ds-chip{
+  background:linear-gradient(135deg,var(--pr-brass2),var(--pr-brass));color:var(--pr-ink);
+  font:800 12px/1 var(--pr-disp);letter-spacing:.08em;padding:7px 11px;border-radius:8px;
+}
+html body .ds-bd{color:#c9d2f5;font:500 13px var(--pr-body);margin-top:10px}
+html body .ds-bd i{background:var(--pr-brass)}
+html body .ds-pill{position:relative;z-index:1;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);
+  color:#fff;border-radius:999px;font:700 11px var(--pr-body);letter-spacing:.06em;padding:7px 12px;backdrop-filter:blur(6px)}
+html body .ds-pill.live i{background:var(--pr-live);box-shadow:0 0 0 0 rgba(18,185,129,.7);animation:prPulse 1.8s infinite}
+html body .ds-pill.soon{color:var(--pr-brass2)} html body .ds-pill.end{opacity:.65}
+@keyframes prPulse{70%{box-shadow:0 0 0 9px rgba(18,185,129,0)}100%{box-shadow:0 0 0 0 rgba(18,185,129,0)}}
+
+/* başlıq bilet bölməsinin üstünə "oturur" */
+html body .ds-t{
+  position:relative;z-index:2;margin:-44px 22px 0;padding:16px 18px;text-align:left;
+  background:#fff;border-radius:14px;color:var(--pr-ink);
+  font:800 24px/1.1 var(--pr-disp);letter-spacing:-.02em;
+  box-shadow:0 14px 26px -14px rgba(10,20,64,.45);border-left:4px solid var(--pr-brass);
+}
+
+/* perforasiya xətti və yan çentiklər */
+html body .ds-hr{position:relative;height:0;margin:24px 0 6px;border:0;border-top:2px dashed var(--pr-line);background:none}
+html body .ds-hr::before,html body .ds-hr::after{
+  content:"";position:absolute;top:-12px;width:22px;height:22px;border-radius:50%;background:var(--pr-paper);
+  box-shadow:inset 0 3px 5px rgba(10,20,64,.12);
+}
+html body .ds-hr::before{left:-11px} html body .ds-hr::after{right:-11px}
+
+/* məlumat sətirləri */
+html body .ds-r{padding:12px 22px;gap:14px;align-items:center}
+html body .ds-ic{
+  width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none;
+  color:var(--pr-ink2);background:linear-gradient(145deg,#eef1fb,#fff);
+  box-shadow:inset 0 0 0 1px var(--pr-line),0 4px 8px -4px rgba(10,20,64,.2);
+}
+html body .ds-tx b{color:var(--pr-ink);font:700 15px var(--pr-body)}
+html body .ds-tx small{color:#6b7392;font-size:12.5px}
+
+/* düymə */
+html body .ds-go{
+  position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px;
+  width:calc(100% - 44px);margin:14px 22px 0;padding:16px;border:0;border-radius:14px;cursor:pointer;
+  background:linear-gradient(135deg,var(--pr-ink2),var(--pr-ink));color:#fff;
+  font:700 16px var(--pr-disp);letter-spacing:.02em;
+  box-shadow:0 0 0 1px rgba(194,154,75,.6) inset,0 16px 24px -12px rgba(10,20,64,.7);
+  transition:transform .2s,box-shadow .2s;
+}
+html body .ds-go::after{content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(240,219,166,.45),transparent);transform:skewX(-18deg);transition:left .6s}
+html body .ds-go:not(:disabled):hover::after{left:130%}
+html body .ds-go:not(:disabled):active{transform:scale(.98)}
+html body .ds-go:disabled{background:#eef0f7;color:#9aa1bd;box-shadow:inset 0 0 0 1px var(--pr-line)}
+html body .ds-note{padding:12px 22px 22px;text-align:center;color:#7b82a0;font-size:12.5px}
+
+/* ============ QEYDİYYAT PORTALI ============ */
+html body .lxp-hero{
+  position:relative;border-radius:28px;font-family:var(--pr-body);overflow:hidden;
+  background:radial-gradient(90% 120% at 100% 100%,rgba(194,154,75,.5),transparent 60%),
+             linear-gradient(160deg,#0a1440,#1b2a7a 70%,#2b2f88);
+  box-shadow:0 30px 60px -30px rgba(10,20,64,.8);
+}
+html body .lxp-hero::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.07;
+  background:repeating-linear-gradient(115deg,#fff 0 1px,transparent 1px 12px)}
+html body .lxp-hero h1{font:800 clamp(34px,6vw,56px)/1 var(--pr-disp);letter-spacing:-.03em}
+html body .lxp-bdg{border:1px solid rgba(240,219,166,.5);background:rgba(240,219,166,.12);color:var(--pr-brass2)}
+html body .lxp-chk{background:var(--pr-brass2);color:var(--pr-ink);font:700 14px var(--pr-body);border:0;
+  box-shadow:0 14px 24px -10px rgba(194,154,75,.9)}
+
+/* cədvəl paneli */
+html body .lxp-card{border:0;border-radius:26px;background:#fff;font-family:var(--pr-body);
+  box-shadow:0 24px 50px -26px rgba(10,20,64,.4)}
+html body .lxp-ch b{font:800 26px var(--pr-disp);color:var(--pr-ink);letter-spacing:-.02em}
+html body .lxp-ch small{background:linear-gradient(135deg,#eef1fb,#fff);border:1px solid var(--pr-line);color:var(--pr-ink2);font-weight:600}
+html body .lxp-card table{border-collapse:separate;border-spacing:0 12px}
+html body .lxp-card thead th{
+  background:none;color:#7b82a0;font:700 11px var(--pr-body);letter-spacing:.12em;
+  border:0;border-bottom:2px solid var(--pr-brass);padding:8px 12px;
+}
+html body .lxp-card tbody tr:not([class*="lxp-d"]) > td{
+  background:#fff;border-top:1px solid var(--pr-line);border-bottom:1px solid var(--pr-line);padding:16px 12px;
+}
+html body .lxp-card tbody tr:not([class*="lxp-d"]) > td:first-child{
+  border-left:5px solid var(--pr-brass);border-radius:14px 0 0 14px;color:var(--pr-brass);font:800 18px var(--pr-disp)}
+html body .lxp-card tbody tr:not([class*="lxp-d"]) > td:last-child{border-right:1px solid var(--pr-line);border-radius:0 14px 14px 0}
+html body .lxp-card tbody tr:hover > td{background:linear-gradient(180deg,#fff,#f6f8ff)}
+html body .lxp-card td button{font:700 14px var(--pr-body);border-radius:12px;
+  background:linear-gradient(135deg,var(--pr-ink2),var(--pr-ink));color:#fff;border:0;padding:12px 14px;
+  box-shadow:0 0 0 1px rgba(194,154,75,.55) inset,0 10px 18px -10px rgba(10,20,64,.7)}
+html body .lxp-card td button:disabled{background:#eef0f7;color:#9aa1bd;box-shadow:none}
+
+/* açılan detal paneli: "çek" görünüşü */
+html body .lxp-d,html body .lxp-dr{border-radius:18px;border:1px solid var(--pr-line);
+  box-shadow:0 18px 34px -22px rgba(10,20,64,.5);overflow:hidden}
+html body .lxp-dh{background:linear-gradient(155deg,var(--pr-ink2),var(--pr-ink));border-bottom:3px solid var(--pr-brass)}
+html body .lxp-dr{border-style:dashed;border-width:0 0 1px}
+
+@media (max-width:560px){
+  html body .ds-grid{grid-template-columns:1fr}
+  html body .ds-t{font-size:22px}
+}
+@media (prefers-reduced-motion:reduce){
+  html body .ds-c,html body .ds-go,html body .ds-go::after,html body .ds-pill.live i{transition:none;animation:none}
+}
