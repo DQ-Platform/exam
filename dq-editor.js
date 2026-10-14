@@ -69,6 +69,27 @@
     }
   }
   function applyAll() { Object.keys(S.edits).forEach(function (k) { try { applyOne(k, S.edits[k]); } catch (e) { } }); }
+  var _sc = 0;
+  function sched() { if (_sc) return; _sc = setTimeout(function () { _sc = 0; applyAll(); if (S.on) unlock(); }, 90); }
+  function watch() {
+    if (!D.body || !window.MutationObserver) { setTimeout(watch, 100); return; }
+    new MutationObserver(function (ms) {
+      for (var i = 0; i < ms.length; i++) { var n = ms[i].target; if (n && n.closest && n.closest("#dqed-bar,#dqed-ins")) continue; sched(); return; }
+    }).observe(D.body, { childList: true, subtree: true });
+  }
+  /* redaktə rejimində «disabled» (qeyri-aktiv) düymə/sahələr də seçilə bilsin */
+  function unlock() {
+    [].forEach.call(D.querySelectorAll("button[disabled],input[disabled],select[disabled],textarea[disabled]"), function (e) {
+      if (e.closest("#dqed-bar,#dqed-ins")) return; e.setAttribute("data-dqed-dis", "1"); e.removeAttribute("disabled");
+    });
+  }
+  function relock() { [].forEach.call(D.querySelectorAll("[data-dqed-dis]"), function (e) { e.removeAttribute("data-dqed-dis"); e.setAttribute("disabled", ""); }); }
+  /* açıq qalmış pəncərələri (Yeniliklər, xəbər detalı və s.) bağla ki, redaktor onların arxasında qalmasın */
+  function closeOverlays() {
+    ["#nw-det .nw-x", "#nw-pub .nw-x", "#nw-pub .nw-hd button", ".dqn-ov .dqn-x", "#nw-det .nw-hd button"].forEach(function (q) {
+      var e = D.querySelector(q); if (e && e.offsetParent !== null) { try { e.click(); } catch (x) { } }
+    });
+  }
   function cache() { try { localStorage.setItem(CK, JSON.stringify({ edits: S.edits })); } catch (e) { } }
 
   /* ---------- verilənlər bazası ---------- */
@@ -103,7 +124,7 @@
     "#dqed-ins .row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}#dqed-ins .row button{background:#eef1fb;color:#0a1c52}#dqed-ins .row button.r{background:#fee2e2;color:#b91c1c}";
   function stat(t) { var s = $("dqed-st"); if (s) s.textContent = t != null ? t : (S.dirty ? "● saxlanmamış" : ""); }
   function hex(c) { var m = String(c).match(/\d+(\.\d+)?/g); if (!m || (m.length > 3 && +m[3] === 0)) return "#ffffff"; return "#" + m.slice(0, 3).map(function (n) { return ("0" + (+n | 0).toString(16)).slice(-2); }).join(""); }
-  function go(fn) { desel(); S.bypass = true; try { window.LXP && LXP.close && LXP.close(); } catch (e) { } try { fn(); } catch (e) { console.warn(e); } S.bypass = false; setTimeout(applyAll, 500); setTimeout(applyAll, 1500); }
+  function go(fn) { desel(); closeOverlays(); S.bypass = true; try { window.LXP && LXP.close && LXP.close(); } catch (e) { } try { fn(); } catch (e) { console.warn(e); } S.bypass = false; setTimeout(applyAll, 500); setTimeout(applyAll, 1500); setTimeout(unlock, 600); setTimeout(unlock, 1800); }
   function build() {
     if (!$("dqed-css")) { var st = D.createElement("style"); st.id = "dqed-css"; st.textContent = CSS; D.head.appendChild(st); }
     if (!D.getElementById("dqed-fonts")) { var l = D.createElement("link"); l.id = "dqed-fonts"; l.rel = "stylesheet"; l.href = "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Caveat:wght@600&display=swap"; D.head.appendChild(l); }
@@ -111,14 +132,25 @@
     bar.innerHTML = '<b>✏️ Redaktə rejimi</b><div id="dqed-nav"></div><span id="dqed-st"></span><button type="button" class="g" data-a="save">💾 Saxla</button><button type="button" data-a="all">↺ Hamısı</button><button type="button" data-a="out">Çıx</button>';
     var ins = D.createElement("div"); ins.id = "dqed-ins";
     D.body.appendChild(bar); D.body.appendChild(ins); D.documentElement.classList.add("dqed-on");
-    var items = [["🏠 Ana səhifə", function () { showScreen("v3-home"); }]];
-    [].forEach.call(D.querySelectorAll("#v3-home .v3-nav a"), function (a, i) {
-      if (/ana\s*s/i.test(a.textContent)) return;
-      items.push(["▸ " + a.textContent.trim(), function () { showScreen("v3-home"); var l = D.querySelectorAll("#v3-home .v3-nav a")[i]; l && l.click(); }]);
-    });
-    if (window.LXP && LXP.open) items.push(["📋 Qeydiyyat portalı", function () { LXP.open(); }]);
     var nav = $("dqed-nav");
-    items.forEach(function (it) { var b = D.createElement("button"); b.type = "button"; b.textContent = it[0]; b.onclick = function () { go(it[1]); }; nav.appendChild(b); });
+    function jump(sel) { return function () { showScreen("v3-home"); setTimeout(function () { var e = D.querySelector(sel); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: "smooth", block: "center" }); }, 400); }; }
+    function renderNav() {
+      nav.innerHTML = "";
+      var items = [["🏠 Ana səhifə", function () { showScreen("v3-home"); window.scrollTo(0, 0); }]];
+      [].forEach.call(D.querySelectorAll("#v3-home .v3-nav a"), function (a, i) {
+        if (/ana\s*s/i.test(a.textContent)) return;
+        items.push(["▸ " + a.textContent.trim(), function () { showScreen("v3-home"); var l = D.querySelectorAll("#v3-home .v3-nav a")[i]; l && l.click(); }]);
+      });
+      if (!items.some(function (x) { return /yenilik/i.test(x[0]); })) items.push(["▸ YENİLİKLƏR", function () {
+        showScreen("v3-home"); var l = [].filter.call(D.querySelectorAll("#v3-home .v3-nav a"), function (a) { return /yenilik/i.test(a.textContent); })[0]; l && l.click();
+      }]);
+      items.push(["🎯 Günün testi", jump("#dt-home")], ["🏆 İmtahan kartı", jump("#dt-grid")], ["⏱ Geri sayım", jump("#dq-count")], ["📊 Statistika", jump("#dq-stats")], ["🦶 Footer", jump("#v3-home .v3-ft")]);
+      items.push(["📋 Qeydiyyat portalı", function () {
+        if (window.LXP && LXP.open) LXP.open(); else { try { V2.toast("Qeydiyyat portalı hələ yüklənməyib, bir az sonra yenə basın"); } catch (e) { } }
+      }]);
+      items.forEach(function (it) { var b = D.createElement("button"); b.type = "button"; b.textContent = it[0]; b.onclick = function () { go(it[1]); }; nav.appendChild(b); });
+    }
+    renderNav(); setTimeout(renderNav, 1200); setTimeout(renderNav, 3500);
     bar.addEventListener("click", function (e) {
       var a = e.target.dataset && e.target.dataset.a; if (!a) return;
       if (a === "save") save(); else if (a === "out") exit();
@@ -191,14 +223,14 @@
     });
   }
   async function open() {
-    if (S.on) return; await load(); S.on = true; build(); stat("");
+    if (S.on) return; await load(); S.on = true; build(); stat(""); unlock();
     D.addEventListener("click", pick, true); D.addEventListener("pointerover", hover, true);
     go(function () { showScreen("v3-home"); }); applyAll();
   }
   function exit() {
     if (S.dirty && !confirm("Saxlanmamış dəyişikliklər var. Yenə də çıxılsın?")) return;
     if (S.dirty) { S.dirty = false; try { var c = JSON.parse(localStorage.getItem(CK) || "null"); var old = S.edits; S.edits = c && c.edits || {}; Object.keys(old).forEach(function (k) { if (!S.edits[k]) applyOne(k, {}); }); } catch (e) { } }
-    desel(); unhover(); S.on = false; D.removeEventListener("click", pick, true); D.removeEventListener("pointerover", hover, true);
+    relock(); desel(); unhover(); S.on = false; D.removeEventListener("click", pick, true); D.removeEventListener("pointerover", hover, true);
     var a = $("dqed-bar"), b = $("dqed-ins"); a && a.remove(); b && b.remove(); D.documentElement.classList.remove("dqed-on");
     try { window.LXP && LXP.close && LXP.close(); } catch (e) { } applyAll(); try { showScreen("admin-panel"); } catch (e) { }
   }
@@ -214,5 +246,5 @@
   var n = 0, iv = setInterval(function () { if (window.V2 && V2.list) { clearInterval(iv); load(); } else if (++n > 160) clearInterval(iv); }, 250);
   var m = 0, iv2 = setInterval(function () { if (addCard() || ++m > 60) clearInterval(iv2); }, 500);
   var ap = $("admin-panel"); if (ap && window.MutationObserver) new MutationObserver(function () { if (!$("dqed-card")) addCard(); }).observe(ap, { childList: true, subtree: true });
-  setInterval(applyAll, 1200); applyAll();
+  setInterval(applyAll, 1200); applyAll(); watch();
 })();
