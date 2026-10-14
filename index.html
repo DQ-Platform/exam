@@ -104,6 +104,51 @@ window.setInterval=function(fn,d){
 };
 })();
 </script>
+<link rel="preload" as="script" href="dq-net.js?v=1">
+<link rel="preload" as="script" href="app.js?v=30">
+<link rel="preload" as="script" href="dq-qapaq.js?v=2">
+<link rel="preload" as="script" href="dq-birlesdirme.js?v=5">
+<link rel="preload" as="script" href="dq-lock.js?v=1">
+<link rel="preload" as="script" href="yspro.js?v=1">
+<link rel="preload" as="script" href="dq-core.js?v=3">
+<link rel="preload" as="script" href="dq-hero.js?v=2">
+<link rel="preload" as="script" href="dq-materials.js?v=3">
+<link rel="preload" as="script" href="dq-live.js?v=1">
+<link rel="preload" as="script" href="dq-home2.js?v=2">
+<link rel="preload" as="script" href="dq-editor.js?v=2">
+<script id="dq-speed">/* DQ Speed: (1) Böyük sənəd (PDF material) cavablarını cihazda saxlayır: 2-ci açılış ANINDA, yenilənmə fonda.
+   (2) pdf.js-i fonda əvvəlcədən hazırlayır. */
+(function(){"use strict";
+if(window.__dqSpeed)return;window.__dqSpeed=1;
+var RF=window.fetch,CN="dq-doc-v1",FRESH=3e5,MINSZ=15e4;
+function conn(){var c=navigator.connection||{};return !c.saveData&&(!c.effectiveType||c.effectiveType==="4g")}
+if(RF&&window.caches&&window.Response){
+ var isDoc=function(u){return/\/rest\/v1\/dq_v2_store\?/.test(u)&&/[?&]id=eq\.\d+/.test(u)&&/[?&]select=data(&|$)/.test(u)};
+ var keyOf=function(u,a){return"https://dq-doc.local/"+encodeURIComponent(u+"|"+a)};
+ window.fetch=function(i,o){
+  var u,m,a="";try{u=typeof i==="string"?i:(i&&i.url)||String(i);m=String((o&&o.method)||(i&&i.method)||"GET").toUpperCase();
+   var h=(o&&o.headers)||(i&&i.headers);if(h){a=(h.get?h.get("Accept"):(h.Accept||h.accept))||""}}catch(e){return RF.apply(this,arguments)}
+  if(m!=="GET"||!isDoc(u))return RF.apply(this,arguments);
+  var args=arguments,self=this,k=keyOf(u,a);
+  function net(){return RF.apply(self,args).then(function(r){
+   if(r&&r.ok){try{r.clone().blob().then(function(b){if(b.size<MINSZ)return;
+     var hd=new Headers(r.headers);hd.set("x-dq-ts",String(Date.now()));
+     caches.open(CN).then(function(c){return c.put(k,new Response(b,{status:200,headers:hd}))}).catch(function(){})}).catch(function(){})}catch(e){}}
+   return r})}
+  return caches.open(CN).then(function(c){return c.match(k).then(function(hit){
+   if(!hit)return net();
+   var ts=+hit.headers.get("x-dq-ts")||0;
+   if(Date.now()-ts>FRESH)net().catch(function(){});
+   return hit})}).catch(function(){return net()})
+ };
+}
+/* pdf.js fonda (yalnız sürətli şəbəkədə) */
+function warm(){try{if(conn()&&window.__dqLibs)window.__dqLibs("pdf").catch(function(){})}catch(e){}}
+addEventListener("load",function(){setTimeout(function(){window.requestIdleCallback?requestIdleCallback(warm,{timeout:6000}):warm()},3500)});
+/* Klik cavabı: toxunuş gecikməsi yoxdur */
+try{document.addEventListener("touchstart",function(){},{passive:true})}catch(e){}
+})();
+</script>
 <link rel="preconnect" href="https://cpzwliqlgaplroscvduo.supabase.co" crossorigin>
 <script id="dq-prefetch">(function(){var U="https://cpzwliqlgaplroscvduo.supabase.co",K="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF";function T(u){return new Promise(function(ok){var d=0,ac=window.AbortController?new AbortController():null,t=setTimeout(function(){if(!d){d=1;try{ac&&ac.abort()}catch(e){}ok(null)}},9000);fetch(u,{headers:{apikey:K},signal:ac&&ac.signal}).then(function(r){if(d)return;d=1;clearTimeout(t);ok(r)},function(){if(d)return;d=1;clearTimeout(t);ok(null)})})}function R(u){return T(u).then(function(r){return r&&r.ok?r:T(u)})}function g(c){return R(U+"/rest/v1/dq_v2_store?select=*&collection=eq."+c+"&order=id.desc").then(function(r){return r&&r.ok?r.json():null}).then(function(a){return Array.isArray(a)?a.map(function(x){return Object.assign({},x.data,{_id:x.id})}):null}).catch(function(){return null})}try{window.__dqPreC=JSON.parse(localStorage.getItem("dq_pre_v3")||"null")}catch{}function gn(l){return R(U+"/rest/v1/dq_v2_store?select=*&collection=eq.news&order=id.desc&limit="+l).then(function(r){return r&&r.ok?r.json():null}).then(function(a){return Array.isArray(a)?a.map(function(x){return Object.assign({},x.data,{_id:x.id})}):null}).catch(function(){return null})}function idb(m,v){return new Promise(function(ok){try{var o=indexedDB.open("dq_news",1);o.onupgradeneeded=function(){o.result.createObjectStore("k")},o.onerror=function(){ok(null)},o.onsuccess=function(){try{var d=o.result,t=d.transaction("k",m==="set"?"readwrite":"readonly"),st=t.objectStore("k"),r=m==="set"?st.put(v,"slider"):st.get("slider");r.onsuccess=function(){ok(r.result||null)},r.onerror=function(){ok(null)},t.oncomplete=function(){d.close()}}catch{ok(null)}}}catch{ok(null)}})}window.__dqIdb=idb,window.__dqNewsC=null,window.__dqNewsCP=Promise.race([idb("get"),new Promise(function(o){setTimeout(function(){o(null)},900)})]),window.__dqPreN1=gn(4),window.__dqPreN=gn(16),window.__dqPre=g("liveexams"),window.__dqPreT=g("v3tests").then(function(a){return Array.isArray(a)?a.filter(function(t){return t&&t.ans&&t.ans.length&&t.status!=="hidden"}):a}),window.__dqPre.then(function(a){window.__dqLiveN=Array.isArray(a)?a.length:-1}),window.__dqPreT.then(function(a){window.__dqTestN=Array.isArray(a)?a.length:-1})})();</script>
 <script id="dq-prefetch2">/* Ana səhifənin ehtiyac duyduğu konfiqurasiya kolleksiyalarını app.js yüklənməmiş PARALEL çəkir.
@@ -1705,7 +1750,6 @@ body.dqh-split #dq-pwa-wrap,body.dqh-split #dq-cookie{display:none!important}
 #dqpf .oath input{width:20px;height:20px;margin-top:2px;accent-color:#1f1b4d;flex:none}
 #dqpf .who{font-size:13px;color:#6b6f85;text-align:center;margin-top:14px}
 </style>
-<link rel="preload" as="script" href="app.js?v=23">
 <style id="dq-tlx-gate-css">
 /* «Tezliklə əlavə olunacaq» pəncərəsi */
 #tlx-soon{position:fixed;inset:0;z-index:2147483200;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(4,12,32,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;transition:opacity .28s ease}
@@ -2370,6 +2414,15 @@ html body .inf-cd:hover{transform:translateY(-3px);box-shadow:0 24px 38px -22px 
 html body .inf-cd b,html body .inf-bd h2,html body .inf-bd h4{color:var(--pr-ink)}
 html body .inf-bd{border-radius:18px;font-family:var(--pr-f)}
 html body .inf-bd th{background:#fff6dc;color:var(--pr-ink)}
+</style>
+<style id="dq-speed-css">
+/* DQ Speed CSS: toxunuşda gecikmə yox, tam ekran blur yox (GPU-nu ən çox yeyən hissə) */
+a,button,input,select,textarea,label,summary,[role=button],[onclick],.btn{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.dqn-ov,.dqg-ov,.dqlf-ov,.v3-md,.nwp-md,#dq-pay-ov,#dq-otp-ov,#dqk-ov,#tlx-soon,#dqpdf-v,[class$="-ov"],[id$="-ov"],[class*="overlay"],[class*="backdrop"],[class*="modal"]{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.dqe-aur{display:none!important}
+button:active,.btn:active,[role=button]:active{transition-duration:.06s!important}
+#dqpdf-v canvas{max-width:100%;height:auto}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body class="v3on" oncontextmenu="return false;">
@@ -3952,7 +4005,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 @media(max-width:560px){#dqs-root .dqs-p{margin:0;border-radius:0;min-height:100%}#dqs-root .dqs-c{flex-direction:column;align-items:stretch}#dqs-root .dqs-pv{width:100%}}
 </style>
 <script src="dq-qapaq.js?v=2"></script>
-<script src="app.js?v=29"></script>
+<script src="app.js?v=30"></script>
 <script src="dq-birlesdirme.js?v=5"></script>
 <script src="dq-lock.js?v=1"></script>
 <script src="yspro.js?v=1"></script>
@@ -3961,7 +4014,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <script src="dq-materials.js?v=3"></script>
 <script src="dq-live.js?v=1"></script>
 <script src="dq-home2.js?v=2"></script>
-<script src="dq-editor.js?v=1"></script>
+<script src="dq-editor.js?v=2"></script>
 <script src="chatbot.js?v=1" defer></script>
 <style id="dq-fix-link-css">
 #v3-home .v3-ft{min-height:0!important;margin-bottom:0!important}
