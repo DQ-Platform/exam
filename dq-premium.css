@@ -2,13 +2,13 @@
    Premium "bilet / boarding pass" dizaynı: İmtahanlar paneli (ds-*) + Qeydiyyat portalı (lxp-*).
    Qoşulma: index.html-də </head>-dən əvvəl, app.js stillərindən SONRA:
    <link rel="stylesheet" href="dq-premium.css?v=1">  */
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 html body{
-  --pr-ink:#0a1440; --pr-ink2:#18246b; --pr-brass:#c29a4b; --pr-brass2:#f0dba6;
+  --pr-ink:#06112e; --pr-ink2:#0c2260; --pr-brass:#e5a82c; --pr-brass2:#f6c453;
   --pr-paper:#f3f5fb; --pr-line:#dfe3f1; --pr-live:#12b981;
-  --pr-disp:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
-  --pr-body:'Figtree','Segoe UI',system-ui,sans-serif;
+  --pr-disp:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;
+  --pr-body:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;
 }
 
 /* ============ İMTAHANLAR: bilet kartları ============ */
@@ -136,3 +136,37 @@ html body .lxp-dr{border-style:dashed;border-width:0 0 1px}
 @media (prefers-reduced-motion:reduce){
   html body .ds-c,html body .ds-go,html body .ds-go::after,html body .ds-pill.live i{transition:none;animation:none}
 }
+
+/* ============ v2: ana səhifə ilə vahid dil (tünd naviy + qızılı, eyni şrift) ============ */
+html body #v3-sessions,html body #lxp{background:#f4f6fc;font-family:var(--pr-body)}
+html body .ds-hd{
+  background:radial-gradient(60% 120% at 85% 40%,rgba(246,176,60,.24),transparent 62%),linear-gradient(170deg,#0a1c52,var(--pr-ink) 75%);overflow:hidden}
+html body .ds-hd::before,html body .lxp-hero::before{content:"";position:absolute;inset:0;opacity:.07;pointer-events:none;
+  background:linear-gradient(#fff 1px,transparent 1px) 0 0/48px 48px,linear-gradient(90deg,#fff 1px,transparent 1px) 0 0/48px 48px}
+html body .ds-hd>*{position:relative;z-index:1}
+html body .ds-hd h2{font:800 clamp(28px,5vw,40px) var(--pr-disp);letter-spacing:-.03em}
+html body .ds-hd::after{background:linear-gradient(90deg,transparent,var(--pr-brass2),transparent);height:2px;opacity:.7}
+html body .ds-back,html body .lxp-back,html body .lxp-cbtn{
+  background:linear-gradient(135deg,var(--pr-brass2),var(--pr-brass));color:#1a1403;border:0;font:800 13px var(--pr-body);
+  box-shadow:0 10px 22px -10px rgba(246,196,83,.85)}
+/* qeydiyyat üst zolağı: ana səhifə başlığı kimi tünd */
+html body .lxp-top{background:linear-gradient(180deg,#07163f,var(--pr-ink));border-bottom:1px solid rgba(246,196,83,.35);box-shadow:none}
+html body .lxp-top .lxp-br b{color:#fff!important;font-family:var(--pr-disp)}
+html body .lxp-top .lxp-br small{color:#aebbe3!important}
+html body .lxp-hero{background:radial-gradient(60% 90% at 85% 80%,rgba(246,176,60,.26),transparent 62%),linear-gradient(170deg,#0a1c52,var(--pr-ink) 75%)}
+html body .lxp-hero::after{display:none}
+html body .lxp-hero>*{position:relative;z-index:1}
+html body .lxp-hero h1{font-family:var(--pr-disp);font-weight:800}
+/* əsas düymələr: ana səhifədəki sarı CTA */
+html body .ds-go:not(:disabled),html body .lxp-card td button:not(:disabled){
+  background:linear-gradient(135deg,var(--pr-brass2),var(--pr-brass));color:#1a1403;
+  box-shadow:0 16px 26px -14px rgba(246,196,83,.9)}
+html body .ds-go:not(:disabled) svg{stroke:#1a1403}
+html body .ds-go::after{background:linear-gradient(100deg,transparent,rgba(255,255,255,.6),transparent)}
+html body .ds-top{background:radial-gradient(120% 140% at 100% 0,rgba(246,176,60,.32),transparent 55%),linear-gradient(155deg,#0c2260,var(--pr-ink))}
+html body .ds-top::after{background:linear-gradient(#fff 1px,transparent 1px) 0 0/28px 28px,linear-gradient(90deg,#fff 1px,transparent 1px) 0 0/28px 28px;opacity:.06}
+html body .ds-t,html body .lxp-ch b{font-family:var(--pr-disp)}
+html body .ds-hr::before,html body .ds-hr::after{background:#f4f6fc}
+html body .lxp-d,html body .lxp-dr{font-family:var(--pr-body)}
+/* gecə rejimi (sayt invert filtri ilə işləyir): tünd bloklar ilkin rəngdə qalır */
+html.dq13-dark .ds-hd,html.dq13-dark .ds-top,html.dq13-dark .lxp-top,html.dq13-dark .lxp-hero,html.dq13-dark .lxp-dh{filter:invert(1) hue-rotate(180deg)}
