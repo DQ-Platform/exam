@@ -72,6 +72,7 @@
     var a = $("dqb-sub"), b = $("dqb-top"); if (!a || !b) return;
     a.innerHTML = subOpts(); b.innerHTML = topOpts();
     var h = $("tv2-sub"); if (h) h.value = S.sub;
+    var bk = $("dqb-back"); if (bk) bk.style.display = S.from === "krs" ? "" : "none";
     var s = S.cat && findSub(S.cat, S.sub), t = findTop(s, S.top), i = $("dqb-info");
     if (i) i.textContent = !S.sub ? "Sualların aid olduğu fənni seçin." : !S.top ? "İndi mövzunu seçin." :
       "Sual «" + S.sub + " › " + S.top + "» bölməsinə əlavə olunacaq" + (t ? " (hazırda " + t.qs.length + " sual var)." : " (mövzu yaradılacaq).");
@@ -92,6 +93,7 @@
     box.innerHTML = '<b>🎯 Sual hara əlavə olunsun?</b>' +
       '<div class="tv2-g" style="margin-top:8px"><div><label>Fənn</label><select class="tv2-in" id="dqb-sub"></select></div><div><label>Mövzu</label><select class="tv2-in" id="dqb-top"></select></div></div>' +
       '<div id="dqb-info" class="tv2-msg i" style="display:block;margin-top:8px"></div>' +
+      '<div class="tv2-row"><button type="button" class="tv2-b g" id="dqb-back" style="display:none">🎠 Karuselə qayıt</button></div>' +
       '<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700">📚 Karuseldəki fənlər və mövzular</summary><div id="dqb-sum" style="margin-top:6px"></div>' +
       '<div class="tv2-row"><button type="button" class="tv2-b b" id="dqb-krs">🎠 Karusel idarəsini aç (redaktə / silmə)</button></div></details>';
     top.insertAdjacentElement("afterend", box);
@@ -111,6 +113,7 @@
       paintTarget();
     });
     $("dqb-krs").onclick = function () { if (window.KRS) { TV2.close(); KRS.open(); } };
+    $("dqb-back").onclick = backToKrs;
     root.addEventListener("click", function (e) {
       var b = e.target.closest && e.target.closest('[data-a="save"]'); if (!b) return;
       e.stopImmediatePropagation(); e.preventDefault(); doSave(b);
@@ -154,7 +157,8 @@
     } catch (x) { msg("Xəta: " + (x && x.message || x), "e"); }
     S.busy = false; btn.disabled = false;
   }
-  async function openPanel(sub, top) {
+  async function openPanel(sub, top, from) {
+    S.from = from || "";
     var T = window.TV2; if (!T) return;
     try { S.cat = await fetchCat(); } catch (e) { S.cat = S.cat || { id: null, subjects: seed() }; }
     if (sub != null) { S.sub = sub; S.top = top || ""; }
@@ -212,10 +216,101 @@
   });
   setInterval(function () { try { paintDaily(); } catch (e) { } }, 1500);
 
+
+  /* ---------- Xəbərlər səhifəsi: sabit WhatsApp düyməsi + sağdan sola axan yazı ---------- */
+  (function () {
+    if (D.getElementById("dqb-news-css")) return;
+    var st = D.createElement("style"); st.id = "dqb-news-css";
+    st.textContent =
+      ".nw-stick{position:sticky;top:0;z-index:5}.nw-stick .nw-top{position:static}" +
+      ".nw-wbar{display:flex;align-items:center;gap:10px;background:#0b2447;border-bottom:2px solid #c9a24f;padding:7px 12px}" +
+      ".nw-tick{flex:1;min-width:0;overflow:hidden;white-space:nowrap;-webkit-mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent)}" +
+      ".nw-tt{display:inline-block;padding-left:100%;color:#fff!important;font-weight:600;font-size:14px;text-decoration:none;animation:nwTick 34s linear infinite;will-change:transform}" +
+      ".nw-tick:hover .nw-tt,.nw-tick:active .nw-tt{animation-play-state:paused}" +
+      "@keyframes nwTick{from{transform:translateX(0)}to{transform:translateX(-100%)}}" +
+      ".nw-wbtn{flex:none;display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#25d366,#0f9d6b);color:#fff!important;border-radius:999px;padding:8px 16px;font-weight:700;font-size:13px;text-decoration:none;white-space:nowrap;box-shadow:0 4px 12px #25d36655}" +
+      ".nw-wbtn .s{display:none}" +
+      "@media(max-width:560px){.nw-wbtn .l{display:none}.nw-wbtn .s{display:inline}.nw-wbtn{padding:8px 12px}.nw-tt{font-size:13px}}" +
+      "@media(prefers-reduced-motion:reduce){.nw-tick{white-space:normal}.nw-tt{animation:none;padding-left:0;white-space:normal}}" +
+      "#nw-pub .nw-lay{grid-template-columns:minmax(0,1fr)!important}#nw-pub .nw-wrap{max-width:900px!important}#nw-pub .nw-side{display:none!important}";
+    D.head.appendChild(st);
+  })();
+
+
+  /* ---------- Karusel panelinə inteqrasiya: idxal düyməsi + bütün alətlər ---------- */
+  var TOOLS_SKIP = /karusel|testlər v2/i;
+  function krsCur() {
+    var r = $("krs-root"); if (!r) return {};
+    var sn = r.querySelector('[data-k="sname"]'), tn = r.querySelector(".krs-t.on [data-k=\"tname\"]");
+    return { sub: sn ? sn.value.trim() : "", top: tn ? tn.value.trim() : "" };
+  }
+  function adminCards() {
+    return [].slice.call(D.querySelectorAll("#admin-panel .admin-nav-card")).filter(function (c) { return c.id !== "krs-card" && !TOOLS_SKIP.test(c.textContent); });
+  }
+  function injectKrs() {
+    var r = $("krs-root"); if (!r || !r.classList.contains("open")) return;
+    var b = r.querySelector(".krs-b"); if (!b) return;
+    var qc = null;
+    [].forEach.call(b.querySelectorAll(".krs-c"), function (c) { var h = c.querySelector("h4"); if (h && /^❓ Suallar/.test(h.textContent)) qc = c; });
+    if (qc && !qc.querySelector(".dqb-tb")) {
+      var cur = krsCur(), tb = D.createElement("div"); tb.className = "dqb-tb";
+      tb.style.cssText = "display:flex;flex-wrap:wrap;gap:6px;margin:8px 0";
+      tb.innerHTML = '<button type="button" class="krs-bt sm blue" data-dqb="imp">📄 PDF / 🖼 Şəkil / 🟣 Forms / Mətn idxalı</button>' +
+        '<small style="flex-basis:100%;color:#64748b">Suallar «' + esc(cur.sub) + ' › ' + esc(cur.top) + '» mövzusuna əlavə olunacaq. Əvvəl yadda saxlanmamış dəyişiklik varsa, «💾 Saxla» basın.</small>';
+      qc.querySelector("h4").insertAdjacentElement("afterend", tb);
+    }
+    if (!b.querySelector(".dqb-tools")) {
+      var cards = adminCards(), tl = D.createElement("div"); tl.className = "krs-c dqb-tools";
+      tl.innerHTML = '<details><summary style="cursor:pointer;font-weight:800">🧰 Bütün alətlər (Testlər idarəsi, sual bankı, yoxlama, kəsmə…)</summary><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">' +
+        '<button type="button" class="krs-bt sm" data-dqb="tm">🗂️ Testlər idarəsi</button>' +
+        cards.map(function (c, i) { return '<button type="button" class="krs-bt sm" data-dqb-tool="' + i + '">' + esc(c.textContent.replace(/\s+/g, " ").trim()) + "</button>"; }).join("") +
+        "</div></details>";
+      b.insertBefore(tl, b.firstChild);
+    }
+  }
+  function closeKrs() {
+    if (!window.KRS) return true;
+    KRS.close();
+    var r = $("krs-root"); return !(r && r.classList.contains("open"));
+  }
+  D.addEventListener("click", function (e) {
+    var x = e.target.closest && e.target.closest("[data-dqb],[data-dqb-tool]"); if (!x) return;
+    e.preventDefault();
+    if (x.dataset.dqb === "imp") {
+      var c = krsCur(); if (!c.sub || !c.top) return alert("Əvvəl mövzunu seçin.");
+      if (closeKrs()) openPanel(c.sub, c.top, "krs");
+    } else if (x.dataset.dqb === "tm") {
+      if (closeKrs() && window.TM) TM.open();
+    } else if (x.dataset.dqbTool != null) {
+      var cards = adminCards(), card = cards[+x.dataset.dqbTool];
+      if (card && closeKrs()) setTimeout(function () { card.click(); }, 80);
+    }
+  });
+  function backToKrs() {
+    var sub = S.sub, top = S.top;
+    if (window.TV2) TV2.close();
+    S.from = "";
+    if (!window.KRS) return;
+    Promise.resolve(KRS.open()).then(function () {
+      setTimeout(function () {
+        var r = $("krs-root"); if (!r) return;
+        var chip = [].filter.call(r.querySelectorAll('[data-a="ssel"]'), function (b) { return low(b.textContent).indexOf(low(sub)) > -1; })[0];
+        chip && chip.click();
+        setTimeout(function () {
+          var inp = [].filter.call(r.querySelectorAll('.krs-t [data-k="tname"]'), function (i) { return low(i.value) === low(top); })[0];
+          var tb = inp && inp.closest(".krs-t").querySelector('[data-a="tsel"]'); tb && tb.click();
+        }, 60);
+      }, 120);
+    });
+  }
+  setInterval(function () { try { injectKrs(); } catch (e) { } }, 600);
+
   /* ---------- qurulum ---------- */
   var n = 0, iv = setInterval(function () {
     if (window.V2 && window.TV2 && window.TLX) {
       clearInterval(iv);
+      var oc = TV2.close;
+      TV2.close = function () { S.from = ""; return oc.apply(this, arguments); };
       var o = TV2.open;
       TV2.open = async function () {
         try { S.cat = await fetchCat(); } catch (e) { S.cat = S.cat || { id: null, subjects: seed() }; }
