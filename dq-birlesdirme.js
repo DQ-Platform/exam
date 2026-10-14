@@ -181,6 +181,8 @@
 
   /* ---------- Günün tövsiyə testi (karuseldən təsadüfi) ---------- */
   function cover(p) {
+    var ph = p.cover || (window.DQSYS && DQSYS.get("tests"));
+    if (ph) return ph;
     var g = p.grad || ["#2f63bd", "#0a2f7a"], t = String(p.topic).slice(0, 34), s = String(p.subject).slice(0, 30);
     var x = function (v) { return String(v).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + g[1] + '"/><stop offset="1" stop-color="' + g[0] + '"/></linearGradient></defs><rect width="800" height="450" fill="url(#g)"/>' +
@@ -193,7 +195,7 @@
   function dayCard(p, sg) {
     return '<div class="dt-day dqb-day" data-sig="' + esc(sg) + '"><div class="cv"><img alt="" src="' + cover(p) + '"></div><div class="in"><span class="dt-tag">⭐ GÜNÜN TÖVSİYƏ TESTİ</span><h3>' + esc(p.topic) + '</h3>' +
       '<div class="dt-meta"><span>📚 ' + esc(p.subject) + "</span><span>❓ " + p.n + " sual</span><span>⏱ " + p.mins + " dəqiqə</span></div>" +
-      "<p>Bu gün üçün fənn testlərindən təsadüfi seçilib. Taymer başlayanda vaxt geriyə sayılır və bitəndə nəticə avtomatik yoxlanılır.</p>" +
+      "<p>Hər gün yeni mövzu: bu gün «" + esc(p.subject) + "» fənni üzrə «" + esc(p.topic) + "». Taymer başlayanda vaxt geriyə sayılır və bitəndə nəticə avtomatik yoxlanılır.</p>" +
       '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="dt-bt g" data-dqb-go="1" data-s="' + esc(p.subject) + '" data-t="' + esc(p.topic) + '">▶ Testə başla</button>' +
       '<button type="button" class="dt-bt l" data-dqb-all="1">Bütün testlər</button></div></div></div>';
   }
@@ -214,7 +216,24 @@
     if (g) { e.preventDefault(); if (window.TLX && TLX.begin) TLX.begin(g.dataset.s, g.dataset.t, g); return; }
     if (e.target.closest && e.target.closest("[data-dqb-all]")) { e.preventDefault(); if (window.V3 && V3.showTests) V3.showTests(); }
   });
-  setInterval(function () { try { paintDaily(); } catch (e) { } }, 1500);
+  /* Qərarlı yüklənmə: köhnə kartın əvəzi ekrana çıxmamış, eyni kadrda (MutationObserver mikrotapşırığı) edilir — «tullanma» olmur */
+  var dayMO = null, dayBusy = false;
+  function guardedDaily() {
+    if (dayBusy) return; dayBusy = true;
+    try { paintDaily(); } catch (e) { }
+    if (dayMO) dayMO.takeRecords();
+    dayBusy = false;
+  }
+  var dn = 0, dIv = setInterval(function () {
+    var h = $("v3-home");
+    if (h && window.MutationObserver) {
+      clearInterval(dIv);
+      dayMO = new MutationObserver(guardedDaily);
+      dayMO.observe(h, { childList: true, subtree: true });
+      guardedDaily();
+    } else if (++dn > 80) clearInterval(dIv);
+  }, 100);
+  setInterval(guardedDaily, 5000);  /* ehtiyat: karusel kataloqu gec yüklənərsə */
 
 
   /* ---------- Xəbərlər səhifəsi: sabit WhatsApp düyməsi + sağdan sola axan yazı ---------- */
