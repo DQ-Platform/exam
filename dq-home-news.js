@@ -1,8 +1,8 @@
-/* DQ Platform — dq-home-news.js (v3)
+/* DQ Platform — dq-home-news.js (v4)
    1) "📢 Yeniliklər" slayderi ana səhifənin sonunda, "Dövlət qulluğu hədəfinə doğru ilk addımı at!" blokunun üstündə.
    2) Həmin çağırış bloku YALNIZ yeni (daxil olmamış) istifadəçilərə görünür; kabinetə daxil olan və ya
       qeydiyyatdan keçən istifadəçidə yox olur. Yeniliklər hər kəsdə qalır.
-   Qoşulma: index.html-də dq-home2.js-dən SONRA: <script src="dq-home-news.js?v=3"></script> */
+   Qoşulma: index.html-də dq-home2.js-dən SONRA: <script src="dq-home-news.js?v=4"></script> */
 (function () {
   "use strict";
   if (window.__dqHomeNews) return;
@@ -131,4 +131,61 @@
   window.addEventListener("dq-news-fresh", soon);
   window.addEventListener("storage", soon);
   document.addEventListener("visibilitychange", function () { if (!document.hidden) soon(); });
+
+  /* ---------- qapaq şəkillərinin yüklənməsi ----------
+     Keşdən gələn (köhnə/şəkilsiz) siyahı yerinə serverdən TƏZƏ yenilikləri (şəkillərlə) çəkir,
+     slayderdəki şəkilsiz/xətalı slaydları yenidən qurur. */
+  var SB_URL = "https://cpzwliqlgaplroscvduo.supabase.co";
+  var SB_KEY = "sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF";
+  var lastFix = 0, fixing = false;
+
+  function isExam(n) { return /mtahan/i.test((n && n.kind) || ""); }
+
+  function needsFix() {
+    var D = window.DQN, box = document.getElementById("yq-news");
+    if (!D || !box || !D.items || !D.items.length) return false;
+    var imgs = box.querySelectorAll(".dqn-slide .dqn-img img:not(.dqp-bg)");
+    for (var i = 0; i < imgs.length; i++) {
+      var im = imgs[i];
+      if (im.complete && im.naturalWidth === 0) return true;      /* xətalı şəkil */
+    }
+    return false;
+  }
+
+  async function fetchFresh() {
+    var u = SB_URL + "/rest/v1/dq_v2_store?select=*&collection=eq.news&order=id.desc&limit=24&_=" + Date.now();
+    var r = await fetch(u, { headers: { apikey: SB_KEY }, cache: "no-store" });
+    if (!r.ok) throw new Error("http " + r.status);
+    var a = await r.json();
+    return (a || []).map(function (x) { return Object.assign({}, x.data, { _id: x.id }); });
+  }
+
+  async function repair(force) {
+    var D = window.DQN;
+    if (fixing || !D || !D.render || !document.getElementById("yq-news")) return;
+    if (!force && Date.now() - lastFix < 45000) return;
+    fixing = true; lastFix = Date.now();
+    try {
+      var fresh = await fetchFresh();
+      var list = fresh.filter(function (n) { return !isExam(n); }).slice(0, 8);
+      if (!list.length) return;
+      var cur = {}; (D.items || []).forEach(function (n) { cur[n._id] = n; });
+      var diff = list.length !== (D.items || []).length || list.some(function (n) {
+        var c = cur[n._id];
+        return !c || (c.img || "").length !== (n.img || "").length;
+      });
+      if (diff || force) { D.render(list); window.__dqHn && (window.__dqHn.repaired = true); }
+    } catch (e) {
+      try { console.warn("[dq-home-news] təzə yeniliklər çəkilmədi", e); } catch (x) { }
+    } finally { fixing = false; }
+  }
+
+  /* şəkil xətası olarsa dərhal, hər halda səhifə açılandan bir qədər sonra bir dəfə təzələ */
+  document.addEventListener("error", function (e) {
+    var t = e.target;
+    if (t && t.tagName === "IMG" && t.closest && t.closest("#yq-news")) repair(true);
+  }, true);
+  setTimeout(function () { repair(false); }, 2500);
+  setInterval(function () { if (needsFix()) repair(false); }, 4000);
+  window.addEventListener("dq-news-fresh", function () { setTimeout(function () { repair(false); }, 300); });
 })();
