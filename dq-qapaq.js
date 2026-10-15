@@ -52,30 +52,9 @@
       box.appendChild(img);
     });
   }
-
-  /* ---------- sayta tətbiqi: Materiallar → Fənlər kartları ---------- */
-  function applyMat() {
-    var hit = null;
-    [].forEach.call(D.querySelectorAll("p,small,div,span"), function (el) {
-      if (!hit && el.children.length === 0 && /Dərs materialları üçün fənni seçin/.test(el.textContent)) hit = el;
-    });
-    if (!hit) return;
-    var box = hit.parentNode, names = subjects();
-    [].forEach.call(box.querySelectorAll("button"), function (bt) {
-      if (bt.getAttribute("data-dqm")) return;
-      var tx = (bt.textContent || "").replace(/\s+/g, " ").trim(), nm = "";
-      names.forEach(function (n) { if (tx.indexOf(n) >= 0 && n.length > nm.length) nm = n; });
-      var im = nm && S.covers["mat:" + nm]; if (!im) return;
-      bt.setAttribute("data-dqm", "1");
-      bt.style.cssText += ";background:linear-gradient(to top,rgba(10,20,64,.92),rgba(10,20,64,.12) 70%),url('" + im + "') center/cover no-repeat;color:#fff;min-height:132px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;text-align:left;border:0;border-radius:16px;box-shadow:0 14px 24px -14px rgba(10,20,64,.7);text-shadow:0 1px 6px rgba(0,0,0,.5)";
-      [].forEach.call(bt.querySelectorAll("small"), function (x) { x.style.color = "#f0dba6"; });
-      [].forEach.call(bt.querySelectorAll("svg,img,.ic,[class*=icon]"), function (x) { x.style.display = "none"; });
-    });
-  }
   var lastSig = "";
   function applyAll() {
     try { applyNews(); } catch (e) { }
-    try { applyMat(); } catch (e) { }
     var sg = (S.covers.tests || "").length + "|" + (S.covers.site || "").length;
     if (sg !== lastSig) { lastSig = sg; if (sg !== "0|0" && window.TLX && TLX.refresh) { try { TLX.refresh(); } catch (e) { } } }
   }
@@ -106,25 +85,16 @@
   /* ---------- admin paneli ---------- */
   var root = null;
   function msg(t) { var m = $("dqs-st"); if (m) m.textContent = t || ""; }
-  function subjects() {
-    var a = (window.DM && DM.SUBS || []).slice();
-    ((window.DM && DM.rows) || []).forEach(function (r) { if (r && r.sub && a.indexOf(r.sub) < 0) a.push(r.sub); });
-    Object.keys(S.covers).forEach(function (k) { if (k.indexOf("mat:") === 0 && a.indexOf(k.slice(4)) < 0) a.push(k.slice(4)); });
-    return a;
-  }
-  function cardHtml(k, t, d) {
-    var v = S.covers[k] || "";
-    return '<div class="dqs-c"><div class="dqs-pv"' + (v ? ' style="background-image:url(\'' + v + '\')"' : "") + ">" + (v ? "" : "Şəkil yoxdur") + "</div>" +
-      '<div class="dqs-tx"><b>🖼️ ' + esc(t) + "</b><small>" + esc(d) + "</small>" +
-      '<div class="dqs-row"><button type="button" class="dqs-bt blue" data-a="pick" data-k="' + esc(k) + '">' + (v ? "🔄 Dəyiş" : "📁 Şəkil seç") + "</button>" +
-      (v ? '<button type="button" class="dqs-bt red" data-a="del" data-k="' + esc(k) + '">🗑 Sil</button>' : "") +
-      '<input type="file" accept="image/*" hidden data-f="' + esc(k) + '"></div></div></div>';
-  }
   function draw() {
     var b = root.querySelector(".dqs-b");
-    b.innerHTML = SLOTS.map(function (s) { return cardHtml(s.k, s.t, s.d); }).join("") +
-      '<div class="dqs-c" style="display:block;background:none;border:0;padding:14px 4px 0"><b>📚 Materiallar: fənn qapaqları</b><small style="display:block;opacity:.7">Hər fənnin «Fənlər» pəncərəsindəki kartının arxa fonu (tövsiyə: 1280×800)</small></div>' +
-      subjects().map(function (n) { return cardHtml("mat:" + n, n, "«Materiallar» → Fənlər kartının qapağı"); }).join("");
+    b.innerHTML = SLOTS.map(function (s) {
+      var v = S.covers[s.k] || "";
+      return '<div class="dqs-c"><div class="dqs-pv"' + (v ? ' style="background-image:url(\'' + v + '\')"' : "") + ">" + (v ? "" : "Şəkil yoxdur") + "</div>" +
+        '<div class="dqs-tx"><b>🖼️ ' + esc(s.t) + "</b><small>" + esc(s.d) + "</small>" +
+        '<div class="dqs-row"><button type="button" class="dqs-bt blue" data-a="pick" data-k="' + s.k + '">' + (v ? "🔄 Dəyiş" : "📁 Şəkil seç") + "</button>" +
+        (v ? '<button type="button" class="dqs-bt red" data-a="del" data-k="' + s.k + '">🗑 Sil</button>' : "") +
+        '<input type="file" accept="image/*" hidden data-f="' + s.k + '"></div></div></div>';
+    }).join("");
   }
   function build() {
     if (root) return;
@@ -167,7 +137,7 @@
     d.innerHTML = '<span class="icon">🖼️</span> Sistem qapaqları'; d.onclick = open; g.appendChild(d); return true;
   }
 
-  window.DQSYS = { get: get, mat: function (n) { return S.covers["mat:" + n] || ""; }, open: open, covers: function () { return JSON.parse(JSON.stringify(S.covers)); }, reload: load };
+  window.DQSYS = { get: get, open: open, covers: function () { return JSON.parse(JSON.stringify(S.covers)); }, reload: load };
 
   /* qurulum */
   var n = 0, iv = setInterval(function () { if (window.V2 && V2.list) { clearInterval(iv); load(); } else if (++n > 160) clearInterval(iv); }, 250);
@@ -175,5 +145,4 @@
   var ap = $("admin-panel"); if (ap && window.MutationObserver) new MutationObserver(function () { if (!$("dqs-card")) addCard(); }).observe(ap, { childList: true, subtree: true });
   else D.addEventListener("DOMContentLoaded", function () { var a2 = $("admin-panel"); if (a2 && window.MutationObserver) new MutationObserver(function () { if (!$("dqs-card")) addCard(); }).observe(a2, { childList: true, subtree: true }); });
   setInterval(applyNews, 900);
-  setInterval(function () { try { applyMat(); } catch (e) { } }, 400);
 })();

@@ -27,18 +27,16 @@ window.DQTheme={norm:norm,resolve:resolve,sys:sys,paint:paint};
 })();
 </script>
 <script id="dq-gtok">
-/* Google girişindən qayıdış: token Supabase klienti hash-i silməzdən ƏVVƏL tutulur.
-   Həm yönləndirmə (flag ilə), həm də popup/yeni tab (flagsız) qayıdışı dəstəklənir. */
+/* Google girişindən qayıdış: token Supabase klienti hash-i silməzdən ƏVVƏL tutulur */
 (function(){try{
  var f=null;try{f=sessionStorage.getItem("dq_g")==="1"}catch(e){}
  if(!f){try{var ts=+localStorage.getItem("dq_g_ts");f=!!ts&&Date.now()-ts<6e5}catch(e){}}
+ if(!f)return;
  var P=new URLSearchParams(location.hash.replace(/^#/,"")),Q=new URLSearchParams(location.search.replace(/^\?/,""));
  var tok=P.get("access_token"),err=P.get("error_description")||Q.get("error_description")||P.get("error")||Q.get("error");
- var oauth=!!tok&&(P.has("provider_token")||P.get("token_type")==="bearer")&&P.get("type")!=="recovery";
- if(!(f&&(tok||err))&&!oauth&&!(err&&P.get("error")))return;
- window.__dqGT={token:tok||null,error:err||null};
- if(f){window.__dqG={token:tok||null,error:err||null,code:P.get("error_code")||Q.get("error_code")||P.get("error")||Q.get("error")||""};
-  try{sessionStorage.removeItem("dq_g");localStorage.removeItem("dq_g_ts")}catch(e){}}
+ if(!tok&&!err)return;
+ window.__dqG={token:tok||null,error:err||null,code:P.get("error_code")||Q.get("error_code")||P.get("error")||Q.get("error")||""};
+ try{sessionStorage.removeItem("dq_g");localStorage.removeItem("dq_g_ts")}catch(e){}
  ["error","error_code","error_description"].forEach(function(k){Q.delete(k)});
  var qs=Q.toString();history.replaceState(null,"",location.pathname+(qs?"?"+qs:""));
 }catch(e){}})();
@@ -106,53 +104,8 @@ window.setInterval=function(fn,d){
 };
 })();
 </script>
-<link rel="preload" as="script" href="dq-net.js?v=1">
-<link rel="preload" as="script" href="app.js?v=32">
-<link rel="preload" as="script" href="dq-qapaq.js?v=2">
-<link rel="preload" as="script" href="dq-birlesdirme.js?v=5">
-<link rel="preload" as="script" href="dq-lock.js?v=1">
-<link rel="preload" as="script" href="yspro.js?v=1">
-<link rel="preload" as="script" href="dq-core.js?v=3">
-<link rel="preload" as="script" href="dq-hero.js?v=2">
-<link rel="preload" as="script" href="dq-materials.js?v=3">
-<link rel="preload" as="script" href="dq-live.js?v=1">
-<link rel="preload" as="script" href="dq-home2.js?v=2">
-<link rel="preload" as="script" href="dq-editor.js?v=2">
-<script id="dq-speed">/* DQ Speed: (1) Böyük sənəd (PDF material) cavablarını cihazda saxlayır: 2-ci açılış ANINDA, yenilənmə fonda.
-   (2) pdf.js-i fonda əvvəlcədən hazırlayır. */
-(function(){"use strict";
-if(window.__dqSpeed)return;window.__dqSpeed=1;
-var RF=window.fetch,CN="dq-doc-v1",FRESH=3e5,MINSZ=15e4;
-function conn(){var c=navigator.connection||{};return !c.saveData&&(!c.effectiveType||c.effectiveType==="4g")}
-if(RF&&window.caches&&window.Response){
- var isDoc=function(u){return/\/rest\/v1\/dq_v2_store\?/.test(u)&&/[?&]id=eq\.\d+/.test(u)&&/[?&]select=data(&|$)/.test(u)};
- var keyOf=function(u,a){return"https://dq-doc.local/"+encodeURIComponent(u+"|"+a)};
- window.fetch=function(i,o){
-  var u,m,a="";try{u=typeof i==="string"?i:(i&&i.url)||String(i);m=String((o&&o.method)||(i&&i.method)||"GET").toUpperCase();
-   var h=(o&&o.headers)||(i&&i.headers);if(h){a=(h.get?h.get("Accept"):(h.Accept||h.accept))||""}}catch(e){return RF.apply(this,arguments)}
-  if(m!=="GET"||!isDoc(u))return RF.apply(this,arguments);
-  var args=arguments,self=this,k=keyOf(u,a);
-  function net(){return RF.apply(self,args).then(function(r){
-   if(r&&r.ok){try{r.clone().blob().then(function(b){if(b.size<MINSZ)return;
-     var hd=new Headers(r.headers);hd.set("x-dq-ts",String(Date.now()));
-     caches.open(CN).then(function(c){return c.put(k,new Response(b,{status:200,headers:hd}))}).catch(function(){})}).catch(function(){})}catch(e){}}
-   return r})}
-  return caches.open(CN).then(function(c){return c.match(k).then(function(hit){
-   if(!hit)return net();
-   var ts=+hit.headers.get("x-dq-ts")||0;
-   if(Date.now()-ts>FRESH)net().catch(function(){});
-   return hit})}).catch(function(){return net()})
- };
-}
-/* pdf.js fonda (yalnız sürətli şəbəkədə) */
-function warm(){try{if(conn()&&window.__dqLibs)window.__dqLibs("pdf").catch(function(){})}catch(e){}}
-addEventListener("load",function(){setTimeout(function(){window.requestIdleCallback?requestIdleCallback(warm,{timeout:6000}):warm()},3500)});
-/* Klik cavabı: toxunuş gecikməsi yoxdur */
-try{document.addEventListener("touchstart",function(){},{passive:true})}catch(e){}
-})();
-</script>
 <link rel="preconnect" href="https://cpzwliqlgaplroscvduo.supabase.co" crossorigin>
-<script id="dq-prefetch">(function(){var U="https://cpzwliqlgaplroscvduo.supabase.co",K="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF";function T(u){return new Promise(function(ok){var d=0,ac=window.AbortController?new AbortController():null,t=setTimeout(function(){if(!d){d=1;try{ac&&ac.abort()}catch(e){}ok(null)}},9000);fetch(u,{headers:{apikey:K},signal:ac&&ac.signal}).then(function(r){if(d)return;d=1;clearTimeout(t);ok(r)},function(){if(d)return;d=1;clearTimeout(t);ok(null)})})}function R(u){return T(u).then(function(r){return r&&r.ok?r:T(u)})}function g(c){return R(U+"/rest/v1/dq_v2_store?select=*&collection=eq."+c+"&order=id.desc").then(function(r){return r&&r.ok?r.json():null}).then(function(a){return Array.isArray(a)?a.map(function(x){return Object.assign({},x.data,{_id:x.id})}):null}).catch(function(){return null})}try{window.__dqPreC=JSON.parse(localStorage.getItem("dq_pre_v3")||"null")}catch{}function gn(l){return R(U+"/rest/v1/dq_v2_store?select=*&collection=eq.news&order=id.desc&limit="+l).then(function(r){return r&&r.ok?r.json():null}).then(function(a){return Array.isArray(a)?a.map(function(x){return Object.assign({},x.data,{_id:x.id})}):null}).catch(function(){return null})}function idb(m,v){return new Promise(function(ok){try{var o=indexedDB.open("dq_news",1);o.onupgradeneeded=function(){o.result.createObjectStore("k")},o.onerror=function(){ok(null)},o.onsuccess=function(){try{var d=o.result,t=d.transaction("k",m==="set"?"readwrite":"readonly"),st=t.objectStore("k"),r=m==="set"?st.put(v,"slider"):st.get("slider");r.onsuccess=function(){ok(r.result||null)},r.onerror=function(){ok(null)},t.oncomplete=function(){d.close()}}catch{ok(null)}}}catch{ok(null)}})}window.__dqIdb=idb,window.__dqNewsC=null,window.__dqNewsCP=Promise.race([idb("get"),new Promise(function(o){setTimeout(function(){o(null)},900)})]),window.__dqPreN1=gn(4),window.__dqPreN=gn(16),window.__dqPre=g("liveexams"),window.__dqPreT=g("v3tests").then(function(a){return Array.isArray(a)?a.filter(function(t){return t&&t.ans&&t.ans.length&&t.status!=="hidden"}):a}),window.__dqPre.then(function(a){window.__dqLiveN=Array.isArray(a)?a.length:-1}),window.__dqPreT.then(function(a){window.__dqTestN=Array.isArray(a)?a.length:-1})})();</script>
+<script id="dq-prefetch">(function(){var U="https://cpzwliqlgaplroscvduo.supabase.co",K="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF";function g(c){return fetch(U+"/rest/v1/dq_v2_store?select=*&collection=eq."+c+"&order=id.desc",{headers:{apikey:K}}).then(function(r){return r.ok?r.json():null}).then(function(a){return Array.isArray(a)?a.map(function(x){return Object.assign({},x.data,{_id:x.id})}):null}).catch(function(){return null})}try{window.__dqPreC=JSON.parse(localStorage.getItem("dq_pre_v3")||"null")}catch{}function gn(l){return fetch(U+"/rest/v1/dq_v2_store?select=*&collection=eq.news&order=id.desc&limit="+l,{headers:{apikey:K}}).then(function(r){return r.ok?r.json():null}).then(function(a){return Array.isArray(a)?a.map(function(x){return Object.assign({},x.data,{_id:x.id})}):null}).catch(function(){return null})}function idb(m,v){return new Promise(function(ok){try{var o=indexedDB.open("dq_news",1);o.onupgradeneeded=function(){o.result.createObjectStore("k")},o.onerror=function(){ok(null)},o.onsuccess=function(){try{var d=o.result,t=d.transaction("k",m==="set"?"readwrite":"readonly"),st=t.objectStore("k"),r=m==="set"?st.put(v,"slider"):st.get("slider");r.onsuccess=function(){ok(r.result||null)},r.onerror=function(){ok(null)},t.oncomplete=function(){d.close()}}catch{ok(null)}}}catch{ok(null)}})}window.__dqIdb=idb,window.__dqNewsC=null,window.__dqNewsCP=idb("get"),window.__dqPreN1=gn(4),window.__dqPreN=gn(16),window.__dqPre=g("liveexams"),window.__dqPreT=g("v3tests").then(function(a){return Array.isArray(a)?a.filter(function(t){return t&&t.ans&&t.ans.length&&t.status!=="hidden"}):a})})();</script>
 <script id="dq-prefetch2">/* Ana səhifənin ehtiyac duyduğu konfiqurasiya kolleksiyalarını app.js yüklənməmiş PARALEL çəkir.
    Sonra dq-gate.js eyni URL-ə gələn sorğuları buradan cavablandırır → "şəlalə" yükləmə aradan qalxır. */
 (function(){var U="https://cpzwliqlgaplroscvduo.supabase.co",K="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF",PF=window.__dqPF={};
@@ -1752,6 +1705,7 @@ body.dqh-split #dq-pwa-wrap,body.dqh-split #dq-cookie{display:none!important}
 #dqpf .oath input{width:20px;height:20px;margin-top:2px;accent-color:#1f1b4d;flex:none}
 #dqpf .who{font-size:13px;color:#6b6f85;text-align:center;margin-top:14px}
 </style>
+<link rel="preload" as="script" href="app.js?v=23">
 <style id="dq-tlx-gate-css">
 /* «Tezliklə əlavə olunacaq» pəncərəsi */
 #tlx-soon{position:fixed;inset:0;z-index:2147483200;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(4,12,32,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;transition:opacity .28s ease}
@@ -1839,7 +1793,7 @@ window.DQBOOT={gate:gate,idle:idle};
   try { seen = sessionStorage.getItem("dq_gate_seen") === "1"; } catch (e) { }
 
   window.__dqGateStage = { render: false, data: false, fonts: false, load: false, blocks: false, net: false };
-  var CAP = CFG.cap || 9000;                                        /* aktiv (görünən) vaxtla mütləq maksimum */
+  var CAP = CFG.cap || 5000;                                        /* aktiv (görünən) vaxtla mütləq maksimum */
   var MIN = CFG.min != null ? CFG.min : (seen ? 150 : 250);        /* ilk render-dən sonra minimum */
   var QUIET = CFG.quiet != null ? CFG.quiet : (seen ? 120 : 180);   /* DOM dəyişməsiz müddət */
   var NETQ = CFG.net != null ? CFG.net : 400;                       /* son şəbəkə cavabından sonra gözləmə
@@ -2156,20 +2110,6 @@ window.DQBOOT={gate:gate,idle:idle};
     } else open();
   }
 
-  /* sağ imtahan kartı və "Günün testi" kartı gələnə qədər səhifə açılmır (ən çox 3.5 san əlavə gözləmə) */
-  function rowReady(h, now) {
-    var n = window.__dqLiveN;
-    if (n === 0 || n === undefined || h.classList.contains("dq-nogrid") || h.classList.contains("dq11-noex")) return true;
-    if (h.querySelector(".lx-card")) return true;
-    return now - tRender >= 3500;
-  }
-  function dayReady(h, now) {
-    var n = window.__dqTestN;
-    if (n === 0 || n === undefined) return true;
-    if (h.querySelector(".dt-day")) return true;
-    return now - tRender >= 3500;
-  }
-
   function tick() {
     if (!holding) return;
     var act = clock();
@@ -2213,7 +2153,7 @@ window.DQBOOT={gate:gate,idle:idle};
     var stOk = !kick.st || now - kick.stT >= 1000 || !!h.querySelector("#dq-stats");   /* kick-dən sonra 2.5 san verək */
     stg.cd = cdOk;
 
-    var blocksOk = core && netIdle && imgs && buildOk && cdOk && stOk && rowReady(h, now) && dayReady(h, now);
+    var blocksOk = core && netIdle && imgs && buildOk && cdOk && stOk;
     stg.blocks = blocksOk;
     if (dataOk && fontsOk && blocksOk &&
       D.readyState === "complete" &&
@@ -2240,50 +2180,6 @@ window.DQBOOT={gate:gate,idle:idle};
 })();
 </script>
 
-<script id="dq-fast-news">
-/* Yeniliklər: "əvvəlcə keş, arxada yenilə" (stale-while-revalidate).
-   - Yeniliklər sorğusu şəbəkədən 350 ms-də gəlməsə, son yadda saxlanmış nüsxə ANINDA göstərilir, arxa planda yenilənir.
-   - Növbəti açılışda siyahı dərhal gəlir; admin yenilik əlavə/silən kimi keş təmizlənir.
-   - Ana səhifə açılandan sonra yeniliklər arxa planda əvvəlcədən çəkilir (istifadəçi düyməyə basanda hazırdır). */
-(function(){"use strict";
-if(window.__dqFastNews)return;window.__dqFastNews=1;
-var of=window.fetch;if(!of)return;
-var RX=/\/rest\/v1\/dq_v2_store\?[^#]*collection=eq\.(news|lxnews)(&|$)/,DB="dq_swr",ST="b",TTL=7*864e5,RACE=350,mem={};
-var U="https://cpzwliqlgaplroscvduo.supabase.co",K="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF";
-function wait(ms){return new Promise(function(r){setTimeout(r,ms)})}
-function idb(fn){return new Promise(function(ok){var d=0;function fin(v){if(!d){d=1;ok(v)}}setTimeout(function(){fin(null)},500);
- try{var o=indexedDB.open(DB,1);o.onupgradeneeded=function(){try{o.result.createObjectStore(ST)}catch(e){}};o.onerror=o.onblocked=function(){fin(null)};
-  o.onsuccess=function(){try{fn(o.result,fin)}catch(e){fin(null)}}}catch(e){fin(null)}})}
-function dbGet(k){return idb(function(db,fin){var r=db.transaction(ST).objectStore(ST).get(k);r.onsuccess=function(){fin(r.result||null);db.close()};r.onerror=function(){fin(null);db.close()}})}
-function dbPut(k,v){return idb(function(db,fin){var t=db.transaction(ST,"readwrite");t.objectStore(ST).put(v,k);t.oncomplete=function(){db.close();fin(1)};t.onerror=function(){db.close();fin(0)}})}
-function dbClear(){return idb(function(db,fin){var t=db.transaction(ST,"readwrite");t.objectStore(ST).clear();t.oncomplete=function(){db.close();fin(1)};t.onerror=function(){db.close();fin(0)}})}
-function urlOf(u){try{return typeof u==="string"?u:(u&&u.href)||""}catch(e){return ""}}
-function hdr(init,n){try{var h=init&&init.headers;if(!h)return "";if(typeof h.get==="function")return h.get(n)||"";for(var k in h)if(k.toLowerCase()===n)return String(h[k])}catch(e){}return ""}
-function fromCache(c){return new Response(c.b,{status:200,headers:{"content-type":"application/json; charset=utf-8","x-dq-cache":"1"}})}
-var nf=function(input,init){
- var url=urlOf(input),self=this,args=arguments;
- if(!url)return of.apply(self,args);
- var method=((init&&init.method)||"GET").toUpperCase();
- if(url.indexOf("/rest/v1/dq_v2_store")>-1&&method!=="GET"&&method!=="HEAD"){mem={};dbClear()}
- if(!RX.test(url)||method!=="GET"||(init&&init.signal)||/count/i.test(hdr(init,"prefer"))||/pgrst\.object/i.test(hdr(init,"accept"))||hdr(init,"range"))return of.apply(self,args);
- var served=null;
- var net=of.apply(self,args).then(function(r){
-  if(r&&r.ok){try{r.clone().text().then(function(t){if(t&&t.length>1){var rec={t:Date.now(),b:t};var changed=served!==null&&served!==t;mem[url]=rec;dbPut(url,rec);if(changed){try{window.dispatchEvent(new CustomEvent("dq-news-fresh",{detail:{url:url}}))}catch(e){}}}}).catch(function(){})}catch(e){}}
-  return r});
- net.catch(function(){});
- var hit=mem[url]?Promise.resolve(mem[url]):dbGet(url);
- return hit.then(function(c){
-  if(!c||!c.b||Date.now()-c.t>TTL)return net;
-  var fast=wait(RACE).then(function(){served=c.b;return fromCache(c)});
-  return Promise.race([net.then(function(r){return r&&r.ok?r:fast},function(){return fast}),fast])})};
-nf.__dqg=of.__dqg;nf.__dqs=1;window.fetch=nf;
-function warm(){try{if(navigator.connection&&navigator.connection.saveData)return;
- var u=U+"/rest/v1/dq_v2_store?select=*&collection=eq.news&order=id.desc";
- dbGet(u).then(function(c){if(c&&c.b&&Date.now()-c.t<12e4)return;window.fetch(u,{headers:{apikey:K}}).catch(function(){})})}catch(e){}}
-function later(){setTimeout(function(){if(window.requestIdleCallback)requestIdleCallback(warm,{timeout:3000});else warm()},1500)}
-if(document.readyState==="complete")later();else addEventListener("load",later);
-})();
-</script>
 <style id="dq-motion">
 /* DQ Motion — index-16-dakı animasiyalar yeni portal/geri sayım dizaynına uyğunlaşdırıldı */
 @keyframes lxp{50%{transform:scale(1.03)}}
@@ -2380,51 +2276,6 @@ html.dq-hold:not(.dq13-dark){background:#061a47}
 #exam-screen .eye-toggle-btn{padding:6px;margin:-6px}
 @keyframes dqTimerPulse{0%,100%{opacity:1}50%{opacity:.45}}
 @media(max-width:600px){#exam-screen .exam-header{padding:10px 12px;gap:8px}#active-exam-title{font-size:13px;line-height:1.3;min-width:0}}
-</style>
-<link rel="stylesheet" href="dq-premium.css?v=2">
-<style id="dq-screens-premium">
-/* ===== Sınaqlar · İmtahanlar · Testlər · Məlumat: ana səhifənin premium dizaynına uyğunlaşdırma ===== */
-html body{--pr-ink:#06112e;--pr-ink2:#0c2260;--pr-brass:#e5a82c;--pr-brass2:#f6c453;--pr-f:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif}
-/* 1) Bildiriş / göz / rejim paneli: aşağı-sol küncdə sabit, kontent üstünə düşmür, toxunmayanda solğun */
-html body #dqt-dock{opacity:.62;transition:opacity .25s ease;box-shadow:0 12px 28px -12px rgba(6,17,46,.75),inset 0 0 0 1px rgba(246,196,83,.4)}
-html body #dqt-dock:hover,html body #dqt-dock:focus-within,html body #dqt-dock:active{opacity:1}
-html body #dqt-dock #dq13-pn{left:0;right:auto}
-html body #dqt-dock.dqt-r #dq13-pn{left:auto;right:0}
-/* 2) Sınaqlar */
-html body .container:has(#exam-select-screen.active){position:relative;overflow:hidden;border-top:0;border-radius:28px;font-family:var(--pr-f);box-shadow:0 26px 50px -26px rgba(10,20,64,.45)}
-html body .container:has(#exam-select-screen.active):before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:linear-gradient(90deg,var(--pr-brass),var(--pr-brass2),var(--pr-brass))}
-html body #exam-select-screen h2,html body #exam-select-screen h3,html body #exam-select-screen .dq-title,html body #dq-types h2{font-family:var(--pr-f);color:var(--pr-ink);font-weight:800;letter-spacing:-.02em}
-html body #exam-select-screen .dq-back{border:1.5px solid #dfe3f1;border-radius:12px;font-family:var(--pr-f);color:var(--pr-ink)}
-html body #exam-select-screen .dq-back:hover{border-color:var(--pr-brass);background:#fffaf0}
-html body #exam-select-screen .btn{font-family:var(--pr-f);border-radius:12px;background:linear-gradient(135deg,var(--pr-ink2),var(--pr-ink));color:var(--pr-brass2);box-shadow:0 12px 22px -12px rgba(6,17,46,.8)}
-html body #exam-select-screen .btn.btn-secondary,html body #exam-select-screen .btn-secondary{background:#eef1fb;color:var(--pr-ink2);box-shadow:none}
-html body #exam-select-screen input,html body #exam-select-screen .code-input{border:1.5px solid #dfe3f1;border-radius:12px;font-family:var(--pr-f)}
-html body #exam-select-screen input:focus{border-color:var(--pr-brass);box-shadow:0 0 0 4px rgba(229,168,44,.22);outline:none}
-html body #dq-types .tp-tabs{border-color:#dfe3f1;box-shadow:0 8px 20px -14px rgba(6,17,46,.5)}
-html body #dq-types .tp-tabs button{font-family:var(--pr-f)}
-html body #dq-types .tp-tabs button.on{background:linear-gradient(135deg,var(--pr-ink2),var(--pr-ink));color:var(--pr-brass2)}
-html body .feed-btn-news{background:linear-gradient(135deg,var(--pr-ink2),var(--pr-ink));color:var(--pr-brass2);font-family:var(--pr-f);border-radius:12px}
-/* 3) Testlər: tünd lövhədəki başlıq görünmürdü */
-html body .tlx-hd h2{color:#fff!important;-webkit-text-fill-color:#fff!important;background:none!important;animation:none!important;text-shadow:0 4px 26px rgba(0,0,0,.4)}
-/* 4) Məlumat */
-html body .inf-top{background:linear-gradient(110deg,var(--pr-ink2),var(--pr-ink));border-bottom:2px solid var(--pr-brass);font-family:var(--pr-f)}
-html body .inf-back{background:linear-gradient(135deg,var(--pr-brass2),var(--pr-brass));color:#1a1403;font-family:var(--pr-f);box-shadow:0 10px 20px -12px rgba(246,196,83,.9)}
-html body .inf-s{border:1.5px solid #dfe3f1;border-radius:14px;font-family:var(--pr-f)}
-html body .inf-s:focus{outline:none;border-color:var(--pr-brass);box-shadow:0 0 0 4px rgba(229,168,44,.22)}
-html body .inf-cd{border-radius:18px;border-left:4px solid var(--pr-brass);box-shadow:0 18px 32px -22px rgba(10,20,64,.45);transition:transform .25s,box-shadow .25s;font-family:var(--pr-f)}
-html body .inf-cd:hover{transform:translateY(-3px);box-shadow:0 24px 38px -22px rgba(10,20,64,.55)}
-html body .inf-cd b,html body .inf-bd h2,html body .inf-bd h4{color:var(--pr-ink)}
-html body .inf-bd{border-radius:18px;font-family:var(--pr-f)}
-html body .inf-bd th{background:#fff6dc;color:var(--pr-ink)}
-</style>
-<style id="dq-speed-css">
-/* DQ Speed CSS: toxunuşda gecikmə yox, tam ekran blur yox (GPU-nu ən çox yeyən hissə) */
-a,button,input,select,textarea,label,summary,[role=button],[onclick],.btn{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.dqn-ov,.dqg-ov,.dqlf-ov,.v3-md,.nwp-md,#dq-pay-ov,#dq-otp-ov,#dqk-ov,#tlx-soon,#dqpdf-v,[class$="-ov"],[id$="-ov"],[class*="overlay"],[class*="backdrop"],[class*="modal"]{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-.dqe-aur{display:none!important}
-button:active,.btn:active,[role=button]:active{transition-duration:.06s!important}
-#dqpdf-v canvas{max-width:100%;height:auto}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body class="v3on" oncontextmenu="return false;">
@@ -4006,17 +3857,93 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 #dqs-root .dqs-st{font-size:12px;color:#64748b;margin-right:auto;align-self:center}
 @media(max-width:560px){#dqs-root .dqs-p{margin:0;border-radius:0;min-height:100%}#dqs-root .dqs-c{flex-direction:column;align-items:stretch}#dqs-root .dqs-pv{width:100%}}
 </style>
-<script src="dq-qapaq.js?v=2"></script>
-<script src="app.js?v=32"></script>
+<style id="dq-premium">
+/* ===== DQ PREMIUM — canlı gradient, müasir, dinamik dizayn qatı =====
+   Söndürmək üçün: <html class="dq-classic"> (və ya bu <style id="dq-premium"> blokunu silin) */
+:root{--dqp-a:#4f46e5;--dqp-b:#7c3aed;--dqp-c:#06b6d4;--dqp-d:#f59e0b;--dqp-e:#ec4899;
+--dqp-grad:linear-gradient(120deg,#4f46e5 0%,#7c3aed 48%,#06b6d4 100%);
+--dqp-grad-warm:linear-gradient(120deg,#f59e0b 0%,#f97316 45%,#ec4899 100%);
+--dqp-grad-green:linear-gradient(120deg,#10b981,#059669 55%,#0d9488);
+--dqp-sh:0 1px 2px rgba(15,23,42,.05),0 16px 36px -16px rgba(79,70,229,.34);
+--dqp-sh-h:0 2px 4px rgba(15,23,42,.06),0 26px 50px -18px rgba(124,58,237,.5)}
+html{scroll-behavior:smooth}
+:root:not(.dq-classic) ::selection{background:#7c3aed;color:#fff}
+:root:not(.dq-classic) :focus-visible{outline:2px solid #7c3aed;outline-offset:2px;border-radius:8px}
+:root:not(.dq-classic) *{scrollbar-width:thin;scrollbar-color:#8b7cf6 transparent}
+
+/* --- yuxarı menyu və başlıq --- */
+:root:not(.dq-classic) .ys-top{background:linear-gradient(100deg,#0a1a45 0%,#1b1a6b 52%,#0b3a72 100%)!important;border-bottom:0!important;box-shadow:0 8px 26px -10px rgba(30,27,107,.65)}
+:root:not(.dq-classic) .ys-top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,#f59e0b,#ec4899,#8b5cf6,#06b6d4);pointer-events:none}
+:root:not(.dq-classic) .ys-top a,:root:not(.dq-classic) .ys-top button,:root:not(.dq-classic) .ys-top>*{transition:background-color .25s,color .25s,box-shadow .25s}
+:root:not(.dq-classic) .ys-top>*:hover{background:rgba(255,255,255,.09)}
+:root:not(.dq-classic) .v3-hd{background:linear-gradient(180deg,#fff 0%,#f6f4ff 100%);border-bottom:1px solid #e6e1ff;box-shadow:0 10px 28px -20px rgba(79,70,229,.55)}
+:root:not(.dq-classic) .v3-nav{background:linear-gradient(100deg,#0a1a45,#1b1a6b 55%,#0b3a72)}
+:root:not(.dq-classic) .v3-nav a:hover{color:#67e8f9}
+
+/* --- düymələr --- */
+:root:not(.dq-classic) .v3-bt:not(.v3-g):not(.v3-r):not(.v3-o):not(.v3-ghost),:root:not(.dq-classic) .btn-primary,:root:not(.dq-classic) .dt-bt:not(.g):not(.l),:root:not(.dq-classic) .lxp-bi button,:root:not(.dq-classic) .dq2-top button,:root:not(.dq-classic) .v3-hd .v3-r button:not(.v3-ghost),:root:not(.dq-classic) .dtn-ac button:not(.g){
+ background:var(--dqp-grad)!important;background-size:200% 200%!important;background-position:0% 50%;color:#fff!important;border:0!important;
+ box-shadow:0 10px 24px -10px rgba(79,70,229,.7);transition:background-position .6s ease,transform .22s ease,box-shadow .22s ease,filter .22s}
+:root:not(.dq-classic) .v3-bt:not(.v3-g):not(.v3-r):not(.v3-o):not(.v3-ghost):hover,:root:not(.dq-classic) .btn-primary:hover,:root:not(.dq-classic) .dt-bt:not(.g):not(.l):hover,:root:not(.dq-classic) .lxp-bi button:hover,:root:not(.dq-classic) .dq2-top button:hover,:root:not(.dq-classic) .dtn-ac button:not(.g):hover{
+ background-position:100% 50%;transform:translateY(-2px);box-shadow:0 16px 30px -10px rgba(124,58,237,.75);filter:saturate(1.1)}
+:root:not(.dq-classic) .dt-bt.g,:root:not(.dq-classic) .v3-bt.v3-g,:root:not(.dq-classic) .lx-reg{background:var(--dqp-grad-green)!important;color:#fff!important;border:0!important;box-shadow:0 10px 24px -10px rgba(16,185,129,.75);transition:transform .22s,box-shadow .22s,filter .22s}
+:root:not(.dq-classic) .dt-bt.g:hover,:root:not(.dq-classic) .v3-bt.v3-g:hover,:root:not(.dq-classic) .lx-reg:hover{transform:translateY(-2px);box-shadow:0 16px 30px -10px rgba(5,150,105,.8);filter:saturate(1.12)}
+:root:not(.dq-classic) .dt-bt:active,:root:not(.dq-classic) .v3-bt:active,:root:not(.dq-classic) .btn-primary:active,:root:not(.dq-classic) .lx-reg:active{transform:scale(.97)!important}
+:root:not(.dq-classic) .nw-more{border-color:#c7d2fe!important;color:#3730a3!important;transition:background .25s,color .25s,border-color .25s,transform .2s}
+:root:not(.dq-classic) .nw-more:hover{background:var(--dqp-grad)!important;color:#fff!important;border-color:transparent!important;transform:translateX(3px)}
+
+/* --- kartlar --- */
+:root:not(.dq-classic) .v3-cd,:root:not(.dq-classic) .dt-day,:root:not(.dq-classic) .lx-card,:root:not(.dq-classic) .nw-card,:root:not(.dq-classic) .v2-card,:root:not(.dq-classic) .tv2-card,:root:not(.dq-classic) .stat-card{border:1px solid rgba(99,102,241,.14)!important;border-radius:22px;box-shadow:var(--dqp-sh)!important}
+:root:not(.dq-classic) .v3-cd:hover,:root:not(.dq-classic) .nw-card:hover,:root:not(.dq-classic) .lx-card:hover,:root:not(.dq-classic) .dt-day:hover{border-color:rgba(124,58,237,.38)!important;box-shadow:var(--dqp-sh-h)!important}
+:root:not(.dq-classic) .v3-cd b{background:var(--dqp-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root:not(.dq-classic) .v3-hero{border-radius:28px;box-shadow:0 24px 60px -28px rgba(79,70,229,.45);border:1px solid rgba(99,102,241,.12)}
+:root:not(.dq-classic) .v3-hero h2{background:var(--dqp-grad);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.01em}
+:root:not(.dq-classic) .dt-tag{background:var(--dqp-grad-warm)!important;color:#fff!important;border:0!important;box-shadow:0 6px 16px -6px rgba(249,115,22,.7)}
+
+/* --- bannerlər --- */
+:root:not(.dq-classic) .lxp-bi,:root:not(.dq-classic) .dq2-top{background:linear-gradient(120deg,#312e81 0%,#6d28d9 55%,#db2777 100%)!important;box-shadow:0 18px 40px -18px rgba(109,40,217,.75)}
+:root:not(.dq-classic) .lxp-bi button,:root:not(.dq-classic) .dq2-top button{background:var(--dqp-grad-warm)!important;color:#fff!important}
+
+/* --- statistika kartları (hər biri fərqli canlı gradient) --- */
+:root:not(.dq-classic) .dqst>*:nth-child(4n+1){background:linear-gradient(135deg,#4338ca,#7c3aed)!important}
+:root:not(.dq-classic) .dqst>*:nth-child(4n+2){background:linear-gradient(135deg,#1d4ed8,#06b6d4)!important}
+:root:not(.dq-classic) .dqst>*:nth-child(4n+3){background:linear-gradient(135deg,#059669,#14b8a6)!important}
+:root:not(.dq-classic) .dqst>*:nth-child(4n+4){background:linear-gradient(135deg,#ea580c,#ec4899)!important}
+:root:not(.dq-classic) .dqst>*{border-radius:22px;box-shadow:0 18px 34px -16px rgba(30,27,107,.55)}
+
+/* --- xəbər səhifəsi --- */
+:root:not(.dq-classic) .nw-top{background:linear-gradient(100deg,#0a1a45,#1b1a6b 55%,#0b3a72)!important}
+:root:not(.dq-classic) .nw-chip{border-color:#d9d6ff}
+:root:not(.dq-classic) .nw-chip.on{background:var(--dqp-grad)!important;border-color:transparent!important;color:#fff!important;box-shadow:0 10px 22px -10px rgba(79,70,229,.8)}
+:root:not(.dq-classic) #dtn .dtn-st{border-top:3px solid transparent;background:linear-gradient(#fff,#fff) padding-box,var(--dqp-grad) border-box;box-shadow:0 26px 56px -26px rgba(79,70,229,.6)}
+:root:not(.dq-classic) #dtn .dtn-h{background:var(--dqp-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root:not(.dq-classic) #dtn .dtn-ln{background:var(--dqp-grad-warm)!important}
+:root:not(.dq-classic) #dtn .dtn-new{background:var(--dqp-grad-warm)!important;color:#fff!important}
+:root:not(.dq-classic) #dtn .dtn-mt b{background:#eef2ff;color:#4338ca}
+:root:not(.dq-classic) #dtn .dtn-dots i.on{background:var(--dqp-grad)!important}
+:root:not(.dq-classic) #dtn .dtn-ar{transition:background .25s,color .25s,transform .2s}
+:root:not(.dq-classic) #dtn .dtn-ar:hover{background:var(--dqp-grad);color:#fff;transform:scale(1.08)}
+
+/* --- admin paneli --- */
+:root:not(.dq-classic) .admin-nav-card{border-radius:18px;transition:transform .25s,box-shadow .25s,filter .25s}
+:root:not(.dq-classic) .admin-nav-card:hover{transform:translateY(-3px);box-shadow:0 18px 34px -16px rgba(79,70,229,.6);filter:saturate(1.12)}
+
+/* --- footer --- */
+:root:not(.dq-classic) .v3-ft{background:linear-gradient(110deg,#0a1a45,#2a1f7a 55%,#4c1d95)!important;border-top:0!important;position:relative}
+:root:not(.dq-classic) .v3-ft::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#f59e0b,#ec4899,#8b5cf6,#06b6d4)}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}:root:not(.dq-classic) .v3-bt,:root:not(.dq-classic) .dt-bt,:root:not(.dq-classic) .btn-primary,:root:not(.dq-classic) .nw-more,:root:not(.dq-classic) .admin-nav-card{transition:none!important}}
+</style>
+<script src="dq-qapaq.js?v=1"></script>
+<script src="app.js?v=31"></script>
 <script src="dq-birlesdirme.js?v=5"></script>
+<script src="dq-oxuyucu.js?v=1"></script>
+<script src="dq-hub.js?v=1"></script>
 <script src="dq-lock.js?v=1"></script>
 <script src="yspro.js?v=1"></script>
 <script src="dq-core.js?v=3"></script>
 <script src="dq-hero.js?v=2"></script>
 <script src="dq-materials.js?v=3"></script>
 <script src="dq-live.js?v=1"></script>
-<script src="dq-home2.js?v=2"></script>
-<script src="dq-editor.js?v=2"></script>
 <script src="chatbot.js?v=1" defer></script>
 <style id="dq-fix-link-css">
 #v3-home .v3-ft{min-height:0!important;margin-bottom:0!important}
@@ -4162,38 +4089,6 @@ function init(){
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
 </script>
-<style id="dq-row-wait-css">
-/* Yeniləmə zamanı "Günün testi" + sağdakı imtahan kartı gələnə qədər: yarım/boş görünüş əvəzinə hər iki xana eyni ölçülü skeleton olur,
-   hazır olanda birlikdə yumşaq görünür */
-#v3-home.dq-rowwait>#dt-home,#v3-home.dq-rowwait>#dt-grid{position:relative;pointer-events:none;overflow:hidden;border-radius:20px;min-height:min(62vw,380px);background:linear-gradient(100deg,#e1eaf8 30%,#f6f9ff 50%,#e1eaf8 70%) 0 0/200% 100%;animation:dqSk 1.1s linear infinite}
-#v3-home.dq-rowwait>#dt-home>*,#v3-home.dq-rowwait>#dt-grid>*{visibility:hidden}
-@keyframes dqRowIn{0%{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-#v3-home.dq-rowin>#dt-home,#v3-home.dq-rowin>#dt-grid{animation:dqRowIn .5s cubic-bezier(.2,.8,.2,1) both}
-</style>
-<script id="dq-row-wait">
-(function(){"use strict";
-var D=document,H=D.documentElement,lostAt=0,raf=0,inT=0,on=false;
-function home(){return D.getElementById("v3-home")}
-function check(){raf=0;var h=home();if(!h)return;
- var now=Date.now(),need=false,lim=7000;
- if(h.classList.contains("active")&&!H.classList.contains("dq-hold")&&!h.classList.contains("dq-nogrid")&&!h.classList.contains("dq11-noex")){
-  var ln=window.__dqLiveN,tn=window.__dqTestN;
-  if(ln!==0&&ln!==undefined&&!h.querySelector(".lx-card")){need=true;if(ln===-1)lim=2500}
-  if(tn!==0&&tn!==undefined&&h.querySelector("#dt-home")&&!h.querySelector(".dt-day")){need=true;if(tn===-1)lim=Math.min(lim,2500)}}
- if(need){if(!lostAt)lostAt=now;
-  if(now-lostAt<lim){if(!on){on=true;h.classList.remove("dq-rowin");h.classList.add("dq-rowwait")}}
-  else if(on){on=false;h.classList.remove("dq-rowwait")}}
- else{
-  if(on){on=false;h.classList.remove("dq-rowwait");h.classList.add("dq-rowin");clearTimeout(inT);inT=setTimeout(function(){h.classList.remove("dq-rowin")},700)}
-  lostAt=0}}
-function sched(){raf||(raf=requestAnimationFrame(check))}
-function init(){var h=home();if(!h){setTimeout(init,200);return}
- try{new MutationObserver(sched).observe(h,{childList:true,subtree:true})}catch(e){}
- try{new MutationObserver(sched).observe(H,{attributes:true,attributeFilter:["class"]})}catch(e){}
- setInterval(sched,400);sched()}
-init();
-})();
-</script>
 <script id="dq-tools-patch">
 
 (function () {
@@ -4209,7 +4104,7 @@ init();
     hideWhen: ['#exam-screen.active', '#tlx-run.open', '.tv2-ov.on'],
     // İmtahan zamanı diqqəti yayındıran digər üzən elementlər də gizlənir
     hideAlso: ['#dq-ticker', '#dq-exbar', '#dq-install-fab'],
-    storeKey: 'dqt_pos_v2'
+    storeKey: 'dqt_pos_v1'
   };
   var U = window.DQ_TOOLS || {};
   for (var k in U) if (Object.prototype.hasOwnProperty.call(U, k)) CFG[k] = U[k];
@@ -4374,7 +4269,7 @@ init();
         css1(dock, {
           position: 'fixed', right: 'auto', bottom: 'auto', zIndex: '99991',
           left: clamp(pos.fx * (innerWidth - w), 0, Math.max(0, innerWidth - w)) + 'px',
-          top: clamp(pos.fy * (innerHeight - h), Math.min(innerHeight * 0.5, Math.max(0, innerHeight - h)), Math.max(0, innerHeight - h)) + 'px'
+          top: clamp(pos.fy * (innerHeight - h), 0, Math.max(0, innerHeight - h)) + 'px'
         });
       } else { /* bu ekranda footer yoxdur → sol-aşağıda üzən */
         css1(dock, {
@@ -4383,7 +4278,6 @@ init();
         });
       }
     }
-    dock.classList.toggle('dqt-r', dock.getBoundingClientRect().left > innerWidth / 2);
   }
 
   /* ---------- İmtahan zamanı gizlət ---------- */
@@ -4593,114 +4487,5 @@ p{text-wrap:pretty}
  html #v3-home.active>.v3-ft{order:9}
 }
 </style>
-<style id="dq-cab-home-css">
-/* Kabinet — ana səhifə stili: tünd göy + qızılı */
-#dq-cab{--h-n1:#061a47;--h-n2:#0a2a6e;--h-n3:#123a8c;--h-gold:#f5b942;--h-gold2:#e4a11b;--h-bg:#eef2fa;--h-line:#dbe3f2;
- background:var(--h-bg)!important}
-/* Yan panel */
-#dq-cab aside{background:linear-gradient(180deg,var(--h-n1),var(--h-n2))!important;border-right:0!important;box-shadow:6px 0 24px #061a4733;color:#e8eefc}
-#dq-cab .dc-brand{color:#fff!important;border-bottom:1px solid #ffffff1f!important}
-#dq-cab .dc-logo{background:linear-gradient(135deg,var(--h-gold),var(--h-gold2))!important;color:#0a1f4d!important}
-#dq-cab .dc-user{color:#fff!important;border-bottom:1px solid #ffffff1f!important}
-#dq-cab .dc-user .dq-av,#dq-cab aside .dq-av{background:var(--h-gold)!important;color:#0a1f4d!important}
-#dq-cab .dc-nav a{color:#c9d6f3!important;border-radius:12px!important;border-left:3px solid transparent!important}
-#dq-cab .dc-nav a:hover{background:#ffffff14!important;color:#fff!important}
-#dq-cab .dc-nav a.on{background:linear-gradient(90deg,#f5b94238,#f5b94212)!important;color:var(--h-gold)!important;border-left-color:var(--h-gold)!important}
-#dq-cab .dc-nav a.r{color:#ff9aa2!important}
-/* Başlıq banneri */
-#dq-cab .dq-hd{position:relative;overflow:hidden;background:radial-gradient(120% 160% at 85% -20%,#2a5bc4 0,transparent 55%),linear-gradient(120deg,var(--h-n1),var(--h-n2) 60%,var(--h-n3))!important;
- border-radius:20px!important;border-bottom:3px solid var(--h-gold);box-shadow:0 14px 34px #061a4745!important;color:#fff}
-#dq-cab .dq-hd h2{color:#fff!important;text-align:left;font-weight:800;letter-spacing:-.3px}
-#dq-cab .dq-hd h2 span,#dq-cab .dq-hd h2 em{color:var(--h-gold)}
-#dq-cab .dq-hd p,#dq-cab .dq-hd small{color:#c9d6f3!important}
-#dq-cab .dc-chip{background:#ffffff1f!important;border:1px solid #ffffff2e;color:#fff}
-#dq-cab .dc-chip .dq-av{background:var(--h-gold)!important;color:#0a1f4d!important}
-/* Salamlama kartı */
-#dq-cab .dc-hero{position:relative;overflow:hidden;background:radial-gradient(110% 150% at 90% -30%,#2a5bc4 0,transparent 55%),linear-gradient(120deg,var(--h-n1),var(--h-n2) 65%,var(--h-n3))!important;
- border-bottom:3px solid var(--h-gold);box-shadow:0 16px 36px #061a474d!important}
-#dq-cab .dc-hero h2{color:var(--h-gold)!important}
-#dq-cab .dc-hs div{background:#ffffff14!important;border:1px solid #ffffff22}
-#dq-cab .dc-hs b{color:var(--h-gold)}
-/* Bölmə başlıqları */
-#dq-cab .dc-sec{color:var(--h-n1)!important;padding-left:10px;border-left:4px solid var(--h-gold)}
-#dq-cab .dc-sec i{color:var(--h-gold2)!important}
-#dq-cab .dc-sec a{color:var(--h-n2)!important}
-/* Kartlar */
-#dq-cab .dc-card,#dq-cab .dc-row,#dq-cab .dc-tbl,#dq-cab .dc-empty,#dq-cab .v3-c,#dq-cab .dq-card{border:1px solid var(--h-line)!important;border-radius:18px!important;box-shadow:0 10px 26px #0a2a6e14!important;background:#fff}
-#dq-cab .dc-card{border-top:3px solid var(--h-gold)!important}
-#dq-cab .dc-ic{background:linear-gradient(135deg,var(--h-n1),var(--h-n3))!important;color:var(--h-gold)!important}
-#dq-cab .dc-card b{color:var(--h-n1)!important}
-/* Düymələr: qızılı əsas, tünd ikinci */
-#dq-cab .dc-btn,#dq-cab .v3-bt,#dq-cab .dc-eye{background:linear-gradient(180deg,var(--h-gold),var(--h-gold2))!important;color:#0a1f4d!important;border-radius:999px!important;font-weight:800!important;box-shadow:0 8px 18px #e4a11b40!important}
-#dq-cab .dc-btn.o{background:#fff!important;color:var(--h-n2)!important;border:1.5px solid var(--h-n2)!important;box-shadow:none!important}
-#dq-cab .dc-btn.dc-wa{background:#25D366!important;color:#fff!important;box-shadow:none!important}
-#dq-cab .dc-badge{background:#fff4d6;color:#8a5a00}
-/* Cədvəl */
-#dq-cab .dc-tbl th{background:var(--h-n1)!important;color:var(--h-gold)!important}
-/* Sınaq tabları */
-#dq-cab .dc-tabs{background:#fff;border:1px solid var(--h-line)}
-#dq-cab .dc-tab.on{background:linear-gradient(120deg,var(--h-n1),var(--h-n3))!important;color:var(--h-gold)!important}
-/* Mobil: üfüqi menyu */
-@media(max-width:820px){
- #dq-cab aside{box-shadow:0 6px 18px #061a4740}
- #dq-cab .dc-nav a{background:#ffffff14!important;color:#dbe5fb!important}
- #dq-cab .dc-nav a.on{background:var(--h-gold)!important;color:#0a1f4d!important}
-}
-</style>
-
-<style id="dq-reg-portal-css">
-/* Qeydiyyat portalı — yeni kart dizaynı */
-#lxp .rp{--n1:#061a47;--n2:#0a2a6e;--n3:#1b4cb5;--gd:#f5b942;--gd2:#e4a11b;--ink:#0b1b3d;--mu:#5b6b8a;--ln:#e1e8f5;max-width:1120px;margin:0 auto;color:var(--ink);text-align:left}
-#lxp .rp *{box-sizing:border-box}
-#lxp .rp h1,#lxp .rp h2,#lxp .rp h3{text-align:left;margin:0}
-#lxp .rp-hero{position:relative;overflow:hidden;display:grid;grid-template-columns:1.2fr .8fr;gap:26px;align-items:center;padding:42px 36px;border-radius:30px;color:#fff;
- background:radial-gradient(60% 90% at 90% 0,#2a5bc455,transparent 60%),radial-gradient(50% 70% at 0 100%,#f5b94226,transparent 60%),linear-gradient(135deg,var(--n1),var(--n2) 70%,#0f3a96);box-shadow:0 24px 50px -18px #061a47aa}
-#lxp .rp-hero:after{content:"";position:absolute;right:-70px;top:-70px;width:240px;height:240px;border-radius:50%;border:44px solid #ffffff0d;pointer-events:none}
-#lxp .rp-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:#ffffff14;border:1px solid #ffffff2b;font-size:12.5px;font-weight:700;color:#ffe3a3}
-#lxp .rp-pill i{width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 0 4px #34d39933}
-#lxp .rp-hero h1{color:#fff;font-size:clamp(28px,4.4vw,44px);line-height:1.1;font-weight:800;letter-spacing:-1px;margin:14px 0 12px}
-#lxp .rp-hero h1 em{font-style:normal;color:var(--gd)}
-#lxp .rp-hero p{margin:0;color:#c9d6f3;font-size:15.5px;line-height:1.6;max-width:520px}
-#lxp .rp-cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
-#lxp .rp-b{border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:14.5px;padding:13px 22px;border-radius:999px;color:#0a1f4d;background:linear-gradient(180deg,var(--gd),var(--gd2));box-shadow:0 10px 22px #e4a11b40}
-#lxp .rp-b.ghost{background:#ffffff14;color:#fff;border:1.5px solid #ffffff40;box-shadow:none}
-#lxp .rp-b.ghost.dk{background:#fff;color:var(--n2);border-color:var(--ln);padding:10px 16px}
-#lxp .rp-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1}
-#lxp .rp-steps li{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:18px;background:#ffffff12;border:1px solid #ffffff24;backdrop-filter:blur(6px)}
-#lxp .rp-steps b{flex:none;width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;background:linear-gradient(135deg,var(--gd),var(--gd2));color:#0a1f4d}
-#lxp .rp-steps strong{display:block;font-size:15px}
-#lxp .rp-steps small{color:#b8c8ee;font-size:12.5px}
-#lxp .rp-sec{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:30px 4px 14px}
-#lxp .rp-sec h2{font-size:22px;font-weight:800;color:var(--n1);padding-left:12px;border-left:5px solid var(--gd)}
-#lxp .rp-sec small{display:block;margin:4px 0 0 17px;color:var(--mu);font-size:13px}
-#lxp .rp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
-#lxp .rp-c{position:relative;display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:24px;background:#fff;border:1px solid var(--ln);box-shadow:0 14px 30px -14px #0a2a6e33;transition:transform .2s,box-shadow .2s}
-#lxp .rp-c:hover{transform:translateY(-3px);box-shadow:0 20px 38px -14px #0a2a6e55}
-#lxp .rp-c:before{content:"";position:absolute;left:20px;right:20px;top:0;height:4px;border-radius:0 0 6px 6px;background:linear-gradient(90deg,var(--n2),var(--n3))}
-#lxp .rp-c.perm{background:linear-gradient(180deg,#fffaf0,#fff 45%);border-color:#f3d48a}
-#lxp .rp-c.perm:before{background:linear-gradient(90deg,var(--gd),var(--gd2))}
-#lxp .rp-c.off{opacity:.78}
-#lxp .rp-ct{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-#lxp .rp-cat{padding:5px 12px;border-radius:10px;background:var(--n2);color:var(--gd);font-weight:800;font-size:13px}
-#lxp .rp-inf{padding:5px 10px;border-radius:10px;background:#fff1cc;color:#8a5a00;font-weight:800;font-size:12px}
-#lxp .rp-st{margin-left:auto;font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;background:#dcfce7;color:#15803d}
-#lxp .rp-st.x{background:#fee2e2;color:#b91c1c}
-#lxp .rp-c h3{font-size:19px;font-weight:800;color:var(--n1);line-height:1.25}
-#lxp .rp-pl{margin:-4px 0 0;color:var(--mu);font-size:13px}
-#lxp .rp-dl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0}
-#lxp .rp-dl div{padding:10px 12px;border-radius:14px;background:#f3f6fd}
-#lxp .rp-dl dt{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mu);font-weight:700}
-#lxp .rp-dl dd{margin:2px 0 0;font-weight:800;font-size:14px;color:var(--n1)}
-#lxp .rp-dl dd.fr{color:#047857}
-#lxp .rp-bar{height:6px;border-radius:6px;background:#e8eefb;overflow:hidden}
-#lxp .rp-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--gd),var(--gd2))}
-#lxp .rp-ft{font-size:12.5px;color:var(--mu);margin-top:-4px}
-#lxp .rp-go{margin-top:auto;border:0;cursor:pointer;font-family:inherit;width:100%;padding:14px;border-radius:16px;font-weight:800;font-size:15px;color:#fff;background:linear-gradient(120deg,var(--n1),var(--n3));box-shadow:0 10px 20px #0a2a6e40}
-#lxp .rp-go.ok{background:linear-gradient(180deg,#22c55e,#16a34a)}
-#lxp .rp-go:disabled{background:#e5e9f3;color:#9aa6bf;box-shadow:none;cursor:not-allowed}
-#lxp .rp-em{padding:36px;text-align:center;color:var(--mu);background:#fff;border:1.5px dashed #c8d4ec;border-radius:22px}
-@media(max-width:760px){#lxp .rp-hero{grid-template-columns:1fr;padding:28px 20px;border-radius:24px}#lxp .rp-grid{grid-template-columns:1fr}#lxp .rp-sec h2{font-size:19px}}
-</style>
-
 </body>
 </html>
