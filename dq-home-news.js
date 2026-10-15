@@ -35,20 +35,31 @@
   }
 
   /* ---------- "Dövlət qulluğu hədəfinə doğru..." blokunu tap ---------- */
+  function norm(t) { return String(t || "").replace(/[\s\u00a0\u200b]+/g, " ").toLowerCase(); }
+  var RX = /h[əe]d[əe]fin[əe]\s+do[ğg]ru|add[ıi]m[ıi]n[ıi]\s+at/;
+
   function findCta(home) {
-    var best = null, nodes = home.querySelectorAll("div,section,a,p,h2,h3,h4,span,b,strong");
-    for (var i = 0; i < nodes.length; i++) {
-      var n = nodes[i];
-      if (n.children.length > 3) continue;
-      var t = n.textContent || "";
-      if (t.indexOf(CTA_TXT) > -1 && t.length < 160) { best = n; break; }
+    var best = null;
+    /* 1) mətn düyünləri üzrə axtarış (mətn bölünmüş olsa da, ən yaxın element tapılır) */
+    var w = document.createTreeWalker(home, NodeFilter.SHOW_TEXT, null), n;
+    while ((n = w.nextNode())) {
+      if (RX.test(norm(n.nodeValue))) { best = n.parentElement; break; }
+    }
+    /* 2) ehtiyat: bütöv element mətni üzrə */
+    if (!best) {
+      var all = home.querySelectorAll("div,section,h2,h3,h4,p,span,b,strong");
+      for (var i = 0; i < all.length; i++) {
+        var t = norm(all[i].textContent);
+        if (t.length < 200 && RX.test(t)) { best = all[i]; break; }
+      }
     }
     if (!best) return null;
-    /* yuxarı qalx: bütün zolağı (düymə ilə birlikdə) tut, amma "Niyə məhz" bölməsinə çatma */
+    /* yuxarı qalx: zolağın özünü (düymə ilə) tut, "Niyə məhz" / statistika / hero bölməsinə çatma */
     var el = best;
     while (el.parentElement && el.parentElement !== home) {
-      var p = el.parentElement, pt = p.textContent || "";
-      if (pt.indexOf(WHY_TXT) > -1 || p.querySelector("#dq-stats")) break;
+      var p = el.parentElement, pt = norm(p.textContent);
+      if (pt.indexOf("niyə məhz") > -1 || pt.indexOf("niye mehz") > -1 || p.querySelector("#dq-stats") ||
+          p.querySelector("#dt-home,#dt-grid,.v3-ft") || pt.length > 600) break;
       el = p;
     }
     return el;
@@ -61,7 +72,11 @@
     if (!home) return;
 
     var ref = findCta(home);
-    if (ref) ref.classList.toggle("dq-hn-cta-off", authed());
+    if (ref) {
+      var off = authed();
+      ref.classList.toggle("dq-hn-cta-off", off);
+      if (off) ref.style.setProperty("display", "none", "important"); else ref.style.removeProperty("display");
+    }
 
     if (!box) return;
     if (ref && ref.parentNode) {
