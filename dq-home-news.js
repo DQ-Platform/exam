@@ -1,6 +1,6 @@
 /* DQ Platform — dq-home-news.js (v1)
    "📢 Yeniliklər" slayderini ana səhifənin SONUNDA, "Dövlət qulluğu hədəfinə doğru ilk addımı at!"
-   blokunun yerində (üstündə) göstərir. Kabinetə daxil olmuş / qeydiyyatdan keçmiş istifadəçiyə göstərilmir.
+   blokunun yerində (üstündə) göstərir. Kabinetə daxil olmuş istifadəçidə isə həmin çağırış bloku gizlənir, yeniliklər qalır.
    Qoşulma: index.html-də dq-home2.js-dən SONRA:  <script src="dq-home-news.js?v=1"></script> */
 (function () {
   "use strict";
@@ -12,15 +12,12 @@
 
   /* ---------- CSS ---------- */
   var css =
-    /* köhnə qaydalar #yq-news-u ana səhifədə gizlədirdi — yalnız qonaq üçün geri açırıq */
-    "body:not(.dq-authed) #v3-home #yq-news.dqn-host{display:block!important;max-width:1020px;margin:26px auto 22px!important;padding:0 14px!important}" +
-    "body:not(.dq-authed) #v3-home #yq-news.dqn-host>.dqn-title{display:block!important}" +
-    "body:not(.dq-authed) #v3-home #yq-news.dqn-host>.dqn-sub{display:block!important}" +
-    "body:not(.dq-authed) #v3-home #yq-news.dqn-host>.dqn{display:block!important}" +
-    "body:not(.dq-authed) #v3-home #yq-news.dqn-host>.dqn-all{display:block!important}" +
-    "body:not(.dq-authed) #v3-home #yq-news.dqn-host>.dq2n{display:none!important}" +
-    /* daxil olmuş istifadəçi: heç vaxt görünməsin */
-    "body.dq-authed #v3-home #yq-news,body.dq-hn-authed #v3-home #yq-news{display:none!important}";
+    /* yeniliklər həm qonaq, həm daxil olmuş istifadəçi üçün görünür */
+    "#v3-home #yq-news.dqn-host{display:block!important;max-width:1020px;margin:26px auto 22px!important;padding:0 14px!important}" +
+    "#v3-home #yq-news.dqn-host>.dqn-title,#v3-home #yq-news.dqn-host>.dqn-sub,#v3-home #yq-news.dqn-host>.dqn,#v3-home #yq-news.dqn-host>.dqn-all{display:block!important}" +
+    "#v3-home #yq-news.dqn-host>.dq2n{display:none!important}" +
+    /* daxil olmuş istifadəçi: "Qeydiyyatdan keç" çağırış bloku yox olur */
+    ".dq-hn-cta-off{display:none!important}";
   var st = document.createElement("style");
   st.id = "dq-home-news-css";
   st.textContent = css;
@@ -61,15 +58,12 @@
   function place() {
     var home = document.getElementById("v3-home");
     var box = document.getElementById("yq-news");
-    if (!home || !box) return;
-
-    if (authed()) {
-      document.body.classList.add("dq-hn-authed");
-      return;
-    }
-    document.body.classList.remove("dq-hn-authed");
+    if (!home) return;
 
     var ref = findCta(home);
+    if (ref) ref.classList.toggle("dq-hn-cta-off", authed());
+
+    if (!box) return;
     if (ref && ref.parentNode) {
       if (box.nextElementSibling !== ref || box.parentNode !== ref.parentNode) ref.parentNode.insertBefore(box, ref);
       return;
