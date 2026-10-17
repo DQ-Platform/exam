@@ -2481,7 +2481,7 @@ window.__dqSplashCalc=calc;window.DQSplash={complete:complete};
 <p class="dq-sub">Kabinetə daxil olmaq üçün məlumatlarınızı daxil edin.</p>
 <div class="dq-form">
 <label class="dq-field"><span>Ad və soyad</span><input type="text" id="user-name" class="code-input" placeholder="Ad və Soyadınız" autocomplete="name"></label>
-<label class="dq-field"><span>FIN kod</span><input type="text" id="user-fin" class="code-input token-field" placeholder="Məs: 7ABC123" maxlength="7" autocapitalize="characters"></label>
+<label class="dq-field"><span>İş nömrəsi</span><input type="text" id="user-fin" class="code-input token-field" placeholder="Məs: 1234567" maxlength="7" autocapitalize="characters"></label>
 <div class="dq-actions">
 <button type="button" class="btn dq-primary" onclick="proceedToExamSelect()"><i class="fa-solid fa-right-to-bracket"></i> Kabinetə daxil ol</button>
 <button type="button" class="btn dq-wa" onclick="registerViaWhatsApp()"><i class="fa-brands fa-whatsapp"></i> Qeydiyyatdan Keç</button>
@@ -3529,7 +3529,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <h4 class="mb-2" style="text-align: left;">Tələbəyə Giriş İcazəsi Ver</h4>
 <div style="display: flex; gap: 10px; flex-wrap: wrap;" class="mb-2">
 <input type="text" id="adm-student-name" class="form-control" placeholder="Ad Soyad" style="flex: 2; min-width: 180px;">
-<input type="text" id="adm-student-fin" class="form-control token-field" placeholder="FIN Kod" style="flex: 1; min-width: 120px;" maxlength="7">
+<input type="text" id="adm-student-fin" class="form-control token-field" placeholder="İş nömrəsi" style="flex: 1; min-width: 120px;" maxlength="7">
 <input type="number" id="adm-exam-no" class="form-control" placeholder="Sınaq № (Məs: 1 və ya 2)" style="flex: 1; min-width: 100px;" value="1">
 </div>
 <div class="category-buttons">
@@ -3548,7 +3548,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <div style="display:flex;gap:10px;flex-wrap:wrap;" class="mb-2">
 <input type="number" id="sch-exam-no" class="form-control" placeholder="Sınaq №" value="1" style="flex:1;min-width:90px;">
 <input type="datetime-local" id="sch-start" class="form-control" style="flex:2;min-width:190px;">
-<input type="text" id="sch-fin" class="form-control token-field" placeholder="FIN (boş = hamı üçün)" maxlength="7" style="flex:1;min-width:130px;">
+<input type="text" id="sch-fin" class="form-control token-field" placeholder="İş nömrəsi (boş = hamı üçün)" maxlength="7" style="flex:1;min-width:130px;">
 </div>
 <button class="btn btn-primary" onclick="dqSchedSave()">💾 Tarixi Yadda Saxla</button>
 <p id="sch-msg" class="mt-1" style="font-size:13px;"></p>
@@ -3560,7 +3560,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <thead>
 <tr>
 <th>Ad Soyad</th>
-<th>FIN Kod</th>
+<th>İş nömrəsi</th>
 <th>Sınaq №</th>
 <th>İcazəli Kateqoriyalar</th>
 <th>Əməliyyat</th>
@@ -3592,7 +3592,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <thead>
 <tr>
 <th>Ad Soyad</th>
-<th>FIN</th>
+<th>İş nömrəsi</th>
 <th>Sınaq №</th>
 <th>Kateqoriya</th>
 <th>Doğru</th>
@@ -3628,7 +3628,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <thead>
 <tr>
 <th>Ad Soyad</th>
-<th>FIN</th>
+<th>İş nömrəsi</th>
 <th>Sınaq</th>
 <th>Doğru</th>
 <th>Yanlış</th>
@@ -3658,7 +3658,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <div class="folder-card" onclick="switchAdminTab('idare')">
 <div class="folder-icon">⚙️</div>
 <div class="folder-title">İştirakçı İcazələri</div>
-<div class="folder-desc">FİN kod icazələrini və tələbə siyahısını idarə edin.</div>
+<div class="folder-desc">İş nömrəsi icazələrini və tələbə siyahısını idarə edin.</div>
 </div>
 </div>
 <div id="edit-questions-list-area" class="mt-4" style="display: none; background: #fff; padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
