@@ -3682,8 +3682,15 @@ var t=setInterval(function(){patch()&&clearInterval(t)},300);
 /* Google: kiçik pəncərədən qayıdış (əsas səhifə yerində qalır) */
 async function finish(tok){try{var u=await _supabase.auth.getUser(tok),usr=u&&u.data&&u.data.user,em=usr&&String(usr.email||"").toLowerCase();if(!em){say("Google hesabı təsdiqlənmədi"+(u&&u.error&&u.error.message?" ("+u.error.message+")":"")+". Yenidən cəhd edin.");return}
     var r=await YQ.find(YQ.key(em));
-    if(r&&r.status==="approved"){YQ.state(r);var md=$("yq-m");md&&md.closest(".v3-md")&&md.closest(".v3-md").remove();return}
-    YQ.open("reg");setTimeout(function(){var n=$("yq-n"),c=$("yq-c");n&&(n.value=(usr.user_metadata&&usr.user_metadata.full_name)||"");c&&(c.value=em)},200)}catch(e){console.error("[dqx] google",e);say("Google ilə giriş tamamlanmadı. Yenidən cəhd edin.")}}
+    if(!(r&&r.status==="approved")){
+      await V2.probe();if(V2.mode!=="cloud"){say("Baza əlçatan deyil, giriş hazırda mümkün deyil.");return}
+      var nm=String((usr.user_metadata&&(usr.user_metadata.full_name||usr.user_metadata.name))||"").trim().replace(/\s+/g," ");if(nm.length<3)nm=em.split("@")[0];
+      var pm={tests:!0,cats:[],exam:"1"};
+      if(r){var pp=r.perms||{};r=Object.assign({},r,{status:"approved",verified:"google",perms:{tests:pp.tests!==!1,cats:Array.isArray(pp.cats)?pp.cats:[],exam:String(pp.exam||"1")}});await V2.put("regs",r,r._id)}
+      else{var fin="",i=0;for(;i<6;i++){var e2=em+(i?"#"+i:""),h1=2166136261>>>0,h2=374761393>>>0;for(var j=0;j<e2.length;j++){h1^=e2.charCodeAt(j);h1=Math.imul(h1,16777619)>>>0;h2^=e2.charCodeAt(j);h2=Math.imul(h2,16777619)>>>0}fin=String(1000000+((h1*1048576+(h2&1048575))%9000000));var ex=await YQ.findFin(fin);if(!ex)break}
+        r={name:nm,fin:fin,contact:em,key:YQ.key(em),status:"approved",verified:"google",perms:pm,ts:new Date().toISOString()};await V2.put("regs",r)}
+    }
+    YQ.state(r);var md2=$("yq-m");md2&&md2.closest(".v3-md")&&md2.closest(".v3-md").remove();}catch(e){console.error("[dqx] google",e);say("Google ilə giriş tamamlanmadı. Yenidən cəhd edin.")}}
 var CH=null;try{CH=new BroadcastChannel("dq_google")}catch(e){}
 var HK="dq_g_handoff",done={};
 function say(t){try{if(window.V2&&V2.toast){V2.toast(t);return}}catch(e){}try{alert(t)}catch(e){}}
