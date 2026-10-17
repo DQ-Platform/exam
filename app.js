@@ -6975,3 +6975,84 @@ function wrap(){
 }
 var k=0,t=setInterval(function(){(wrap()||++k>400)&&clearInterval(t)},250);
 })()}catch(err){console.error("[dq-cabinet-sinaq-reg]",err)}
+
+/* ===== DQ · İş nömrəsi sinxronizasiyası (hər istifadəçinin şəxsi nömrəsi hər yerdə eyni) =====
+   Mənbə: istifadəçinin kabinet hesabı (YQ2.me.fin). Qeydiyyatlar cihazdan asılı olmayaraq
+   hesaba (uid/email/telefon) görə tapılır və bazada həmin nömrəyə gətirilir. */
+(function(){"use strict";
+function nk(s){return String(s||"").toLowerCase().replace(/\s+/g," ").trim()}
+function d9(s){return String(s==null?"":s).replace(/\D/g,"").slice(-9)}
+function me(){
+  try{var m=window.YQ2&&YQ2.me;if(m&&m.fin){var em=/@/.test(m.contact||"")?String(m.contact).toLowerCase():"";
+    return{name:m.name,fin:String(m.fin).toUpperCase(),uid:String(m.key||m._id||m.fin),email:em,phone:em?String(m.phone||""):String(m.contact||"")}}}catch(e){}
+  try{var c=window.DQ&&DQ.cabinet&&DQ.cabinet();if(c&&c.fin&&String(c.fin).toUpperCase()!=="QONAQ00")return{name:c.name,fin:String(c.fin).toUpperCase(),uid:"fin:"+String(c.fin).toUpperCase(),email:"",phone:""}}catch(e){}
+  return null}
+function ls(){try{return JSON.parse(localStorage.getItem("lx_my_regs")||"{}")||{}}catch(e){return{}}}
+function lsSave(o){try{localStorage.setItem("lx_my_regs",JSON.stringify(o))}catch(e){}}
+function fixLocal(u){var m=ls(),ch=!1;for(var k in m)if(m[k]&&m[k].fin&&String(m[k].fin).toUpperCase()!==u.fin){m[k].fin=u.fin;ch=!0}ch&&lsSave(m)}
+async function allow(r,fin){
+  try{
+    var q=await _supabase.from("allowed_students").select("*").eq("fin",fin);
+    var old=(q.data||[]).filter(function(z){return String(z.exam_no)===String(r.exam_no)})[0];
+    if(old){var cs=Array.isArray(old.categories)?old.categories.slice():[];cs.indexOf(r.cat)<0&&cs.push(r.cat);await _supabase.from("allowed_students").update({student_name:r.name,categories:cs}).eq("id",old.id)}
+    else await _supabase.from("allowed_students").insert([{student_name:r.name,fin:fin,exam_no:String(r.exam_no),categories:[r.cat]}])
+  }catch(e){}}
+function mineOf(r,u,wns){
+  if(r.uid&&r.uid===u.uid)return!0;
+  if(r.email&&u.email&&String(r.email).toLowerCase()===u.email)return!0;
+  if(wns[r.work_no]&&nk(r.name)===nk(u.name))return!0;
+  if(u.phone&&d9(u.phone).length>=9&&d9(r.contact)===d9(u.phone)&&nk(r.name)===nk(u.name))return!0;
+  return!1}
+var last=0,busy=null;
+async function healNow(){
+  var u=me();if(!u||!window.V2)return;
+  fixLocal(u);
+  var mine=ls(),wns={};for(var k in mine)mine[k]&&mine[k].work_no&&(wns[mine[k].work_no]=1);
+  var list=[];try{list=await V2.list("lxreg")||[]}catch(e){return}
+  for(var i=0;i<list.length;i++){
+    var r=list[i];
+    if(!r||r.status==="cancelled"||!mineOf(r,u,wns))continue;
+    var fixFin=String(r.fin||"").toUpperCase()!==u.fin,fixId=r.uid!==u.uid;
+    if(!fixFin&&!fixId)continue;
+    var o={};for(var p in r)p!=="_id"&&(o[p]=r[p]);o.fin=u.fin;o.uid=u.uid;u.email&&(o.email=u.email);
+    try{await V2.put("lxreg",o,r._id);r.fin=u.fin;fixFin&&r.status==="approved"&&await allow(r,u.fin)}catch(e){}
+  }
+}
+function heal(force){
+  if(busy)return busy;
+  if(!force&&Date.now()-last<20000)return Promise.resolve();
+  busy=healNow().catch(function(){}).then(function(){last=Date.now();busy=null});
+  return busy}
+
+/* Qeydiyyat formu: daxil olmuş istifadəçidə ad kabinetdən gəlir və dəyişdirilmir -> nömrə həmişə kabinet nömrəsi olur */
+function form(){
+  var u=me(),n=document.getElementById("lxp-n"),c=document.getElementById("lxp-c");
+  if(n&&u&&!n.__a){n.__a=1;n.value=u.name;n.readOnly=!0;n.style.opacity=".85"}
+  if(c&&!c.__a){c.__a=1;
+    try{var v=u&&u.phone||localStorage.getItem("dq_last_contact");v&&!c.value&&(c.value=v)}catch(e){}
+    c.addEventListener("input",function(){try{localStorage.setItem("dq_last_contact",c.value.trim())}catch(e){}})}}
+new MutationObserver(function(){form()}).observe(document.documentElement,{childList:!0,subtree:!0});
+
+function install(){
+  var L=window.LXP;
+  if(!L||!L.reg||!L.done||!L.submit)return!1;
+  if(L.reg.__n)return!0;
+  if(!L.reg.__k)return!1;
+  var oS=L.submit,oD=L.done,oR=L.reg;
+  L.submit=async function(){
+    try{await heal(!0)}catch(e){}
+    var r=await oS.apply(this,arguments);
+    try{await heal(!0)}catch(e){}      /* yeni yaranmış qeydiyyatı da hesaba bağla */
+    return r};
+  L.done=function(id,wn,fin){
+    var a=Array.prototype.slice.call(arguments),u=me();
+    if(u){a[2]=u.fin;fixLocal(u)}
+    return oD.apply(this,a)};
+  L.reg=function(){var a=arguments;heal().then(function(){oR.apply(L,a)})};
+  L.reg.__k=1;L.reg.__n=1;
+  return!0}
+var n=0,t=setInterval(function(){(install()||++n>150)&&clearInterval(t)},400);
+/* Hər dəfə kabinet açılanda da fonda sinxronlaşdır (başqa cihazdan edilən qeydiyyatlar üçün) */
+setTimeout(function(){heal(!0)},4000);
+setInterval(function(){document.hidden||heal()},120000);
+})();
