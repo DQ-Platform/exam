@@ -6382,3 +6382,177 @@ var m=0,iv=setInterval(function(){if(addCard()||++m>60)clearInterval(iv)},500);
 function watch(){var ap=document.getElementById("admin-panel");if(ap)new MutationObserver(function(){if(!document.getElementById("dqsm-card"))addCard()}).observe(ap,{childList:true,subtree:true})}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",watch);else watch();
 })();
+
+;
+
+/* ===== dq-v2-gate ===== */
+/* 1) Giriş pəncərəsində «Giriş» düyməsini 2 san basılı tut → «Admin Panel Girişi» kartı
+      → düzgün e-poçt + şifrə → Admin Panel V2 (DQ_YSL / V2 «Görünüş 2») açılır.
+   2) İmtahan Şablonları → «Bax»: sual siyahısı, hər sual üçün «Düzəliş Et», qarışdırma, PDF, yadda saxla.
+   Şifrə kodda açıq saxlanmır — yalnız SHA-256 izi (hash) yoxlanılır. */
+(function(){"use strict";
+if(window.__dqV2Gate)return;window.__dqV2Gate=1;
+var D=document,HASH="e7bccdc336e541b2cb6017a994f29a53856d56690dddf17dcd285125b6e5577a",HOLD=2000,KEY="dq_gate_ok";
+var tm=0,sx=0,sy=0,fails=0,lockUntil=0,swallow=0;
+function $(i){return D.getElementById(i)}
+function sha(s){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)).then(function(d){return Array.prototype.map.call(new Uint8Array(d),function(b){return("0"+b.toString(16)).slice(-2)}).join("")})}
+var SHIELD='<svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="#e5484d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z"/><path d="M12 8v4.5M12 15.6v.01"/></svg>';
+
+function css(){if($("dq-v2g-css"))return;var s=D.createElement("style");s.id="dq-v2g-css";
+s.textContent="#yq-m button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}"+
+"#dq-v2g{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:flex-start;justify-content:center;padding:max(56px,8vh) 16px 24px;overflow:auto;font-family:Mulish,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background-color:#f7f6f3;background-image:radial-gradient(#0b2a6b22 1px,transparent 1px);background-size:20px 20px}"+
+"#dq-v2g .g-top{position:fixed;left:0;right:0;top:0;height:46px;background:#0e3a66;border-bottom:2px solid #b9975b}"+
+"#dq-v2g .g-card{position:relative;width:100%;max-width:460px;background:#fff;border-radius:34px;padding:38px 34px 30px;box-shadow:0 24px 60px #1e1b4b1f;border:1px solid #eceaf3;text-align:center;color:#12122b}"+
+"#dq-v2g h2{margin:14px 0 8px;font-size:26px;font-weight:700}#dq-v2g p{margin:0 0 22px;color:#5b6478;font-size:15px;line-height:1.6}"+
+"#dq-v2g label{display:block;text-align:left;font-weight:600;font-size:15px;margin:14px 0 8px}"+
+"#dq-v2g input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:15px 20px;border:1px solid #e1e3ec;border-radius:999px;background:#fff;color:#12122b;outline:none}"+
+"#dq-v2g input:focus{border-color:#1e1b4b;box-shadow:0 0 0 4px #1e1b4b1a}"+
+"#dq-v2g .g-pw{position:relative}#dq-v2g .g-pw input{padding-right:52px}"+
+"#dq-v2g .g-pw button{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;font-size:18px;cursor:pointer;padding:8px;color:#5b6478}"+
+"#dq-v2g .g-m{min-height:20px;margin:12px 0 0;font-size:14px;color:#d64545;text-align:left}"+
+"#dq-v2g .g-go{width:100%;margin-top:10px;font:inherit;font-weight:700;font-size:17px;border:0;border-radius:999px;padding:17px;background:#1e1b4b;color:#fff;cursor:pointer;box-shadow:0 12px 24px #1e1b4b40}"+
+"#dq-v2g .g-go:disabled{opacity:.6;cursor:wait}#dq-v2g .g-x{margin-top:14px;border:0;background:none;color:#5b6478;font:inherit;font-size:14px;cursor:pointer;text-decoration:underline}";
+D.head.appendChild(s)}
+
+function grant(){window.__dqAuthed=true;
+try{sessionStorage.setItem(KEY,"1");sessionStorage.setItem("dq_nav2_unlock","1");localStorage.setItem("dq_admin_logged","true")}catch(e){}
+try{window.DQ_NAV2&&DQ_NAV2.unlock&&DQ_NAV2.unlock()}catch(e){}}
+function closeGate(){var o=$("dq-v2g");o&&o.remove()}
+function openV2(){
+var m=$("yq-m"),w=m&&m.closest&&m.closest(".v3-md");w&&w.remove();
+try{if(window.DQ_YSL&&DQ_YSL.open){DQ_YSL.open();return}}catch(e){console.error(e)}
+try{window.__ysSkin=true;V2.open()}catch(e){alert("Admin Panel V2 yüklənmədi, səhifəni yeniləyin.")}}
+
+function submit(){
+var em=$("dq-v2g-e").value.trim().toLowerCase(),pw=$("dq-v2g-p").value.replace(/\s+$/,""),m=$("dq-v2g-m"),b=$("dq-v2g-go");
+if(Date.now()<lockUntil){m.textContent="Çox sayda səhv cəhd. Bir dəqiqədən sonra yenidən yoxlayın.";return}
+if(!em||!pw){m.textContent="E-poçt və şifrəni daxil edin.";return}
+if(!(window.crypto&&crypto.subtle)){m.textContent="Bu giriş yalnız təhlükəsiz (https) bağlantıda işləyir.";return}
+b.disabled=true;m.textContent="";
+sha(em+"|"+pw).then(function(h){
+ if(h!==HASH){b.disabled=false;if(++fails>=5){lockUntil=Date.now()+60000;fails=0}m.textContent="E-poçt və ya şifrə yanlışdır.";var p=$("dq-v2g-p");p.value="";p.focus();return}
+ fails=0;grant();closeGate();openV2()
+})["catch"](function(){b.disabled=false;m.textContent="Yoxlama alınmadı, yenidən cəhd edin."})}
+
+function openGate(){
+if($("dq-v2g"))return;css();
+var o=D.createElement("div");o.id="dq-v2g";
+o.innerHTML='<div class="g-top"></div><div class="g-card" role="dialog" aria-modal="true" aria-label="Admin Panel Girişi">'+SHIELD+
+'<h2>Admin Panel Girişi</h2><p>Bu bölməyə daxil olmaq üçün idarəçi (admin) hesab məlumatlarını daxil edin.</p>'+
+'<label for="dq-v2g-e">Admin Email</label><input id="dq-v2g-e" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="admin@email.com">'+
+'<label for="dq-v2g-p">Şifrə</label><div class="g-pw"><input id="dq-v2g-p" type="password" autocomplete="off" autocapitalize="none" placeholder="••••••••"><button type="button" id="dq-v2g-eye" aria-label="Şifrəni göstər">👁</button></div>'+
+'<div class="g-m" id="dq-v2g-m" role="alert"></div><button type="button" class="g-go" id="dq-v2g-go">Daxil Ol</button><button type="button" class="g-x" id="dq-v2g-x">Ləğv et</button></div>';
+D.body.appendChild(o);
+$("dq-v2g-go").onclick=submit;$("dq-v2g-x").onclick=closeGate;
+$("dq-v2g-eye").onclick=function(){var p=$("dq-v2g-p");p.type=p.type==="password"?"text":"password"};
+o.addEventListener("keydown",function(e){if(e.key==="Enter")submit();else if(e.key==="Escape")closeGate()});
+setTimeout(function(){var e=$("dq-v2g-e");e&&e.focus()},350)}
+
+function giris(t){var b=t&&t.closest&&t.closest("#yq-m button");return b&&/^giri[sş]$/i.test(b.textContent.trim())?b:null}
+function cancel(){clearTimeout(tm);tm=0}
+D.addEventListener("pointerdown",function(e){
+ cancel();if(e.pointerType==="mouse"&&e.button!==0)return;
+ if(!giris(e.target))return;
+ sx=e.clientX;sy=e.clientY;
+ tm=setTimeout(function(){tm=0;swallow=Date.now()+1800;if(window.__dqAuthed===true){openV2();return}openGate()},HOLD)},true);
+["pointerup","pointercancel","dragstart","scroll"].forEach(function(ev){D.addEventListener(ev,cancel,true)});
+D.addEventListener("pointermove",function(e){if(tm&&Math.hypot(e.clientX-sx,e.clientY-sy)>12)cancel()},true);
+D.addEventListener("click",function(e){if(swallow&&Date.now()<swallow&&giris(e.target)){e.preventDefault();e.stopImmediatePropagation();swallow=0}},true);
+D.addEventListener("contextmenu",function(e){if(tm||giris(e.target))e.preventDefault()},true);
+css();
+
+/* ================= İmtahan şablonu: «Bax» → sual siyahısı + redaktə ================= */
+function ready(f,n){n=n||0;try{if(typeof V2!=="undefined"&&V2.viewTpl&&V2.put&&V2.esc)return f()}catch(e){}if(n<300)setTimeout(function(){ready(f,n+1)},150)}
+ready(function(){
+var esc=function(s){return V2.esc(s)},LT="ABCDE",CATS=["BB","BA","AC","BDU"];
+var T=null,ix=-1,ed=-1,dirty=false;
+function isImg(t){t=String(t||"");return /^data:image\//i.test(t)||/^https?:\/\/\S+\.(png|jpe?g|gif|webp|svg)(\?\S*)?$/i.test(t)}
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function shuf(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function txt(t){return isImg(t)?'<img class="tv-oi" src="'+esc(t)+'" alt="">':esc(t)}
+function style(){if($("tv-css"))return;var s=D.createElement("style");s.id="tv-css";
+s.textContent=".tv-md{position:fixed;inset:0;z-index:2147483500;background:#0b1230a8;display:flex;align-items:center;justify-content:center;padding:12px}"+
+".tv-box{background:#fff;border-radius:22px;width:100%;max-width:860px;max-height:94vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 70px #0006}"+
+".tv-hd{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid #eceaf3}.tv-hd h3{margin:0;font-size:20px;font-weight:800;color:#12122b}"+
+".tv-hd button{border:0;background:none;font-size:24px;cursor:pointer;color:#5b6478;line-height:1}"+
+".tv-tl{display:flex;gap:8px;flex-wrap:wrap;padding:12px 22px;border-bottom:1px solid #f1f0f6}"+
+".tv-bd{overflow:auto;padding:6px 22px 16px;flex:1;-webkit-overflow-scrolling:touch}"+
+".tv-q{padding:14px 0;border-bottom:1px solid #eceaf3}.tv-h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.tv-t{font-weight:700;color:#12122b;word-break:break-word}"+
+".tv-os{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-top:8px;font-size:14px;color:#475069}@media(max-width:560px){.tv-os{grid-template-columns:1fr}}"+
+".tv-o.ok{color:#059669;font-weight:800}.tv-oi,.tv-qi{max-width:100%;max-height:150px;display:block;margin-top:6px;border-radius:8px;background:#fff}"+
+".tv-n{margin-top:8px;font-size:13px;color:#7a6a3a;background:#fbf6e8;border-radius:10px;padding:8px 10px}"+
+".tv-edit{background:#f8f7fc;border-radius:14px;padding:14px;margin:10px 0;border:1px solid #e3e0f1}.tv-er{display:flex;gap:8px;align-items:center;margin-top:8px}.tv-er label{min-width:20px;font-weight:700}.tv-er .v2-in{flex:1}"+
+".tv-bt{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.tv-ft{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;padding:14px 22px;border-top:1px solid #eceaf3}";
+D.head.appendChild(s)}
+
+function qHtml(q,k){
+ if(k===ed)return eHtml(q,k);
+ var qi=q.qimg?'<img class="tv-qi" src="'+esc(q.qimg)+'" alt="">':"";
+ var open=q.type==="open";
+ var body=open?'<div style="margin-top:6px;font-size:14px">Cavab: <b>'+esc(q.correct)+'</b></div>':'<div class="tv-os">'+(q.opts||[]).map(function(o,j){var im=o&&o.img&&!isImg(o.text)?'<img class="tv-oi" src="'+esc(o.img)+'" alt="">':"";return'<span class="tv-o'+(j===q.correct?" ok":"")+'"><b>'+LT[j]+')</b> '+txt(o&&o.text)+im+'</span>'}).join("")+'</div>';
+ return'<div class="tv-q"><div class="tv-h"><div class="tv-t">'+(k+1)+'. '+(q.text?txt(q.text):(q.qimg?"🖼️ Şəkilli sual":"—"))+'</div><button type="button" class="v2-b o s" data-a="edit" data-k="'+k+'">Düzəliş Et</button></div>'+qi+body+(q.note?'<div class="tv-n">'+esc(q.note)+'</div>':"")+'</div>'}
+
+function eHtml(q,k){
+ var open=q.type==="open",opts="",sel;
+ if(!open){opts=(q.opts||[]).map(function(o,j){return isImg(o.text)?'<div class="tv-er"><label>'+LT[j]+'</label><img class="tv-oi" style="margin:0" src="'+esc(o.text)+'" alt=""></div>':'<div class="tv-er"><label>'+LT[j]+'</label><input class="v2-in" data-f="o'+j+'" value="'+esc(o.text)+'"></div>'}).join("");
+  sel='<select class="v2-in" data-f="c">'+(q.opts||[]).map(function(o,j){return'<option value="'+j+'"'+(j===q.correct?" selected":"")+'>'+LT[j]+'</option>'}).join("")+'</select>'}
+ else sel='<input class="v2-in" data-f="c" value="'+esc(q.correct)+'">';
+ return'<div class="tv-q tv-edit" data-k="'+k+'"><b>Sual '+(k+1)+' — düzəliş</b>'+
+ '<div class="v2-f"><label>Sual mətni</label><textarea class="v2-in" rows="3" data-f="t">'+(isImg(q.text)?"":esc(q.text))+'</textarea></div>'+opts+
+ '<div class="v2-grid" style="margin-top:10px"><div class="v2-f"><label>Düzgün cavab</label>'+sel+'</div><div class="v2-f"><label>Təsnifat</label><select class="v2-in" data-f="cat">'+CATS.map(function(c){return'<option'+(c===q.cat?" selected":"")+'>'+c+'</option>'}).join("")+'</select></div></div>'+
+ '<div class="v2-f" style="margin-top:8px"><label>Qanunvericilik izahı (şərh)</label><textarea class="v2-in" rows="2" data-f="n">'+esc(q.note||"")+'</textarea></div>'+
+ '<div class="tv-bt"><button type="button" class="v2-b s" data-a="ok" data-k="'+k+'">Tətbiq et</button><button type="button" class="v2-b o s" data-a="cancel">Ləğv et</button><button type="button" class="v2-b r s" data-a="del" data-k="'+k+'">🗑 Sualı sil</button></div></div>'}
+
+function draw(){
+ var m=D.querySelector(".tv-md");if(!m)return;
+ var bd=m.querySelector(".tv-bd"),sc=bd?bd.scrollTop:0;
+ m.querySelector(".tv-hd h3").textContent=T.name+" — Suallar ("+T.questions.length+")"+(dirty?" •":"");
+ m.querySelector(".tv-bd").innerHTML=T.questions.length?T.questions.map(qHtml).join(""):'<div class="v2-empty" style="padding:30px;text-align:center">Şablonda sual qalmayıb.</div>';
+ m.querySelector(".tv-bd").scrollTop=sc}
+
+function apply(k){
+ var m=D.querySelector(".tv-md"),box=m.querySelector('.tv-edit[data-k="'+k+'"]'),q=T.questions[k];if(!box||!q)return;
+ var g=function(f){var e=box.querySelector('[data-f="'+f+'"]');return e?e.value:null};
+ if(!isImg(q.text)){var t=(g("t")||"").trim();if(!t&&!q.qimg){alert("Sual mətnini daxil edin.");return}q.text=t}
+ if(q.type==="open"){var c=(g("c")||"").trim();if(!c){alert("Düzgün cavabı daxil edin.");return}q.correct=c.toUpperCase()}
+ else{(q.opts||[]).forEach(function(o,j){var v=g("o"+j);if(v!==null){if(!v.trim()&&!o.img){alert("Variant "+LT[j]+" boş ola bilməz.");throw 0}o.text=v.trim()}});q.correct=parseInt(g("c"),10)||0}
+ q.cat=g("cat")||q.cat;q.note=(g("n")||"").trim();
+ ed=-1;dirty=true;draw()}
+
+async function save(){
+ var src=V2.tpls[ix];if(!src)return;var o={};Object.keys(src).forEach(function(k){if(k!=="_id")o[k]=src[k]});
+ o.questions=clone(T.questions);await V2.put("templates",o,src._id);
+ V2.tpls[ix]=Object.assign({},o,{_id:src._id});dirty=false;V2.toast("Şablon yadda saxlanıldı ✅");draw()}
+
+function closeM(){
+ if(dirty&&!confirm("Saxlanmamış dəyişikliklər var. Bağlansın?"))return;
+ var m=D.querySelector(".tv-md");m&&m.remove();var was=dirty;T=null;ed=-1;dirty=false;
+ try{if(V2.page==="tpl")V2.go("tpl")}catch(e){}}
+
+V2.viewTpl=function(i){
+ var t=V2.tpls[i];if(!t)return;style();
+ var old=D.querySelector(".tv-md");old&&old.remove();
+ T=clone(t);T.questions=T.questions||[];ix=i;ed=-1;dirty=false;
+ var m=D.createElement("div");m.className="tv-md";
+ m.innerHTML='<div class="tv-box" role="dialog" aria-modal="true"><div class="tv-hd"><h3></h3><button type="button" data-a="close" aria-label="Bağla">×</button></div>'+
+ '<div class="tv-tl"><button type="button" class="v2-b o s" data-a="shufq">🔀 Sualları qarışdır</button><button type="button" class="v2-b o s" data-a="shufo">🔀 Variantları qarışdır</button><button type="button" class="v2-b o s" data-a="reset">↩ Saxlanmış hala qaytar</button></div>'+
+ '<div class="tv-bd"></div><div class="tv-ft"><button type="button" class="v2-b o" data-a="pdf">📄 PDF kimi ixrac et</button><button type="button" class="v2-b g" data-a="save">💾 Yadda saxla</button><button type="button" class="v2-b" data-a="close">Bağla</button></div></div>';
+ m.addEventListener("pointerdown",function(e){if(e.target===m)m._bg=1;else m._bg=0});
+ m.addEventListener("click",async function(e){
+  if(e.target===m&&m._bg){closeM();return}
+  var b=e.target.closest&&e.target.closest("[data-a]");if(!b||!T)return;
+  var a=b.getAttribute("data-a"),k=parseInt(b.getAttribute("data-k"),10);
+  if(a==="close")closeM();
+  else if(a==="edit"){ed=k;draw()}
+  else if(a==="cancel"){ed=-1;draw()}
+  else if(a==="ok"){try{apply(k)}catch(x){if(x!==0)console.error(x)}}
+  else if(a==="del"){if(confirm("Bu sual şablondan silinsin?")){T.questions.splice(k,1);ed=-1;dirty=true;draw()}}
+  else if(a==="shufq"){shuf(T.questions);ed=-1;dirty=true;draw()}
+  else if(a==="shufo"){T.questions.forEach(function(q){if(q.type==="open"||!q.opts||q.opts.length<2)return;var idx=q.opts.map(function(_,j){return j});shuf(idx);var no=idx.map(function(j){return q.opts[j]});q.correct=idx.indexOf(q.correct);q.opts=no});ed=-1;dirty=true;draw()}
+  else if(a==="reset"){if(!dirty||confirm("Saxlanmamış dəyişikliklər ləğv edilsin?")){T=clone(V2.tpls[ix]);ed=-1;dirty=false;draw()}}
+  else if(a==="pdf")V2.printQs(T.questions,T.name);
+  else if(a==="save"){try{await save()}catch(x){alert("Yadda saxlanmadı: "+(x&&x.message||x))}}
+ });
+ D.body.appendChild(m);draw()};
+});
+})();
