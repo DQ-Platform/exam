@@ -248,6 +248,19 @@ function csave(){localStorage.setItem("dq_r2",JSON.stringify({u:E("qp-cu").value
 async function ctest(){csave();try{var u=await toUrl("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==");var r=await fetch(u);msg(r.ok?"✅ Cloudflare işləyir: "+u:"Şəkil oxunmadı ("+r.status+")","qp-cmsg")}catch(e){msg("Xəta: "+e.message+" (URL/açar/Worker yoxlayın)","qp-cmsg")}}
 async function cvOpt(o){var D=function(v){return typeof v==="string"&&v.indexOf("data:image")===0};
  if(D(o))return[await toUrl(o),1];if(o&&typeof o==="object"&&D(o.image))return[Object.assign({},o,{image:await toUrl(o.image)}),1];return[o,0]}
+/* ---------- Edge keş: imtahan suallarını Cloudflare Worker-dən oxut (Supabase egress azalır) ----------
+   Tələbə cihazlarında da işləməsi üçün Worker ünvanını bura yazın: var EDGE="https://dq-img.XXXX.workers.dev"; */
+var EDGE="";
+function edgeUrl(){return(EDGE||(cfg()||{}).u||"").replace(/\/$/,"")}
+function edgeTry(b){var base=edgeUrl(),u=b.url;if(!base||!u||b.method!=="GET")return null;
+ var h=b.headers,g=function(k){return h?String(h.get?h.get(k):(h[k]||h[k.toLowerCase()])||""):""};
+ if(/pgrst\.object/.test(g("Accept"))||/count/.test(g("Prefer")))return null;
+ var sp=u.searchParams;if(!/^eq\./.test(sp.get("exam_id")||"")||!/^eq\./.test(sp.get("category")||""))return null;
+ return fetch(base+"/rest/exam_questions"+u.search).then(function(r){if(!r.ok)throw 0;return r.json()})
+  .then(function(d){return Array.isArray(d)?{data:d,error:null,count:null,status:200,statusText:"OK"}:null}).catch(function(){return null})}
+function edge(b){if(b.__e||typeof b.then!=="function")return;b.__e=1;var th=b.then;
+ b.then=function(a,r){var p=null;try{p=edgeTry(b)}catch(e){}
+  return(p?p.then(function(x){return x||th.call(b)}):th.call(b)).then(a,r)}}
 /* yeni yazılan şəkillər avtomatik Cloudflare-ə getsin (Cloudflare qoşulubsa) */
 async function offBody(body){var rows=Array.isArray(body)?body:[body];
  for(var i=0;i<rows.length;i++){var r=rows[i];if(!r||typeof r!=="object")continue;
@@ -255,6 +268,7 @@ async function offBody(body){var rows=Array.isArray(body)?body:[body];
   if(Array.isArray(r.options)){for(var m=0;m<r.options.length;m++)r.options[m]=(await cvOpt(r.options[m]))[0]}}}
 function hook(){try{if(typeof _supabase==="undefined"||!_supabase||_supabase.__dqoff)return;var of=_supabase.from;
  _supabase.from=function(t){var q=of.apply(_supabase,arguments);if(t!=="exam_questions"&&t!=="question_bank")return q;
+  if(t==="exam_questions"){var fs=q.select;if(typeof fs==="function")q.select=function(){var b=fs.apply(q,arguments);try{edge(b)}catch(e){}return b}}
   ["insert","update","upsert"].forEach(function(m){var f=q[m];if(typeof f!=="function")return;
    q[m]=function(){var b=f.apply(q,arguments);
     try{if(b&&typeof b.then==="function"&&"body" in b&&!b.__o){b.__o=1;var th=b.then;
