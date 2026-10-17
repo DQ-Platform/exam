@@ -463,6 +463,20 @@ async function migrate(){var c=cfg();if(!c||!c.u||!c.k){msg("Əvvəl URL və aç
  }catch(e){msg("Xəta: "+(e.message||e),"qp-cmsg")}
  S.mig=0}
 /* ---------- UI ---------- */
+async function d1mig(){var c=cfg();if(!c||!c.u||!c.k){msg("Əvvəl URL və açarı yadda saxlayın.","qp-cmsg");return}
+ if(S.d1)return;if(!confirm("exam_questions və question_bank Supabase-dən oxunub Cloudflare D1-ə kopyalanacaq (Supabase-dəki məlumat silinmir). Təkrar işlətmək təhlükəsizdir. Davam?"))return;
+ S.d1=1;var base=c.u.replace(/\/$/,""),T=["exam_questions","question_bank"],bad=0,H={"x-key":c.k,"content-type":"application/json"};
+ try{for(var ti=0;ti<T.length&&S.d1;ti++){var t=T[ti],from=0,B=25,n=0;
+   while(S.d1){var r=await _supabase.from(t).select("*").order("id",{ascending:true}).range(from,from+B-1);if(r.error)throw r.error;
+    var d=r.data||[];if(!d.length)break;
+    var o=await fetch(base+"/api/upsert/"+t,{method:"POST",headers:H,body:JSON.stringify(d)});
+    if(!o.ok)throw new Error("Worker "+o.status+" "+(await o.text()).slice(0,80));
+    var jr=await o.json();bad+=(jr.skipped||[]).length;n+=jr.ok||0;from+=B;msg(t+": "+n+" köçürüldü"+(bad?" · ⚠ atlanan: "+bad:""),"qp-cmsg");
+    if(d.length<B)break}}
+  var st=await(await fetch(base+"/api/stats",{headers:{"x-key":c.k}})).json();
+  msg((S.d1?"✅ Bitdi. ":"⏹ Dayandırıldı. ")+"D1-də: exam_questions "+st.exam_questions+" · question_bank "+st.question_bank+(bad?" · ⚠ "+bad+" sətir 2MB-dan böyükdür (şəkilləri əvvəl R2-yə köçürün, sonra təkrar edin)":""),"qp-cmsg")
+ }catch(e){msg("Xəta: "+(e.message||e),"qp-cmsg")}S.d1=0}
+
 function tab(n){if(n===2){S.tab=2;if(window.switchAdminTab)switchAdminTab("qbank");load();return}
  S.tab=n;E("qp-t1").style.display=n===1?"":"none";E("qp-t3").style.display=n===3?"":"none";E("qp-b1").classList.toggle("on",n===1);E("qp-b3").classList.toggle("on",n===3);
  if(n===3){var c=cfg()||{};E("qp-cu").value=c.u||"";E("qp-ck").value=c.k||"";E("qp-cw").checked=c.w!==false}}
@@ -506,7 +520,7 @@ function build(){
   +'<label>Fənn<select id="qp-subj"><option value="">🤖 Avto (AI təyin etsin)</option>'+SUBJ.map(function(x){return"<option>"+x+"</option>"}).join("")+'</select></label><label>Rejim<select id="qp-aim"><option value="ai" selected>🤖 AI: sual + variant mətni</option><option value="cut">✂️ Yalnız şəkil kəsmə</option></select></label><label>Fon təmizləmə<select id="qp-clean"><option value="255">Yox</option><option value="215" selected>Yüngül (su nişanı)</option><option value="185">Güclü</option></select></label><button class="qp-b" data-a="run">⚡ Çıxar</button></div>'
   +'<div id="qp-msg" style="font-weight:700;color:#334155"></div><div id="qp-res" class="qp-res"></div>'
   +'</div>'
-  +'<div id="qp-t3" style="display:none"><p style="font-size:13px;color:#475569">Şəkillər Cloudflare R2-də saxlanır, bazada yalnız link qalır — Supabase egress limiti aşılmır. Qoşulandan sonra yeni əlavə olunan şəkillər (sual, variant, bank) avtomatik buraya yüklənir; köhnələri "Köhnə şəkilləri köçür" ilə köçürün.</p><div class="qp-fl"><label style="flex:1">Worker URL<input id="qp-cu" placeholder="https://dq-img.xxx.workers.dev"></label><label>Yükləmə açarı<input id="qp-ck" type="password"></label><label style="flex-direction:row;align-items:center;gap:6px"><input id="qp-cw" type="checkbox" checked> WebP-yə sıx</label></div><div class="qp-fl"><button class="qp-b" data-a="csave">💾 Yadda saxla</button><button class="qp-b gr" data-a="ctest">🔌 Test</button><button class="qp-b ok" data-a="cmig">🚚 Köhnə şəkilləri köçür</button><button class="qp-b no" data-a="cstop">⏹ Dayandır</button></div><div id="qp-cmsg" style="font-weight:700"></div></div>';
+  +'<div id="qp-t3" style="display:none"><p style="font-size:13px;color:#475569">Şəkillər Cloudflare R2-də saxlanır, bazada yalnız link qalır — Supabase egress limiti aşılmır. Qoşulandan sonra yeni əlavə olunan şəkillər (sual, variant, bank) avtomatik buraya yüklənir; köhnələri "Köhnə şəkilləri köçür" ilə köçürün.</p><div class="qp-fl"><label style="flex:1">Worker URL<input id="qp-cu" placeholder="https://dq-img.xxx.workers.dev"></label><label>Yükləmə açarı<input id="qp-ck" type="password"></label><label style="flex-direction:row;align-items:center;gap:6px"><input id="qp-cw" type="checkbox" checked> WebP-yə sıx</label></div><div class="qp-fl"><button class="qp-b" data-a="csave">💾 Yadda saxla</button><button class="qp-b gr" data-a="ctest">🔌 Test</button><button class="qp-b ok" data-a="cmig">🚚 Köhnə şəkilləri köçür</button><button class="qp-b no" data-a="cstop">⏹ Dayandır</button><button class="qp-b ok" data-a="d1mig">📦 Bazanı D1-ə köçür</button></div><div id="qp-cmsg" style="font-weight:700"></div></div>';
   a.parentNode.insertBefore(d,a);
   d.addEventListener("click",onClick);d.addEventListener("change",onChange);d.addEventListener("input",onInput=function(e){var t=e.target,f=t.dataset&&t.dataset.f;if(/^qp-(ex|st)$/.test(t.id)){if(t.id==="qp-ex"&&E("qp-fu").value==="notin")drawBank();else summary();return}
    if(!f)return;var o=obj(t);if(!o)return;if(t.dataset.c==="r"&&(f==="text"||f==="opt"||f==="n"))setTimeout(updSv,0);
@@ -573,7 +587,7 @@ function onClick(e){var t=e.target.closest("[data-a],.qp-row");if(!t)return;var 
  else if(a==="all"){var f=filtered(),on=!f.every(function(i){return S.sel[i.id]});f.forEach(function(i){S.sel[i.id]=on});drawBank()}
  else if(a==="pre"){E("qp-st").value=t.dataset.v;summary()}
  else if(a==="assign")assign();
- else if(a==="csave")csave();else if(a==="ctest")ctest();else if(a==="cmig")migrate();else if(a==="cstop"){S.mig=0;msg("Dayandırılır…","qp-cmsg")}
+ else if(a==="csave")csave();else if(a==="ctest")ctest();else if(a==="cmig")migrate();else if(a==="d1mig")d1mig();else if(a==="cstop"){S.mig=0;S.d1=0;msg("Dayandırılır…","qp-cmsg")}
  else if(a==="psave"){var it=S.items.filter(function(x){return x.id===S.cur})[0];if(!it)return;it.num=+E("qp-pn").value||0;it.src=E("qp-ps").value;it.tag=E("qp-pt").value;it.subject=E("qp-psu").value;
   ST.put(it).then(load).catch(function(x){msg("Xəta: "+x.message,"qp-bmsg")})}
  else if(a==="pdel"){if(S.cur&&confirm("Bu sual bankdan silinsin?"))ST.del(S.cur).then(function(){delete S.sel[S.cur];S.cur=null;return load()}).catch(function(x){msg("Xəta: "+x.message,"qp-bmsg")})}}
