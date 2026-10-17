@@ -6591,15 +6591,13 @@ var GM=/^[a-z0-9._%+-]+@gmail\.com$/;
 function stripText(m){
   var w=document.createTreeWalker(m,NodeFilter.SHOW_TEXT,null),rm=[],n;
   while((n=w.nextNode())){var t=(n.nodeValue||"").replace(/\s+/g," ").trim();
-    if(/^(F[İI]N kod|İş nömrəsi)$/i.test(t)||/^Telefon nömrəsi( və ya Gmail)?$/i.test(t))rm.push(n)}
+    if(/^(F[İI]N kod|İş nömrəsi)$/i.test(t))rm.push(n)}
   rm.forEach(function(x){x.parentNode&&x.parentNode.removeChild(x)})}
 function strip(){
   var m=$("yq-m");if(!m)return;
   var f=$("yq-f"),p=$("yq-p");
-  if(!p&&(!f||f.type==="hidden"))return;
+  if(!f||f.type==="hidden")return;
   if(f&&f.type!=="hidden")f.remove();
-  if(p)p.remove();
-  m.querySelectorAll(".dqs-h").forEach(function(h){if(/Əlaqə üçün/i.test(h.textContent||""))h.remove()});
   stripText(m);
   var c=$("yq-c");
   if(c){var pv=c.previousSibling,ok=false;
