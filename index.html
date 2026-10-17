@@ -107,7 +107,7 @@ window.setInterval=function(fn,d){
 })();
 </script>
 <link rel="preload" as="script" href="dq-net.js?v=1">
-<link rel="preload" as="script" href="app.js?v=41">
+<link rel="preload" as="script" href="app.js?v=42">
 <link rel="preload" as="script" href="dq-qapaq.js?v=2">
 <link rel="preload" as="script" href="dq-birlesdirme.js?v=5">
 <link rel="preload" as="script" href="dq-lock.js?v=1">
@@ -159,7 +159,7 @@ try{document.addEventListener("touchstart",function(){},{passive:true})}catch(e)
 function go(u,n){return fetch(u,{headers:{apikey:K}}).then(function(r){if(r.status>=500&&n<2)return new Promise(function(o){setTimeout(o,400*(n+1))}).then(function(){return go(u,n+1)});return r},function(e){if(n<2)return new Promise(function(o){setTimeout(o,400*(n+1))}).then(function(){return go(u,n+1)});throw e})}
 ["countdown","homestats","lxcfg","liveexams","v3cfg","v3tests","hzcfg","site_texts","types","covers","tmcfg","sitecms","prices","dtview","lxnews"].forEach(function(c){
  var u=U+"/rest/v1/dq_v2_store?select=*&collection=eq."+c+"&order=id.desc";try{PF[u]=go(u,0);PF[u].catch(function(){})}catch(e){}})})();</script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"><script>(function(){try{var t=matchMedia("(pointer:coarse)").matches||"ontouchstart" in window;if(t&&Math.min(screen.width,screen.height)<820&&localStorage.getItem("dq_desktop_mode")!=="0"){window.__dqOrigVp="width=device-width, initial-scale=1.0, viewport-fit=cover";document.querySelector('meta[name="viewport"]').setAttribute("content","width=1280, user-scalable=yes, maximum-scale=5, viewport-fit=cover")}}catch(e){}})()</script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -4010,7 +4010,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 @media(max-width:560px){#dqs-root .dqs-p{margin:0;border-radius:0;min-height:100%}#dqs-root .dqs-c{flex-direction:column;align-items:stretch}#dqs-root .dqs-pv{width:100%}}
 </style>
 <script src="dq-qapaq.js?v=2"></script>
-<script src="app.js?v=41"></script>
+<script src="app.js?v=42"></script>
 <script src="dq-birlesdirme.js?v=5"></script>
 <script src="dq-oxuyucu.js?v=1"></script>
 <script src="dq-copy2.js?v=1"></script>
