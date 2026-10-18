@@ -1346,7 +1346,7 @@ function dqPager(cols){
     function newPage(first,withCols){
       var pg=div("pg");
       var w=wm.firstElementChild.cloneNode(true);pg.appendChild(w);
-      pg.appendChild(div("sh hd",'<span class="l">0504305162</span><span class="c">DQplatform | Dövlət Qulluğu</span><span class="r">By Yunis İmanov</span>'));
+      pg.appendChild(div("sh hd",'<span class="l">0504305162</span><span class="c">DQplatform | Dövlət Qulluğu</span><span class="r"> Yunis İmanov</span>'));
       var body=div("pgb");
       if(first&&ttl)body.appendChild(ttl);
       var cs=null,cl=[];
