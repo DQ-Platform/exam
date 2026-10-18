@@ -1260,23 +1260,48 @@ async function epClick(e){
   }
 }
 function optLetterList(q){return"ABCDE"}
+
+/* Variant mətnini çapa uyğun təmizləyir: <p> işarələri yox, şəkillər real şəkil kimi */
+function optPrintHtml(o){
+  var raw=optText(o);raw=raw==null?"":String(raw);
+  var extra=(o&&typeof o==="object"&&o.image)?o.image:"";
+  var html="";
+  if(/<\/?[a-z][^>]*>/i.test(raw)){
+    var d=new DOMParser().parseFromString("<body>"+raw.replace(/&nbsp;|\u00a0/g," ")+"</body>","text/html");
+    d.querySelectorAll("script,style,iframe,object,embed,link,meta").forEach(function(n){n.remove()});
+    d.body.querySelectorAll("img").forEach(function(im){
+      var src=im.getAttribute("src")||"";
+      if(/^\s*javascript:/i.test(src)){im.remove();return}
+      [].slice.call(im.attributes).forEach(function(a){if(a.name!=="src")im.removeAttribute(a.name)});
+      im.className="oi";
+    });
+    d.body.querySelectorAll("p,div,li,h1,h2,h3,h4,span").forEach(function(n){
+      if(!n.textContent.trim()&&!n.querySelector("img")){n.remove();return}
+      n.replaceWith.apply(n,[].slice.call(n.childNodes));
+    });
+    html=d.body.innerHTML.replace(/(<br\s*\/?>\s*)+$/i,"").trim();
+  }else html=esc(raw.trim());
+  if(extra&&html.indexOf("<img")<0)html+=(html?" ":"")+'<img class="oi" src="'+esc(extra)+'">';
+  return html;
+}
 function buildPrintHtml(title,rows,opt){
-  var css='@page{size:A4;margin:14mm 13mm}*{box-sizing:border-box}body{font:10.5pt/1.36 "Times New Roman",Times,serif;color:#000;margin:0}'+
-   'h1{font-size:15pt;text-align:center;margin:0 0 8mm}.cols{column-count:'+opt.cols+';column-gap:9mm;column-rule:1px solid #bbb}'+
-   '.sec{background:#d9d9d9;border:1px solid #000;font-weight:700;text-align:center;padding:2mm 3mm;margin:0 0 3mm;break-inside:avoid;break-after:avoid;font-size:11.5pt}'+
-   '.q{break-inside:avoid;margin:0 0 5mm}.qt{font-weight:400}.qt p{margin:0 0 1mm}.qt p:first-of-type{display:inline}.qt p:first-of-type+p{margin-top:1mm}.qn{font-weight:700}'+
-   '.q img.f{display:block;max-width:100%;margin:2mm 0}.o{margin:.6mm 0;padding-left:6mm;text-indent:-6mm}.o img{max-height:22mm;vertical-align:middle}.orow{margin:1mm 0}'+
-   '.key{break-before:page}.key h2{font-size:13pt;text-align:center;margin:0 0 5mm}.kt{display:flex;flex-wrap:wrap;gap:6mm;justify-content:center}.kt table{border-collapse:collapse}.kt td{border:1px solid #000;padding:1mm 4mm;text-align:center;min-width:12mm}';
-  var h='<!doctype html><html lang="az"><head><meta charset="utf-8"><title>'+esc(title)+'</title><style>'+css+'</style></head><body><h1>'+esc(title)+'</h1><div class="cols">';
+  var css='.dq-hd{position:fixed;left:0;right:0;top:0;transform:translateY(-100%);margin-top:-3mm;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1.5px solid #0f2a5c;padding-bottom:1.2mm;font-family:Georgia,"Times New Roman",serif;color:#0f2a5c;z-index:5}.dq-hd .l,.dq-hd .r{font-size:10.5pt;font-weight:600;min-width:38mm}.dq-hd .r{text-align:right;font-style:italic}.dq-hd .c{display:flex;align-items:center;gap:2.5mm;font-size:15pt;font-weight:700;font-style:italic;text-align:center}.dq-wm{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-32deg);text-align:center;z-index:-1;color:#0f2a5c;opacity:.10;white-space:nowrap;font-family:Arial,sans-serif;pointer-events:none}.dq-wm svg{display:block;margin:0 auto 3mm}.dq-wm b{display:block;font-size:62pt;letter-spacing:2pt}.dq-wm i{display:block;font-size:24pt;margin-top:2mm}'+
+  '@page{size:A4;margin:24mm 13mm 17mm;@bottom-center{content:"Səhifə " counter(page) " / " counter(pages);font:600 8.5pt Arial,sans-serif;color:#0f2a5c;vertical-align:top;padding-top:2mm;border-top:1px solid #c8962e}@bottom-left{content:"DQplatform";font:italic 8pt Georgia,serif;color:#7b8aa8;vertical-align:top;padding-top:2mm;border-top:1px solid #c8962e}@bottom-right{content:"By Yunis İmanov";font:italic 8pt Georgia,serif;color:#7b8aa8;vertical-align:top;padding-top:2mm;border-top:1px solid #c8962e}@top-left{content:"0504305162";font:600 10.5pt Georgia,serif;color:#0f2a5c;vertical-align:bottom;border-bottom:1.5px solid #0f2a5c;padding-bottom:1mm}@top-center{content:"DQplatform | Dövlət Qulluğu";font:italic 700 15pt Georgia,serif;color:#0f2a5c;vertical-align:bottom;border-bottom:1.5px solid #0f2a5c;padding-bottom:1mm;width:110mm}@top-right{content:"By Yunis İmanov";font:italic 600 10.5pt Georgia,serif;color:#0f2a5c;vertical-align:bottom;border-bottom:1.5px solid #0f2a5c;padding-bottom:1mm}}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}*{box-sizing:border-box}body{font:10.5pt/1.36 "Times New Roman",Times,serif;color:#000;margin:0}'+
+   '.ttl{text-align:center;margin:1mm 0 7mm;padding:3mm 0 4mm;border-top:.6mm solid #0f2a5c;border-bottom:.6mm solid #c8962e}.ttl .ey{font:700 8pt Arial,sans-serif;letter-spacing:2.2pt;color:#c8962e;margin-bottom:1.2mm}.ttl h1{font:700 19pt Georgia,serif;color:#0f2a5c;margin:0}.ttl .sb{font:600 9pt Arial,sans-serif;color:#51607f;margin-top:1.2mm}.cols{column-count:'+opt.cols+';column-gap:9mm;column-rule:1px solid #c9d3e6}'+
+   '.sec{background:linear-gradient(90deg,#0f2a5c,#1d4e9e);color:#fff;border-left:2.2mm solid #c8962e;border-radius:1.5mm;font-weight:700;letter-spacing:.4pt;text-align:center;padding:1.8mm 3mm;margin:0 0 3mm;break-inside:avoid;break-after:avoid;font-size:11.5pt}'+
+   '.q{break-inside:avoid;margin:0 0 5mm}.qt{font-weight:400}.qt p{margin:0 0 1mm}.qt p:first-of-type{display:inline}.qt p:first-of-type+p{margin-top:1mm}.qn{display:inline-block;min-width:5.6mm;padding:0 1.4mm;background:#0f2a5c;color:#fff;border-radius:1.2mm;font:700 9pt Arial,sans-serif;text-align:center;margin-right:1.6mm;line-height:1.5}'+
+   '.q img.f{display:block;max-width:100%;margin:2mm 0}.qt img{max-width:100%;height:auto;mix-blend-mode:multiply}.o{margin:1.1mm 0;padding-left:7mm;text-indent:-7mm;overflow:hidden}.o .ol{display:inline-block;width:4.9mm;height:4.9mm;border:.3mm solid #0f2a5c;border-radius:50%;text-align:center;font:700 7.6pt/4.5mm Arial,sans-serif;color:#0f2a5c;margin-right:1.8mm;text-indent:0;vertical-align:middle;box-sizing:border-box}.o img.oi{mix-blend-mode:multiply;max-height:20mm;display:inline-block;max-width:92%;max-height:20mm;width:auto;height:auto;vertical-align:middle;margin:1mm 0 0 1mm;text-indent:0}.dq-dl{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:99;background:#2563eb;color:#fff;border:0;border-radius:14px;padding:14px 12px;font:700 14px Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.3);writing-mode:vertical-rl;cursor:pointer}@media print{.dq-dl{display:none!important}}.orow{margin:1mm 0}'+
+   '.key{break-before:page;padding-top:6mm}.key h2{font-size:13pt;text-align:center;margin:0 0 5mm}.kt{display:flex;flex-wrap:wrap;gap:6mm;justify-content:center}.kt table{border-collapse:collapse}.kt td:first-child{background:#eef2fa;font-weight:700;color:#0f2a5c}.kt td:last-child{font-weight:700}.key h2{color:#0f2a5c;border-bottom:.6mm solid #c8962e;padding-bottom:2mm}.kt td{border:1px solid #9fb0d0;padding:1mm 4mm;text-align:center;min-width:12mm}';
+  var h='<!doctype html><html lang="az"><head><meta charset="utf-8"><title>'+esc(title)+'</title><style>'+css+'</style></head><body><button class="dq-dl" onclick="window.print()">⬇ Yüklə (PDF)</button><div class="dq-wm"><svg class="wm" width="190" height="190" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><defs><path id="rg" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><circle cx="100" cy="100" r="96" fill="none" stroke="#0f2a5c" stroke-width="4"/><circle cx="100" cy="100" r="90" fill="none" stroke="#c8962e" stroke-width="1.5"/><circle cx="100" cy="100" r="62" fill="#0f2a5c"/><circle cx="100" cy="100" r="57" fill="none" stroke="#c8962e" stroke-width="1.5"/><text font-family="Arial,sans-serif" font-size="13" font-weight="700" letter-spacing="2.4" fill="#0f2a5c"><textPath href="#rg" startOffset="2%">DQ PLATFORM • DÖVLƏT QULLUĞU •</textPath></text><text x="100" y="116" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="52" fill="#fff">YS</text><path d="M72,128 H128" stroke="#c8962e" stroke-width="2"/><path d="M100,52 l4,9 h-8z" fill="#c8962e"/></svg><b>DQplatform</b><i>By Yunis İmanov</i></div><div class="ttl"><div class="ey">DQPLATFORM · SINAQ MATERİALI</div><h1>'+esc(title)+'</h1><div class="sb">'+rows.length+' sual</div></div><div class="cols">';
   var lastSub=null;
   rows.forEach(function(r){
     if(opt.banner&&r.subject&&r.subject!==lastSub){h+='<div class="sec">'+esc(r.subject)+'</div>';lastSub=r.subject}
     var opts=Array.isArray(r.options)?r.options:[];
-    h+='<div class="q"><div class="qt"><span class="qn">'+esc(r.q_number)+'.</span> '+dqPrint(r.question)+'</div>';
+    h+='<div class="q"><div class="qt"><span class="qn">'+esc(r.q_number)+'</span> '+dqPrint(r.question)+'</div>';
     if(r.image_url)h+='<img class="f" src="'+esc(r.image_url)+'">';
     var allEmpty=opts.length&&opts.every(function(o){return!String(optText(o)||"").trim()&&!(o&&o.image)});
     if(allEmpty)h+='<div class="orow">'+opts.map(function(o,k){return"ABCDE"[k]+")"}).join("&emsp;&emsp;")+'</div>';
-    else opts.forEach(function(o,k){var img=o&&typeof o==="object"&&o.image?' <img src="'+esc(o.image)+'">':"";h+='<div class="o">'+"ABCDE"[k]+') '+esc(optText(o)||"")+img+'</div>'});
+    else opts.forEach(function(o,k){h+='<div class="o"><span class="ol">'+"ABCDE"[k]+'</span>'+optPrintHtml(o)+'</div>'});
     h+='</div>';
   });
   h+='</div>';
@@ -1292,12 +1317,41 @@ function dqPrint(t){
   if(typeof dqClean==="function"){try{return dqClean(t)}catch(e){}}
   return'<p>'+esc(t).replace(/\n/g,"<br>")+'</p>';
 }
+/* Şəkillərin ağ fonunu şəffaf edir ki, arxa fondakı watermark görünsün */
+function dqUnwhite(src){
+  return new Promise(function(ok){
+    var im=new Image();
+    im.onload=function(){
+      try{
+        var w=im.naturalWidth,h=im.naturalHeight;if(!w||!h||w*h>6000000)return ok(src);
+        var c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");x.drawImage(im,0,0);
+        var d=x.getImageData(0,0,w,h),p=d.data;
+        for(var i=0;i<p.length;i+=4){var m=Math.min(p[i],p[i+1],p[i+2]);if(m>=246)p[i+3]=0;else if(m>=226)p[i+3]=Math.min(p[i+3],Math.round((246-m)/20*255))}
+        x.putImageData(d,0,0);ok(c.toDataURL("image/png"));
+      }catch(e){ok(src)}
+    };
+    im.onerror=function(){ok(src)};im.src=src;
+  });
+}
+async function dqUnwhiteHtml(html){
+  var re=/(<img[^>]*?\ssrc=")(data:image\/[^"]+)(")/g,m,list=[],seen={};
+  while((m=re.exec(html))){if(!seen[m[2]]){seen[m[2]]=1;list.push(m[2])}}
+  var map={};for(var i=0;i<list.length;i++)map[list[i]]=await dqUnwhite(list[i]);
+  return html.replace(re,function(a,p,u,q){return p+(map[u]||u)+q});
+}
 async function exportExam(exam,cat){
   var rows=await pagedSelect("exam_questions","q_number,subject,question,image_url,options,correct",function(q){return q.eq("exam_id",String(exam)).eq("category",cat).order("q_number",{ascending:true})});
   if(!rows.length){toast("Bu sınaqda sual yoxdur","warn");return}
   rows.sort(function(a,b){return a.q_number-b.q_number});
   var html=buildPrintHtml("Sınaq "+exam+" · "+cat+" kateqoriyası",rows,EP.opt);
+  try{html=await dqUnwhiteHtml(html)}catch(e){console.error(e)}
   window.DQPP._lastPrintHtml=html;
+  var w=null;try{w=window.open("","_blank")}catch(e){}
+  if(w){
+    w.document.open();w.document.write(html);w.document.close();
+    toast("Önizləmə açıldı — sağdakı «Yüklə» düyməsini basın ("+rows.length+" sual)","ok");
+    return;
+  }
   var old=document.getElementById("pp-printframe");if(old)old.remove();
   var f=document.createElement("iframe");f.id="pp-printframe";f.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
   document.body.appendChild(f);
