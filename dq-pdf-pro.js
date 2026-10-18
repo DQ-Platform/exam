@@ -2,6 +2,43 @@
    index.html-də app.js-dən SONRA əlavə edin:  <script src="dq-pdf-pro.js?v=1"></script> */
 (function(){"use strict";
 if(window.DQPP)return;
+/* İmtahan ekranı və önizləmə: variant hərfi dairə içində (A, B, C, D, E), şəkilli variantlar səliqəli */
+(function(){
+  if(document.getElementById("dq-exam-opt-css"))return;
+  var P="var(--primary-dark,#0f2a5c)";
+  var st=document.createElement("style");st.id="dq-exam-opt-css";
+  st.textContent=
+  ".options label{position:relative;display:flex;align-items:center;gap:14px;padding:11px 14px;border:2px solid transparent;border-radius:14px;transition:border-color .15s,background .15s}"+
+  ".options label>input[type=radio]{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}"+
+  ".options label .dq-opt{align-items:center;gap:14px}"+
+  ".options label .dq-ol{flex:0 0 auto;box-sizing:border-box;display:inline-block;width:36px;height:36px;min-width:36px;border:2.5px solid "+P+";border-radius:50%;text-align:center;line-height:31px;font-weight:800;color:"+P+";background:transparent;transition:background .15s,color .15s}"+
+  ".options label .dq-ol{font-size:17px}"+
+  ".options label:hover{border-color:rgba(15,42,92,.35)}"+
+  ".options label:has(input:checked){border-color:"+P+";background:rgba(15,42,92,.09)}"+
+  ".options label:has(input:checked) .dq-ol{background:"+P+";color:#fff}"+
+  ".options label .dq-ot:empty{display:none}"+
+  ".options label .dq-ot img,.options label>img.opt-preview-img{display:block;max-width:min(100%,300px);max-height:180px;width:auto;height:auto;object-fit:contain;margin:.2em 0;padding:4px;background:#fff;border-radius:10px;border:1px solid rgba(15,42,92,.15)}"+
+  ".options label>img.opt-preview-img{margin-left:auto!important}"+
+  ".options.dq-allimg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}"+
+  ".options.dq-allimg label{margin:0}"+
+  "@media(max-width:560px){.options.dq-allimg{grid-template-columns:1fr}}";
+  document.head.appendChild(st);
+  /* "A)" → "A" (dairənin içində yalnız hərf); bütün variantlar şəkildirsə 2 sütunlu şəbəkə */
+  function enhance(root){
+    var list=[];if(root.matches&&root.matches(".options"))list.push(root);
+    if(root.querySelectorAll)[].push.apply(list,root.querySelectorAll(".options"));
+    var ols=root.querySelectorAll?[].slice.call(root.querySelectorAll(".dq-ol")):[];if(root.classList&&root.classList.contains("dq-ol"))ols.push(root);
+    ols.forEach(function(b){var t=b.textContent;if(/^[A-E]\)$/.test(t))b.textContent=t.charAt(0)});
+    list.forEach(function(o){var ls=o.querySelectorAll("label");var all=ls.length>1&&[].every.call(ls,function(l){return l.querySelector("img")});o.classList.toggle("dq-allimg",all)});
+  }
+  var q=[],tm=0;
+  function flush(){tm=0;var n=q.splice(0);n.forEach(function(x){if(x.isConnected)enhance(x)})}
+  function start(){
+    enhance(document.body);
+    new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType===1)q.push(n)})});if(!tm)tm=setTimeout(flush,30)}).observe(document.body,{childList:true,subtree:true});
+  }
+  if(document.body)start();else document.addEventListener("DOMContentLoaded",start);
+})();
 /* ═══════════════ 1. KÖMƏKÇİLƏR ═══════════════ */
 var VERSION="1.0.0";
 var CATS=["BA","BB","AC","AB"];
@@ -181,14 +218,24 @@ function detectGutter(items,W,figs){
 }
 
 /* Başlıq / titul sətirləri \u2014 sual mətninə qarışmasın */
+/* Eksport edilmiş sınaq PDF-inin başlıq/altlıq elementləri (boşluqsuz müqayisə) \u2014 sütun axtarışına qarışmasın */
+var HEADER_ITEM_RES=[/^0\d{9}$/,/^DQplatform\|DövlətQulluğu$/i,/^ByYunisİmanov$/i,/^Səhifə\d+\/\d+$/i,/^DQPLATFORM·SINAQMATERİALI$/i,/^Sınaq\d+·.{1,20}kateqoriyası$/i,/^\d{1,3}sual$/i,/^DQplatform$/i];
 var HEADER_RES=[
   /(?:^|\s)aid\s+test(?:\s+tapşırıqları)?\s*$/i,
   /^tapşırıqları\s*$/i,
   /test\s+tapşırıqları\s*$/i,
   /^\d{1,2}\.\d{1,2}\.\d{4}\b.{0,40}$/,
-  /^(?:sual\s*)?bank[ıi]?\s*$/i
+  /^(?:sual\s*)?bank[ıi]?\s*$/i,
+  /^0\d{9}\b.*İmanov$/i,
+  /^DQplatform\b.*İmanov$/i,
+  /^DQplatform\s*\|\s*Dövlət Qulluğu$/i,
+  /^By\s+Yunis\s+İmanov$/i,
+  /^Səhifə\s*\d+\s*\/\s*\d+$/i,
+  /^DQPLATFORM\s*·\s*SINAQ/i,
+  /^\d{1,3}\s+sual$/i,
+  /^Sınaq\s+\d+\s*·/i
 ];
-function isHeaderLine(t){t=t.replace(/\t/g," ").trim();if(t.length>90)return false;return HEADER_RES.some(function(r){return r.test(t)})}
+function isHeaderLine(t){t=t.replace(/\t/g," ").trim();if(t.length>90)return false;if(HEADER_RES.some(function(r){return r.test(t)}))return true;var lo=t.toLocaleLowerCase("az");try{return subjectList().some(function(x){return String(x).toLocaleLowerCase("az")===lo})}catch(e){return false}}
 
 var PAIR_LINE=/^\s*(?:\d{1,3}\s*[-–:.)=]?\s*[A-Ea-e]\s*[,;]?\s*)+$/;
 function pageIsKey(items,lines){
@@ -205,11 +252,14 @@ function pageIsKey(items,lines){
 async function readPage(page,pn,opt){
   var vp=page.getViewport({scale:1}),W=vp.width,H=vp.height,vt=vp.transform;
   var tc=await page.getTextContent(),items=[];
+  var ours=tc.items.some(function(it){return typeof it.str==="string"&&/DQplatform\s*\|\s*Dövlət\s*Qulluğu/i.test(it.str)});
   tc.items.forEach(function(it){
     if(typeof it.str!=="string"||!it.str.length)return;
     var tr=it.transform,x=vt[0]*tr[4]+vt[2]*tr[5]+vt[4],y=vt[1]*tr[4]+vt[3]*tr[5]+vt[5];
     var h=Math.abs(it.height)||Math.hypot(tr[2],tr[3])||10;
     if(!it.str.trim())return;
+    var _st=it.str.replace(/\s+/g,"");if(HEADER_ITEM_RES.some(function(r){return r.test(_st)}))return;
+    if(Math.abs(tr[1])>.02*Math.abs(tr[0]||1)||Math.abs(tr[2])>.02*Math.abs(tr[3]||1))return; /* çəpinə/fırlanmış mətn (watermark) */
     items.push({s:it.str,x:x,y:y,w:Math.abs(it.width),h:h});
   });
   var pg={pn:pn,W:W,H:H,items:items,gfx:[],figs:[],isKey:false,lines:[]};
@@ -218,7 +268,7 @@ async function readPage(page,pn,opt){
   if(pg.isKey)return pg;
   /* qrafik elementlər → klasterlər */
   pg.raw=[];
-  if(opt.figures){try{pg.raw=sanitizeRects(await readGraphics(page,vt),pg);pg.figs=buildFigs(pg.raw,pg)}catch(e){console.warn("[DQPP] qrafik oxunmadı",e)}}
+  if(opt.figures){try{pg.raw=sanitizeRects(await readGraphics(page,vt),pg);if(ours)pg.raw=pg.raw.filter(function(r){return r.k==="i"});pg.figs=buildFigs(pg.raw,pg)}catch(e){console.warn("[DQPP] qrafik oxunmadı",e)}}
   var rest=items.filter(function(it){return!it.hdr&&(/^(?:[A-E]\s?\)\s*)+$/.test(it.s.trim())||!pg.figs.some(function(f){return f.has(it)}))});
   var gut=detectGutter(rest,W,pg.figs);
   var groups=gut!=null?[rest.filter(function(i){return i.x+i.w/2<gut}),rest.filter(function(i){return i.x+i.w/2>=gut})]:[rest];
@@ -344,6 +394,7 @@ function lineQ(e){var m=e.text.replace(/\t/g," ").match(/^\s*(\d{1,3})\s*[.)]\s*
   if(/^\d{1,2}\.\d{2,4}\b/.test(rest)||rest.length<3)return null;return{n:+m[1],rest:rest}}
 function blockText(stream,i0,i1){var t=[];for(var i=i0;i<i1;i++)if(stream[i].t==="line")t.push(stream[i].text);return t.join("\n")}
 function hasOptions(txt){return/(^|\s)A\)/.test(txt)&&/(^|\s)B\)/.test(txt)}
+function blockHasFig(stream,i0,i1){for(var i=i0;i<i1;i++)if(stream[i].t==="fig")return true;return false}
 function pickStarts(stream,strict){
   var cands=[];stream.forEach(function(e,i){if(e.t!=="line")return;var q=lineQ(e);if(q)cands.push({i:i,n:q.n})});
   var best=[];
@@ -352,7 +403,7 @@ function pickStarts(stream,strict){
     for(var k=f+1;k<cands.length;k++){
       var c=cands[k];
       if(c.n!==exp)continue;
-      if(strict&&!hasOptions(blockText(stream,chain[chain.length-1].i,c.i)))continue;
+      if(strict&&!hasOptions(blockText(stream,chain[chain.length-1].i,c.i))&&!blockHasFig(stream,chain[chain.length-1].i,c.i))continue;
       chain.push(c);exp++;
     }
     if(chain.length>best.length)best=chain;
@@ -493,6 +544,26 @@ function parseBlock(block,ctx){
   return{number:number,stem:stem,opts:opts,crops:crops,page:lines[0].page,top:lines[0].top,flags:flags,gopt:gopt};
 }
 
+/* Nömrə nöqtəsiz ("12 Mətn") və ya variant hərfi mötərizəsiz ("A 14") yazılmış PDF-lər üçün ehtiyat rejim */
+function normalizeLoose(pages){
+  var n=0;
+  pages.forEach(function(pg){
+    if(pg.isKey)return;
+    (pg.lines||[]).forEach(function(l){
+      var o=l.text,t=o;
+      t=t.replace(/^(\s*)(\d{1,3})[ \t]+(?=[^\d\s])/,"$1$2. ");
+      t=t.replace(/^(\s*)([A-E])[ \t]+(?=\S)/,"$1$2) ");
+      t=t.replace(/^(\s*)([A-E])\s*$/,"$1$2)");
+      if(t!==o){l.text=t;n++}
+    });
+  });
+  return n;
+}
+function pdfDiag(pages){
+  var lines=0,sample=[];
+  pages.forEach(function(pg){(pg.lines||[]).forEach(function(l){lines++;if(sample.length<3&&l.text.trim().length>8)sample.push(l.text.trim().slice(0,50))})});
+  return{lines:lines,sample:sample};
+}
 function buildQuestions(pages,opt){
   var stream=[],byNo={};
   pages.forEach(function(pg){byNo[pg.pn]=pg});
@@ -509,7 +580,7 @@ function buildQuestions(pages,opt){
   var strict=pickStarts(stream,true),relaxed=pickStarts(stream,false),starts=strict;
   if(relaxed.length>strict.length){
     var withOpt=0;
-    relaxed.forEach(function(s,k){if(hasOptions(blockText(stream,s.i,k+1<relaxed.length?relaxed[k+1].i:stream.length)))withOpt++});
+    relaxed.forEach(function(s,k){var _e=k+1<relaxed.length?relaxed[k+1].i:stream.length;if(hasOptions(blockText(stream,s.i,_e))||blockHasFig(stream,s.i,_e))withOpt++});
     if(withOpt/relaxed.length>=.85)starts=relaxed;
   }
   var qs=[];
@@ -618,8 +689,14 @@ async function runImport(file){
       var pg=await pdf.getPage(i);pages.push(await readPage(pg,i,S.opt));
     }
     pr("Suallar və variantlar ayrılır…",62);
-    var raw=buildQuestions(pages,S.opt);
-    if(!raw.length)throw new Error("PDF-də nömrələnmiş sual (1. 2. 3. …) tapılmadı. Fayl skan edilmiş şəkil ola bilər \u2014 belə PDF-lər üçün «AI PDF Studio PRO» bölməsindən istifadə edin.");
+    var raw=buildQuestions(pages,S.opt),loose=false;
+    if(!raw.length&&normalizeLoose(pages)){raw=buildQuestions(pages,S.opt);loose=raw.length>0}
+    if(!raw.length){
+      var dg=pdfDiag(pages);
+      throw new Error(dg.lines<5
+        ?"PDF-də oxunan mətn yoxdur (skan edilmiş şəkil ola bilər) \u2014 belə PDF-lər üçün «AI PDF Studio PRO» bölməsindən istifadə edin."
+        :"PDF-də "+dg.lines+" mətn sətri tapıldı, amma «1. sual … A) B) C) D)» formatı tanınmadı. Oxunan nümunə: «"+dg.sample.join(" | ")+"». Sual nömrəsi və variant hərfləri (A), B) …) mətn kimi olmalıdır.");
+    }
     var key=S.opt.key?parseKey(pages):{map:{},count:0,dups:[]},cache={};
     var qs=[];
     for(var k=0;k<raw.length;k++){
@@ -635,6 +712,7 @@ async function runImport(file){
     pr("Hazırdır",100);
     renderWork();
     var miss=qs.filter(function(q){return q.correct<0&&!q.open}).length;
+    if(loose)toast("Nömrələr və variant hərfləri nöqtəsiz/mötərizəsiz idi \u2014 ehtiyat rejimdə oxundu, sualları yoxlayın","warn");
     toast(qs.length+" sual oxundu"+(key.count?"; cavab açarı: "+key.count+" cavab":"; cavab açarı tapılmadı")+(miss?" · "+miss+" sualın cavabı yoxdur":""),miss?"warn":"ok");
   }catch(e){
     console.error(e);toast(e.message||String(e),"err");
@@ -791,7 +869,7 @@ var CSS='.pp{font-family:inherit;color:#0f172a}.pp *{box-sizing:border-box}'+
 '.pp-img{max-width:100%;max-height:180px;border:1px solid #e2e8f0;border-radius:8px;display:block;margin:6px 0;background:#fff}'+
 '.pp-bar{position:sticky;bottom:0;z-index:5;background:#fff;border:1px solid #cbd5e1;border-radius:14px;padding:12px;margin-top:16px;box-shadow:0 -6px 20px #0f172a14;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}'+
 '.pp-bar .c{min-width:140px}.pp-bar .c>label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:3px}.pp-bar .chk{display:flex;gap:6px;align-items:center;font-size:13px;margin:3px 0;cursor:pointer}'+
-'.pp-pv .question-top{display:flex;justify-content:space-between;align-items:center}.pp-pv .preview-img{max-height:none!important}.pp-pv .options label.cor{background:#dcfce7;outline:2px solid #22c55e}'+
+'.pp-pv .question-top{display:flex;justify-content:space-between;align-items:center}.pp-pv .preview-img{max-height:none!important}.pp-pv .options label.cor{background:#dcfce7;border-color:#22c55e}'+
 '.pp-ai{background:#faf5ff;border:1px solid #d8b4fe;border-radius:12px;padding:10px;margin:10px 0;font-size:13.5px;line-height:1.55}.pp-ai ins{background:#bbf7d0;text-decoration:none;border-radius:3px;padding:0 2px}.pp-ai del{background:#fecaca;border-radius:3px;padding:0 2px}'+
 '.pp-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 16px;border-radius:12px;font-size:13.5px;z-index:99999;max-width:90vw;box-shadow:0 8px 24px #0004;transition:opacity .4s}.pp-toast.ok{background:#166534}.pp-toast.err{background:#991b1b}.pp-toast.warn{background:#92400e}.pp-toast.out{opacity:0}'+
 '.pp-modal{position:fixed;inset:0;background:#0f172acc;z-index:99990;display:none;align-items:center;justify-content:center;padding:14px}.pp-modal .in{background:#fff;border-radius:16px;padding:14px;max-width:96vw;max-height:94vh;overflow:auto}'+
@@ -897,19 +975,12 @@ function renderPreview(){
   if(q.image)h+='<div class="pv-fig"><img src="'+q.image+'" class="preview-img" alt="Sual şəkli"></div>';
   if(q.open)h+='<div class="form-group mt-3"><label style="font-weight:bold;font-size:14px">Cavabınızı Daxil Edin (Açıq Sual):</label><input type="text" class="form-control" style="max-width:300px" disabled'+(S.showAns?' value="'+esc(q.openAns)+'"':"")+'></div>';
   else{
-    var allImg=q.opts.length>1&&q.opts.every(function(o){return o.img&&!String(o.t||"").trim()});
-    if(allImg){
-      h+='<div class="pv-og">';
-      q.opts.forEach(function(o,k){var cor=S.showAns&&q.correct===k;h+='<div class="pv-oi'+(cor?" cor":"")+'"><div class="pv-ol">'+labels[k]+'</div><img src="'+o.img+'" alt="Variant '+labels[k]+'"></div>'});
-      h+='</div>';
-    }else{
-      h+='<div class="options mt-3">';
-      q.opts.forEach(function(o,k){
-        var cor=S.showAns&&q.correct===k;
-        h+='<label class="'+(cor?"cor":"")+'" style="display:flex;align-items:flex-start;gap:10px"><input type="radio" disabled'+(cor?" checked":"")+' style="margin-top:4px"><span class="dq-opt"><b class="dq-ol">'+labels[k]+')</b><span class="dq-ot">'+dqc(o.t)+'</span>'+(o.img?'<img src="'+o.img+'" class="pv-oimg">':"")+'</span></label>';
-      });
-      h+='</div>';
-    }
+    h+='<div class="options mt-3">';
+    q.opts.forEach(function(o,k){
+      var cor=S.showAns&&q.correct===k;
+      h+='<label class="'+(cor?"cor":"")+'" style="display:flex; align-items:center; gap:10px;"><input type="radio" disabled'+(cor?" checked":"")+'><span class="dq-opt"><b class="dq-ol">'+labels[k]+')</b><span class="dq-ot">'+dqc(o.t)+'</span></span>'+(o.img?'<img src="'+o.img+'" class="opt-preview-img" style="margin-left:auto;">':"")+'</label>';
+    });
+    h+='</div>';
   }
   box.innerHTML=h;
   var p=el("pp-pos");if(p)p.textContent=(S.sel+1)+" / "+S.qs.length;
@@ -1346,7 +1417,7 @@ function dqPager(cols){
     function newPage(first,withCols){
       var pg=div("pg");
       var w=wm.firstElementChild.cloneNode(true);pg.appendChild(w);
-      pg.appendChild(div("sh hd",'<span class="l">0504305162</span><span class="c">DQplatform | Dövlət Qulluğu</span><span class="r"> Yunis İmanov</span>'));
+      pg.appendChild(div("sh hd",'<span class="l">0504305162</span><span class="c">DQplatform | Dövlət Qulluğu</span><span class="r">By Yunis İmanov</span>'));
       var body=div("pgb");
       if(first&&ttl)body.appendChild(ttl);
       var cs=null,cl=[];
@@ -1377,8 +1448,8 @@ function buildPrintHtml(title,rows,opt){
   '@page{size:A4;margin:24mm 13mm 17mm;@bottom-center{content:"Səhifə " counter(page) " / " counter(pages);font:600 8.5pt Arial,sans-serif;color:#0f2a5c;vertical-align:top;padding-top:2mm;border-top:1px solid #c8962e}@bottom-left{content:"DQplatform";font:italic 8pt Georgia,serif;color:#7b8aa8;vertical-align:top;padding-top:2mm;border-top:1px solid #c8962e}@bottom-right{content:"By Yunis İmanov";font:italic 8pt Georgia,serif;color:#7b8aa8;vertical-align:top;padding-top:2mm;border-top:1px solid #c8962e}@top-left{content:"0504305162";font:600 10.5pt Georgia,serif;color:#0f2a5c;vertical-align:bottom;border-bottom:1.5px solid #0f2a5c;padding-bottom:1mm}@top-center{content:"DQplatform | Dövlət Qulluğu";font:italic 700 15pt Georgia,serif;color:#0f2a5c;vertical-align:bottom;border-bottom:1.5px solid #0f2a5c;padding-bottom:1mm;width:110mm}@top-right{content:"By Yunis İmanov";font:italic 600 10.5pt Georgia,serif;color:#0f2a5c;vertical-align:bottom;border-bottom:1.5px solid #0f2a5c;padding-bottom:1mm}}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}*{box-sizing:border-box}body{font:10.5pt/1.36 "Times New Roman",Times,serif;color:#000;margin:0}'+
    '.ttl{text-align:center;margin:3mm 0 7mm;padding:3mm 0 4mm;border-top:.6mm solid #0f2a5c;border-bottom:.6mm solid #c8962e}.ttl .ey{font:700 8pt Arial,sans-serif;letter-spacing:2.2pt;color:#c8962e;margin-bottom:1.2mm}.ttl h1{font:700 19pt Georgia,serif;color:#0f2a5c;margin:0}.ttl .sb{font:600 9pt Arial,sans-serif;color:#51607f;margin-top:1.2mm}'+
    '.sec{background:linear-gradient(90deg,#0f2a5c,#1d4e9e);color:#fff;border-left:2.2mm solid #c8962e;border-radius:1.5mm;font-weight:700;letter-spacing:.4pt;text-align:center;padding:1.8mm 3mm;margin:0 0 3mm;break-inside:avoid;break-after:avoid;font-size:11.5pt}'+
-   '.q{break-inside:avoid;margin:0 0 5mm}.qt{font-weight:400}.qt p{margin:0 0 1mm}.qt p:first-of-type{display:inline}.qt p:first-of-type+p{margin-top:1mm}.qn{display:inline-block;min-width:5.6mm;padding:0 1.4mm;background:#0f2a5c;color:#fff;border-radius:1.2mm;font:700 9pt Arial,sans-serif;text-align:center;margin-right:1.6mm;line-height:1.5}'+
-   '.q img.f{display:block;max-width:100%;margin:2mm 0}.qt img{max-width:100%;height:auto;mix-blend-mode:multiply}.o{margin:1.1mm 0;padding-left:7mm;text-indent:-7mm;overflow:hidden}.o .ol{display:inline-block;width:4.9mm;height:4.9mm;border:.3mm solid #0f2a5c;border-radius:50%;text-align:center;font:700 7.6pt/4.5mm Arial,sans-serif;color:#0f2a5c;margin-right:1.8mm;text-indent:0;vertical-align:middle;box-sizing:border-box}.o img.oi{mix-blend-mode:multiply;max-height:20mm;display:inline-block;max-width:92%;max-height:20mm;width:auto;height:auto;vertical-align:middle;margin:1mm 0 0 1mm;text-indent:0}.dq-dl{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:99;background:#2563eb;color:#fff;border:0;border-radius:14px;padding:14px 12px;font:700 14px Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.3);writing-mode:vertical-rl;cursor:pointer}@media print{.dq-dl{display:none!important}}.orow{margin:1mm 0}'+
+   '.q{break-inside:avoid;margin:0 0 5mm}.qt{font-weight:400}.qt p{margin:0 0 1mm}.qt p:first-of-type{display:inline}.qt p:first-of-type+p{margin-top:1mm}.qn::after{content:".";color:#0f2a5c}.qn{display:inline-block;min-width:5.6mm;padding:0 1.4mm;background:#0f2a5c;color:#fff;border-radius:1.2mm;font:700 9pt Arial,sans-serif;text-align:center;margin-right:1.6mm;line-height:1.5}'+
+   '.q img.f{display:block;max-width:100%;margin:2mm 0}.qt img{max-width:100%;height:auto;mix-blend-mode:multiply}.o{margin:1.1mm 0;padding-left:7mm;text-indent:-7mm;overflow:hidden}.o .ol::after{content:")";color:#fff}.o .ol{display:inline-block;width:4.9mm;height:4.9mm;border:.3mm solid #0f2a5c;border-radius:50%;text-align:center;font:700 7.6pt/4.5mm Arial,sans-serif;color:#0f2a5c;margin-right:1.8mm;text-indent:0;vertical-align:middle;box-sizing:border-box;padding-left:.3em}.o img.oi{mix-blend-mode:multiply;max-height:20mm;display:inline-block;max-width:92%;max-height:20mm;width:auto;height:auto;vertical-align:middle;margin:1mm 0 0 1mm;text-indent:0}.dq-dl{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:99;background:#2563eb;color:#fff;border:0;border-radius:14px;padding:14px 12px;font:700 14px Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.3);writing-mode:vertical-rl;cursor:pointer}@media print{.dq-dl{display:none!important}}.orow{margin:1mm 0}'+
    '.key{padding-top:6mm}.key h2{font-size:13pt;text-align:center;margin:0 0 5mm}.kt{display:flex;flex-wrap:wrap;gap:6mm;justify-content:center}.kt table{border-collapse:collapse}.kt td:first-child{background:#eef2fa;font-weight:700;color:#0f2a5c}.kt td:last-child{font-weight:700}.key h2{color:#0f2a5c;border-bottom:.6mm solid #c8962e;padding-bottom:2mm}.kt td{border:1px solid #9fb0d0;padding:1mm 4mm;text-align:center;min-width:12mm}'+
    '.pg{position:relative;overflow:hidden}.pgb{height:100%;display:flex;flex-direction:column;position:relative;z-index:1}.cols{flex:1;min-height:0;display:flex}.col{flex:1 1 0;min-width:0;overflow:hidden;padding:0 4.5mm}.col:first-child{padding-left:0}.col:last-child{padding-right:0}.col+.col{border-left:1px solid #c9d3e6}.col>*:last-child{margin-bottom:0}.grp>.q{margin-bottom:5mm}.grp:last-child>.q:last-child{margin-bottom:0}.ttl{flex:none}.sh{position:absolute;left:13mm;right:13mm;font-family:Georgia,"Times New Roman",serif;color:#0f2a5c;z-index:2}.sh.hd{top:9mm;height:12mm;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1.5px solid #0f2a5c;padding-bottom:1mm}.sh.hd .l{font-size:10.5pt;font-weight:600}.sh.hd .c{font-size:15pt;font-weight:700;font-style:italic}.sh.hd .r{font-size:10.5pt;font-weight:600;font-style:italic}.sh.ft{bottom:6mm;display:flex;justify-content:space-between;border-top:1px solid #c8962e;padding-top:1.6mm;font-size:8pt;color:#7b8aa8;font-style:italic}.sh.ft b{font:600 8.5pt Arial,sans-serif;color:#0f2a5c;font-style:normal}'+
    '@media screen{body{background:#cdd3de;padding:10px 0}.pg{width:210mm;height:297mm;margin:0 auto 12px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.25);padding:24mm 13mm 17mm}}'+
