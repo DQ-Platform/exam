@@ -149,7 +149,7 @@
       '<option value="gemini-2.5-pro">2.5 Pro (daha dəqiq)</option></select></div>' +
       '<div class="qs-row"><button class="qs-b g" id="qs-go">🤖 Bütün səhifələrdən sualları çıxar</button>' +
       '<button class="qs-b" id="qs-ocr">📝 Gemini-siz çıxar (OCR)</button></div>' +
-      '<div class="qs-help" style="margin:0">OCR rejimi API açarı tələb etmir, brauzerdə işləyir (ilk dəfə dil faylı yüklənir). Düzgün cavab seçilmir və şəkillər kəsilmir — nəticəni yoxlayıb düzəldin.</div>' +
+      '<div class="qs-help" style="margin:0">OCR rejimi API açarı tələb etmir, brauzerdə işləyir (ilk dəfə dil faylı yüklənir). Sütunlar avtomatik ayrılır. Variantlar ayrılmır (sual mətninin içində qalır), düzgün cavab seçilmir, şəkillər kəsilmir.</div>' +
       '<div class="qs-row">' +
       '<button class="qs-b o" id="qs-blank">➕ Boş sual</button><button class="qs-b o" id="qs-restore" style="display:none">♻️ Qaralamanı bərpa et</button></div>' +
       '<div class="qs-prog" id="qs-prog"><i></i></div></div>' +
@@ -492,12 +492,13 @@
   var OPT_RE = /^\(?\s*([A-Ea-e])\s*(?:[)\]}]|\.(?=\s))\s*(.*)$/;
   var NUM_RE = /^(\d{1,3})\s*[.)]\s*(.*)$/;
   var NOISE_RE = /^(d[öo]vl[əe]t qullu[ğg]u|[üu]mumi s[ıi]naq|www\.|https?:)/i;
+  var NOISE2_RE = /(sayfa\s*\d+\s*\/\s*\d+|sonraki|[öo]nceki|s[ıi]naq\s*\d+\s*kopya)/i;
 
+  /* sualları nömrəyə görə ayırır; variantlar AYRILMIR — A) B) C) D) sətirləri sual mətninin içində qalır */
   function parseOcrLines(lines) {
     var qs = [], cur = null, last = 0;
-    function filled(q) { return q.opts.filter(Boolean).length; }
     function open(n, rest, pg) {
-      cur = { num: n, lines: [], opts: [], optOpen: -1, page: pg };
+      cur = { num: n, lines: [], optCount: 0, optOpen: false, nextOpt: 0, page: pg };
       if (rest) cur.lines.push(rest);
       qs.push(cur); last = n;
     }
@@ -510,37 +511,70 @@
     }
     lines.forEach(function (ln) {
       var t = String(ln.t || "").replace(/\s+/g, " ").trim(), m;
-      if (!t || !/[A-Za-z0-9əƏöÖüÜıİçÇşŞğĞ]/.test(t) || NOISE_RE.test(t) || /^\d{1,3}$/.test(t)) return;
+      if (!t || !/[A-Za-z0-9əƏöÖüÜıİçÇşŞğĞ]/.test(t) || NOISE_RE.test(t) || NOISE2_RE.test(t) || /^\d{1,3}$/.test(t)) return;
       if (cur && (m = OPT_RE.exec(t))) {
-        var li = LET.indexOf(m[1].toUpperCase()), nxt = cur.opts.length;
-        if (li >= nxt && li <= nxt + 1) {
-          while (cur.opts.length < li) cur.opts.push("");
-          cur.opts.push(m[2].trim()); cur.optOpen = li; return;
+        var li = LET.indexOf(m[1].toUpperCase());
+        if (li >= cur.nextOpt && li <= cur.nextOpt + 1) {
+          cur.nextOpt = li + 1; cur.optCount++; cur.optOpen = true;
+          cur.lines.push(LET[li] + ") " + m[2].trim()); return;
         }
       }
       if ((m = NUM_RE.exec(t))) {
-        var n = parseInt(m[1], 10), nf = cur ? filled(cur) : 0;
+        var n = parseInt(m[1], 10), nf = cur ? cur.optCount : 0;
         var isNew = !cur ? n <= 200 : (nf >= 1 && (n === last + 1 || (nf >= 2 && n > last && n <= last + 3)));
         if (isNew) { open(n, m[2].trim(), ln.p); return; }
       }
       if (!cur) return;
-      if (cur.optOpen >= 0) cur.opts[cur.optOpen] = (cur.opts[cur.optOpen] + " " + t).trim();
+      if (cur.optOpen) cur.lines[cur.lines.length - 1] += " " + t;
       else addText(cur, t);
     });
     return qs.map(function (c) {
-      var o = c.opts.slice(0, 5); while (o.length < 4) o.push("");
-      return { num: c.num, text: c.lines.join("\n").trim(), opts: o, page: c.page, incomplete: filled(c) < 4 };
+      return { num: c.num, text: c.lines.join("\n").trim(), opts: ["", "", "", ""], page: c.page, incomplete: c.optCount < 4 };
     });
   }
 
-  var OCR = { w: null, k: 0, n: 1 };
+  /* ---------- sütun ayırma (OCR-dan əvvəl) ---------- */
+  function findGutter(cnt, w, ch) {
+    var lo = Math.floor(w * 0.3), hi = Math.ceil(w * 0.7), tol = Math.max(2, ch * 0.004), best = null, cur = null;
+    for (var x = lo; x < hi; x++) {
+      var c = cnt[x] > ch * 0.6 ? 0 : cnt[x];          // nazik şaquli xətti (ayırıcı) boşluq say
+      if (c <= tol) { if (!cur) cur = { a: x, b: x }; cur.b = x; }
+      else { if (cur && (!best || cur.b - cur.a > best.b - best.a)) best = cur; cur = null; }
+    }
+    if (cur && (!best || cur.b - cur.a > best.b - best.a)) best = cur;
+    return best && best.b - best.a >= 8 ? best : null;
+  }
+  function splitColumns(cv) {
+    var w = cv.width, h = cv.height, d = cv.getContext("2d").getImageData(0, 0, w, h).data;
+    var cnt = new Array(w).fill(0), rows = new Array(h).fill(0);
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      var i = (y * w + x) * 4;
+      if (d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11 < 150) { cnt[x]++; rows[y]++; }
+    }
+    var y0 = 0, y1 = h - 1; while (y0 < h && rows[y0] < 3) y0++; while (y1 > y0 && rows[y1] < 3) y1--;
+    var g = findGutter(cnt, w, Math.max(1, y1 - y0));
+    if (!g) return [cv];
+    function crop(xa, xb) {
+      var c = mk(xb - xa, h); c.getContext("2d").drawImage(cv, xa, 0, xb - xa, h, 0, 0, xb - xa, h); return c;
+    }
+    return [crop(0, g.a), crop(g.b + 1, w)];
+  }
+  function ocrParts(p) {
+    var saved = S.cfg.stack, flat;
+    S.cfg.stack = 0; try { flat = process(p); } finally { S.cfg.stack = saved; }
+    var out = process(p);                                // istifadəçinin gördüyü (rects tətbiq olunmuş) şəkil
+    if (out.height > flat.height * 1.3) return [out];    // 2 sütun artıq alt-alta düzülüb
+    return splitColumns(out);                            // düzülməyib → özümüz ayırırıq
+  }
+
+  var OCR = { w: null, k: 0, n: 1, f: 1 };
   async function getOcr() {
     if (OCR.w) return OCR.w;
     if (!window.__dqLibs) throw new Error("Kitabxana yükləyicisi (__dqLibs) tapılmadı.");
     await window.__dqLibs("ocr");
     OCR.w = await Tesseract.createWorker("aze", 1, {
       logger: function (m) {
-        if (m && m.status === "recognizing text") setProg(Math.round((OCR.k + (m.progress || 0)) / OCR.n * 100));
+        if (m && m.status === "recognizing text") setProg(Math.round((OCR.k + (m.progress || 0) * OCR.f) / OCR.n * 100));
       }
     });
     return OCR.w;
@@ -549,9 +583,9 @@
     var s = 1800 / cv.width;
     s = Math.min(2.5, Math.max(1, s)); if (cv.width * s > 2600) s = 2600 / cv.width;
     if (cv.height * s > 9000) s = Math.max(0.6, 9000 / cv.height);
-    if (Math.abs(s - 1) < 0.05) return cv;
-    var c = mk(cv.width * s, cv.height * s), x = c.getContext("2d");
-    x.imageSmoothingQuality = "high"; x.drawImage(cv, 0, 0, c.width, c.height);
+    var M = 30, c = mk(cv.width * s + 2 * M, cv.height * s + 2 * M), x = c.getContext("2d");
+    x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
+    x.imageSmoothingQuality = "high"; x.drawImage(cv, M, M, cv.width * s, cv.height * s);
     return c;
   }
   async function extractOcr() {
@@ -561,22 +595,26 @@
     try {
       msg("OCR mühərriki yüklənir (ilk dəfə 20–40 san çəkə bilər)…"); setProg(2);
       var w = await getOcr();
-      await w.setParameters({ tessedit_pageseg_mode: S.cfg.stack ? "4" : "3", preserve_interword_spaces: "1" });
+      await w.setParameters({ tessedit_pageseg_mode: "4", preserve_interword_spaces: "1" });
       var n = S.pages.length, lines = [];
       OCR.n = n;
       for (var k = 0; k < n; k++) {
-        OCR.k = k; msg("OCR oxuyur: səhifə " + (k + 1) + " / " + n);
-        var res = await w.recognize(ocrCanvas(process(S.pages[k])));
-        String((res && res.data && res.data.text) || "").split(/\r?\n/).forEach(function (t) { lines.push({ t: t, p: k }); });
+        var parts = ocrParts(S.pages[k]); OCR.f = 1 / parts.length;
+        for (var j = 0; j < parts.length; j++) {
+          OCR.k = k + j / parts.length; msg("OCR oxuyur: səhifə " + (k + 1) + " / " + n + (parts.length > 1 ? " (sütun " + (j + 1) + ")" : ""));
+          var res = await w.recognize(ocrCanvas(parts[j]));
+          String((res && res.data && res.data.text) || "").split(/\r?\n/).forEach(function (t) { lines.push({ t: t, p: k }); });
+        }
         setProg(Math.round((k + 1) / n * 100));
       }
+      showPage();
       var list = parseOcrLines(lines).map(function (it) {
         return { id: ++S.uid, sel: false, num: it.num, text: it.text, opts: it.opts, correct: null, image: null, page: it.page, incomplete: it.incomplete };
       });
       if (!list.length) msg("Sual tapılmadı. Fon silmə gücünü dəyişin, ya da ➕ Boş sual ilə əl ilə daxil edin.", "err");
       else {
         S.qs = S.qs.concat(list); renderList(); persist();
-        msg("✅ OCR ilə " + list.length + " sual çıxarıldı. Düzgün cavabı və lazım olsa şəkli əl ilə seçin; mətni yoxlayın.", "ok");
+        msg("✅ OCR ilə " + list.length + " sual çıxarıldı. Variantlar sual mətninin içindədir (ayrılmayıb); mətni yoxlayın.", "ok");
       }
     } catch (e) { msg("❌ OCR xətası: " + e.message + " (internet bağlantısını yoxlayın)", "err"); }
     S.busy = false; $("qs-go").disabled = false; $("qs-ocr").disabled = false;
