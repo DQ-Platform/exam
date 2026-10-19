@@ -274,7 +274,7 @@ async function readPage(page,pn,opt){
   var groups=gut!=null?[rest.filter(function(i){return i.x+i.w/2<gut}),rest.filter(function(i){return i.x+i.w/2>=gut})]:[rest];
   var colBounds=gut!=null?[[0,gut],[gut,W]]:[[0,W]];
   groups.forEach(function(g,ci){
-    groupLines(g).forEach(function(L){L.col=ci;L.page=pn;L.t="line";pg.lines.push(L)});
+    groupLines(g).forEach(function(L){if(!stripChrome(L,H))return;L.col=ci;L.page=pn;L.t="line";pg.lines.push(L)});
   });
   /* şəkilləri sütunlara bölüşdür */
   pg.figs.forEach(function(f){
@@ -286,6 +286,17 @@ async function readPage(page,pn,opt){
   return pg;
 }
 
+/* Sınaq PDF-inin başlıq/altlıq qalıqları (hərfləri aralı "S I N A Q M A T E R İ A L I", "Səhifə", "1 / 25") sətirdən təmizlənir */
+function stripChrome(L,H){
+  var t=L.text,o=t;
+  t=t.replace(/(?:DQ\s*PLATFORM\s*[\u00b7\u2022|]?\s*)?S\s*I\s*N\s*A\s*Q\s*M\s*A\s*T\s*E\s*R\s*[\u0130Ii]\s*A\s*L\s*[I\u0130\u0131]/gi," ");
+  t=t.replace(/^[\s\t]*S[əe]hif[əe](?:[\s\t]*\d{1,3}[\s\t]*\/[\s\t]*\d{1,3})?(?=[\s\t]|$)/i,"");
+  var zone=L.y>H*.9||L.y<H*.1,m=t.match(/^[\s\t]*(\d{1,3})[\s\t]*\/[\s\t]*(\d{1,3})(?:[\s\t]+|$)/);
+  if(m&&+m[2]>=+m[1]&&(zone||(+m[2]===(S.numPages||-1))))t=t.slice(m[0].length);
+  t=t.replace(/^[\s\t]+|[\s\t]+$/g,"");
+  if(t!==o.trim())L.text=t;
+  return t.length>0;
+}
 /* qrafik klasterləri */
 function sanitizeRects(rects,pg){
   var W=pg.W,H=pg.H;
@@ -390,10 +401,13 @@ function parseKey(pages){
 }
 
 /* ═══════════════ 7. SUALLARIN AYRILMASI ═══════════════ */
-function lineQ(e){var m=e.text.replace(/\t/g," ").match(/^\s*(\d{1,3})\s*[.)]\s*(\S.*)$/);if(!m)return null;var rest=m[2];
+var LOOSE=false; /* true: nöqtəsiz nömrə ("3 Mətn") və mötərizəsiz variant ("A Mətn") rejimi */
+function lineQ(e){var tx=e.text.replace(/\t/g," "),m=tx.match(/^\s*(\d{1,3})\s*[.)]\s*(\S.*)$/);
+  if(!m&&LOOSE)m=tx.match(/^\s*(\d{1,3})\s+(?=[A-Za-z\u00c0-\u024f\u0400-\u04ff"\u201c\u00ab\u201e(])(\S.*)$/);
+  if(!m)return null;var rest=m[2];
   if(/^\d{1,2}\.\d{2,4}\b/.test(rest)||rest.length<3)return null;return{n:+m[1],rest:rest}}
 function blockText(stream,i0,i1){var t=[];for(var i=i0;i<i1;i++)if(stream[i].t==="line")t.push(stream[i].text);return t.join("\n")}
-function hasOptions(txt){return/(^|\s)A\)/.test(txt)&&/(^|\s)B\)/.test(txt)}
+function hasOptions(txt){var c=findOptionChain(txt);return!!(c&&c.length>=2)}
 function blockHasFig(stream,i0,i1){for(var i=i0;i<i1;i++)if(stream[i].t==="fig")return true;return false}
 function pickStarts(stream,strict){
   var cands=[];stream.forEach(function(e,i){if(e.t!=="line")return;var q=lineQ(e);if(q)cands.push({i:i,n:q.n})});
@@ -451,8 +465,8 @@ function flowStem(lines){
   push();
   return paras.join("\n");
 }
-function findOptionChain(full){
-  var re=/(^|\s)([A-E])\)/g,m,marks=[];
+function chainWith(re,full){
+  var m,marks=[];
   while((m=re.exec(full)))marks.push({L:m[2],s:m.index+m[1].length,e:re.lastIndex});
   var best=null;
   for(var i=0;i<marks.length;i++){
@@ -461,6 +475,12 @@ function findOptionChain(full){
     for(var j=i+1;j<marks.length&&nx<="E";j++){if(marks[j].L===nx){chain.push(marks[j]);nx=String.fromCharCode(nx.charCodeAt(0)+1)}}
     if(chain.length>=2&&(!best||chain.length>=best.length))best=chain;
   }
+  return best;
+}
+function findOptionChain(full){
+  var best=chainWith(/(^|\s)([A-E])\)/g,full);
+  /* ehtiyat: "A mətn B mətn C mətn" (mötərizəsiz). "A," "A –" "A." kimi hallar marker sayılmır */
+  if((!best||best.length<2)&&LOOSE)best=chainWith(/(^|\s)([A-E])(?=\s+[^\s,;:.)\u2013\u2014\-])/g,full);
   return best;
 }
 function oneLine(seg){
@@ -674,6 +694,7 @@ function cleanQuestion(q){
 }
 
 /* ═══════════════ 10. PDF → SUALLAR ═══════════════ */
+function rawQuality(raw){var good=0;raw.forEach(function(q){if(q.opts.length>=2||q.gopt||q.crops.length)good++});return{total:raw.length,good:good,score:good*3-(raw.length-good)}}
 async function runImport(file){
   if(S.busy)return;
   S.busy=true;S.file=file;
@@ -681,16 +702,22 @@ async function runImport(file){
   try{
     pr("PDF kitabxanası yüklənir…",3);
     await ensurePdfLib();
-    pr("Fayl oxunur…",6);
+    pr("Fayl oxunur…",6);S.numPages=0;
     var buf=await file.arrayBuffer();
-    var pdf=await pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise,pages=[];
+    var pdf=await pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise,pages=[];S.numPages=pdf.numPages;
     for(var i=1;i<=pdf.numPages;i++){
       pr("Səhifə "+i+" / "+pdf.numPages+" analiz olunur…",8+i/pdf.numPages*50);
       var pg=await pdf.getPage(i);pages.push(await readPage(pg,i,S.opt));
     }
     pr("Suallar və variantlar ayrılır…",62);
-    var raw=buildQuestions(pages,S.opt),loose=false;
-    if(!raw.length&&normalizeLoose(pages)){raw=buildQuestions(pages,S.opt);loose=raw.length>0}
+    var loose=false;LOOSE=false;
+    var raw=buildQuestions(pages,S.opt),q1=rawQuality(raw);
+    /* nömrələr/hərflər nöqtəsiz-mötərizəsiz ola bilər: ikinci keçid, nəticə daha yaxşıdırsa seçilir */
+    if(q1.total===0||q1.good<q1.total*.9){
+      LOOSE=true;var raw2=[];try{raw2=buildQuestions(pages,S.opt)}catch(e){console.warn("[DQPP] loose",e)}
+      var q2=rawQuality(raw2);
+      if(q2.score>q1.score){raw=raw2;loose=true}else LOOSE=false;
+    }
     if(!raw.length){
       var dg=pdfDiag(pages);
       throw new Error(dg.lines<5
@@ -1448,8 +1475,8 @@ function buildPrintHtml(title,rows,opt){
   '@page{size:A4;margin:24mm 13mm 17mm;@bottom-center{content:"Səhifə " counter(page) " / " counter(pages);font:600 8.5pt Arial,sans-serif;color:#0f2a5c;vertical-align:top;padding-top:2mm;border-top:1px solid #c8962e}@bottom-left{content:"DQplatform";font:italic 8pt Georgia,serif;color:#7b8aa8;vertical-align:top;padding-top:2mm;border-top:1px solid #c8962e}@bottom-right{content:"By Yunis İmanov";font:italic 8pt Georgia,serif;color:#7b8aa8;vertical-align:top;padding-top:2mm;border-top:1px solid #c8962e}@top-left{content:"0504305162";font:600 10.5pt Georgia,serif;color:#0f2a5c;vertical-align:bottom;border-bottom:1.5px solid #0f2a5c;padding-bottom:1mm}@top-center{content:"DQplatform | Dövlət Qulluğu";font:italic 700 15pt Georgia,serif;color:#0f2a5c;vertical-align:bottom;border-bottom:1.5px solid #0f2a5c;padding-bottom:1mm;width:110mm}@top-right{content:"By Yunis İmanov";font:italic 600 10.5pt Georgia,serif;color:#0f2a5c;vertical-align:bottom;border-bottom:1.5px solid #0f2a5c;padding-bottom:1mm}}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}*{box-sizing:border-box}body{font:10.5pt/1.36 "Times New Roman",Times,serif;color:#000;margin:0}'+
    '.ttl{text-align:center;margin:3mm 0 7mm;padding:3mm 0 4mm;border-top:.6mm solid #0f2a5c;border-bottom:.6mm solid #c8962e}.ttl .ey{font:700 8pt Arial,sans-serif;letter-spacing:2.2pt;color:#c8962e;margin-bottom:1.2mm}.ttl h1{font:700 19pt Georgia,serif;color:#0f2a5c;margin:0}.ttl .sb{font:600 9pt Arial,sans-serif;color:#51607f;margin-top:1.2mm}'+
    '.sec{background:linear-gradient(90deg,#0f2a5c,#1d4e9e);color:#fff;border-left:2.2mm solid #c8962e;border-radius:1.5mm;font-weight:700;letter-spacing:.4pt;text-align:center;padding:1.8mm 3mm;margin:0 0 3mm;break-inside:avoid;break-after:avoid;font-size:11.5pt}'+
-   '.q{break-inside:avoid;margin:0 0 5mm}.qt{font-weight:400}.qt p{margin:0 0 1mm}.qt p:first-of-type{display:inline}.qt p:first-of-type+p{margin-top:1mm}.qn::after{content:".";color:#0f2a5c}.qn{display:inline-block;min-width:5.6mm;padding:0 1.4mm;background:#0f2a5c;color:#fff;border-radius:1.2mm;font:700 9pt Arial,sans-serif;text-align:center;margin-right:1.6mm;line-height:1.5}'+
-   '.q img.f{display:block;max-width:100%;margin:2mm 0}.qt img{max-width:100%;height:auto;mix-blend-mode:multiply}.o{margin:1.1mm 0;padding-left:7mm;text-indent:-7mm;overflow:hidden}.o .ol::after{content:")";color:#fff}.o .ol{display:inline-block;width:4.9mm;height:4.9mm;border:.3mm solid #0f2a5c;border-radius:50%;text-align:center;font:700 7.6pt/4.5mm Arial,sans-serif;color:#0f2a5c;margin-right:1.8mm;text-indent:0;vertical-align:middle;box-sizing:border-box;padding-left:.3em}.o img.oi{mix-blend-mode:multiply;max-height:20mm;display:inline-block;max-width:92%;max-height:20mm;width:auto;height:auto;vertical-align:middle;margin:1mm 0 0 1mm;text-indent:0}.dq-dl{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:99;background:#2563eb;color:#fff;border:0;border-radius:14px;padding:14px 12px;font:700 14px Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.3);writing-mode:vertical-rl;cursor:pointer}@media print{.dq-dl{display:none!important}}.orow{margin:1mm 0}'+
+   '.q{break-inside:avoid;margin:0 0 5mm}.qt{font-weight:400}.qt p{margin:0 0 1mm}.qt p:first-of-type{display:inline}.qt p:first-of-type+p{margin-top:1mm}.qn .pn{color:#0f2a5c}.qn{display:inline-block;min-width:5.6mm;padding:0 1.4mm;background:#0f2a5c;color:#fff;border-radius:1.2mm;font:700 9pt Arial,sans-serif;text-align:center;margin-right:1.6mm;line-height:1.5}'+
+   '.q img.f{display:block;max-width:100%;margin:2mm 0}.qt img{max-width:100%;height:auto;mix-blend-mode:multiply}.o{margin:1.1mm 0;padding-left:7mm;text-indent:-7mm;overflow:hidden}.o .ol .pn{color:#fff}.o .ol{display:inline-block;width:4.9mm;height:4.9mm;border:.3mm solid #0f2a5c;border-radius:50%;text-align:center;font:700 7.6pt/4.5mm Arial,sans-serif;color:#0f2a5c;margin-right:1.8mm;text-indent:0;vertical-align:middle;box-sizing:border-box;padding-left:.3em}.o img.oi{mix-blend-mode:multiply;max-height:20mm;display:inline-block;max-width:92%;max-height:20mm;width:auto;height:auto;vertical-align:middle;margin:1mm 0 0 1mm;text-indent:0}.dq-dl{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:99;background:#2563eb;color:#fff;border:0;border-radius:14px;padding:14px 12px;font:700 14px Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.3);writing-mode:vertical-rl;cursor:pointer}@media print{.dq-dl{display:none!important}}.orow{margin:1mm 0}'+
    '.key{padding-top:6mm}.key h2{font-size:13pt;text-align:center;margin:0 0 5mm}.kt{display:flex;flex-wrap:wrap;gap:6mm;justify-content:center}.kt table{border-collapse:collapse}.kt td:first-child{background:#eef2fa;font-weight:700;color:#0f2a5c}.kt td:last-child{font-weight:700}.key h2{color:#0f2a5c;border-bottom:.6mm solid #c8962e;padding-bottom:2mm}.kt td{border:1px solid #9fb0d0;padding:1mm 4mm;text-align:center;min-width:12mm}'+
    '.pg{position:relative;overflow:hidden}.pgb{height:100%;display:flex;flex-direction:column;position:relative;z-index:1}.cols{flex:1;min-height:0;display:flex}.col{flex:1 1 0;min-width:0;overflow:hidden;padding:0 4.5mm}.col:first-child{padding-left:0}.col:last-child{padding-right:0}.col+.col{border-left:1px solid #c9d3e6}.col>*:last-child{margin-bottom:0}.grp>.q{margin-bottom:5mm}.grp:last-child>.q:last-child{margin-bottom:0}.ttl{flex:none}.sh{position:absolute;left:13mm;right:13mm;font-family:Georgia,"Times New Roman",serif;color:#0f2a5c;z-index:2}.sh.hd{top:9mm;height:12mm;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1.5px solid #0f2a5c;padding-bottom:1mm}.sh.hd .l{font-size:10.5pt;font-weight:600}.sh.hd .c{font-size:15pt;font-weight:700;font-style:italic}.sh.hd .r{font-size:10.5pt;font-weight:600;font-style:italic}.sh.ft{bottom:6mm;display:flex;justify-content:space-between;border-top:1px solid #c8962e;padding-top:1.6mm;font-size:8pt;color:#7b8aa8;font-style:italic}.sh.ft b{font:600 8.5pt Arial,sans-serif;color:#0f2a5c;font-style:normal}'+
    '@media screen{body{background:#cdd3de;padding:10px 0}.pg{width:210mm;height:297mm;margin:0 auto 12px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.25);padding:24mm 13mm 17mm}}'+
@@ -1459,11 +1486,11 @@ function buildPrintHtml(title,rows,opt){
   rows.forEach(function(r){
     if(opt.banner&&r.subject&&r.subject!==lastSub){h+='<div class="sec">'+esc(r.subject)+'</div>';lastSub=r.subject}
     var opts=Array.isArray(r.options)?r.options:[];
-    h+='<div class="q"><div class="qt"><span class="qn">'+esc(r.q_number)+'</span> '+dqPrint(r.question)+'</div>';
+    h+='<div class="q"><div class="qt"><span class="qn">'+esc(r.q_number)+'<span class="pn">.</span></span> '+dqPrint(r.question)+'</div>';
     if(r.image_url)h+='<img class="f" src="'+esc(r.image_url)+'">';
     var allEmpty=opts.length&&opts.every(function(o){return!String(optText(o)||"").trim()&&!(o&&o.image)});
     if(allEmpty)h+='<div class="orow">'+opts.map(function(o,k){return"ABCDE"[k]+")"}).join("&emsp;&emsp;")+'</div>';
-    else opts.forEach(function(o,k){h+='<div class="o"><span class="ol">'+"ABCDE"[k]+'</span>'+optPrintHtml(o)+'</div>'});
+    else opts.forEach(function(o,k){h+='<div class="o"><span class="ol">'+"ABCDE"[k]+'<span class="pn">)</span></span>'+optPrintHtml(o)+'</div>'});
     h+='</div>';
   });
   if(opt.key){
