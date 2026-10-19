@@ -143,11 +143,14 @@
       '<div class="qs-cvwrap"><canvas id="qs-canvas"></canvas></div>' +
       '<div class="qs-help" style="margin-top:6px">🧽 Sil rejimini açıb barmaqla/siçanla düzbucaq çəkin — qalıq loqo/yazı ağ ilə örtülür.</div></div>' +
 
-      '<div class="qs-box" id="qs-ext" style="display:none"><b>3) Sualları çıxar (Gemini)</b>' +
-      '<div class="qs-row"><input class="qs-in" id="qs-key" type="password" placeholder="Gemini API açarı" style="flex:1;min-width:200px">' +
+      '<div class="qs-box" id="qs-ext" style="display:none"><b>3) Sualları çıxar (Gemini və ya Gemini-siz OCR)</b>' +
+      '<div class="qs-row"><input class="qs-in" id="qs-key" type="password" placeholder="Gemini API açarı (boşdursa OCR işləyir)" style="flex:1;min-width:200px">' +
       '<select class="qs-in" id="qs-model"><option value="gemini-2.5-flash">2.5 Flash (sürətli)</option><option value="gemini-2.5-flash-lite">2.5 Flash-Lite (limit yüngül)</option><option value="gemini-2.0-flash">2.0 Flash</option>' +
       '<option value="gemini-2.5-pro">2.5 Pro (daha dəqiq)</option></select></div>' +
       '<div class="qs-row"><button class="qs-b g" id="qs-go">🤖 Bütün səhifələrdən sualları çıxar</button>' +
+      '<button class="qs-b" id="qs-ocr">📝 Gemini-siz çıxar (OCR)</button></div>' +
+      '<div class="qs-help" style="margin:0">OCR rejimi API açarı tələb etmir, brauzerdə işləyir (ilk dəfə dil faylı yüklənir). Düzgün cavab seçilmir və şəkillər kəsilmir — nəticəni yoxlayıb düzəldin.</div>' +
+      '<div class="qs-row">' +
       '<button class="qs-b o" id="qs-blank">➕ Boş sual</button><button class="qs-b o" id="qs-restore" style="display:none">♻️ Qaralamanı bərpa et</button></div>' +
       '<div class="qs-prog" id="qs-prog"><i></i></div></div>' +
 
@@ -441,11 +444,11 @@
     if (S.busy) return;
     if (!S.pages.length) return msg("Əvvəlcə fayl yükləyin.", "err");
     var key = $("qs-key").value.trim();
-    if (!key) return msg("Gemini API açarını daxil edin.", "err");
+    if (!key) { msg("Gemini açarı yoxdur — OCR (Gemini-siz) rejimi işə düşür…"); return extractOcr(); }
     try { localStorage.setItem(KEY_LS, key); } catch (e) {}
     S.cfg.model = $("qs-model").value; saveCfg();
     S.busy = true; $("qs-go").disabled = true;
-    var found = [];
+    var found = [], fb = false;
     try {
       var n = S.pages.length, CH = 3, STEP = 2, start = 0, done = 0;
       while (start < n) {
@@ -479,8 +482,104 @@
       S.qs = S.qs.concat(list);
       renderList(); persist();
       msg("✅ " + list.length + " sual çıxarıldı. Yoxlayın, düzəldin, sol qutu ilə seçib sınağa əlavə edin.", "ok");
-    } catch (e) { msg("❌ " + e.message, "err"); }
+    } catch (e) { msg("❌ " + e.message + "\nGemini işləmədi — OCR rejiminə keçilir…", "err"); fb = true; }
     S.busy = false; $("qs-go").disabled = false;
+    if (fb) return extractOcr();
+    setTimeout(function () { $("qs-prog").style.display = "none"; }, 1500);
+  }
+
+  /* ---------- Gemini-siz: OCR (Tesseract) + qayda əsaslı parser ---------- */
+  var OPT_RE = /^\(?\s*([A-Ea-e])\s*(?:[)\]}]|\.(?=\s))\s*(.*)$/;
+  var NUM_RE = /^(\d{1,3})\s*[.)]\s*(.*)$/;
+  var NOISE_RE = /^(d[öo]vl[əe]t qullu[ğg]u|[üu]mumi s[ıi]naq|www\.|https?:)/i;
+
+  function parseOcrLines(lines) {
+    var qs = [], cur = null, last = 0;
+    function filled(q) { return q.opts.filter(Boolean).length; }
+    function open(n, rest, pg) {
+      cur = { num: n, lines: [], opts: [], optOpen: -1, page: pg };
+      if (rest) cur.lines.push(rest);
+      qs.push(cur); last = n;
+    }
+    function addText(q, t) {
+      var L = q.lines;
+      if (!L.length) { L.push(t); return; }
+      var prev = L[L.length - 1];
+      if (/^\d{1,2}\s*[.)]\s*\S/.test(t) || /[?:]$/.test(prev)) L.push(t);
+      else L[L.length - 1] = prev + " " + t;
+    }
+    lines.forEach(function (ln) {
+      var t = String(ln.t || "").replace(/\s+/g, " ").trim(), m;
+      if (!t || !/[A-Za-z0-9əƏöÖüÜıİçÇşŞğĞ]/.test(t) || NOISE_RE.test(t) || /^\d{1,3}$/.test(t)) return;
+      if (cur && (m = OPT_RE.exec(t))) {
+        var li = LET.indexOf(m[1].toUpperCase()), nxt = cur.opts.length;
+        if (li >= nxt && li <= nxt + 1) {
+          while (cur.opts.length < li) cur.opts.push("");
+          cur.opts.push(m[2].trim()); cur.optOpen = li; return;
+        }
+      }
+      if ((m = NUM_RE.exec(t))) {
+        var n = parseInt(m[1], 10), nf = cur ? filled(cur) : 0;
+        var isNew = !cur ? n <= 200 : (nf >= 1 && (n === last + 1 || (nf >= 2 && n > last && n <= last + 3)));
+        if (isNew) { open(n, m[2].trim(), ln.p); return; }
+      }
+      if (!cur) return;
+      if (cur.optOpen >= 0) cur.opts[cur.optOpen] = (cur.opts[cur.optOpen] + " " + t).trim();
+      else addText(cur, t);
+    });
+    return qs.map(function (c) {
+      var o = c.opts.slice(0, 5); while (o.length < 4) o.push("");
+      return { num: c.num, text: c.lines.join("\n").trim(), opts: o, page: c.page, incomplete: filled(c) < 4 };
+    });
+  }
+
+  var OCR = { w: null, k: 0, n: 1 };
+  async function getOcr() {
+    if (OCR.w) return OCR.w;
+    if (!window.__dqLibs) throw new Error("Kitabxana yükləyicisi (__dqLibs) tapılmadı.");
+    await window.__dqLibs("ocr");
+    OCR.w = await Tesseract.createWorker("aze", 1, {
+      logger: function (m) {
+        if (m && m.status === "recognizing text") setProg(Math.round((OCR.k + (m.progress || 0)) / OCR.n * 100));
+      }
+    });
+    return OCR.w;
+  }
+  function ocrCanvas(cv) {
+    var s = 1800 / cv.width;
+    s = Math.min(2.5, Math.max(1, s)); if (cv.width * s > 2600) s = 2600 / cv.width;
+    if (cv.height * s > 9000) s = Math.max(0.6, 9000 / cv.height);
+    if (Math.abs(s - 1) < 0.05) return cv;
+    var c = mk(cv.width * s, cv.height * s), x = c.getContext("2d");
+    x.imageSmoothingQuality = "high"; x.drawImage(cv, 0, 0, c.width, c.height);
+    return c;
+  }
+  async function extractOcr() {
+    if (S.busy) return;
+    if (!S.pages.length) return msg("Əvvəlcə fayl yükləyin.", "err");
+    S.busy = true; $("qs-go").disabled = true; $("qs-ocr").disabled = true;
+    try {
+      msg("OCR mühərriki yüklənir (ilk dəfə 20–40 san çəkə bilər)…"); setProg(2);
+      var w = await getOcr();
+      await w.setParameters({ tessedit_pageseg_mode: S.cfg.stack ? "4" : "3", preserve_interword_spaces: "1" });
+      var n = S.pages.length, lines = [];
+      OCR.n = n;
+      for (var k = 0; k < n; k++) {
+        OCR.k = k; msg("OCR oxuyur: səhifə " + (k + 1) + " / " + n);
+        var res = await w.recognize(ocrCanvas(process(S.pages[k])));
+        String((res && res.data && res.data.text) || "").split(/\r?\n/).forEach(function (t) { lines.push({ t: t, p: k }); });
+        setProg(Math.round((k + 1) / n * 100));
+      }
+      var list = parseOcrLines(lines).map(function (it) {
+        return { id: ++S.uid, sel: false, num: it.num, text: it.text, opts: it.opts, correct: null, image: null, page: it.page, incomplete: it.incomplete };
+      });
+      if (!list.length) msg("Sual tapılmadı. Fon silmə gücünü dəyişin, ya da ➕ Boş sual ilə əl ilə daxil edin.", "err");
+      else {
+        S.qs = S.qs.concat(list); renderList(); persist();
+        msg("✅ OCR ilə " + list.length + " sual çıxarıldı. Düzgün cavabı və lazım olsa şəkli əl ilə seçin; mətni yoxlayın.", "ok");
+      }
+    } catch (e) { msg("❌ OCR xətası: " + e.message + " (internet bağlantısını yoxlayın)", "err"); }
+    S.busy = false; $("qs-go").disabled = false; $("qs-ocr").disabled = false;
     setTimeout(function () { $("qs-prog").style.display = "none"; }, 1500);
   }
 
@@ -674,7 +773,7 @@
 
     var key = $("qs-key"); try { key.value = localStorage.getItem(KEY_LS) || ""; } catch (e) {}
     $("qs-model").value = S.cfg.model;
-    $("qs-go").onclick = extract;
+    $("qs-go").onclick = extract; $("qs-ocr").onclick = extractOcr;
     $("qs-blank").onclick = function () {
       S.qs.push({ id: ++S.uid, sel: false, num: "", text: "", opts: ["", "", "", ""], correct: null, image: null, page: null, incomplete: false });
       renderList(); persist();
