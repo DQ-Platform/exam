@@ -145,7 +145,7 @@
 
       '<div class="qs-box" id="qs-ext" style="display:none"><b>3) Sualları çıxar (Gemini)</b>' +
       '<div class="qs-row"><input class="qs-in" id="qs-key" type="password" placeholder="Gemini API açarı" style="flex:1;min-width:200px">' +
-      '<select class="qs-in" id="qs-model"><option value="gemini-2.5-flash">2.5 Flash (sürətli)</option>' +
+      '<select class="qs-in" id="qs-model"><option value="gemini-2.5-flash">2.5 Flash (sürətli)</option><option value="gemini-2.5-flash-lite">2.5 Flash-Lite (limit yüngül)</option><option value="gemini-2.0-flash">2.0 Flash</option>' +
       '<option value="gemini-2.5-pro">2.5 Pro (daha dəqiq)</option></select></div>' +
       '<div class="qs-row"><button class="qs-b g" id="qs-go">🤖 Bütün səhifələrdən sualları çıxar</button>' +
       '<button class="qs-b o" id="qs-blank">➕ Boş sual</button><button class="qs-b o" id="qs-restore" style="display:none">♻️ Qaralamanı bərpa et</button></div>' +
@@ -391,16 +391,40 @@
     images.forEach(function (b64, i) { parts.push({ text: "Şəkil " + (i + 1) + ":" }); parts.push({ inline_data: { mime_type: "image/jpeg", data: b64 } }); });
     var url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key);
     var body = { contents: [{ parts: parts }], generationConfig: { temperature: 0.1, responseMimeType: "application/json", maxOutputTokens: 16000 } };
-    for (var t = 0; t < 3; t++) {
-      var r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      if (r.status === 429 || r.status >= 500) { await sleep(2500 * (t + 1)); continue; }
-      var j = await r.json();
-      if (!r.ok) throw new Error((j.error && j.error.message) || "HTTP " + r.status);
+    var lastErr = "";
+    for (var t = 0; t < 4; t++) {
+      var r;
+      try { r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
+      catch (e) { lastErr = "şəbəkə xətası (" + e.message + ")"; await sleep(3000 * (t + 1)); continue; }
+      var j = null; try { j = await r.json(); } catch (e) {}
+      var em = (j && j.error && j.error.message) || "";
+      if (r.status === 429 || r.status >= 500) {
+        lastErr = "HTTP " + r.status + (em ? ": " + em.slice(0, 180) : "");
+        if (/per ?day|PerDay/i.test(em + JSON.stringify((j && j.error && j.error.details) || ""))) break;   // gündəlik limit — gözləməyin mənası yoxdur
+        var wait = 5000 * (t + 1), rd = /retry in ([\d.]+)s/i.exec(em);
+        if (rd) wait = Math.min(60000, Math.ceil(parseFloat(rd[1]) * 1000) + 500);
+        msg("Gemini məşğuldur (" + r.status + "), " + Math.round(wait / 1000) + " san gözlənilir… (" + (t + 1) + "/4)");
+        await sleep(wait); continue;
+      }
+      if (!r.ok) throw new Error(em || "HTTP " + r.status);
       var pp = (((j.candidates || [])[0] || {}).content || {}).parts || [];
       var txt = pp.map(function (x) { return x.text || ""; }).join("").replace(/```json|```/g, "").trim();
-      try { return JSON.parse(txt).questions || []; } catch (e) { if (t === 2) return []; }
+      try { return JSON.parse(txt).questions || []; } catch (e) { lastErr = "cavab JSON deyil"; if (t >= 2) return []; }
     }
-    throw new Error("Gemini cavab vermədi (limit və ya server xətası). Bir azdan yenidən cəhd edin.");
+    var err = new Error("Gemini cavab vermədi — " + lastErr); err.retryable = true; throw err;
+  }
+  async function callWithFallback(key, images) {
+    var order = [S.cfg.model, "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"].filter(function (m, i, a) { return a.indexOf(m) === i; });
+    var last;
+    for (var i = 0; i < order.length; i++) {
+      try { var res = await callGemini(key, order[i], images); if (i > 0) S.cfg.model = order[i]; return res; }
+      catch (e) {
+        last = e;
+        if (e.retryable || /not found|404|not supported/i.test(e.message)) { msg("⚠️ " + order[i] + " alınmadı, növbəti model yoxlanılır…"); continue; }
+        throw e;
+      }
+    }
+    throw last;
   }
   function cropNorm(cv, box) {
     if (!box || box.length !== 4) return null;
@@ -423,18 +447,13 @@
     S.busy = true; $("qs-go").disabled = true;
     var found = [];
     try {
-      var n = S.pages.length, CH = 5, STEP = 4, start = 0, done = 0;
+      var n = S.pages.length, CH = 3, STEP = 2, start = 0, done = 0;
       while (start < n) {
         var idx = []; for (var i = start; i < Math.min(n, start + CH); i++) idx.push(i);
         msg("Gemini oxuyur: səhifə " + (idx[0] + 1) + "–" + (idx[idx.length - 1] + 1) + " / " + n);
         setProg(Math.round(done / n * 100));
         var imgs = idx.map(function (k) { return toJpeg(process(S.pages[k])); });
-        var items;
-        try { items = await callGemini(key, S.cfg.model, imgs); }
-        catch (e) {
-          if (/not found|404/i.test(e.message) && S.cfg.model !== "gemini-2.5-flash") { S.cfg.model = "gemini-2.5-flash"; items = await callGemini(key, S.cfg.model, imgs); }
-          else throw e;
-        }
+        var items = await callWithFallback(key, imgs);
         items.forEach(function (it, order) {
           var pi = idx[Math.min(idx.length, Math.max(1, parseInt(it.page) || 1)) - 1];
           var o = it.options || {}, opts = LET.map(function (l) { return String(o[l] == null ? "" : o[l]).trim(); });
@@ -447,6 +466,7 @@
         });
         done = Math.min(n, start + CH); start += STEP;
         if (start + 1 >= n && done >= n) break;
+        await sleep(2500);
       }
       setProg(100);
       found.sort(function (a, b) { return a.ord - b.ord; });
