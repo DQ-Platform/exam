@@ -149,7 +149,7 @@
       '<option value="gemini-2.5-pro">2.5 Pro (daha dəqiq)</option></select></div>' +
       '<div class="qs-row"><button class="qs-b g" id="qs-go">🤖 Bütün səhifələrdən sualları çıxar</button>' +
       '<button class="qs-b" id="qs-ocr">📝 Gemini-siz çıxar (OCR)</button></div>' +
-      '<div class="qs-help" style="margin:0">OCR rejimi API açarı tələb etmir, brauzerdə işləyir (ilk dəfə dil faylı yüklənir). Sütunlar avtomatik ayrılır. Variantlar ayrılmır (sual mətninin içində qalır), düzgün cavab seçilmir, şəkillər kəsilmir.</div>' +
+      '<div class="qs-help" style="margin:0">OCR rejimi API açarı tələb etmir, brauzerdə işləyir (ilk dəfə dil faylı yüklənir). Sütunlar avtomatik ayrılır, sual və A–E variantlar ayrı xanalara düşür, fiqur/sxem/cədvəl şəkilləri avtomatik kəsilib suala əlavə olunur. Düzgün cavab seçilmir.</div>' +
       '<div class="qs-row">' +
       '<button class="qs-b o" id="qs-blank">➕ Boş sual</button><button class="qs-b o" id="qs-restore" style="display:none">♻️ Qaralamanı bərpa et</button></div>' +
       '<div class="qs-prog" id="qs-prog"><i></i></div></div>' +
@@ -488,17 +488,38 @@
     setTimeout(function () { $("qs-prog").style.display = "none"; }, 1500);
   }
 
-  /* ---------- Gemini-siz: OCR (Tesseract) + qayda əsaslı parser ---------- */
+  /* ---------- Gemini-siz: OCR (Tesseract) + şəkil aşkarlama + qayda əsaslı parser ---------- */
   var OPT_RE = /^\(?\s*([A-Ea-e])\s*(?:[)\]}]|\.(?=\s))\s*(.*)$/;
-  var NUM_RE = /^(\d{1,3})\s*[.)]\s*(.*)$/;
+  var NUM_RE = /^(\d{1,3})\s*[.,)]\s*(.*)$/;
   var NOISE_RE = /^(d[öo]vl[əe]t qullu[ğg]u|[üu]mumi s[ıi]naq|www\.|https?:)/i;
   var NOISE2_RE = /(sayfa\s*\d+\s*\/\s*\d+|sonraki|[öo]nceki|s[ıi]naq\s*\d+\s*kopya)/i;
+  var SYM_RE = /^[AΔ△▲Vv•●■□▽\/\\^\-_~.,'"|\s]{1,16}$/;
 
-  /* sualları nömrəyə görə ayırır; variantlar AYRILMIR — A) B) C) D) sətirləri sual mətninin içində qalır */
-  function parseOcrLines(lines) {
-    var qs = [], cur = null, last = 0;
-    function open(n, rest, pg) {
-      cur = { num: n, lines: [], optCount: 0, optOpen: false, nextOpt: 0, page: pg };
+  /* "42351 B) 51423 C) 24351" kimi eyni sətirdəki variantları ayırır */
+  function inlineSplit(s, exp) {
+    var re = /(?:^|\s)([A-E])\s*[)\]}]/g, m, hits = [];
+    while ((m = re.exec(s))) {
+      var li = LET.indexOf(m[1]);
+      if (li >= exp && li <= exp + 1) { hits.push({ li: li, s: m.index, e: re.lastIndex }); exp = li + 1; }
+    }
+    var res = { head: (hits.length ? s.slice(0, hits[0].s) : s).trim(), items: [] };
+    hits.forEach(function (h, k) {
+      res.items.push({ li: h.li, text: s.slice(h.e, k + 1 < hits.length ? hits[k + 1].s : s.length).trim() });
+    });
+    return res;
+  }
+
+  /* lines: [{t,p,g,x0,y0,x1,y1}], figs: figs[g] = fiqur qutuları. A) B) C) D) E) variant xanalarına düşür */
+  function parseOcrLines(lines, figs) {
+    var qs = [], cur = null, last = 0, prevFig = false;
+    function rect(ln) { return ln.g == null || ln.y0 == null ? null : { g: ln.g, x0: ln.x0, y0: ln.y0, x1: ln.x1, y1: ln.y1 }; }
+    function inFig(ln) {
+      if (ln.g == null || ln.y0 == null || !figs || !figs[ln.g]) return false;
+      var cx = (ln.x0 + ln.x1) / 2, cy = (ln.y0 + ln.y1) / 2;
+      return figs[ln.g].some(function (f) { return cx >= f.x0 - 2 && cx <= f.x1 + 2 && cy >= f.y0 - 2 && cy <= f.y1 + 2; });
+    }
+    function open(n, rest, ln) {
+      cur = { num: n, lines: [], opts: [], optOpen: -1, page: ln.p, start: rect(ln), optRects: [], optConf: [] };
       if (rest) cur.lines.push(rest);
       qs.push(cur); last = n;
     }
@@ -509,40 +530,172 @@
       if (/^\d{1,2}\s*[.)]\s*\S/.test(t) || /[?:]$/.test(prev)) L.push(t);
       else L[L.length - 1] = prev + " " + t;
     }
+    function setOpt(q, li, text) { while (q.opts.length < li) q.opts.push(""); q.opts[li] = text; q.optOpen = li; }
+    function takeOpts(ln, m, inF) {
+      var li = LET.indexOf(m[1].toUpperCase()), nxt = cur.opts.length;
+      if (li < nxt || li > nxt + 1) return false;
+      var sp = inlineSplit(m[2], li + 1), rc = rect(ln);
+      setOpt(cur, li, inF ? "" : sp.head);
+      sp.items.forEach(function (it) { setOpt(cur, it.li, inF ? "" : it.text); });
+      if (rc) cur.optRects.push(rc);
+      if (!inF && ln.c != null) cur.optConf.push(ln.c);
+      return true;
+    }
     lines.forEach(function (ln) {
       var t = String(ln.t || "").replace(/\s+/g, " ").trim(), m;
       if (!t || !/[A-Za-z0-9əƏöÖüÜıİçÇşŞğĞ]/.test(t) || NOISE_RE.test(t) || NOISE2_RE.test(t) || /^\d{1,3}$/.test(t)) return;
-      if (cur && (m = OPT_RE.exec(t))) {
-        var li = LET.indexOf(m[1].toUpperCase());
-        if (li >= cur.nextOpt && li <= cur.nextOpt + 1) {
-          cur.nextOpt = li + 1; cur.optCount++; cur.optOpen = true;
-          cur.lines.push(LET[li] + ") " + m[2].trim()); return;
-        }
-      }
+      var inF = inFig(ln), wasFig = prevFig; prevFig = inF;
+      if (cur && (m = OPT_RE.exec(t)) && takeOpts(ln, m, inF)) return;
+      if (inF) return;                                   // fiqurun içindəki OCR zibili
       if ((m = NUM_RE.exec(t))) {
-        var n = parseInt(m[1], 10), nf = cur ? cur.optCount : 0;
-        var isNew = !cur ? n <= 200 : (nf >= 1 && (n === last + 1 || (nf >= 2 && n > last && n <= last + 3)));
-        if (isNew) { open(n, m[2].trim(), ln.p); return; }
+        var n = parseInt(m[1], 10), no = cur ? cur.opts.length : 0;
+        var isNew = !cur ? n <= 200 : ((no >= 1 && (n === last + 1 || (no >= 2 && n > last && n <= last + 12))) || (n === last + 1 && wasFig));
+        if (isNew) { open(n, m[2].trim(), ln); return; }
       }
       if (!cur) return;
-      if (cur.optOpen) cur.lines[cur.lines.length - 1] += " " + t;
-      else addText(cur, t);
+      if (cur.optOpen >= 0) {
+        cur.opts[cur.optOpen] = (cur.opts[cur.optOpen] + " " + t).trim();
+        var rc = rect(ln); if (rc) cur.optRects.push(rc);
+      } else addText(cur, t);
     });
     return qs.map(function (c) {
-      return { num: c.num, text: c.lines.join("\n").trim(), opts: ["", "", "", ""], page: c.page, incomplete: c.optCount < 4 };
+      var o = c.opts.slice(0, 5), cnt = o.length; while (o.length < 4) o.push("");
+      var fo = o.filter(Boolean);
+      var sym = fo.length >= 3 && fo.every(function (x) { return SYM_RE.test(x); }) && fo.some(function (x) { return x.replace(/\s/g, "").length >= 2; });
+      if (!sym && c.optConf.length) {                     // variant sətirlərini OCR zəif oxuyubsa (simvol/fiqur variantlar)
+        var avg = c.optConf.reduce(function (x, y) { return x + y; }, 0) / c.optConf.length;
+        if (avg < 68) sym = true;
+      }
+      return { num: c.num, text: c.lines.join("\n").trim(), opts: o, page: c.page, incomplete: fo.length < 4,
+        start: c.start, optRects: c.optRects, markerCount: cnt, symbolic: sym };
     });
+  }
+
+  /* hər sual üçün: hansı fiqur(lar) kəsilsin, variantlar şəkildirmi */
+  function planImages(qs, infos, docHasE) {
+    var PK = 1e5;
+    qs.forEach(function (q, qi) {
+      q.rects = null; q.picVar = false;
+      if (!q.start) return;
+      var nx = qs[qi + 1];
+      var a = q.start.g * PK + q.start.y0 - 3, b = (nx && nx.start) ? nx.start.g * PK + nx.start.y0 - 3 : Infinity;
+      var cl = [];
+      infos.forEach(function (inf, g) {
+        inf.figs.forEach(function (f) { var c = g * PK + (f.y0 + f.y1) / 2; if (c >= a && c < b) cl.push({ g: g, f: f }); });
+      });
+      var picVar = q.symbolic || (cl.length && q.opts.filter(Boolean).length < 2) || q.optRects.some(function (r) {
+        var cx = (r.x0 + r.x1) / 2, cy = (r.y0 + r.y1) / 2;
+        return cl.some(function (c) { return c.g === r.g && cx >= c.f.x0 - 3 && cx <= c.f.x1 + 3 && cy >= c.f.y0 - 3 && cy <= c.f.y1 + 3; });
+      });
+      var rs = {};
+      function add(g, x0, y0, x1, y1) {
+        var r = rs[g];
+        if (!r) rs[g] = { g: g, x0: x0, y0: y0, x1: x1, y1: y1 };
+        else { r.x0 = Math.min(r.x0, x0); r.y0 = Math.min(r.y0, y0); r.x1 = Math.max(r.x1, x1); r.y1 = Math.max(r.y1, y1); }
+      }
+      cl.forEach(function (c) { add(c.g, c.f.x0, c.f.y0, c.f.x1, c.f.y1); });
+      if (q.symbolic) q.optRects.forEach(function (r) { add(r.g, r.x0, r.y0, r.x1, r.y1); });
+      var gs = Object.keys(rs).map(Number).sort(function (x, y) { return x - y; });
+      if (!gs.length) return;
+      q.rects = gs.map(function (g) { return rs[g]; });
+      q.picVar = !!picVar;
+      if (q.picVar) {
+        var n = Math.max(q.markerCount, docHasE ? 5 : 4);
+        q.opts = LET.slice(0, n);
+        q.incomplete = false;
+      }
+    });
+  }
+
+  /* ---------- fiqur aşkarlama (bağlı komponentlər; OCR-a ehtiyac yoxdur) ---------- */
+  function detectFigures(g, w, h) {
+    var N = w * h, ink = new Uint8Array(N), i, x, y;
+    for (i = 0; i < N; i++) ink[i] = g[i] < 150 ? 1 : 0;
+    var lab = new Int32Array(N), parent = [0], next = 1;
+    function find(a) { while (parent[a] !== a) { parent[a] = parent[parent[a]]; a = parent[a]; } return a; }
+    function uni(a, b) { a = find(a); b = find(b); if (a !== b) { if (a < b) parent[b] = a; else parent[a] = b; } }
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) {
+      i = y * w + x; if (!ink[i]) continue;
+      var l1 = x > 0 ? lab[i - 1] : 0, l2 = (x > 0 && y > 0) ? lab[i - w - 1] : 0, l3 = y > 0 ? lab[i - w] : 0, l4 = (y > 0 && x < w - 1) ? lab[i - w + 1] : 0;
+      var m = 0; [l1, l2, l3, l4].forEach(function (l) { if (l && (!m || l < m)) m = l; });
+      if (!m) { lab[i] = next; parent.push(next); next++; }
+      else { lab[i] = m; [l1, l2, l3, l4].forEach(function (l) { if (l && l !== m) uni(m, l); }); }
+    }
+    var bx0 = new Int32Array(next).fill(1e9), by0 = new Int32Array(next).fill(1e9), bx1 = new Int32Array(next).fill(-1), by1 = new Int32Array(next).fill(-1), cnt = new Int32Array(next);
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) {
+      i = y * w + x; if (!lab[i]) continue;
+      var r = find(lab[i]);
+      if (x < bx0[r]) bx0[r] = x; if (x > bx1[r]) bx1[r] = x; if (y < by0[r]) by0[r] = y; if (y > by1[r]) by1[r] = y; cnt[r]++;
+    }
+    var comps = [], hs = [];
+    for (var r2 = 1; r2 < next; r2++) if (cnt[r2] && parent[r2] === r2) {
+      var c = { x0: bx0[r2], y0: by0[r2], x1: bx1[r2], y1: by1[r2] };
+      c.w = c.x1 - c.x0 + 1; c.h = c.y1 - c.y0 + 1; comps.push(c);
+      if (c.h >= 5 && c.h <= 45 && c.w <= 60) hs.push(c.h);
+    }
+    hs.sort(function (a, b) { return a - b; });
+    var hText = hs.length ? hs[Math.floor(hs.length * 0.75)] : 12, bigH = Math.max(26, 2.2 * hText), big = [], small = [];
+    comps.forEach(function (c) {
+      var rule = c.w <= 5 && c.h >= h * 0.5;               // səhifə ayırıcı xətti
+      if (!rule && c.h >= bigH && c.w >= 0.6 * hText) big.push({ x0: c.x0, y0: c.y0, x1: c.x1, y1: c.y1 });
+      else if (!rule && c.w >= 8 * hText && c.h >= 1.6 * hText) big.push({ x0: c.x0, y0: c.y0, x1: c.x1, y1: c.y1 });
+      else small.push(c);
+    });
+    function merge(bs, m) {
+      var ch = true;
+      while (ch) {
+        ch = false;
+        for (var a = 0; a < bs.length && !ch; a++) for (var b = a + 1; b < bs.length && !ch; b++) {
+          var A = bs[a], B = bs[b];
+          if (A.x0 - m <= B.x1 && B.x0 - m <= A.x1 && A.y0 - m <= B.y1 && B.y0 - m <= A.y1) {
+            A.x0 = Math.min(A.x0, B.x0); A.y0 = Math.min(A.y0, B.y0); A.x1 = Math.max(A.x1, B.x1); A.y1 = Math.max(A.y1, B.y1);
+            bs.splice(b, 1); ch = true;
+          }
+        }
+      }
+      return bs;
+    }
+    big = merge(big, Math.max(18, 1.8 * hText));
+    small.forEach(function (c) {                           // etiketlər: K, P, 1., A) …
+      var cx = (c.x0 + c.x1) / 2, cy = (c.y0 + c.y1) / 2;
+      big.forEach(function (f) {
+        if (cx >= f.x0 - 34 && cx <= f.x1 + 34 && cy >= f.y0 - 3 && cy <= f.y1 + 3) {
+          f.x0 = Math.min(f.x0, c.x0); f.x1 = Math.max(f.x1, c.x1); f.y0 = Math.min(f.y0, c.y0); f.y1 = Math.max(f.y1, c.y1);
+        }
+      });
+    });
+    return merge(big, 6).filter(function (f) { return f.x1 - f.x0 >= 20 && f.y1 - f.y0 >= 20; });
+  }
+  function grayOf(cv) {
+    var d = cv.getContext("2d").getImageData(0, 0, cv.width, cv.height).data, n = cv.width * cv.height, g = new Uint8Array(n);
+    for (var i = 0; i < n; i++) g[i] = (d[i * 4] * 0.3 + d[i * 4 + 1] * 0.59 + d[i * 4 + 2] * 0.11) | 0;
+    return g;
+  }
+  function drawRects(rects, infos) {
+    var segs = rects.map(function (r) {
+      var cv = infos[r.g].cv, x0 = Math.max(0, Math.floor(r.x0 - 6)), y0 = Math.max(0, Math.floor(r.y0 - 2)),
+        x1 = Math.min(cv.width, Math.ceil(r.x1 + 6)), y1 = Math.min(cv.height, Math.ceil(r.y1 + 2));
+      return { cv: cv, x0: x0, y0: y0, w: x1 - x0, h: y1 - y0 };
+    }).filter(function (s) { return s.w > 20 && s.h > 20; });
+    if (!segs.length) return null;
+    var W = Math.max.apply(null, segs.map(function (s) { return s.w; })), f = Math.min(2, Math.max(1, 800 / W)), gap = 8, H = 0;
+    segs.forEach(function (s) { H += s.h * f; }); H += gap * (segs.length - 1);
+    var c = mk(Math.round(W * f), Math.round(H)), x = c.getContext("2d"), yy = 0;
+    x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.imageSmoothingQuality = "high";
+    segs.forEach(function (s) { x.drawImage(s.cv, s.x0, s.y0, s.w, s.h, 0, yy, s.w * f, s.h * f); yy += s.h * f + gap; });
+    return c.toDataURL("image/jpeg", 0.9);
   }
 
   /* ---------- sütun ayırma (OCR-dan əvvəl) ---------- */
   function findGutter(cnt, w, ch) {
-    var lo = Math.floor(w * 0.3), hi = Math.ceil(w * 0.7), tol = Math.max(2, ch * 0.004), best = null, cur = null;
+    var lo = Math.floor(w * 0.25), hi = Math.ceil(w * 0.75), tol = Math.max(2, ch * 0.004), best = null, cur = null;
     for (var x = lo; x < hi; x++) {
       var c = cnt[x] > ch * 0.6 ? 0 : cnt[x];          // nazik şaquli xətti (ayırıcı) boşluq say
       if (c <= tol) { if (!cur) cur = { a: x, b: x }; cur.b = x; }
       else { if (cur && (!best || cur.b - cur.a > best.b - best.a)) best = cur; cur = null; }
     }
     if (cur && (!best || cur.b - cur.a > best.b - best.a)) best = cur;
-    return best && best.b - best.a >= 8 ? best : null;
+    return best && best.b - best.a >= 6 ? best : null;
   }
   function splitColumns(cv) {
     var w = cv.width, h = cv.height, d = cv.getContext("2d").getImageData(0, 0, w, h).data;
@@ -586,7 +739,13 @@
     var M = 30, c = mk(cv.width * s + 2 * M, cv.height * s + 2 * M), x = c.getContext("2d");
     x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
     x.imageSmoothingQuality = "high"; x.drawImage(cv, M, M, cv.width * s, cv.height * s);
-    return c;
+    return { c: c, s: s, M: M };
+  }
+  function ocrLines(d) {
+    if (d && d.lines && d.lines.length) return d.lines;
+    var out = [];
+    ((d && d.blocks) || []).forEach(function (b) { (b.paragraphs || []).forEach(function (pp) { (pp.lines || []).forEach(function (l) { out.push(l); }); }); });
+    return out;
   }
   async function extractOcr() {
     if (S.busy) return;
@@ -596,25 +755,42 @@
       msg("OCR mühərriki yüklənir (ilk dəfə 20–40 san çəkə bilər)…"); setProg(2);
       var w = await getOcr();
       await w.setParameters({ tessedit_pageseg_mode: "4", preserve_interword_spaces: "1" });
-      var n = S.pages.length, lines = [];
+      var n = S.pages.length, lines = [], infos = [];
       OCR.n = n;
       for (var k = 0; k < n; k++) {
         var parts = ocrParts(S.pages[k]); OCR.f = 1 / parts.length;
         for (var j = 0; j < parts.length; j++) {
-          OCR.k = k + j / parts.length; msg("OCR oxuyur: səhifə " + (k + 1) + " / " + n + (parts.length > 1 ? " (sütun " + (j + 1) + ")" : ""));
-          var res = await w.recognize(ocrCanvas(parts[j]));
-          String((res && res.data && res.data.text) || "").split(/\r?\n/).forEach(function (t) { lines.push({ t: t, p: k }); });
+          OCR.k = k + j / parts.length; msg("OCR oxuyur: səhifə " + (k + 1) + " / " + n + (parts.length > 1 ? " (sütun " + (j + 1) + "/" + parts.length + ")" : " (sütun ayrılmadı)"));
+          var cv = parts[j], gi = infos.length, figs = [];
+          try { figs = detectFigures(grayOf(cv), cv.width, cv.height); } catch (er) { figs = []; }
+          infos.push({ cv: cv, p: k, figs: figs });
+          var oc = ocrCanvas(cv);
+          var res = await w.recognize(oc.c, {}, { blocks: true, text: true });
+          var ls = ocrLines(res && res.data);
+          if (ls.length) ls.forEach(function (l) {
+            var b = l.bbox || {};
+            lines.push({ t: l.text, c: l.confidence, p: k, g: gi, x0: (b.x0 - oc.M) / oc.s, y0: (b.y0 - oc.M) / oc.s, x1: (b.x1 - oc.M) / oc.s, y1: (b.y1 - oc.M) / oc.s });
+          });
+          else String((res && res.data && res.data.text) || "").split(/\r?\n/).forEach(function (t) { lines.push({ t: t, p: k }); });
         }
         setProg(Math.round((k + 1) / n * 100));
       }
       showPage();
-      var list = parseOcrLines(lines).map(function (it) {
-        return { id: ++S.uid, sel: false, num: it.num, text: it.text, opts: it.opts, correct: null, image: null, page: it.page, incomplete: it.incomplete };
+      msg("Suallar və şəkillər hazırlanır…");
+      var docHasE = lines.some(function (l) { return /(?:^|\s)E\s*[)\]}]/.test(String(l.t || "")); });
+      var raw = parseOcrLines(lines, infos.map(function (f) { return f.figs; }));
+      planImages(raw, infos, docHasE);
+      var nimg = 0;
+      var list = raw.map(function (it) {
+        var img = null;
+        if (it.rects) { try { img = drawRects(it.rects, infos); } catch (er) { img = null; } }
+        if (img) nimg++;
+        return { id: ++S.uid, sel: false, num: it.num, text: it.text, opts: it.opts, correct: null, image: img, page: it.page, incomplete: it.incomplete };
       });
       if (!list.length) msg("Sual tapılmadı. Fon silmə gücünü dəyişin, ya da ➕ Boş sual ilə əl ilə daxil edin.", "err");
       else {
         S.qs = S.qs.concat(list); renderList(); persist();
-        msg("✅ OCR ilə " + list.length + " sual çıxarıldı. Variantlar sual mətninin içindədir (ayrılmayıb); mətni yoxlayın.", "ok");
+        msg("✅ OCR ilə " + list.length + " sual çıxarıldı, " + nimg + " sual üçün şəkil kəsildi. Düzgün cavabı seçin və mətni yoxlayın. Variantlar şəkildədirsə, xanalarda yalnız A, B, C… hərfləri yazılır.", "ok");
       }
     } catch (e) { msg("❌ OCR xətası: " + e.message + " (internet bağlantısını yoxlayın)", "err"); }
     S.busy = false; $("qs-go").disabled = false; $("qs-ocr").disabled = false;
