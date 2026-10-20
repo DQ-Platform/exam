@@ -226,7 +226,7 @@
       S.cur = Math.max(0, S.pages.length - files.length >= 0 ? 0 : 0);
       $("qs-pgcount").innerHTML = '<span class="qs-tag">' + S.pages.length + ' səhifə yükləndi</span> <button class="qs-b r s" id="qs-reset">Hamısını sil</button>';
       $("qs-reset").onclick = function () { S.pages = []; S.cur = 0; $("qs-pgcount").innerHTML = ""; $("qs-clean").style.display = "none"; $("qs-ext").style.display = $("qs-qwrap").style.display === "none" ? "none" : "block"; };
-      $("qs-clean").style.display = "block"; $("qs-ext").style.display = "block";
+      $("qs-clean").style.display = "block"; $("qs-ext").style.display = "block"; $("qs-qwrap").style.display = "block";
       msg("");
       showPage();
     } catch (e) { msg("❌ " + e.message, "err"); }
@@ -243,22 +243,53 @@
     }
     fin(); return best;
   }
-  function pageRect(src) {          // ekran görüntüsündə açıq (ağ/solğun) səhifə sahəsini tapır
-    var w = src.width, h = src.height, st = 2, x, y, i;
-    var d = src.getContext("2d").getImageData(0, 0, w, h).data, rows = [], cols = [];
-    function lt(k) { return d[k] > 170 && d[k + 1] > 170 && d[k + 2] > 170; }
-    for (y = 0; y < h; y += st) { var n = 0; for (x = 0; x < w; x += st) if (lt((y * w + x) * 4)) n++; rows[y / st] = n >= 0.3 * (w / st); }
-    var r = runsOf(rows, Math.max(4, Math.round(h * 0.03 / st)));   // sıx mətn sətirləri 60%-i keçmir — buna görə 30% + boşluq körpüsü
-    if (!r) return { x: 0, y: 0, w: w, h: h };
-    var y0 = r.a * st, y1 = Math.min(h, r.b * st);
-    for (x = 0; x < w; x += st) { var m = 0; for (y = y0; y < y1; y += st) if (lt((y * w + x) * 4)) m++; cols[x / st] = m >= 0.3 * ((y1 - y0) / st); }
-    var c = runsOf(cols, Math.max(4, Math.round(w * 0.02 / st)));
-    if (!c) return { x: 0, y: 0, w: w, h: h };
-    var x0 = c.a * st, x1 = Math.min(w, c.b * st), rw = x1 - x0, rh = y1 - y0;
-    if (rw * rh < 0.2 * w * h) return { x: 0, y: 0, w: w, h: h };
-    if (rw > 0.97 * w && rh > 0.97 * h) return { x: 0, y: 0, w: w, h: h };
-    var mg = Math.round(rw * 0.025);
-    return { x: x0 + mg, y: y0, w: rw - 2 * mg, h: rh };
+  function morph(m, ws, hs, r, grow) {   // grow=1: genişlət (dilate), grow=0: daralt (erode; kənardan kənar = dolu)
+    var o = new Uint8Array(ws * hs), x, y, dx, dy, hit;
+    for (y = 0; y < hs; y++) for (x = 0; x < ws; x++) {
+      hit = grow ? 0 : 1;
+      for (dy = -r; dy <= r && (grow ? !hit : hit); dy++) for (dx = -r; dx <= r; dx++) {
+        var yy = y + dy, xx = x + dx, v = (yy < 0 || yy >= hs || xx < 0 || xx >= ws) ? (grow ? 0 : 1) : m[yy * ws + xx];
+        if (grow ? v : !v) { hit = grow ? 1 : 0; break; }
+      }
+      o[y * ws + x] = hit;
+    }
+    return o;
+  }
+  function pageRect(src) {          // ekran görüntüsündə ən böyük ağ «kağız» sahəsini tapır (qara/tünd interfeys və menyular atılır)
+    var w = src.width, h = src.height, s = Math.max(2, Math.round(Math.max(w, h) / 550)),
+      ws = Math.floor(w / s), hs = Math.floor(h / s), full = { x: 0, y: 0, w: w, h: h };
+    if (ws < 12 || hs < 12) return full;
+    var d = src.getContext("2d").getImageData(0, 0, w, h).data, m = new Uint8Array(ws * hs), x, y, yy, xx;
+    for (y = 0; y < hs; y++) for (x = 0; x < ws; x++) {
+      var mn = 255;
+      for (yy = 0; yy < s && mn > 200; yy++) for (xx = 0; xx < s; xx++) {
+        var k = ((y * s + yy) * w + (x * s + xx)) * 4, v = d[k] < d[k + 1] ? d[k] : d[k + 1];
+        if (d[k + 2] < v) v = d[k + 2]; if (v < mn) mn = v;
+      }
+      m[y * ws + x] = mn > 200 ? 1 : 0;
+    }
+    m = morph(morph(m, ws, hs, 3, 1), ws, hs, 3, 0);        // mətn sətirləri arasındakı boşluqları doldur
+    var lab = new Uint8Array(ws * hs), stack = new Int32Array(ws * hs), best = null;
+    for (var st0 = 0; st0 < ws * hs; st0++) {
+      if (!m[st0] || lab[st0]) continue;
+      var sp = 0, n = 0, bx0 = ws, bx1 = 0, by0 = hs, by1 = 0;
+      stack[sp++] = st0; lab[st0] = 1;
+      while (sp) {
+        var cur = stack[--sp], cx = cur % ws, cy = (cur - cx) / ws; n++;
+        if (cx < bx0) bx0 = cx; if (cx > bx1) bx1 = cx; if (cy < by0) by0 = cy; if (cy > by1) by1 = cy;
+        if (cx > 0 && m[cur - 1] && !lab[cur - 1]) { lab[cur - 1] = 1; stack[sp++] = cur - 1; }
+        if (cx < ws - 1 && m[cur + 1] && !lab[cur + 1]) { lab[cur + 1] = 1; stack[sp++] = cur + 1; }
+        if (cy > 0 && m[cur - ws] && !lab[cur - ws]) { lab[cur - ws] = 1; stack[sp++] = cur - ws; }
+        if (cy < hs - 1 && m[cur + ws] && !lab[cur + ws]) { lab[cur + ws] = 1; stack[sp++] = cur + ws; }
+      }
+      if (!best || n > best.n) best = { n: n, x0: bx0, x1: bx1, y0: by0, y1: by1 };
+    }
+    if (!best) return full;
+    var rx = best.x0 * s, ry = best.y0 * s, rw = Math.min(w - rx, (best.x1 - best.x0 + 1) * s), rh = Math.min(h - ry, (best.y1 - best.y0 + 1) * s);
+    if (rw * rh < 0.2 * w * h) return full;
+    if (rw > 0.97 * w && rh > 0.97 * h) return full;
+    var mg = Math.round(rw * 0.012);
+    return { x: rx + mg, y: ry, w: rw - 2 * mg, h: rh };
   }
   function headerLine(cv) {          // başlığın altındakı tünd qırmızı xətti axtarır
     var w = cv.width, lim = Math.floor(cv.height * 0.14), d = cv.getContext("2d").getImageData(0, 0, w, lim).data, best = -1;
@@ -319,8 +350,20 @@
     ctx.drawImage(cv, cx, rr[0], rw, rh, 0, lh + 12, rw, rh);
     return out;
   }
+  function tight(cv) {              // yalnız sual/variant mətni qalır, ətrafı dümağ ağ olur
+    var w = cv.width, h = cv.height, d = cv.getContext("2d").getImageData(0, 0, w, h).data, rows = new Uint32Array(h), cols = new Uint32Array(w), x, y;
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) if (d[(y * w + x) * 4] < 140) { rows[y]++; cols[x]++; }
+    var y0 = 0, y1 = h - 1, x0 = 0, x1 = w - 1;
+    while (y0 < h && rows[y0] < 3) y0++; while (y1 > y0 && rows[y1] < 3) y1--;
+    while (x0 < w && cols[x0] < 3) x0++; while (x1 > x0 && cols[x1] < 3) x1--;
+    if (y1 - y0 < 20 || x1 - x0 < 20) return cv;
+    var bw = x1 - x0 + 1, bh = y1 - y0 + 1, pad = Math.max(16, Math.round(bw * 0.03)), out = mk(bw + 2 * pad, bh + 2 * pad), ctx = out.getContext("2d");
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, out.width, out.height);
+    ctx.drawImage(cv, x0, y0, bw, bh, pad, pad, bw, bh);
+    return out;
+  }
   function process(p) {
-    var g = geometry(p), cl = cleanCanvas(g, S.cfg.c);
+    var g = geometry(p), cl = tight(cleanCanvas(g, S.cfg.c));
     var out = S.cfg.stack ? stackCols(cl) : cl;
     var ctx = out.getContext("2d"); ctx.fillStyle = "#fff";
     (p.rects || []).forEach(function (r) { ctx.fillRect(r.x * out.width, r.y * out.height, r.w * out.width, r.h * out.height); });
@@ -753,6 +796,75 @@
     ((d && d.blocks) || []).forEach(function (b) { (b.paragraphs || []).forEach(function (pp) { (pp.lines || []).forEach(function (l) { out.push(l); }); }); });
     return out;
   }
+  /* ---------- ehtiyat parser: variant zəncirinə (A→B→C→D) görə suallara ayırır ---------- */
+  var AZC = "A-Za-zƏəİıÖöÜüÇçŞşĞğ";
+  function fbClean(s) {
+    s = String(s || "").replace(/[\u00a0\t]/g, " ").replace(/ {2,}/g, " ").replace(/\s+([,;?!)])/g, "$1");
+    s = s.replace(new RegExp("([,;])(?=[" + AZC + "])", "g"), "$1 ").replace(new RegExp("([a-zəıöüçşğ]{2})([.?!])(?=[A-ZƏİÖÜÇŞĞ][a-zəıöüçşğ]|\\d\\s)", "g"), "$1$2 ");
+    s = s.replace(new RegExp("(^|\\n)(\\d{1,2})\\.(?=[" + AZC + "])", "g"), "$1$2. ");
+    return s.trim();
+  }
+  function fbJoin(raw) {
+    var out = [];
+    raw.split("\n").forEach(function (l) {
+      l = l.trim(); if (!l) return;
+      if (!out.length) { out.push(l); return; }
+      var stmt = /^\d{1,2}[.)]\s*\S/.test(l) && !/^\d{1,2}[.)]\d/.test(l);
+      if (stmt || /^[•\-–]\s/.test(l)) out.push(l); else out[out.length - 1] += " " + l;
+    });
+    return out.join("\n");
+  }
+  function chainParse(text) {
+    var lines = String(text || "").replace(/\r/g, "").split("\n").map(function (l) { return l.replace(/\s+/g, " ").trim(); })
+      .filter(function (l) { return l && /[A-Za-z0-9əƏöÖüÜıİçÇşŞğĞ]/.test(l) && !NOISE_RE.test(l) && !NOISE2_RE.test(l) && !/^\d{1,3}$/.test(l); });
+    var T = lines.join("\n"), M = [], m, re1 = /(^|\s)\(?([A-E])\s?\)\s*/g, re2 = /^([A-E])\.(?=\s|[^\d.])\s*/gm;
+    while ((m = re1.exec(T))) M.push({ L: m[2], s: m.index + m[1].length, e: m.index + m[0].length });
+    while ((m = re2.exec(T))) M.push({ L: m[1], s: m.index, e: m.index + m[0].length });
+    M.sort(function (a, b) { return a.s - b.s; });
+    var ch = [], cur = null;
+    M.forEach(function (x) {
+      if (!cur) { if (x.L === "A") cur = [x]; return; }
+      var nx = String.fromCharCode(cur[cur.length - 1].L.charCodeAt(0) + 1);
+      if (x.L === nx && x.s >= cur[cur.length - 1].e) { cur.push(x); if (x.L === "E") { ch.push(cur); cur = null; } }
+      else if (x.L === "A") { if (cur.length >= 2) ch.push(cur); cur = [x]; }
+    });
+    if (cur && cur.length >= 2) ch.push(cur);
+    function cands(from, to, skip) {
+      var seg = T.slice(from, to), re = /^(\d{1,3})\s*[.)]\s*(?=\S)/gm, mm, o = [];
+      while ((mm = re.exec(seg))) {
+        if (skip && mm.index === 0) continue;
+        var rest = seg.slice(mm.index + mm[0].length, mm.index + mm[0].length + 40);
+        if (/^\d/.test(rest) && !new RegExp("^\\d+\\s+[" + AZC + "]{3,}").test(rest)) continue;
+        if (/^[\d.\s]+$/.test(rest.split("\n")[0])) continue;
+        o.push({ n: +mm[1], pos: from + mm.index, len: mm[0].length });
+      }
+      return o;
+    }
+    var res = [], lastN = 0, prevEnd = 0;
+    ch.forEach(function (c, i) {
+      var first = c[0], cs = cands(prevEnd, first.s, i > 0), exp = i === 0 ? 1 : lastN + 1,
+        cd = i === 0 ? (cs.filter(function (z) { return z.n === 1; })[0] || cs[0] || null) : (cs.filter(function (z) { return z.n === exp; })[0] || null);
+      if (i > 0) { var pl = ch[i - 1][ch[i - 1].length - 1]; res[res.length - 1].lastRaw = T.slice(pl.e, cd ? cd.pos : first.s); }
+      var stem = cd ? T.slice(cd.pos + cd.len, first.s) : (i === 0 ? T.slice(0, first.s) : "");
+      var n = cd ? cd.n : exp; lastN = n;
+      var o = ["", "", "", "", ""];
+      c.forEach(function (x, k) { if (k + 1 < c.length) o[x.L.charCodeAt(0) - 65] = T.slice(x.e, c[k + 1].s); });
+      res.push({ n: n, stem: stem, o: o, li: c[c.length - 1].L.charCodeAt(0) - 65, ls: c[c.length - 1].e });
+      prevEnd = c[c.length - 1].e;
+    });
+    if (res.length) {
+      var lq = res[res.length - 1], nx = cands(lq.ls, T.length, false).filter(function (z) { return z.n === lq.n + 1; })[0];
+      lq.lastRaw = T.slice(lq.ls, nx ? nx.pos : T.length);
+    }
+    return res.map(function (q) {
+      q.o[q.li] = q.lastRaw || "";
+      var opts = q.o.map(function (x) { return fbClean(fbJoin(x).replace(/\n/g, " ")); }), cnt = opts.filter(Boolean).length;
+      var stemT = fbClean(fbJoin(q.stem)); stemT = stemT.charAt(0).toLocaleUpperCase("az") + stemT.slice(1);
+      while (opts.length > 4 && !opts[opts.length - 1]) opts.pop();
+      return { num: q.n, text: stemT, opts: opts, page: 0, incomplete: cnt < 4 };
+    });
+  }
+
   async function extractOcr() {
     if (S.busy) return;
     if (!S.pages.length) return msg("Əvvəlcə fayl yükləyin.", "err");
@@ -784,8 +896,10 @@
       showPage();
       msg("Suallar və şəkillər hazırlanır…");
       var docHasE = lines.some(function (l) { return /(?:^|\s)E\s*[)\]}]/.test(String(l.t || "")); });
-      var raw = parseOcrLines(lines, infos.map(function (f) { return f.figs; }));
-      planImages(raw, infos, docHasE);
+      var raw = parseOcrLines(lines, infos.map(function (f) { return f.figs; })), alt = [];
+      try { alt = chainParse(lines.map(function (l) { return l.t || ""; }).join("\n")); } catch (er) { alt = []; }
+      if (alt.length > raw.length) raw = alt;                 // əsas parser az tapıbsa ehtiyat parserə keç
+      else planImages(raw, infos, docHasE);
       var nimg = 0;
       var list = raw.map(function (it) {
         var img = null;
@@ -793,7 +907,7 @@
         if (img) nimg++;
         return { id: ++S.uid, sel: false, num: it.num, text: it.text, opts: it.opts, correct: null, image: img, page: it.page, incomplete: it.incomplete };
       });
-      if (!list.length) msg("Sual tapılmadı. Fon silmə gücünü dəyişin, ya da ➕ Boş sual ilə əl ilə daxil edin.", "err");
+      if (!list.length) msg("Sual tapılmadı. Yuxarıdakı təmiz səhifəni yoxlayın (fon silmə gücü / 🧽 Sil rejimi), ya da ➕ Boş sual ilə əl ilə daxil edin.", "err");
       else {
         S.qs = S.qs.concat(list); renderList(); persist();
         msg("✅ OCR ilə " + list.length + " sual çıxarıldı, " + nimg + " sual üçün şəkil kəsildi. Düzgün cavabı seçin və mətni yoxlayın. Variantlar şəkildədirsə, xanalarda yalnız A, B, C… hərfləri yazılır.", "ok");
@@ -827,7 +941,7 @@
     return h;
   }
   function renderList() {
-    $("qs-qwrap").style.display = S.qs.length ? "block" : "none";
+    $("qs-qwrap").style.display = (S.qs.length || S.pages.length) ? "block" : "none";
     $("qs-list").innerHTML = S.qs.map(cardHtml).join("");
     $("qs-list").querySelectorAll(".qs-t").forEach(grow);
     counts();
