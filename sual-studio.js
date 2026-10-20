@@ -233,29 +233,32 @@
   }
 
   /* ---------- təmizləmə boru xətti ---------- */
-  function longest(arr, len, st, need) {
-    var best = null, cur = null;
-    for (var i = 0; i < len; i += st) {
-      if (arr[i] >= need) { if (!cur) cur = { a: i, b: i }; cur.b = i + st; }
-      else { if (cur && (!best || cur.b - cur.a > best.b - best.a)) best = cur; cur = null; }
+  function runsOf(ok, gap) {         // true-lar arasında "gap"-dək boşluğu körpüləyib ən uzun zolağı qaytarır
+    var best = null, s = -1, last = -1;
+    function fin() { if (s >= 0 && (!best || last + 1 - s > best.b - best.a)) best = { a: s, b: last + 1 }; }
+    for (var i = 0; i < ok.length; i++) {
+      if (!ok[i]) continue;
+      if (s < 0) s = i; else if (i - last > gap + 1) { fin(); s = i; }
+      last = i;
     }
-    if (cur && (!best || cur.b - cur.a > best.b - best.a)) best = cur;
-    return best;
+    fin(); return best;
   }
   function pageRect(src) {          // ekran görüntüsündə açıq (ağ/solğun) səhifə sahəsini tapır
-    var w = src.width, h = src.height, st = 2;
-    var d = src.getContext("2d").getImageData(0, 0, w, h).data, rows = new Uint32Array(h), x, y, i;
-    for (y = 0; y < h; y += st) { var n = 0; for (x = 0; x < w; x += st) { i = (y * w + x) * 4; if (d[i] > 170 && d[i + 1] > 170 && d[i + 2] > 170) n++; } rows[y] = n; }
-    var r = longest(rows, h, st, 0.6 * (w / st));
+    var w = src.width, h = src.height, st = 2, x, y, i;
+    var d = src.getContext("2d").getImageData(0, 0, w, h).data, rows = [], cols = [];
+    function lt(k) { return d[k] > 170 && d[k + 1] > 170 && d[k + 2] > 170; }
+    for (y = 0; y < h; y += st) { var n = 0; for (x = 0; x < w; x += st) if (lt((y * w + x) * 4)) n++; rows[y / st] = n >= 0.3 * (w / st); }
+    var r = runsOf(rows, Math.max(4, Math.round(h * 0.03 / st)));   // sıx mətn sətirləri 60%-i keçmir — buna görə 30% + boşluq körpüsü
     if (!r) return { x: 0, y: 0, w: w, h: h };
-    var cols = new Uint32Array(w);
-    for (y = r.a; y < r.b; y += st) for (x = 0; x < w; x += st) { i = (y * w + x) * 4; if (d[i] > 170 && d[i + 1] > 170 && d[i + 2] > 170) cols[x]++; }
-    var c = longest(cols, w, st, 0.6 * ((r.b - r.a) / st));
+    var y0 = r.a * st, y1 = Math.min(h, r.b * st);
+    for (x = 0; x < w; x += st) { var m = 0; for (y = y0; y < y1; y += st) if (lt((y * w + x) * 4)) m++; cols[x / st] = m >= 0.3 * ((y1 - y0) / st); }
+    var c = runsOf(cols, Math.max(4, Math.round(w * 0.02 / st)));
     if (!c) return { x: 0, y: 0, w: w, h: h };
-    var rw = c.b - c.a, rh = r.b - r.a;
-    if (rw * rh < 0.3 * w * h) return { x: 0, y: 0, w: w, h: h };
-    var m = Math.round(rw * 0.025);
-    return { x: c.a + m, y: r.a, w: rw - 2 * m, h: rh };
+    var x0 = c.a * st, x1 = Math.min(w, c.b * st), rw = x1 - x0, rh = y1 - y0;
+    if (rw * rh < 0.2 * w * h) return { x: 0, y: 0, w: w, h: h };
+    if (rw > 0.97 * w && rh > 0.97 * h) return { x: 0, y: 0, w: w, h: h };
+    var mg = Math.round(rw * 0.025);
+    return { x: x0 + mg, y: y0, w: rw - 2 * mg, h: rh };
   }
   function headerLine(cv) {          // başlığın altındakı tünd qırmızı xətti axtarır
     var w = cv.width, lim = Math.floor(cv.height * 0.14), d = cv.getContext("2d").getImageData(0, 0, w, lim).data, best = -1;
@@ -382,7 +385,10 @@
     '(7) Başlıq, altlıq, su nişanı, loqo və ad yazılarını (məs. "DÖVLƏT QULLUĞU", "Ümumi sınaq imtahanı", şəxs adları) suala QATMA. ' +
     '(8) page = sualın başladığı şəklin nömrəsi (1-dən). ' +
     '(9) Sualda şəkil/cədvəl/sxem varsa has_figure=true və figure_box-u həmin şəklin daxilində 0–1000 normallaşdırılmış koordinatla ver. ' +
-    '(10) Sonuncu şəkildə sual yarımçıq kəsilibsə incomplete=true. Sual yoxdursa {"questions":[]}.';
+    '(10) Sonuncu şəkildə sual yarımçıq kəsilibsə incomplete=true. Sual yoxdursa {"questions":[]}. ' +
+    '(11) Brauzer/tətbiq interfeysini (ünvan sətri, "Sayfa 1 / 9", %100, Önceki, Sonraki, Bitir, düymələr, saat, versiya, səhifə nömrələri) TAMAMİLƏ at; ilk nömrələnmiş sualdan əvvəl heç nə yazma. ' +
+    '(12) Hər sualı öz variantları ilə birlikdə tam çıxar; variant başqa sütunda/səhifədə olsa belə öz sualına aid et. Nömrələri buraxma və təkrarlama. ' +
+    '(13) OCR/yazı səhvlərini, artıq boşluqları və durğu işarələrini düzəlt (məs. "Dogru"→"Doğru"), amma mənanı, ədədləri və xüsusi adları dəyişmə.';
 
   function toJpeg(cv) {
     var s = Math.min(2, Math.max(1, 900 / cv.width)); if (cv.height * s > 7000) s = Math.max(1, 7000 / cv.height);
