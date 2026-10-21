@@ -228,6 +228,27 @@ function go(u,n){return fetch(u,{headers:{apikey:K}}).then(function(r){if(r.stat
   ]
 }
 </script>
+<script id="dq-tess-lazy">(function(){"use strict";
+/* Tesseract kitabxanası sürət üçün lazy yüklənir (dq11-early). OCR kodu isə onu birbaşa çağırırdı → "Tesseract is not defined".
+   Bu qatı ilk çağırışda həqiqi kitabxananı yükləyib işi ona ötürür. */
+if(window.Tesseract)return;
+var URL="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js",P=null;
+function real(){if(window.Tesseract&&!window.Tesseract.__lazy)return Promise.resolve(window.Tesseract);
+ if(P)return P;
+ P=new Promise(function(ok,no){var stub=window.Tesseract;try{delete window.Tesseract}catch(e){window.Tesseract=undefined}
+  var s=document.createElement("script");s.src=URL;s.async=true;
+  s.onload=function(){if(window.Tesseract&&!window.Tesseract.__lazy)ok(window.Tesseract);else{window.Tesseract=stub;P=null;no(new Error("Tesseract yüklənmədi"))}};
+  s.onerror=function(){window.Tesseract=stub;P=null;no(new Error("OCR kitabxanası yüklənmədi — internet bağlantısını yoxlayın."))};
+  document.head.appendChild(s)});
+ return P}
+var T={__lazy:true,
+ PSM:{OSD_ONLY:"0",AUTO_OSD:"1",AUTO_ONLY:"2",AUTO:"3",SINGLE_COLUMN:"4",SINGLE_BLOCK_VERT_TEXT:"5",SINGLE_BLOCK:"6",SINGLE_LINE:"7",SINGLE_WORD:"8",CIRCLE_WORD:"9",SINGLE_CHAR:"10",SPARSE_TEXT:"11",SPARSE_TEXT_OSD:"12",RAW_LINE:"13"},
+ OEM:{TESSERACT_ONLY:0,LSTM_ONLY:1,TESSERACT_LSTM_COMBINED:2,DEFAULT:3}};
+["recognize","createWorker","detect","setLogging"].forEach(function(n){
+ T[n]=function(){var a=arguments;return real().then(function(R){return R[n].apply(R,a)})}});
+window.Tesseract=T;
+window.__dqLibs=(function(o){return function(k){if(k==="ocr")return real().then(function(){});return o?o.apply(this,arguments):Promise.resolve()}})(window.__dqLibs);
+})();</script>
 <script src="dq-net.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
@@ -4942,5 +4963,44 @@ function init(){var g=document.querySelector("#admin-panel .admin-nav-grid");if(
  build();new MutationObserver(sched).observe(g,{childList:true,subtree:true});
  setTimeout(build,800);setTimeout(build,2500)}
 if(document.readyState==="complete")init();else window.addEventListener("load",init)})();</script>
+
+<style id="dqcnt-css">.dqcnt{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:800;background:#eaf1fc;color:#0a2f7a;border:1px solid #c9d6ee;align-self:flex-start}.dqcnt.z{background:#fef2f2;color:#b91c1c;border-color:#fecaca}.dqcnt.ld{opacity:.6}</style>
+<script id="dqcnt-js">(function(){"use strict";
+var DATA=null,TS=0,COLS=null,busy=false,lastSig="";
+function norm(s){return String(s==null?"":s).toLocaleLowerCase("az").replace(/[^\p{L}\p{N}]+/gu," ").trim()}
+function vis(el){return el&&el.offsetParent!==null}
+async function load(force){
+ if(busy)return;if(!force&&DATA&&Date.now()-TS<15000)return;busy=true;
+ try{var sb=window._supabase;if(!sb)return;
+  if(!COLS){var s=await sb.from("exam_questions").select("*").limit(1);if(s.error||!s.data||!s.data[0])return;
+   var K=Object.keys(s.data[0]);
+   COLS={exam:K.filter(function(k){return /^exam_id$/.test(k)})[0],cat:K.filter(function(k){return /^category$/.test(k)})[0],
+    sub:K.filter(function(k){return /^(subject(_name)?|fenn|fənn|section|topic|lesson|bolme|bölmə|subject_id)$/i.test(k)})[0]};
+   if(!COLS.sub)COLS.sub=K.filter(function(k){return /subject|fenn|fənn|section|topic/i.test(k)})[0]}
+  if(!COLS.exam)return;
+  var sel=[COLS.exam,COLS.cat,COLS.sub].filter(Boolean).join(","),rows=[],from=0;
+  for(;;){var r=await sb.from("exam_questions").select(sel).range(from,from+999);if(r.error)break;var d=r.data||[];rows=rows.concat(d);if(d.length<1000||rows.length>100000)break;from+=1000}
+  DATA=rows;TS=Date.now()}catch(e){}finally{busy=false}}
+function put(card,n){var b=card.querySelector(".dqcnt");if(!b){b=document.createElement("div");b.className="dqcnt";card.appendChild(b)}
+ b.classList.remove("ld");b.classList.toggle("z",!n);b.textContent="📝 "+n+" sual əlavə edilib"}
+function render(){
+ if(!DATA||!COLS)return;
+ var ex=document.querySelectorAll("#examFolderGrid .folder-card");
+ if(ex.length&&vis(ex[0]))ex.forEach(function(c){var t=(c.querySelector(".folder-title")||{}).textContent||"",m=t.match(/(\d+)/);if(!m)return;
+  var n=DATA.filter(function(q){return String(q[COLS.exam])===m[1]}).length;put(c,n)});
+ var sc=document.querySelectorAll("#stepSubjects .folder-card");
+ if(sc.length&&vis(sc[0])){
+  var en=((document.getElementById("navExam")||{}).textContent||"").match(/(\d+)/),cn=((document.getElementById("navCategory")||{}).textContent||"").trim().split(/\s+/)[0];
+  sc.forEach(function(c){var t=norm((c.querySelector(".folder-title")||{}).textContent);
+   var n=DATA.filter(function(q){
+    if(en&&String(q[COLS.exam])!==en[1])return false;
+    if(COLS.cat&&cn&&/^[A-Z]{2}$/.test(cn)&&String(q[COLS.cat])!==cn)return false;
+    return COLS.sub&&norm(q[COLS.sub])===t}).length;
+   put(c,n)})}}
+function tick(){var ex=document.querySelector("#examFolderGrid .folder-card"),sc=document.querySelector("#stepSubjects .folder-card");
+ var sig=(vis(ex)?"E":"")+(vis(sc)?"S"+((document.getElementById("navExam")||{}).textContent)+((document.getElementById("navCategory")||{}).textContent):"");
+ if(!sig){lastSig="";return}
+ if(sig!==lastSig){lastSig=sig;load(true).then(render)}else{render();load(false).then(render)}}
+setInterval(tick,700)})();</script>
 </body>
 </html>
