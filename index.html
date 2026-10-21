@@ -3063,17 +3063,23 @@ $("bPrint").addEventListener("click",function(){window.print()});
 
 /* ---------- PDF ---------- */
 /* Təmiz ağ vərəq: rəngli (su nişanı, başlıq, altlıq) piksellər silinir, fon dümağ ağ olur */
-function cleanCv(c){var g=c.getContext("2d"),w=c.width,h=c.height,im=g.getImageData(0,0,w,h),d=im.data,n=w*h,H=new Uint32Array(256),M=new Uint8Array(n),T=new Uint8Array(n),i,r,gg,b,l,p,mx,mn,x,y,col=0;
- for(i=0;i<n;i++){p=i*4;H[(d[p]*77+d[p+1]*150+d[p+2]*29)>>8]++}
- var bg=255,best=0;for(i=140;i<256;i++)if(H[i]>best){best=H[i];bg=i}
- bg=Math.max(bg,150);var k=255/bg;
+function cleanCv(c){var g=c.getContext("2d"),w=c.width,h=c.height,im=g.getImageData(0,0,w,h),d=im.data,n=w*h,M=new Uint8Array(n),T=new Uint8Array(n),L=new Uint8Array(n),i,p,r,gg,b,l,mx,mn,x,y,col=0;
  for(i=0;i<n;i++){p=i*4;r=d[p];gg=d[p+1];b=d[p+2];mx=Math.max(r,gg,b);mn=Math.min(r,gg,b);l=(r*77+gg*150+b*29)>>8;
-  if(mx-mn>38||(r-Math.max(gg,b)>14&&l>110)){M[i]=1;col++}
-  l=l>=bg*.9?255:Math.min(255,l*k);d[p]=d[p+1]=d[p+2]=l}
- if(col){/* rəngli sahəni 1 piksel genişlət: kənar halo və narın ləkələr də silinsin */
+  if(mx-mn>38||(r-Math.max(gg,b)>14&&l>110)){M[i]=1;col++}L[i]=l}
+ if(col){/* rəngli sahəni 1 piksel genişlət (kənar halo) */
   for(y=0;y<h;y++)for(x=0;x<w;x++){i=y*w+x;if(M[i]){T[i]=1;continue}var f=0;for(var dx=-1;dx<=1&&!f;dx++){var xx=x+dx;if(xx>=0&&xx<w&&M[y*w+xx])f=1}T[i]=f}
   for(x=0;x<w;x++)for(y=0;y<h;y++){i=y*w+x;if(T[i]){M[i]=1;continue}var f2=0;for(var dy=-1;dy<=1&&!f2;dy++){var yy=y+dy;if(yy>=0&&yy<h&&T[yy*w+x])f2=1}M[i]=f2}
-  for(i=0;i<n;i++)if(M[i]){p=i*4;d[p]=d[p+1]=d[p+2]=255}}
+  for(i=0;i<n;i++)if(M[i])L[i]=255}
+ /* Yerli fon səviyyəsi: bloklar üzrə maksimum → böyüt → hamarla. Boz su nişanı, kölgə və qeyri-bərabər fon "fon" sayılır,
+    mətn isə ondan qaranlıq qaldığı üçün qalır. */
+ var K=4,gw=Math.ceil(w/K),gh=Math.ceil(h/K),G=new Uint8Array(gw*gh),G2=new Uint8Array(gw*gh),rs=Math.max(2,Math.round(w/(140*K))),j,v,m;
+ for(y=0;y<h;y++){var row=(y>>2)*gw;for(x=0;x<w;x++){v=L[y*w+x];if(v>G[row+(x>>2)])G[row+(x>>2)]=v}}
+ for(y=0;y<gh;y++)for(x=0;x<gw;x++){m=0;for(j=Math.max(0,x-rs);j<=Math.min(gw-1,x+rs);j++)if(G[y*gw+j]>m)m=G[y*gw+j];G2[y*gw+x]=m}
+ for(x=0;x<gw;x++)for(y=0;y<gh;y++){m=0;for(j=Math.max(0,y-rs);j<=Math.min(gh-1,y+rs);j++)if(G2[j*gw+x]>m)m=G2[j*gw+x];G[y*gw+x]=m}
+ for(y=0;y<gh;y++)for(x=0;x<gw;x++){var sm=0,cn=0;for(j=Math.max(0,x-rs);j<=Math.min(gw-1,x+rs);j++){sm+=G[y*gw+j];cn++}G2[y*gw+x]=sm/cn}
+ for(x=0;x<gw;x++)for(y=0;y<gh;y++){var sm2=0,cn2=0;for(j=Math.max(0,y-rs);j<=Math.min(gh-1,y+rs);j++){sm2+=G2[j*gw+x];cn2++}G[y*gw+x]=sm2/cn2}
+ for(y=0;y<h;y++){var gr=(y>>2)*gw;for(x=0;x<w;x++){i=y*w+x;p=i*4;var bgv=G[gr+(x>>2)],q=L[i]/Math.max(bgv,40);
+  v=q>=.76?255:Math.round(q*q/.5776*255);d[p]=d[p+1]=d[p+2]=v}}
  g.putImageData(im,0,0);S.wm=col/n}
 function trimWhite(o){var g=o.getContext("2d"),w=o.width,h=o.height,d=g.getImageData(0,0,w,h).data,x0=w,y0=h,x1=-1,y1=-1,x,y,p;
  for(y=0;y<h;y++)for(x=0;x<w;x++){p=(y*w+x)*4;if(d[p]<235||d[p+1]<235||d[p+2]<235){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}

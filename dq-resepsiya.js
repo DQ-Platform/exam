@@ -3,7 +3,13 @@
 var $=function(i){return document.getElementById(i)};
 var AL="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",CATS=["BA","BB","AC"],T="allowed_students";
 var cur=null,cols=null;
-function db(){return window._supabase||window.sb||null}
+var _c=null;
+function db(){
+ if(_c)return _c;
+ try{if(typeof _supabase!=="undefined"&&_supabase&&_supabase.from)return(_c=_supabase)}catch(e){}
+ if(window._supabase&&window._supabase.from)return(_c=window._supabase);
+ try{if(window.supabase&&window.supabase.createClient)return(_c=window.supabase.createClient("https://cpzwliqlgaplroscvduo.supabase.co","sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF"))}catch(e){}
+ return null}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function pick(row,re,def){if(row)for(var k in row)if(re.test(k))return k;return def}
 /* sütun adlarını cədvəldən avtomatik tapır; boşdursa standart adlar */
@@ -32,6 +38,7 @@ window.DQResep={
   if(!name)return msg("Ad və soyadı yazın",1);
   if(!exam)return msg("Sınaq nömrəsini yazın",1);
   if(!cats.length)return msg("Ən azı bir kateqoriya seçin",1);
+  if(!db())return msg("Verilənlər bazası bağlantısı tapılmadı — saytda admin kimi daxil olub səhifəni yeniləyin",1);
   if(cur)return msg("Bu şəxs üçün iş nömrəsi artıq yaradılıb. Yeni şəxs üçün «Yeni şəxs» düyməsini basın",1);
   var b=$("rsp-gen");b.disabled=true;
   try{
