@@ -679,7 +679,7 @@
     var grid = panel.querySelector(".admin-nav-grid");
     if (grid && !grid.querySelector("[data-po-card]")) {
       var c = document.createElement("div"); c.className = "admin-nav-card"; c.setAttribute("data-po-card", "1"); c.setAttribute("onclick", "DQPO.open()");
-      c.style.cssText = "background:linear-gradient(135deg,#7c3aed,#db2777);color:#fff"; c.innerHTML = '<span class="icon">📄</span> PDF Pro Oxuma';
+      c.style.cssText = "background:linear-gradient(135deg,#7c3aed,#db2777);color:#fff"; c.innerHTML = '<span class="icon">📄</span> PDF Pro Oxuma (Sual Bankı)';
       grid.insertBefore(c, grid.firstChild);
     }
     return true;
