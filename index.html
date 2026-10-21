@@ -4721,5 +4721,98 @@ p{text-wrap:pretty}
 @media(max-width:760px){#lxp .rp-hero{grid-template-columns:1fr;padding:28px 20px;border-radius:24px}#lxp .rp-grid{grid-template-columns:1fr}#lxp .rp-sec h2{font-size:19px}}
 </style>
 
+<style id="dqx-ag-css">
+.admin-nav-grid.dqx-on{display:block!important}
+.admin-nav-grid.dqx-on>.dq-ag{display:none!important}
+.dqx-bar{display:flex;gap:8px;align-items:center;margin:0 0 14px;flex-wrap:wrap}
+.dqx-search{flex:1;min-width:180px;padding:9px 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px;background:#fff;color:#0f172a}
+.dqx-tog{padding:8px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#334155;font-size:12px;font-weight:700;cursor:pointer}
+.dqx-g{margin:0 0 16px;background:#fff;border:1px solid #e2e8f0;border-left:4px solid var(--ag);border-radius:12px;overflow:hidden}
+.dqx-h{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;background:linear-gradient(90deg,color-mix(in srgb,var(--ag) 9%,#fff),#fff)}
+.dqx-i{font-size:18px;line-height:1}
+.dqx-tt{flex:1;min-width:0;text-align:left}
+.dqx-tt b{display:block;font-size:14px;color:var(--ag);font-weight:800}
+.dqx-tt small{display:block;font-size:11px;color:#64748b;margin-top:1px}
+.dqx-n{min-width:24px;padding:2px 9px;border-radius:999px;background:var(--ag);color:#fff;font-size:11px;font-weight:800;text-align:center}
+.dqx-ch{font-size:11px;color:#94a3b8;transition:transform .2s}
+.dqx-g.dqx-shut .dqx-ch{transform:rotate(-90deg)}
+.dqx-c{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px;padding:10px 12px 12px}
+.dqx-g.dqx-shut .dqx-c{display:none}
+.dqx-c .admin-nav-card{background:#f8fafc!important;background-image:none!important;color:#0f172a!important;border:1px solid #e2e8f0!important;border-top:3px solid var(--ag)!important;box-shadow:none!important;min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:10px 6px;line-height:1.25;font-size:12px;font-weight:600;border-radius:10px;text-align:center}
+.dqx-c .admin-nav-card:hover{background:color-mix(in srgb,var(--ag) 10%,#fff)!important;transform:translateY(-1px)}
+.dqx-c .admin-nav-card .icon{display:block;font-size:20px;line-height:1}
+.dqx-c .admin-nav-card.dqx-hide{display:none!important}
+.dqx-g.dqx-empty{display:none}
+@media(max-width:480px){.dqx-c{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px}.dqx-c .admin-nav-card{font-size:10.5px;min-height:66px}}
+</style>
+<script id="dqx-ag-js">(function(){"use strict";
+var G=[
+["bank","📝","Suallar və sual bankı","Sual daxiletmə, bank və redaktə","#1e3a8a",/suallar modulu|sual bank|sual baza|məntiq sual|sual studiya|ardıcıl daxil|şablon|sual idarəsi|redakt[əe]\s*m[əe]rk/],
+["ai","✨","AI & PDF idxal alətləri","PDF/OCR, Gemini, kəsmə və avtomatik yükləmə","#6d28d9",/pdf|\bai\b|ocr|kəsmə|telefon|gemini|sinxron/],
+["bulk","📋","Toplu daxiletmə","Copy/Paste və kütləvi sual yükləmə","#0e7490",/copy|toplu/],
+["verify","✅","Yoxlama və təsdiq","Keyfiyyət nəzarəti və təsdiq prosesləri","#b45309",/yoxlama|təsdiq|elan/],
+["exam","📊","Sınaqlar, testlər və nəticələr","Sınaq idarəsi, iştirakçılar, statistika","#0f766e",/testl|sınaq|iştirakçı|nəticə|cavablar|statistika|karusel.*test|test/],
+["access","🔐","İcazələr və qeydiyyat","Giriş, kodlar və iştirak icazələri","#7c3aed",/icazə|kod yarat|istifadəçi|iştirak|qeydiyyat|tekrar|təkrar/],
+["content","📢","Məzmun və elanlar","Xəbərlər, dərs materialları, məlumat","#c2410c",/xəbər|dərs|material|məlumat|təəssürat|imtahan elan|sessiya/],
+["home","🏠","Ana səhifə və dizayn","Sayğac, qapaqlar, sayt redaktoru, animasiya","#be185d",/ana səhifə|sayğac|qapaq|redaktor|redakt|animasiya|premium|dizayn|sayt/],
+["panel","🧭","İdarəçi panelləri","V2–V7 və YSPRO idarəçi mərkəzləri","#1e1b4b",/idarəçi|yspro|v\d/],
+["sys","⚙️","Sistem və ayarlar","Ümumi ayarlar, qiymət və modullar","#334155",/idarə\s*&|ayar|qiymət|modullar|sistem/]
+];
+var other=["other","📁","Digər alətlər","Kateqoriyalaşdırılmamış","#475569",null];
+function lab(c){return (c.textContent||"").replace(/\s+/g," ").trim()}
+function key(s){return s.toLocaleLowerCase("az").replace(/[^\p{L}\p{N} ]/gu,"").replace(/\s+/g," ").trim()}
+function pick(t){var l=t.toLocaleLowerCase("az");
+ // xüsusi sıralama: dəqiq qaydalar əvvəl
+ if(/ana səhifə/.test(l))return "home";
+ if(/təsdiq.*elan|yoxlama/.test(l))return "verify";
+ if(/iş nömrəsi|iştirak icazə|istifadəçi icazə|icazə müdd|təkrar iştirak|kod yarat/.test(l))return "access";
+ if(/imtahan elan|xəbər|təəssürat/.test(l))return "content";
+ if(/idarəçi|yspro/.test(l))return "panel";
+ for(var i=0;i<G.length;i++){if(G[i][5]&&G[i][5].test(l))return G[i][0]}
+ return "other"}
+var busy=false,t=null,q="";
+function build(){
+ var grid=document.querySelector("#admin-panel .admin-nav-grid");if(!grid)return;
+ var cards=[].slice.call(grid.querySelectorAll(".admin-nav-card"));if(!cards.length)return;
+ busy=true;
+ try{
+  var seen={},map={};G.concat([other]).forEach(function(g){map[g[0]]=[]});
+  cards.forEach(function(c){var k=key(lab(c));c.classList.remove("dqx-hide");
+   if(seen[k]){c.style.display="none";c.setAttribute("data-dqx-dup","1");return}
+   seen[k]=1;c.style.display="";c.removeAttribute("data-dqx-dup");
+   map[pick(lab(c))].push(c)});
+  var old=grid.querySelector(":scope>.dqx-root");if(old)old.remove();
+  var root=document.createElement("div");root.className="dqx-root";
+  var bar=document.createElement("div");bar.className="dqx-bar";
+  bar.innerHTML='<input class="dqx-search" type="search" placeholder="🔎 Paneldə axtar…" aria-label="Axtar"><button type="button" class="dqx-tog" data-a="open">Hamısını aç</button><button type="button" class="dqx-tog" data-a="shut">Hamısını yığ</button>';
+  root.appendChild(bar);
+  var shut={};try{shut=JSON.parse(localStorage.getItem("dqx_shut")||"{}")}catch(e){}
+  G.concat([other]).forEach(function(g){var arr=map[g[0]];if(!arr.length)return;
+   var s=document.createElement("section");s.className="dqx-g"+(shut[g[0]]?" dqx-shut":"");s.style.setProperty("--ag",g[4]);s.setAttribute("data-g",g[0]);
+   s.innerHTML='<div class="dqx-h" role="button" tabindex="0"><span class="dqx-i">'+g[1]+'</span><span class="dqx-tt"><b>'+g[2]+'</b><small>'+g[3]+'</small></span><span class="dqx-n">'+arr.length+'</span><span class="dqx-ch">▼</span></div><div class="dqx-c"></div>';
+   var c=s.querySelector(".dqx-c");arr.forEach(function(x){c.appendChild(x)});root.appendChild(s)});
+  // köhnə qrup qabıqlarını və qalan kartları (dublikatlar) saxla, gizli
+  var hold=document.createElement("div");hold.style.display="none";
+  cards.forEach(function(c){if(c.getAttribute("data-dqx-dup"))hold.appendChild(c)});
+  root.appendChild(hold);
+  grid.querySelectorAll(":scope>.dq-ag").forEach(function(e){e.remove()});
+  grid.appendChild(root);grid.classList.add("dqx-on");
+  var inp=root.querySelector(".dqx-search");inp.value=q;
+  function filt(){q=inp.value.trim().toLocaleLowerCase("az");root.querySelectorAll(".dqx-g").forEach(function(s){var n=0;
+    s.querySelectorAll(".admin-nav-card").forEach(function(c){var m=!q||lab(c).toLocaleLowerCase("az").indexOf(q)>-1;c.classList.toggle("dqx-hide",!m);if(m)n++});
+    s.classList.toggle("dqx-empty",!n);if(q&&n)s.classList.remove("dqx-shut")})}
+  inp.addEventListener("input",filt);filt();
+  root.addEventListener("click",function(e){
+   var tg=e.target.closest(".dqx-tog");
+   if(tg){var o=tg.getAttribute("data-a")==="open";shut={};root.querySelectorAll(".dqx-g").forEach(function(s){s.classList.toggle("dqx-shut",!o);if(!o)shut[s.getAttribute("data-g")]=1});try{localStorage.setItem("dqx_shut",JSON.stringify(shut))}catch(x){}return}
+   var h=e.target.closest(".dqx-h");if(h){var s=h.parentNode;s.classList.toggle("dqx-shut");shut[s.getAttribute("data-g")]=s.classList.contains("dqx-shut")?1:0;try{localStorage.setItem("dqx_shut",JSON.stringify(shut))}catch(x){}}});
+ }finally{busy=false}}
+function sched(){if(busy)return;clearTimeout(t);t=setTimeout(function(){var g=document.querySelector("#admin-panel .admin-nav-grid");if(!g)return;
+  var loose=g.querySelectorAll(".admin-nav-card").length,mine=g.querySelectorAll(".dqx-root .admin-nav-card").length;
+  if(!g.querySelector(".dqx-root")||loose!==mine||g.querySelector(":scope>.dq-ag"))build()},250)}
+function init(){var g=document.querySelector("#admin-panel .admin-nav-grid");if(!g)return;
+ build();new MutationObserver(sched).observe(g,{childList:true,subtree:true});
+ setTimeout(build,800);setTimeout(build,2500)}
+if(document.readyState==="complete")init();else window.addEventListener("load",init)})();</script>
 </body>
 </html>
