@@ -2919,8 +2919,8 @@ label.l{display:flex;justify-content:space-between;align-items:center;font-size:
  <div class="pa-grid">
   <section class="card" id="src">
    <h2>PDF mənbə <span class="pg" id="docName" style="font-size:12px;color:var(--mute);font-weight:500"></span></h2>
-   <div class="drop" id="drop" tabindex="0" role="button" aria-label="PDF seç"><b>İmtahan PDF faylını yükləyin</b><span>Seçmək üçün klikləyin və ya faylı bura buraxın</span></div>
-   <input type="file" id="fPdf" accept="application/pdf" hidden>
+   <div class="drop" id="drop" tabindex="0" role="button" aria-label="PDF və ya şəkil seç"><b>İmtahan PDF və ya şəkil fayllarını yükləyin</b><span>Seçmək üçün klikləyin və ya faylı bura buraxın</span></div>
+   <input type="file" id="fPdf" accept="application/pdf,image/*" multiple hidden>
    <div id="viewer" hidden>
     <div class="bar">
      <button class="btn sm" id="pPrev" aria-label="Əvvəlki səhifə">‹</button><span class="pg" id="pgInfo">1 / 1</span><button class="btn sm" id="pNext" aria-label="Növbəti səhifə">›</button>
@@ -2928,7 +2928,9 @@ label.l{display:flex;justify-content:space-between;align-items:center;font-size:
      <button class="btn sm" id="sortT" aria-pressed="false" title="Bir neçə sualı seçib avtomatik ayır">🧩 Sırala: bağlı</button>
      <button class="btn sm on" id="cropT" aria-pressed="true">Kəsmə: açıq</button>
      <button class="btn sm on" id="copyT" aria-pressed="true" title="Kəsilən sahənin mətnini avtomatik kopyala">📋 Kopyala: açıq</button>
-     <button class="btn sm" id="newPdf">Başqa PDF</button>
+     <button class="btn sm" id="keyT" title="Cari səhifədəki «1d 2b 3a…» cavab açarını oxu və suallara avtomatik uyğunlaşdır">🔑 Cavab açarı</button><button class="btn sm" id="keyX" hidden title="Oxunmuş cavab açarını sil">✕</button>
+     <button class="btn sm on" id="cleanT" aria-pressed="true" title="Su nişanı, rəngli yazılar və kənar elementlər silinir, sual ağ vərəq üzərində qalır">🧼 Ağ vərəq: açıq</button>
+     <button class="btn sm" id="newPdf">Başqa fayl</button>
     </div>
     <div class="view crop" id="view"><div class="stage" id="stage"><canvas id="cv"></canvas><div class="sel" id="sel"></div></div></div>
     <div class="tg" id="targets" role="group" aria-label="Kəsilən sahə hara yazılsın"></div>
@@ -2959,14 +2961,14 @@ label.l{display:flex;justify-content:space-between;align-items:center;font-size:
  </section>
 </main>
 </div>
-<div class="sxo" id="sxo" hidden><div class="sxc" role="dialog" aria-modal="true" aria-labelledby="sxT"><div class="sxh"><b id="sxT">Tapılan suallar</b><button class="btn sm" id="sxX" type="button">Bağla</button></div><div class="sxb" id="sxB"></div><div class="sxf"><input class="f" id="sxK" style="flex:1;min-width:180px" placeholder="Cavab açarı (sıra ilə): məs. ACBDE" aria-label="Cavab açarı"><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><select class="f" id="sxN" aria-label="Sınaq" style="width:auto;min-height:40px"></select><select class="f" id="sxC" aria-label="Kateqoriya" style="width:auto;min-height:40px"><option>BA</option><option>BB</option><option>AC</option></select><select class="f" id="sxS" aria-label="Fənn" style="width:auto;min-height:40px;max-width:150px"></select></div><button class="btn pri" id="sxAdd" type="button">Seçilənləri sual bankına əlavə et</button></div></div></div>
+<div class="sxo" id="sxo" hidden><div class="sxc" role="dialog" aria-modal="true" aria-labelledby="sxT"><div class="sxh"><b id="sxT">Tapılan suallar</b><span style="display:flex;gap:6px"><button class="btn sm" id="sxKey" type="button">🔑 Açarı tətbiq et</button><button class="btn sm" id="sxX" type="button">Bağla</button></span></div><div class="sxb" id="sxB"></div><div class="sxf"><input class="f" id="sxK" style="flex:1;min-width:180px" placeholder="Cavab açarı (sıra ilə): məs. ACBDE" aria-label="Cavab açarı"><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><select class="f" id="sxN" aria-label="Sınaq" style="width:auto;min-height:40px"></select><select class="f" id="sxC" aria-label="Kateqoriya" style="width:auto;min-height:40px"><option>BA</option><option>BB</option><option>AC</option></select><select class="f" id="sxS" aria-label="Fənn" style="width:auto;min-height:40px;max-width:150px"></select></div><button class="btn pri" id="sxAdd" type="button">Seçilənləri sual bankına əlavə et</button></div></div></div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
 (function(){"use strict";
 var KEYS=["Q","A","B","C","D","E"],LS="proadd_questions_v1",PDFJS="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",WORKER="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",TESS="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js";
 var $=function(i){return document.getElementById(i)};
-var S={qs:[],draft:null,n:4,target:"Q",pdf:null,page:1,zoom:1,crop:true,copy:true,sort:false,pg:null,vpc:null,edit:null};
+var S={qs:[],draft:null,n:4,target:"Q",pdf:null,page:1,zoom:1,crop:true,copy:true,sort:false,pg:null,vpc:null,edit:null,clean:true,wm:0,key:{},keyN:0};
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function toast(t,err){var e=$("toast");e.textContent=t;e.className="toast on"+(err?" err":"");clearTimeout(toast.t);toast.t=setTimeout(function(){e.className="toast"},err?4500:2200)}
 function save(){try{localStorage.setItem(LS,JSON.stringify(S.qs))}catch(e){toast("Brauzer yaddaşı doludur — JSON ixrac edin",1)}}
@@ -3060,19 +3062,65 @@ $("fJson").addEventListener("change",function(e){var f=e.target.files[0];e.targe
 $("bPrint").addEventListener("click",function(){window.print()});
 
 /* ---------- PDF ---------- */
-function openPdf(file){if(!file||file.type!=="application/pdf"&&!/\.pdf$/i.test(file.name))return toast("Yalnız PDF faylı seçin",1);
+/* Təmiz ağ vərəq: rəngli (su nişanı, başlıq, altlıq) piksellər silinir, fon dümağ ağ olur */
+function cleanCv(c){var g=c.getContext("2d"),w=c.width,h=c.height,im=g.getImageData(0,0,w,h),d=im.data,n=w*h,H=new Uint32Array(256),M=new Uint8Array(n),T=new Uint8Array(n),i,r,gg,b,l,p,mx,mn,x,y,col=0;
+ for(i=0;i<n;i++){p=i*4;H[(d[p]*77+d[p+1]*150+d[p+2]*29)>>8]++}
+ var bg=255,best=0;for(i=140;i<256;i++)if(H[i]>best){best=H[i];bg=i}
+ bg=Math.max(bg,150);var k=255/bg;
+ for(i=0;i<n;i++){p=i*4;r=d[p];gg=d[p+1];b=d[p+2];mx=Math.max(r,gg,b);mn=Math.min(r,gg,b);l=(r*77+gg*150+b*29)>>8;
+  if(mx-mn>38||(r-Math.max(gg,b)>14&&l>110)){M[i]=1;col++}
+  l=l>=bg*.9?255:Math.min(255,l*k);d[p]=d[p+1]=d[p+2]=l}
+ if(col){/* rəngli sahəni 1 piksel genişlət: kənar halo və narın ləkələr də silinsin */
+  for(y=0;y<h;y++)for(x=0;x<w;x++){i=y*w+x;if(M[i]){T[i]=1;continue}var f=0;for(var dx=-1;dx<=1&&!f;dx++){var xx=x+dx;if(xx>=0&&xx<w&&M[y*w+xx])f=1}T[i]=f}
+  for(x=0;x<w;x++)for(y=0;y<h;y++){i=y*w+x;if(T[i]){M[i]=1;continue}var f2=0;for(var dy=-1;dy<=1&&!f2;dy++){var yy=y+dy;if(yy>=0&&yy<h&&T[yy*w+x])f2=1}M[i]=f2}
+  for(i=0;i<n;i++)if(M[i]){p=i*4;d[p]=d[p+1]=d[p+2]=255}}
+ g.putImageData(im,0,0);S.wm=col/n}
+function trimWhite(o){var g=o.getContext("2d"),w=o.width,h=o.height,d=g.getImageData(0,0,w,h).data,x0=w,y0=h,x1=-1,y1=-1,x,y,p;
+ for(y=0;y<h;y++)for(x=0;x<w;x++){p=(y*w+x)*4;if(d[p]<235||d[p+1]<235||d[p+2]<235){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}
+ if(x1<0)return o;var m=10;x0=Math.max(0,x0-m);y0=Math.max(0,y0-m);x1=Math.min(w-1,x1+m);y1=Math.min(h-1,y1+m);
+ var t=document.createElement("canvas");t.width=x1-x0+1;t.height=y1-y0+1;var q=t.getContext("2d");q.fillStyle="#fff";q.fillRect(0,0,t.width,t.height);q.drawImage(o,x0,y0,t.width,t.height,0,0,t.width,t.height);return t}
+function ocrArea(rx,ry,rw,rh,msg){toast(msg||"OCR ilə oxunur…");return lib("tess").then(function(){return Tesseract.recognize(cropImg(rx,ry,rw,rh,1800),"aze+eng")}).then(function(r){return(r.data.text||"").replace(/[ \t]+\n/g,"\n").trim()})}
+/* Şəkil faylları PDF kimi səhifə sayılır — kəsmə, OCR, kopyala, sırala eyni işləyir */
+function imgDoc(ims){return{numPages:ims.length,getPage:function(n){var im=ims[n-1];return Promise.resolve({hi:im.naturalWidth,
+ getViewport:function(o){var s=o.scale,H=im.naturalHeight*s;return{width:im.naturalWidth*s,height:H,scale:s,transform:[s,0,0,-s,0,H]}},
+ render:function(o){var c=o.canvasContext,v=o.viewport;c.fillStyle="#fff";c.fillRect(0,0,v.width,v.height);c.drawImage(im,0,0,v.width,v.height);return{promise:Promise.resolve(),cancel:function(){}}},
+ getTextContent:function(){return Promise.resolve({items:[]})}})}}}
+function showDoc(name){S.page=1;S.zoom=1;$("docName").textContent=name;$("drop").hidden=true;$("viewer").hidden=false;draw()}
+function openImgs(fs){fs.sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true})});toast("Şəkil yüklənir…");
+ Promise.all(fs.map(function(f){return new Promise(function(ok,no){var im=new Image();im.onload=function(){ok(im)};im.onerror=function(){no(new Error(f.name+" açılmadı"))};im.src=URL.createObjectURL(f)})}))
+ .then(function(ims){S.pdf=imgDoc(ims);showDoc(fs.length>1?fs.length+" şəkil":fs[0].name)}).catch(function(e){toast("Şəkil açılmadı: "+(e&&e.message||e),1)})}
+function openPdf(files){var fs=[].slice.call(files&&files.length!==undefined?files:(files?[files]:[]));if(!fs.length)return;
+ var im=fs.filter(function(f){return/^image\//.test(f.type)||/\.(jpe?g|png|webp|bmp|gif)$/i.test(f.name)});
+ if(im.length)return openImgs(im);
+ var file=fs[0];if(file.type!=="application/pdf"&&!/\.pdf$/i.test(file.name))return toast("PDF və ya şəkil faylı seçin",1);
  toast("PDF yüklənir…");lib("pdf").then(function(){return file.arrayBuffer()}).then(function(b){return pdfjsLib.getDocument({data:b}).promise}).then(function(p){
-  S.pdf=p;S.page=1;S.zoom=1;$("docName").textContent=file.name;$("drop").hidden=true;$("viewer").hidden=false;draw()}).catch(function(e){toast("PDF açılmadı: "+(e&&e.message||e),1)})}
+  S.pdf=p;showDoc(file.name)}).catch(function(e){toast("PDF açılmadı: "+(e&&e.message||e),1)})}
+/* ---------- Cavab açarı: «1d 2b 3a …» siyahısını oxu, suallara nömrə ilə uyğunlaşdır ---------- */
+function parseKey(t){var m={},c=0,mx=0,re=/(?:^|[^\d])(\d{1,3})\s*[\.\-\):]?\s*([A-Ea-e])(?![A-Za-zƏəİıÖöÜüŞşÇçĞğ\)])/g,x;
+ while((x=re.exec(t||""))){var n=+x[1];if(n>=1&&n<=300&&!m[n]){m[n]=x[2].toUpperCase();c++;if(n>mx)mx=n}re.lastIndex=x.index+x[0].length-1}
+ return{m:m,c:c,ok:c>=5&&c>=mx*.6}}
+function keyLabel(){$("keyT").textContent=S.keyN?"🔑 Açar: "+S.keyN:"🔑 Cavab açarı";$("keyT").classList.toggle("on",!!S.keyN);$("keyX").hidden=!S.keyN;$("sxKey").textContent=S.keyN?"🔑 Açarı tətbiq et ("+S.keyN+")":"🔑 Açarı tətbiq et"}
+function applyKey(silent){var k=S.key||{},done=0,miss=0;
+ [].forEach.call(document.querySelectorAll("#sxB .sxq"),function(c){var v=k[+c.dataset.n],s=c.querySelector(".sxs");if(!v||!s){miss++;return}s.value=v;if(s.value===v)done++;else miss++});
+ if(!silent)toast(!S.keyN?"Əvvəlcə cavablar səhifəsini oxuyun (🔑 Cavab açarı)":done+" sual uyğunlaşdırıldı"+(miss?" · "+miss+" sualın açarı tapılmadı":""),!S.keyN||!done);return done}
+function setKeyFrom(t){var k=parseKey(t);if(!k.ok)return false;
+ Object.keys(k.m).forEach(function(n){S.key[n]=k.m[n]});S.keyN=Object.keys(S.key).length;keyLabel();
+ var d=!$("sxo").hidden?applyKey(true):0;toast("🔑 Cavab açarı oxundu: "+k.c+" cavab"+(d?" · "+d+" sual uyğunlaşdırıldı":""));return true}
+$("keyT").addEventListener("click",function(){var c=$("cv");if(!S.pdf)return toast("Əvvəlcə fayl yükləyin",1);
+ toast("Cavab açarı axtarılır…");areaText(0,0,c.clientWidth,c.clientHeight).then(function(t){if(!setKeyFrom(t))toast("Bu səhifədə «1d 2b 3a…» tipli cavab siyahısı tapılmadı — cavablar səhifəsinə keçin",1)}).catch(function(e){toast("Oxunmadı: "+(e&&e.message||e),1)})});
+$("keyX").addEventListener("click",function(){S.key={};S.keyN=0;keyLabel();toast("Cavab açarı silindi")});
+$("sxKey").addEventListener("click",function(){applyKey(false)});
+$("cleanT").addEventListener("click",function(){S.clean=!S.clean;if(!S.clean)S.wm=0;this.classList.toggle("on",S.clean);this.textContent="🧼 Ağ vərəq: "+(S.clean?"açıq":"bağlı");this.setAttribute("aria-pressed",S.clean);draw()});
 var rt=null;
-function draw(){if(!S.pdf)return;S.pdf.getPage(S.page).then(function(pg){var w=Math.max(280,$("view").clientWidth-4),v1=pg.getViewport({scale:1}),sc=(w/v1.width)*S.zoom,dpr=Math.min(window.devicePixelRatio||1,2.5),vp=pg.getViewport({scale:sc*dpr}),c=$("cv");
+function draw(){if(!S.pdf)return;S.pdf.getPage(S.page).then(function(pg){var w=Math.max(280,$("view").clientWidth-4),v1=pg.getViewport({scale:1}),sc=(w/v1.width)*S.zoom,dpr=pg.hi?Math.min(5,Math.max(window.devicePixelRatio||1,pg.hi/(w*S.zoom))):Math.min(window.devicePixelRatio||1,2.5),vp=pg.getViewport({scale:sc*dpr}),c=$("cv");
   S.pg=pg;S.vpc=pg.getViewport({scale:sc});c.width=vp.width;c.height=vp.height;c.style.width=vp.width/dpr+"px";c.style.height=vp.height/dpr+"px";if(rt)try{rt.cancel()}catch(e){}
-  rt=pg.render({canvasContext:c.getContext("2d"),viewport:vp});rt.promise.catch(function(){});$("pgInfo").textContent=S.page+" / "+S.pdf.numPages;$("zInfo").textContent=Math.round(S.zoom*100)+"%";$("sel").style.display="none"})}
+  rt=pg.render({canvasContext:c.getContext("2d"),viewport:vp});rt.promise.then(function(){if(S.clean)cleanCv(c)}).catch(function(){});$("pgInfo").textContent=S.page+" / "+S.pdf.numPages;$("zInfo").textContent=Math.round(S.zoom*100)+"%";$("sel").style.display="none"})}
 $("drop").addEventListener("click",function(){$("fPdf").click()});
 $("drop").addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();$("fPdf").click()}});
 $("newPdf").addEventListener("click",function(){$("fPdf").click()});
-$("fPdf").addEventListener("change",function(e){openPdf(e.target.files[0]);e.target.value=""});
+$("fPdf").addEventListener("change",function(e){openPdf(e.target.files);e.target.value=""});
 ["dragenter","dragover"].forEach(function(n){$("drop").addEventListener(n,function(e){e.preventDefault();$("drop").classList.add("over")})});
-["dragleave","drop"].forEach(function(n){$("drop").addEventListener(n,function(e){e.preventDefault();$("drop").classList.remove("over");if(n==="drop")openPdf(e.dataTransfer.files[0])})});
+["dragleave","drop"].forEach(function(n){$("drop").addEventListener(n,function(e){e.preventDefault();$("drop").classList.remove("over");if(n==="drop")openPdf(e.dataTransfer.files)})});
 $("pPrev").addEventListener("click",function(){if(S.page>1){S.page--;draw()}});
 $("pNext").addEventListener("click",function(){if(S.pdf&&S.page<S.pdf.numPages){S.page++;draw()}});
 $("zIn").addEventListener("click",function(){S.zoom=Math.min(3,S.zoom+.25);draw()});
@@ -3082,17 +3130,17 @@ $("copyT").addEventListener("click",function(){S.copy=!S.copy;this.classList.tog
 $("sortT").addEventListener("click",function(){S.sort=!S.sort;this.classList.toggle("on",S.sort);this.textContent="🧩 Sırala: "+(S.sort?"açıq":"bağlı");this.setAttribute("aria-pressed",S.sort);$("view").classList.toggle("crop",S.crop||S.sort);if(S.sort)toast("Sırala: bir neçə sualı birlikdə seçin — sual və variantlar avtomatik ayrılacaq")});
 function clip(t){var done=function(){toast("Kopyalandı ✓ ("+t.length+" simvol)")},fb=function(){var a=document.createElement("textarea");a.value=t;a.style.cssText="position:fixed;opacity:0;top:0;left:0";document.body.appendChild(a);a.focus();a.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}a.remove();ok?done():toast("Kopyalama icazəsi verilmədi",1)};
  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,fb);else fb()}
-function cropImg(x,y,w,h,mx){var c=$("cv"),k=c.width/c.clientWidth,o=document.createElement("canvas"),sw=w*k,sh=h*k,m=Math.min(1,mx/sw);o.width=Math.round(sw*m);o.height=Math.round(sh*m);var g=o.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,o.width,o.height);g.drawImage(c,x*k,y*k,sw,sh,0,0,o.width,o.height);return o.toDataURL("image/jpeg",.9)}
+function cropImg(x,y,w,h,mx){var c=$("cv"),k=c.width/c.clientWidth,o=document.createElement("canvas"),sw=w*k,sh=h*k,m=Math.min(1,mx/sw);o.width=Math.round(sw*m);o.height=Math.round(sh*m);var g=o.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,o.width,o.height);g.drawImage(c,x*k,y*k,sw,sh,0,0,o.width,o.height);return(S.clean?trimWhite(o):o).toDataURL("image/jpeg",.9)}
 /* seçilmiş sahənin mətni: əvvəl PDF mətn qatı, yoxdursa OCR */
 function areaText(rx,ry,rw,rh){var pg=S.pg,vp=S.vpc;if(!pg||!vp)return Promise.resolve("");
+ if(S.clean&&S.wm>.003)return ocrArea(rx,ry,rw,rh,"Su nişanı/rəngli yazı silindi — təmiz şəkildən OCR…");
  return pg.getTextContent().then(function(tc){var L=[];
   tc.items.forEach(function(it){if(!it.str||!it.str.trim())return;var t=pdfjsLib.Util.transform(vp.transform,it.transform),fh=Math.hypot(t[2],t[3])||10,l=t[4],b=t[5],w=it.width*vp.scale,cx=l+w/2,cy=b-fh*.35;
    if(cx<rx||cx>rx+rw||cy<ry||cy>ry+rh)return;var ln=L.length&&L[L.length-1];
    if(ln&&Math.abs(b-ln.y)<fh*.5)ln.it.push({x:l,w:w,s:it.str,fh:fh});else L.push({y:b,it:[{x:l,w:w,s:it.str,fh:fh}]})});
   var txt=L.map(function(ln){ln.it.sort(function(a,b){return a.x-b.x});var o="",pe=null;ln.it.forEach(function(i){if(pe!==null&&i.x-pe>i.fh*.15&&!/\s$/.test(o)&&!/^\s/.test(i.s))o+=" ";o+=i.s;pe=i.x+i.w});return o.replace(/\s+$/,"")}).join("\n").trim();
   if(txt)return txt;
-  toast("Mətn qatı yoxdur — OCR ilə oxunur…");
-  return lib("tess").then(function(){return Tesseract.recognize(cropImg(rx,ry,rw,rh,1800),"aze+eng")}).then(function(r){return(r.data.text||"").replace(/[ \t]+\n/g,"\n").trim()})})}
+  return ocrArea(rx,ry,rw,rh,"Mətn qatı yoxdur — OCR ilə oxunur…")})}
 function copyArea(x,y,w,h){areaText(x,y,w,h).then(function(t){t?clip(t):toast("Mətn tapılmadı",1)}).catch(function(e){toast("Kopyalama alınmadı: "+(e&&e.message||e),1)})}
 
 /* ---------- Sırala: sualları və variantları avtomatik ayır ---------- */
@@ -3109,15 +3157,15 @@ function parseQs(txt){var L=txt.split("\n"),qs=[],cur=null,LET="ABCDE",startRe=/
  return qs.map(function(q){return{n:q.n,text:q.stem.join("\n").trim(),o:q.o}})}
 
 function sortArea(x,y,w,h){toast("Oxunur…");areaText(x,y,w,h).then(function(t){var qs=parseQs(t);
-  if(!qs.length)return toast("Sual tapılmadı — “1.” kimi nömrəli sual və A) B) C) D) variantları olan sahə seçin",1);sxOpen(qs)})
+  if(!qs.length&&setKeyFrom(t))return;if(!qs.length)return toast("Sual tapılmadı — “1.” kimi nömrəli sual və A) B) C) D) variantları olan sahə seçin",1);sxOpen(qs)})
  .catch(function(e){toast("Oxunmadı: "+(e&&e.message||e),1)})}
 function sxOpen(qs){var h=qs.map(function(q,i){var n=q.o.length,ok=n===4||n===5,L="ABCDE".slice(0,n>=4?n:4).split("");
-  return'<div class="sxq'+(ok?"":" warn")+'" data-i="'+i+'"><div class="top"><span>'+(i+1)+'. sual <small style="color:var(--mute);font-weight:500">(PDF-də № '+q.n+')</small></span><label><input type="checkbox" class="sxk"'+(ok?" checked":"")+'> Əlavə et</label></div>'+
+  return'<div class="sxq'+(ok?"":" warn")+'" data-i="'+i+'" data-n="'+q.n+'"><div class="top"><span>'+(i+1)+'. sual <small style="color:var(--mute);font-weight:500">(PDF-də № '+q.n+')</small></span><label><input type="checkbox" class="sxk"'+(ok?" checked":"")+'> Əlavə et</label></div>'+
    '<textarea class="f sxt" rows="3" aria-label="Sual mətni">'+esc(q.text)+'</textarea>'+
    q.o.map(function(o){return'<div class="ov"><b>'+o.l+'</b><input class="f sxv" value="'+esc(o.t)+'" aria-label="Variant '+o.l+'"></div>'}).join("")+
    '<label class="l" style="justify-content:flex-start;gap:8px">Düzgün cavab <select class="f sxs" style="width:auto;min-height:36px"><option value="">—</option>'+L.map(function(c){return"<option>"+c+"</option>"}).join("")+'</select></label>'+
    (ok?"":'<p class="hint" style="color:var(--bad)">'+n+' variant tapıldı (4 və ya 5 olmalıdır) — mətni yoxlayın.</p>')+'</div>'}).join("");
- $("sxB").innerHTML=h;$("sxK").value="";sxFill();$("sxT").textContent="Tapılan suallar: "+qs.length;$("sxo").hidden=false;$("sxB").scrollTop=0}
+ $("sxB").innerHTML=h;$("sxK").value="";sxFill();$("sxT").textContent="Tapılan suallar: "+qs.length;$("sxo").hidden=false;$("sxB").scrollTop=0;var dn=applyKey(true);if(dn)toast("🔑 "+dn+" sual üçün cavab avtomatik uyğunlaşdırıldı")}
 function sxFill(){var N=$("sxN"),S2=$("sxS"),ex=+$("exam").value||1,mx=Math.max(10,ex);N.innerHTML="";for(var i=1;i<=mx;i++){var o=document.createElement("option");o.value=i;o.textContent="Sınaq "+i;N.appendChild(o)}N.value=String(ex);$("sxC").value=$("cat").value;
  S2.innerHTML="";[].forEach.call($("subj").options,function(o){if(o.value==="__new")return;var x=document.createElement("option");x.textContent=o.textContent;S2.appendChild(x)});if($("subj").value!=="__new")S2.value=$("subj").value}
 function sxClose(){$("sxo").hidden=true}
