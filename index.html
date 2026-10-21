@@ -2660,8 +2660,128 @@ window.__dqSplashCalc=calc;window.DQSplash={complete:complete};
 <div class="admin-nav-card" onclick="V2.open();V2.go('news')"><span class="icon">📢</span> İmtahan Elanı Paylaş</div>
 <div class="admin-nav-card" onclick="V2.open();V2.go('res')"><span class="icon">💬</span> Təəssüratlar (Təsdiq)</div>
 <div class="admin-nav-card" onclick="window.DQCD&&DQCD.openAdmin()" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">⏳</span> Sayğac</div>
+<div class="admin-nav-card" onclick="PPU.open()" style="background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff"><span class="icon">📥</span> Peşəkar PDF Sınaq Yükləyici</div>
 <div class="admin-nav-card" onclick="window.DQST&&DQST.openAdmin()" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">📊</span> Ana Səhifə Statistikası</div>
 </div>
+<style id="ppu-css">
+#mod-propdf .ppu-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+#mod-propdf .ppu-tabs{display:flex;gap:6px;margin:0 0 16px;flex-wrap:wrap}
+#mod-propdf .ppu-tab{padding:9px 14px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;font-weight:700;font-size:13px;cursor:pointer;color:#334155}
+#mod-propdf .ppu-tab.on{background:#7c3aed;color:#fff;border-color:#7c3aed}
+#mod-propdf .ppu-up{background:#faf5ff;border:1px solid #ede9fe;border-radius:12px;padding:14px;margin:0 0 14px}
+#mod-propdf .ppu-up small{display:block;color:#6d28d9;font-weight:600;margin-top:8px;font-size:12px}
+#mod-propdf .ppu-lb{display:block;font-size:11px;font-weight:800;letter-spacing:.5px;color:#475569;text-transform:uppercase;margin:12px 0 5px}
+#mod-propdf .ppu-in,#mod-propdf .ppu-ta,#mod-propdf .ppu-sel{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:10px;font:inherit;font-size:14px;background:#fff;color:#0f172a;box-sizing:border-box}
+#mod-propdf .ppu-ta{resize:vertical;min-height:44px;line-height:1.5}
+#mod-propdf .ppu-hd{display:flex;align-items:center;justify-content:space-between;margin:18px 0 10px;padding-top:14px;border-top:1px solid #e2e8f0}
+#mod-propdf .ppu-hd b{font-size:16px;color:#0f172a}
+#mod-propdf .ppu-bd{background:#ede9fe;color:#6d28d9;font-weight:800;font-size:12px;padding:4px 12px;border-radius:999px}
+#mod-propdf .ppu-q{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:14px;margin:0 0 12px}
+#mod-propdf .ppu-q.warn{border-color:#f59e0b;background:#fffbeb}
+#mod-propdf .ppu-qn{font-size:11px;font-weight:800;color:#7c3aed;margin:0 0 6px}
+#mod-propdf .ppu-og{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+#mod-propdf .ppu-ft{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;font-size:12px;font-weight:700;color:#475569}
+#mod-propdf .ppu-ft .ppu-sel{width:auto;padding:6px 10px}
+#mod-propdf .ppu-del{background:none;border:0;color:#dc2626;font-weight:800;cursor:pointer;font-size:13px}
+#mod-propdf .ppu-btn{padding:10px 16px;border-radius:10px;border:0;font-weight:800;font-size:13px;cursor:pointer;background:#7c3aed;color:#fff}
+#mod-propdf .ppu-btn.g{background:#059669}#mod-propdf .ppu-btn.l{background:#e2e8f0;color:#0f172a}
+#mod-propdf .ppu-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#mod-propdf .ppu-msg{margin:10px 0;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:600;display:none}
+#mod-propdf .ppu-msg.ok{display:block;background:#ecfdf5;color:#065f46}#mod-propdf .ppu-msg.er{display:block;background:#fef2f2;color:#991b1b}#mod-propdf .ppu-msg.in{display:block;background:#eff6ff;color:#1e40af}
+@media(max-width:480px){#mod-propdf .ppu-og{grid-template-columns:1fr}}
+</style>
+<div id="mod-propdf" class="admin-module-block">
+<div class="ppu-top"><button type="button" class="ppu-btn l" onclick="PPU.close()">← Panelə qayıt</button><h4 style="margin:0">📥 Peşəkar PDF Sınaq Yükləyici</h4></div>
+<div class="ppu-tabs"><button type="button" class="ppu-tab on" data-t="new" onclick="PPU.tab('new')">➕ Yeni Sınaq Əlavə Et</button><button type="button" class="ppu-tab" data-t="ans" onclick="PPU.tab('ans')">☑️ Cavabları Tənzimlə</button></div>
+<div id="ppu-new">
+<div class="ppu-up"><span class="ppu-lb" style="margin-top:0">Sınaq PDF faylını seçin</span><input type="file" id="ppu-file" accept="application/pdf" onchange="PPU.load(this)"><small>Sistem PDF daxilindəki mətnləri təmizləyərək bütün sualları və variantları avtomatik qutulara bölür.</small></div>
+<div id="ppu-msg" class="ppu-msg"></div>
+<span class="ppu-lb">Sınağın adı</span><input class="ppu-in" id="ppu-name" placeholder="Sınağın adı">
+<div class="ppu-og"><div><span class="ppu-lb">Sınaq №</span><input class="ppu-in" id="ppu-exam" type="number" min="1" value="1"></div><div><span class="ppu-lb">Kateqoriya / Məlumat</span><input class="ppu-in" id="ppu-cat" placeholder="Məs: Dövlət qulluğu – Sınaq"></div></div>
+<span class="ppu-lb">Kateqoriya kodu (sistem)</span><div class="ppu-row"><label><input type="checkbox" class="ppu-cc" value="AC"> AC</label><label><input type="checkbox" class="ppu-cc" value="BA" checked> BA</label><label><input type="checkbox" class="ppu-cc" value="BB"> BB</label></div>
+<div class="ppu-hd"><b>Suallar və Variantlar</b><span class="ppu-bd" id="ppu-cnt">0 sual</span></div>
+<div id="ppu-list"></div>
+<div class="ppu-row" style="margin-top:12px"><button type="button" class="ppu-btn l" onclick="PPU.add()">➕ Sual əlavə et</button><button type="button" class="ppu-btn l" onclick="PPU.json()">⬇️ JSON yüklə</button><button type="button" class="ppu-btn g" onclick="PPU.save()">💾 Sınağı Saxla</button></div>
+<div id="ppu-msg2" class="ppu-msg"></div>
+</div>
+<div id="ppu-ans" style="display:none">
+<p style="color:#64748b;font-size:13px">Cavab açarını yapışdırın (məs: <code>1-A 2-B 3-C</code> və ya <code>1.A 2.D</code>). Yüklənmiş suallara tətbiq olunacaq.</p>
+<textarea class="ppu-ta" id="ppu-key" rows="6" placeholder="1-A 2-B 3-C 4-D …"></textarea>
+<div class="ppu-row" style="margin-top:10px"><button type="button" class="ppu-btn" onclick="PPU.applyKey()">Tətbiq et</button></div>
+<div id="ppu-msg3" class="ppu-msg"></div>
+</div>
+</div>
+<script id="ppu-js">(function(){"use strict";
+var S={rows:[]},L5=["A","B","C","D","E"];
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function say(id,t,k){var e=$(id);if(!e)return;e.className="ppu-msg "+(k||"in");e.textContent=t;if(!t)e.style.display="none"}
+function lib(){return new Promise(function(res,rej){if(window.pdfjsLib)return res();var s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";s.onload=res;s.onerror=function(){rej(new Error("PDF.js yüklənmədi"))};document.head.appendChild(s)}).then(function(){pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"})}
+function heal(s){return s.replace(/\s+/g," ").replace(/(\S+) ([əƏ]) (?=\S)/g,"$1$2").replace(/(\S+) ([əƏ])(?= |$|[.,;:?!])/g,"$1$2").trim()}
+async function extract(file){await lib();var pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise,out=[];
+ for(var p=1;p<=pdf.numPages;p++){var tc=await(await pdf.getPage(p)).getTextContent(),lines=[];
+  tc.items.forEach(function(it){if(it.str==null||!it.transform)return;var y=it.transform[5],L=null;for(var k=0;k<lines.length;k++)if(Math.abs(lines[k].y-y)<3){L=lines[k];break}if(!L){L={y:y,it:[]};lines.push(L)}L.it.push({x:it.transform[4],w:it.width||0,h:Math.abs(it.transform[3])||10,s:it.str})});
+  lines.sort(function(a,b){return b.y-a.y});
+  lines.forEach(function(L){L.it.sort(function(a,b){return a.x-b.x});var s="",end=null;L.it.forEach(function(i){var t=i.s;if(end!==null&&!/^\s/.test(t)&&!/\s$/.test(s)&&i.x-end>i.h*.25)s+=" ";s+=t;end=i.x+i.w});s=heal(s);if(s)out.push(s)})}
+ return out}
+function parseKey(t,key){var re=/(\d{1,3})\s*[-–.:)=]?\s*([A-Ea-e])(?![A-Za-zƏəıİöÖüÜğĞşŞçÇ])/g,m,n=0;while((m=re.exec(t))){key[+m[1]]=L5.indexOf(m[2].toUpperCase());n++}return n}
+function opts(t){var ms=[],pos=0;for(var i=0;i<5;i++){var r=new RegExp("(^|\\s)\\(?"+L5[i]+"\\s*[\\).]\\s*","g");r.lastIndex=pos;var m=r.exec(t);if(!m)break;ms.push({s:m.index+m[1].length,e:m.index+m[0].length});pos=m.index+m[0].length}
+ if(ms.length<2)return{q:t.trim(),o:["","","",""]};var o=[];ms.forEach(function(x,i){o.push(t.slice(x.e,i+1<ms.length?ms[i+1].s:t.length).trim())});while(o.length<4)o.push("");return{q:t.slice(0,ms[0].s).trim(),o:o}}
+function parse(lines){var txt=lines.join("\n"),key={},body=txt,ki=txt.search(/\n\s*(cavablar(\s+açar\w*)?|cavab\s+açar\w*|açar|answers?|key)\s*[:\n]/i);
+ if(ki>txt.length*.4){body=txt.slice(0,ki);parseKey(txt.slice(ki),key)}
+ var re=/(^|\n)\s*(\d{1,3})\s*[.)]\s+/g,m,idx=[],last=0;
+ while((m=re.exec(body))){var n=+m[2];if(n>last&&n<=last+3){idx.push({n:n,s:m.index+m[1].length,t:m.index+m[0].length});last=n}}
+ var rows=[];idx.forEach(function(x,i){var t=body.slice(x.t,i+1<idx.length?idx[i+1].s:body.length).replace(/\n+/g," "),c=-1,d=t.match(/(?:düzgün\s+)?cavab\s*[:\-]\s*([A-E])\b/i);
+  if(d){c=L5.indexOf(d[1].toUpperCase());t=t.replace(d[0],"")}
+  var r=opts(t);if(c<0&&key[x.n]!=null)c=key[x.n];rows.push({n:x.n,q:r.q,o:r.o,c:c})});return rows}
+function render(){var h="",need=S.rows.some(function(r){return r.o[4]});
+ S.rows.forEach(function(r,i){var oc=need||r.o[4]?5:4,ops="";for(var k=0;k<oc;k++)ops+='<input class="ppu-in" data-i="'+i+'" data-o="'+k+'" placeholder="'+L5[k]+' variantı" value="'+esc(r.o[k]||"")+'">';
+  var sel='<option value="-1"'+(r.c<0?" selected":"")+'>— seçin —</option>';for(var k=0;k<oc;k++)sel+='<option value="'+k+'"'+(r.c===k?" selected":"")+">"+L5[k]+"</option>";
+  h+='<div class="ppu-q'+(r.c<0?" warn":"")+'"><div class="ppu-qn">SUAL '+(i+1)+'</div><textarea class="ppu-ta" data-i="'+i+'" data-q="1" rows="2">'+esc(r.q)+'</textarea><div class="ppu-og">'+ops+'</div><div class="ppu-ft"><span>Düzgün Cavab: <select class="ppu-sel" data-i="'+i+'" data-c="1">'+sel+'</select></span><button type="button" class="ppu-del" data-i="'+i+'" data-d="1">🗑 Sil</button></div></div>'});
+ $("ppu-list").innerHTML=h;$("ppu-cnt").textContent=S.rows.length+" sual"}
+function bind(){var l=$("ppu-list");if(l.__b)return;l.__b=1;
+ l.addEventListener("input",function(e){var t=e.target,i=+t.dataset.i;if(isNaN(i)||!S.rows[i])return;if(t.dataset.q)S.rows[i].q=t.value;else if(t.dataset.o!=null)S.rows[i].o[+t.dataset.o]=t.value});
+ l.addEventListener("change",function(e){var t=e.target;if(t.dataset.c){S.rows[+t.dataset.i].c=+t.value;t.closest(".ppu-q").classList.toggle("warn",+t.value<0)}});
+ l.addEventListener("click",function(e){var b=e.target.closest("[data-d]");if(b){S.rows.splice(+b.dataset.i,1);render()}})}
+function sample(){return window._supabase.from("exam_questions").select("*").limit(1).then(function(r){if(r.error)throw r.error;return r.data&&r.data[0]})}
+function mapper(sm){var K=Object.keys(sm),f=function(re){return K.filter(function(k){return re.test(k)})[0]},m={};
+ m.cat=f(/^category$/);m.exam=f(/^exam_id$/);m.num=f(/^(q_?num(ber)?|question_(num|no|number|index)|num(ber)?|q_?no|order(_?index)?|position|idx|index|sira)$/i);
+ m.q=f(/^(question(_text)?|q_?text|text|title|sual)$/i);m.opts=f(/^(options?|variants?|choices|answers)$/i);m.corr=f(/^(correct(_?(answer|option|index|idx))?|answer|right_?answer|dogru)$/i);
+ if(!m.opts){m.each=L5.map(function(L){return f(new RegExp("^(opt(ion)?_?"+L+"|variant_?"+L+"|"+L+")$","i"))});if(m.each.filter(Boolean).length<4)m.each=null}
+ return m}
+function toRow(r,i,m,sm,exam,cat,start){var o={};if(m.exam)o[m.exam]=typeof sm[m.exam]==="number"?+exam:String(exam);o[m.cat]=cat;if(m.num)o[m.num]=start+i;o[m.q]=r.q;
+ var op=r.o.filter(function(x,k){return k<4||x});
+ if(m.opts){o[m.opts]=op}else m.each.forEach(function(k,j){if(k)o[k]=r.o[j]||""});
+ var cv=sm[m.corr];o[m.corr]=typeof cv==="number"?r.c:(typeof cv==="string"&&/^[A-E]$/i.test(cv)?L5[r.c]:(op[r.c]||""));return o}
+window.PPU={
+open:function(){try{window.switchAdminTab&&switchAdminTab("propdf")}catch(e){}
+ var p=document.getElementById("admin-panel");document.querySelectorAll("#admin-panel .admin-module-block").forEach(function(b){b.style.display="none"});var g=p&&p.querySelector(".admin-nav-grid");if(g)g.style.display="none";$("mod-propdf").style.display="block";bind();window.scrollTo({top:0,behavior:"smooth"})},
+close:function(){$("mod-propdf").style.display="none";var g=document.querySelector("#admin-panel .admin-nav-grid");if(g)g.style.display=""},
+tab:function(t){["new","ans"].forEach(function(x){$("ppu-"+x).style.display=x===t?"":"none"});document.querySelectorAll("#mod-propdf .ppu-tab").forEach(function(b){b.classList.toggle("on",b.dataset.t===t)})},
+load:async function(inp){var f=inp.files&&inp.files[0];if(!f)return;bind();say("ppu-msg","PDF oxunur…","in");
+ try{var lines=await extract(f);S.rows=parse(lines);$("ppu-name").value=f.name.replace(/\.pdf$/i,"");render();
+  var no=S.rows.filter(function(r){return r.c<0}).length,nv=S.rows.filter(function(r){return !r.o[0]}).length;
+  say("ppu-msg",S.rows.length?S.rows.length+" sual tapıldı"+(nv?" · "+nv+" sualda variantlar ayrılmadı (əl ilə tamamlayın)":"")+(no?" · "+no+" sualda düzgün cavab seçilməyib (sarı çərçivə)":""):"Sual tapılmadı — PDF skan şəklindədirsə OCR modulundan istifadə edin.",S.rows.length?"ok":"er")}
+ catch(e){say("ppu-msg","Xəta: "+(e.message||e),"er")}},
+add:function(){S.rows.push({q:"",o:["","","",""],c:-1});render()},
+applyKey:function(){var k={},n=parseKey($("ppu-key").value,k);if(!n)return say("ppu-msg3","Cavab açarı tanınmadı","er");var a=0;S.rows.forEach(function(r,i){var v=k[i+1];if(v!=null&&v>=0){r.c=v;a++}});render();say("ppu-msg3",a+" suala cavab tətbiq olundu (yeni sınaq tabında yoxlayın)","ok")},
+json:function(){var b=new Blob([JSON.stringify({name:$("ppu-name").value,questions:S.rows},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=($("ppu-name").value||"sinaq")+".json";a.click()},
+save:async function(){try{
+ if(!S.rows.length)return say("ppu-msg2","Saxlamaq üçün sual yoxdur","er");
+ var bad=S.rows.filter(function(r){return !r.q.trim()||r.o.filter(Boolean).length<2}).length;if(bad&&!confirm(bad+" sualda mətn/variant çatışmır. Yenə də saxlanılsın?"))return;
+ var nc=S.rows.filter(function(r){return r.c<0}).length;if(nc)return say("ppu-msg2",nc+" sualda düzgün cavab seçilməyib — əvvəlcə seçin.","er");
+ var cats=[].slice.call(document.querySelectorAll(".ppu-cc:checked")).map(function(x){return x.value});if(!cats.length)return say("ppu-msg2","Ən azı bir kateqoriya kodu seçin","er");
+ if(!window._supabase)return say("ppu-msg2","Verilənlər bazası bağlantısı tapılmadı","er");
+ say("ppu-msg2","Bazanın strukturu yoxlanılır…","in");var sm=await sample();
+ if(!sm)return say("ppu-msg2","Bazada nümunə sual yoxdur — struktur təyin edilə bilmədi. JSON yükləyib mənə göndərin.","er");
+ var m=mapper(sm);if(!m.exam||!m.cat||!m.q||!m.corr||!(m.opts||m.each))return say("ppu-msg2","Cədvəl sütunları avtomatik tanınmadı: "+Object.keys(sm).join(", ")+". Heç nə yazılmadı.","er");
+ var exam=$("ppu-exam").value||"1",rows=[];cats.forEach(function(c){S.rows.forEach(function(r,i){rows.push(toRow(r,i,m,sm,exam,c,1))})});
+ var ex=await window._supabase.from("exam_questions").select("*",{count:"exact",head:true}).eq(m.exam,rows[0][m.exam]).in(m.cat,cats);
+ if(ex&&ex.count&&!confirm("Sınaq "+exam+" ("+cats.join(", ")+") üçün bazada artıq "+ex.count+" sual var. "+rows.length+" yeni sual ƏLAVƏ olunsun?"))return say("ppu-msg2","Ləğv edildi","in");
+ if(!confirm(rows.length+" sual bazaya yazılacaq. Davam edək?"))return;
+ for(var i=0;i<rows.length;i+=50){var r=await window._supabase.from("exam_questions").insert(rows.slice(i,i+50));if(r.error)throw new Error(r.error.message+" ("+i+" sətirdən sonra dayandı)")}
+ say("ppu-msg2","✅ "+rows.length+" sual uğurla saxlanıldı","ok")}catch(e){say("ppu-msg2","Xəta: "+(e.message||e),"er")}}};
+})();</script>
 <div id="mod-dimcd" class="admin-module-block"></div>
 <div id="mod-homestats" class="admin-module-block"></div>
 <div id="mod-suallar" class="admin-module-block">
