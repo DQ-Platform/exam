@@ -2959,7 +2959,7 @@ label.l{display:flex;justify-content:space-between;align-items:center;font-size:
  </section>
 </main>
 </div>
-<div class="sxo" id="sxo" hidden><div class="sxc" role="dialog" aria-modal="true" aria-labelledby="sxT"><div class="sxh"><b id="sxT">Tapılan suallar</b><button class="btn sm" id="sxX" type="button">Bağla</button></div><div class="sxb" id="sxB"></div><div class="sxf"><input class="f" id="sxK" style="flex:1;min-width:180px" placeholder="Cavab açarı (sıra ilə): məs. ACBDE" aria-label="Cavab açarı"><button class="btn pri" id="sxAdd" type="button">Seçilənləri sual bankına əlavə et</button></div></div></div>
+<div class="sxo" id="sxo" hidden><div class="sxc" role="dialog" aria-modal="true" aria-labelledby="sxT"><div class="sxh"><b id="sxT">Tapılan suallar</b><button class="btn sm" id="sxX" type="button">Bağla</button></div><div class="sxb" id="sxB"></div><div class="sxf"><input class="f" id="sxK" style="flex:1;min-width:180px" placeholder="Cavab açarı (sıra ilə): məs. ACBDE" aria-label="Cavab açarı"><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><select class="f" id="sxN" aria-label="Sınaq" style="width:auto;min-height:40px"></select><select class="f" id="sxC" aria-label="Kateqoriya" style="width:auto;min-height:40px"><option>BA</option><option>BB</option><option>AC</option></select><select class="f" id="sxS" aria-label="Fənn" style="width:auto;min-height:40px;max-width:150px"></select></div><button class="btn pri" id="sxAdd" type="button">Seçilənləri sual bankına əlavə et</button></div></div></div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -3117,7 +3117,9 @@ function sxOpen(qs){var h=qs.map(function(q,i){var n=q.o.length,ok=n===4||n===5,
    q.o.map(function(o){return'<div class="ov"><b>'+o.l+'</b><input class="f sxv" value="'+esc(o.t)+'" aria-label="Variant '+o.l+'"></div>'}).join("")+
    '<label class="l" style="justify-content:flex-start;gap:8px">Düzgün cavab <select class="f sxs" style="width:auto;min-height:36px"><option value="">—</option>'+L.map(function(c){return"<option>"+c+"</option>"}).join("")+'</select></label>'+
    (ok?"":'<p class="hint" style="color:var(--bad)">'+n+' variant tapıldı (4 və ya 5 olmalıdır) — mətni yoxlayın.</p>')+'</div>'}).join("");
- $("sxB").innerHTML=h;$("sxK").value="";$("sxT").textContent="Tapılan suallar: "+qs.length;$("sxo").hidden=false;$("sxB").scrollTop=0}
+ $("sxB").innerHTML=h;$("sxK").value="";sxFill();$("sxT").textContent="Tapılan suallar: "+qs.length;$("sxo").hidden=false;$("sxB").scrollTop=0}
+function sxFill(){var N=$("sxN"),S2=$("sxS"),ex=+$("exam").value||1,mx=Math.max(10,ex);N.innerHTML="";for(var i=1;i<=mx;i++){var o=document.createElement("option");o.value=i;o.textContent="Sınaq "+i;N.appendChild(o)}N.value=String(ex);$("sxC").value=$("cat").value;
+ S2.innerHTML="";[].forEach.call($("subj").options,function(o){if(o.value==="__new")return;var x=document.createElement("option");x.textContent=o.textContent;S2.appendChild(x)});if($("subj").value!=="__new")S2.value=$("subj").value}
 function sxClose(){$("sxo").hidden=true}
 $("sxX").addEventListener("click",sxClose);
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("sxo").hidden)sxClose()});
@@ -3126,7 +3128,7 @@ $("sxAdd").addEventListener("click",function(){var cards=[].slice.call(document.
  items=[],bad=0,b=this;
  cards.forEach(function(c){var tx=c.querySelector(".sxt").value.trim(),vs=[].map.call(c.querySelectorAll(".sxv"),function(i){return i.value.trim()}),cr=c.querySelector(".sxs").value,n=vs.length;
   if(!tx||(n!==4&&n!==5)||vs.some(function(v){return!v})||!cr||"ABCDE".indexOf(cr)>=n){bad++;c.classList.add("warn");return}
-  items.push({card:c,q:{id:"q"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),category:$("cat").value,text:tx,textImg:"",options:vs.map(function(v,i){return{label:"ABCDE"[i],text:v,img:""}}),correct:cr,explanation:""}})});
+  items.push({card:c,q:{id:"q"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),category:$("sxC").value,exam:String(+$("sxN").value||1),subject:$("sxS").value,text:tx,textImg:"",options:vs.map(function(v,i){return{label:"ABCDE"[i],text:v,img:""}}),correct:cr,explanation:""}})});
  if(!items.length)return toast(bad?"Əlavə üçün mətn, variantlar və düzgün cavab tam olmalıdır":"Əlavə ediləcək sual seçilməyib",1);
  b.disabled=true;var added=0,chain=Promise.resolve();
  items.forEach(function(it){chain=chain.then(function(){return window.ProAdd&&window.ProAdd.onSave?window.ProAdd.onSave(it.q,false):0}).then(function(){S.qs.push(it.q);it.card.remove();added++})});
@@ -5402,5 +5404,6 @@ function tick(){var ex=document.querySelector("#examFolderGrid .folder-card"),sc
  if(!sig){lastSig="";return}
  if(sig!==lastSig){lastSig=sig;load(true).then(render)}else{render();load(false).then(render)}}
 setInterval(tick,700)})();</script>
+<script src="dq-resepsiya.js?v=1"></script>
 </body>
 </html>
