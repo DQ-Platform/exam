@@ -142,13 +142,20 @@ function check(it, dupes) {
   var gap = false; for (var i = 0; i < opts.length; i++) { if (!opts[i]) gap = true; else if (gap) { w.push("Variantlar arasında boşluq var"); break; } }
   if (it.correct < 0) w.push("Düzgün cavab seçilməyib");
   else if (!opts[it.correct]) w.push("Düzgün cavab boş variantı göstərir");
+  var subj = subjOf(it.num);
+  if (!(it.num >= 1 && it.num <= 100)) w.push("Sual № 1–100 aralığında deyil (fənn «Ümumi» olacaq)");
+  if (subj === "Qanunvericilik") {
+    if (it.correct === 4) w.push("Qanunvericilikdə düzgün cavab E ola bilməz");
+    else if (opts[4]) w.push("Qanunvericilik bölməsində E variantı yazılmır (atılacaq)");
+  }
   if (dupes[(it.q || "").trim().toLowerCase()] > 1 && (it.q || "").trim()) w.push("Təkrarlanan sual");
   return w;
 }
+function subjOf(n) { try { return typeof getSubjectByNumber === "function" ? getSubjectByNumber(+n || 1) : ""; } catch (e) { return ""; } }
 function dupMap() {
   var d = {}; S.items.forEach(function (it) { var k = (it.q || "").trim().toLowerCase(); if (k) d[k] = (d[k] || 0) + 1; }); return d;
 }
-function blocking(w) { return w.some(function (x) { return /boşdur|lazımdır|seçilməyib|boş variantı|boşluq/.test(x); }); }
+function blocking(w) { return w.some(function (x) { return /boşdur|lazımdır|seçilməyib|boş variantı|boşluq|E ola bilməz/.test(x); }); }
 
 /* ---------- UI ---------- */
 var CSS = ".cm{max-width:980px;margin:0 auto}.cm h4{margin:0 0 4px}.cm .cm-sub{color:#64748b;font-size:13px;margin-bottom:12px}" +
@@ -273,7 +280,7 @@ function draw() {
     for (var j = 0; j < 5; j++) sel += '<option value="' + j + '"' + (it.correct === j ? " selected" : "") + '>' + LETTERS[j] + ' variantı</option>';
     h += '<div class="cm-card ' + cls + '"><div class="cm-hd"><div style="display:flex;gap:8px;align-items:center"><label class="cm-chip" style="padding:3px 10px"><input type="checkbox" data-i="' + i + '" data-f="inc"' + (it.inc ? " checked" : "") + '> Daxil et</label>' +
       '<span>Sual №</span><input type="number" class="cm-num" min="1" data-i="' + i + '" data-f="num" value="' + (it.num || 1) + '" style="width:80px!important"></div>' +
-      '<div style="display:flex;gap:8px;align-items:center"><span class="cm-badge">' + badge + '</span><button class="cm-btn l" style="padding:4px 10px" data-del="' + i + '">✖</button></div></div>' +
+      '<div style="display:flex;gap:8px;align-items:center"><span class="cm-badge" title="Fənn">' + esc(subjOf(it.num)) + '</span><span class="cm-badge">' + badge + '</span><button class="cm-btn l" style="padding:4px 10px" data-del="' + i + '">✖</button></div></div>' +
       '<textarea rows="3" data-i="' + i + '" data-f="q" placeholder="Sual mətni">' + esc(it.q) + '</textarea>' +
       '<div class="cm-grid">' + optsH + '</div>' +
       '<div class="cm-grid"><div><label style="font-weight:700;font-size:13px">Düzgün cavab</label><select data-i="' + i + '" data-f="cor">' + sel + '</select></div>' +
@@ -286,15 +293,12 @@ function draw() {
 
 /* ---------- Bazaya yükləmə ---------- */
 function sb() { try { return _supabase; } catch (e) { return window._supabase || null; } }
-async function dbCount(exam) {
-  var s = sb(); if (!s) return null;
+async function dbRow(exam, cat, num) {
+  var s = sb(); if (!s) return undefined;
   try {
-    var r = await s.from("exam_questions").select("*", { count: "exact", head: true }).eq("exam_id", Number(exam));
-    if (!r.error && typeof r.count === "number") return r.count;
-    r = await s.from("exam_questions").select("*", { count: "exact", head: true }).eq("exam_id", String(exam));
-    if (!r.error && typeof r.count === "number") return r.count;
-  } catch (e) {}
-  return null;
+    var r = await s.from("exam_questions").select("id,question,options,correct").eq("exam_id", String(exam)).eq("category", cat).eq("q_number", num).maybeSingle();
+    if (r.error) return undefined; return r.data || null;
+  } catch (e) { return undefined; }
 }
 function setv(id, v, evt) {
   var el = $(id); if (!el) return false; el.value = v;
@@ -308,7 +312,7 @@ async function run() {
   var exam = parseInt($("cm-exam").value, 10);
   var cats = [].filter.call(document.querySelectorAll(".cm-cat"), function (c) { return c.checked; }).map(function (c) { return c.value; });
   if (!exam || exam < 1) { alert("Sınaq № düzgün deyil."); return; }
-  if (!cats.length) { alert("Ən azı bir kateqoriya (BA / BB / AC) seçin."); return; }
+  if (!cats.length && !$("cm-flash").checked) { alert("Ən azı bir kateqoriya (BA / BB / AC) və ya ⚡ Günün sualı seçin."); return; }
   var dm = dupMap();
   var todo = S.items.filter(function (it) { return it.inc && it.status !== "ok" && !blocking(check(it, dm)); });
   var skipped = S.items.filter(function (it) { return it.inc && it.status !== "ok" && blocking(check(it, dm)); }).length;
@@ -321,6 +325,7 @@ async function run() {
   $("cm-go").disabled = true; $("cm-stop").style.display = "inline-block"; $("cm-parse").disabled = true;
   var flash = $("cm-flash").checked;
   var oa = window.alert, oc = window.confirm, msgs = [];
+  if (typeof dqClean !== "function") { alert("app.js tam yüklənməyib (dqClean tapılmadı)."); S.running = false; $("cm-go").disabled = false; $("cm-stop").style.display = "none"; $("cm-parse").disabled = false; return; }
   var ok = 0, fail = 0, done = 0;
 
   try {
@@ -329,7 +334,7 @@ async function run() {
       var it = todo[n]; it.status = "work"; it.msg = ""; draw();
       msgs = []; window.alert = function (m) { msgs.push(String(m)); }; window.confirm = function () { return true; };
       try {
-        var before = await dbCount(exam);
+        try { Object.keys(copyPasteUploadedOptions).forEach(function (k) { delete copyPasteUploadedOptions[k]; }); } catch (e0) {}
         setv("cp-raw-text", "", "input");
         setv("cp-parsed-question", it.q.trim());
         var cc = it.opts.map(function (o) { return (o || "").trim(); });
@@ -342,13 +347,21 @@ async function run() {
         if ($("cp-correct-opt") && $("cp-correct-opt").value !== String(it.correct)) throw new Error("Düzgün cavab formaya yazıla bilmədi");
         var r = window.saveCopyPasteQuestion();
         if (r && typeof r.then === "function") await r;
-        var after = null, tries = 0;
-        if (before != null) { while (tries < 12) { await sleep(500); after = await dbCount(exam); if (after != null && after > before) break; tries++; } }
-        else await sleep(900);
-        var err = msgs.filter(function (m) { return /xəta|səhv|alınmadı|uğursuz|seçin|daxil edin|boş|doldurun|error|fail/i.test(m); })[0];
-        if (err) { it.status = "fail"; it.msg = err; fail++; }
-        else if (before != null && after != null && after <= before) { it.status = "ok"; it.msg = "Yeni sətir artmadı — eyni № mövcud idisə yenilənmiş ola bilər (bazada yoxlayın)."; ok++; }
-        else { it.status = "ok"; ok++; }
+        var hardErr = msgs.filter(function (m) { return /xəta baş verdi|Zəhmət olmasa|seçməlisiniz/i.test(m); })[0];
+        var flashErr = msgs.filter(function (m) { return /Günün sualına əlavə olunmadı/i.test(m); })[0];
+        var saidOk = msgs.some(function (m) { return /uğurla|əlavə olundu/i.test(m); });
+        if (hardErr || !saidOk) { it.status = "fail"; it.msg = hardErr || flashErr || msgs.join(" | ") || "Saxlama təsdiqi alınmadı"; fail++; }
+        else {
+          var bad = [];
+          for (var ci = 0; ci < cats.length; ci++) {
+            var row = await dbRow(exam, cats[ci], it.num);
+            if (row === undefined) continue; /* yoxlama mümkün deyil */
+            if (row === null) bad.push(cats[ci] + ": bazada tapılmadı");
+            else if (+row.correct !== it.correct) bad.push(cats[ci] + ": düzgün cavab uyğun gəlmir");
+          }
+          if (bad.length) { it.status = "fail"; it.msg = "Bazada yoxlama: " + bad.join("; "); fail++; }
+          else { it.status = "ok"; it.msg = flashErr ? "Bazaya yazıldı, amma " + flashErr : ""; ok++; }
+        }
       } catch (e) { it.status = "fail"; it.msg = (e && e.message) || "Naməlum xəta"; fail++; }
       finally { window.alert = oa; window.confirm = oc; }
       done++; $("cm-prog").style.width = Math.round(done / todo.length * 100) + "%"; draw();
