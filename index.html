@@ -2644,6 +2644,7 @@ window.__dqSplashCalc=calc;window.DQSplash={complete:complete};
 <div class="admin-nav-card" onclick="switchAdminTab('mobilepdf')"><span class="icon">📱</span> Telefon Beynindən PDF Yüklə</div>
 <div class="admin-nav-card" onclick="switchAdminTab('copypaste')"><span class="icon">📋</span> Copy / Paste Sual Daxil Et</div>
 <div class="admin-nav-card" onclick="switchAdminTab('qstudio')"><span class="icon">🧼</span> Sual Studiyası</div>
+<div class="admin-nav-card" onclick="switchAdminTab('copymaster')" style="background:linear-gradient(135deg,#7c3aed,#db2777);color:#fff"><span class="icon">🚀</span> CopyMaster — Toplu Copy/Paste</div>
 <div class="admin-nav-card" onclick="switchAdminTab('copy2')" style="background:linear-gradient(135deg,#059669,#0891b2);color:#fff"><span class="icon">📑</span> Copy2 — Toplu sual (10/20/30)</div>
 <div class="admin-nav-card" onclick="switchAdminTab('bq')"><span class="icon">🗂️</span> Fənn üzrə Ardıcıl Daxiletmə</div>
 <div class="admin-nav-card" onclick="V2.open()" style="background:#1e1b4b;color:#fff"><span class="icon">🧭</span> İdarəçi V2</div>
@@ -3412,6 +3413,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <button class="btn btn-primary" style="width: 100%;" onclick="saveCopyPasteQuestion()">💾 Seçilən Kateqoriyaya Yüklə & Bazaya Vur</button>
 </div>
 <div id="mod-copy2" class="admin-module-block"></div>
+<div id="mod-copymaster" class="admin-module-block"></div>
 <div id="mod-bq" class="admin-module-block">
 <h4>🗂️ Fənn Üzrə Ardıcıl Sual Daxiletməsi</h4>
 <p class="mt-1 mb-3" style="color:#64748b;font-size:13px;">Fənni seçin, sualları ardıcıl daxil edib hər birinin cavabını təsdiqləyin. Sonda ümumi baxış pəncərəsində yoxlayın, lazım olsa sıralamanı qarışdırın və hamısını bir kliklə bazaya yazın. Qaralama avtomatik yadda saxlanılır.</p>
@@ -4016,6 +4018,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <script src="dq-birlesdirme.js?v=5"></script>
 <script src="dq-oxuyucu.js?v=1"></script>
 <script src="dq-copy2.js?v=1"></script>
+<script src="dq-copymaster.js?v=1"></script>
 <script src="dq-panelv2.js?v=1"></script>
 <script src="dq-hub.js?v=1"></script>
 <script src="dq-lock.js?v=1"></script>
