@@ -114,6 +114,7 @@ label.l{display:flex;justify-content:space-between;align-items:center;font-size:
      <button class="btn sm" id="pPrev" aria-label="Əvvəlki səhifə">‹</button><span class="pg" id="pgInfo">1 / 1</span><button class="btn sm" id="pNext" aria-label="Növbəti səhifə">›</button>
      <button class="btn sm" id="zOut" aria-label="Kiçilt">−</button><span class="pg" id="zInfo">100%</span><button class="btn sm" id="zIn" aria-label="Böyüt">+</button>
      <button class="btn sm on" id="cropT" aria-pressed="true">Kəsmə: açıq</button>
+     <button class="btn sm on" id="copyT" aria-pressed="true" title="Kəsilən sahənin mətnini avtomatik kopyala">📋 Kopyala: açıq</button>
      <button class="btn sm" id="newPdf">Başqa PDF</button>
     </div>
     <div class="view crop" id="view"><div class="stage" id="stage"><canvas id="cv"></canvas><div class="sel" id="sel"></div></div></div>
@@ -149,7 +150,7 @@ label.l{display:flex;justify-content:space-between;align-items:center;font-size:
 (function(){"use strict";
 var KEYS=["Q","A","B","C","D","E"],LS="proadd_questions_v1",PDFJS="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",WORKER="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",TESS="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js";
 var $=function(i){return document.getElementById(i)};
-var S={qs:[],draft:null,n:4,target:"Q",pdf:null,page:1,zoom:1,crop:true,edit:null};
+var S={qs:[],draft:null,n:4,target:"Q",pdf:null,page:1,zoom:1,crop:true,copy:true,pg:null,vpc:null,edit:null};
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function toast(t,err){var e=$("toast");e.textContent=t;e.className="toast on"+(err?" err":"");clearTimeout(toast.t);toast.t=setTimeout(function(){e.className="toast"},err?4500:2200)}
 function save(){try{localStorage.setItem(LS,JSON.stringify(S.qs))}catch(e){toast("Brauzer yaddaşı doludur — JSON ixrac edin",1)}}
@@ -247,7 +248,7 @@ function openPdf(file){if(!file||file.type!=="application/pdf"&&!/\.pdf$/i.test(
   S.pdf=p;S.page=1;S.zoom=1;$("docName").textContent=file.name;$("drop").hidden=true;$("viewer").hidden=false;draw()}).catch(function(e){toast("PDF açılmadı: "+(e&&e.message||e),1)})}
 var rt=null;
 function draw(){if(!S.pdf)return;S.pdf.getPage(S.page).then(function(pg){var w=Math.max(280,$("view").clientWidth-4),v1=pg.getViewport({scale:1}),sc=(w/v1.width)*S.zoom,dpr=Math.min(window.devicePixelRatio||1,2.5),vp=pg.getViewport({scale:sc*dpr}),c=$("cv");
-  c.width=vp.width;c.height=vp.height;c.style.width=vp.width/dpr+"px";c.style.height=vp.height/dpr+"px";if(rt)try{rt.cancel()}catch(e){}
+  S.pg=pg;S.vpc=pg.getViewport({scale:sc});c.width=vp.width;c.height=vp.height;c.style.width=vp.width/dpr+"px";c.style.height=vp.height/dpr+"px";if(rt)try{rt.cancel()}catch(e){}
   rt=pg.render({canvasContext:c.getContext("2d"),viewport:vp});rt.promise.catch(function(){});$("pgInfo").textContent=S.page+" / "+S.pdf.numPages;$("zInfo").textContent=Math.round(S.zoom*100)+"%";$("sel").style.display="none"})}
 $("drop").addEventListener("click",function(){$("fPdf").click()});
 $("drop").addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();$("fPdf").click()}});
@@ -260,6 +261,19 @@ $("pNext").addEventListener("click",function(){if(S.pdf&&S.page<S.pdf.numPages){
 $("zIn").addEventListener("click",function(){S.zoom=Math.min(3,S.zoom+.25);draw()});
 $("zOut").addEventListener("click",function(){S.zoom=Math.max(.5,S.zoom-.25);draw()});
 $("cropT").addEventListener("click",function(){S.crop=!S.crop;$("view").classList.toggle("crop",S.crop);this.textContent="Kəsmə: "+(S.crop?"açıq":"bağlı");this.setAttribute("aria-pressed",S.crop)});
+$("copyT").addEventListener("click",function(){S.copy=!S.copy;this.classList.toggle("on",S.copy);this.textContent="📋 Kopyala: "+(S.copy?"açıq":"bağlı");this.setAttribute("aria-pressed",S.copy)});
+function clip(t){var done=function(){toast("Kopyalandı ✓ ("+t.length+" simvol)")},fb=function(){var a=document.createElement("textarea");a.value=t;a.style.cssText="position:fixed;opacity:0;top:0;left:0";document.body.appendChild(a);a.focus();a.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}a.remove();ok?done():toast("Kopyalama icazəsi verilmədi",1)};
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,fb);else fb()}
+function copyArea(rx,ry,rw,rh,img){var pg=S.pg,vp=S.vpc;if(!pg||!vp)return;
+ pg.getTextContent().then(function(tc){var L=[];
+  tc.items.forEach(function(it){if(!it.str||!it.str.trim())return;var t=pdfjsLib.Util.transform(vp.transform,it.transform),fh=Math.hypot(t[2],t[3])||10,l=t[4],b=t[5],w=it.width*vp.scale,cx=l+w/2,cy=b-fh*.35;
+   if(cx<rx||cx>rx+rw||cy<ry||cy>ry+rh)return;var ln=L.length&&L[L.length-1];
+   if(ln&&Math.abs(b-ln.y)<fh*.5)ln.it.push({x:l,w:w,s:it.str,fh:fh});else L.push({y:b,it:[{x:l,w:w,s:it.str,fh:fh}]})});
+  var txt=L.map(function(ln){ln.it.sort(function(a,b){return a.x-b.x});var o="",pe=null;ln.it.forEach(function(i){if(pe!==null&&i.x-pe>i.fh*.15&&!/\s$/.test(o)&&!/^\s/.test(i.s))o+=" ";o+=i.s;pe=i.x+i.w});return o.replace(/\s+$/,"")}).join("\n").trim();
+  if(txt)return clip(txt);
+  toast("Mətn qatı yoxdur — OCR ilə oxunur…");
+  return lib("tess").then(function(){return Tesseract.recognize(img,"aze+eng")}).then(function(r){var t=(r.data.text||"").replace(/[ \t]+\n/g,"\n").trim();if(!t)return toast("Mətn tapılmadı",1);clip(t)})})
+ .catch(function(e){toast("Kopyalama alınmadı: "+(e&&e.message||e),1)})}
 var st=null;
 function pt(e){var r=$("cv").getBoundingClientRect();return{x:Math.max(0,Math.min(r.width,e.clientX-r.left)),y:Math.max(0,Math.min(r.height,e.clientY-r.top))}}
 $("stage").addEventListener("pointerdown",function(e){if(!S.crop||!S.pdf||e.button>0)return;st=pt(e);this.setPointerCapture(e.pointerId);e.preventDefault()});
@@ -268,8 +282,8 @@ $("stage").addEventListener("pointerup",function(e){if(!st)return;var p=pt(e),a=
  var x=Math.min(a.x,p.x),y=Math.min(a.y,p.y),w=Math.abs(p.x-a.x),h=Math.abs(p.y-a.y);if(w<10||h<10)return;
  var c=$("cv"),k=c.width/c.clientWidth,o=document.createElement("canvas"),sw=w*k,sh=h*k,m=Math.min(1,1100/sw);o.width=Math.round(sw*m);o.height=Math.round(sh*m);
  var g=o.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,o.width,o.height);g.drawImage(c,x*k,y*k,sw,sh,0,0,o.width,o.height);
- var key=S.target;setImg(key,o.toDataURL("image/jpeg",.88));
- if(key!=="Q"){var nx=KEYS[KEYS.indexOf(key)+1];if(nx&&(nx!=="E"||S.n>4))S.target=nx;paint()}else{S.target="A";paint()}toast("Sahə kəsildi: "+(key==="Q"?"sual":"variant "+key))});
+ var key=S.target,img=o.toDataURL("image/jpeg",.88);setImg(key,img);
+ if(key!=="Q"){var nx=KEYS[KEYS.indexOf(key)+1];if(nx&&(nx!=="E"||S.n>4))S.target=nx;paint()}else{S.target="A";paint()}toast("Sahə kəsildi: "+(key==="Q"?"sual":"variant "+key));if(S.copy)copyArea(x,y,w,h,img)});
 $("stage").addEventListener("pointercancel",function(){st=null;$("sel").style.display="none"});
 var rz;window.addEventListener("resize",function(){clearTimeout(rz);rz=setTimeout(draw,200)});
 
