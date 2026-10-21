@@ -4841,31 +4841,39 @@ p{text-wrap:pretty}
 @media(max-width:760px){#lxp .rp-hero{grid-template-columns:1fr;padding:28px 20px;border-radius:24px}#lxp .rp-grid{grid-template-columns:1fr}#lxp .rp-sec h2{font-size:19px}}
 </style>
 
-<style id="dqx-ag-css">
-.admin-nav-grid.dqx-on{display:block!important}
-.admin-nav-grid.dqx-on>.dq-ag{display:none!important}
-.dqx-bar{display:flex;gap:8px;align-items:center;margin:0 0 14px;flex-wrap:wrap}
-.dqx-search{flex:1;min-width:180px;padding:9px 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px;background:#fff;color:#0f172a}
-.dqx-tog{padding:8px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#334155;font-size:12px;font-weight:700;cursor:pointer}
-.dqx-g{margin:0 0 16px;background:#fff;border:1px solid #e2e8f0;border-left:4px solid var(--ag);border-radius:12px;overflow:hidden}
-.dqx-h{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;background:linear-gradient(90deg,color-mix(in srgb,var(--ag) 9%,#fff),#fff)}
-.dqx-i{font-size:18px;line-height:1}
-.dqx-tt{flex:1;min-width:0;text-align:left}
-.dqx-tt b{display:block;font-size:14px;color:var(--ag);font-weight:800}
-.dqx-tt small{display:block;font-size:11px;color:#64748b;margin-top:1px}
-.dqx-n{min-width:24px;padding:2px 9px;border-radius:999px;background:var(--ag);color:#fff;font-size:11px;font-weight:800;text-align:center}
-.dqx-ch{font-size:11px;color:#94a3b8;transition:transform .2s}
-.dqx-g.dqx-shut .dqx-ch{transform:rotate(-90deg)}
-.dqx-c{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px;padding:10px 12px 12px}
-.dqx-g.dqx-shut .dqx-c{display:none}
-.dqx-c .admin-nav-card{background:#f8fafc!important;background-image:none!important;color:#0f172a!important;border:1px solid #e2e8f0!important;border-top:3px solid var(--ag)!important;box-shadow:none!important;min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:10px 6px;line-height:1.25;font-size:12px;font-weight:600;border-radius:10px;text-align:center}
-.dqx-c .admin-nav-card:hover{background:color-mix(in srgb,var(--ag) 10%,#fff)!important;transform:translateY(-1px)}
-.dqx-c .admin-nav-card .icon{display:block;font-size:20px;line-height:1}
-.dqx-c .admin-nav-card.dqx-hide{display:none!important}
-.dqx-g.dqx-empty{display:none}
-@media(max-width:480px){.dqx-c{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px}.dqx-c .admin-nav-card{font-size:10.5px;min-height:66px}}
+<style id="dqap-ag-css">
+.admin-nav-grid.dqap-on{display:block!important}
+.admin-nav-grid.dqap-on>.dq-ag{display:none!important}
+.dqap-root{max-width:1080px;margin:0 auto;text-align:left}
+.dqap-bar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 18px;padding:10px 0;background:linear-gradient(#fff 82%,rgba(255,255,255,0))}
+.dqap-search{flex:1;min-width:200px;padding:11px 14px;border:1.5px solid #dbe3f1;border-radius:12px;font-size:14px;background:#f8fafc;color:#0f172a;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+.dqap-search:focus{border-color:#2f63bd;background:#fff;box-shadow:0 0 0 4px #2f63bd22}
+.dqap-tog{padding:10px 14px;border:1.5px solid #dbe3f1;border-radius:12px;background:#fff;color:#334155;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.dqap-tog:hover{background:#eaf1fc;border-color:#2f63bd;color:#0a2f7a}
+.dqap-g{display:block;width:auto;margin:0 0 14px;padding:0;background:#fff;border:1px solid #e3e9f4;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px #0f172a0a,0 6px 18px -10px #0f172a26;transition:box-shadow .25s}
+.dqap-g:hover{box-shadow:0 1px 2px #0f172a0a,0 10px 26px -10px #0f172a33}
+.dqap-h{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none;background:color-mix(in srgb,var(--ag) 6%,#fff);border-bottom:1px solid color-mix(in srgb,var(--ag) 14%,#e3e9f4);position:relative}
+.dqap-h:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ag)}
+.dqap-g.dqap-shut .dqap-h{border-bottom-color:transparent}
+.dqap-i{flex:none;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;line-height:1;background:color-mix(in srgb,var(--ag) 14%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ag) 25%,transparent)}
+.dqap-tt{flex:1;min-width:0;text-align:left}
+.dqap-tt b{display:block;font-size:14.5px;color:var(--ag);font-weight:800;letter-spacing:.1px;line-height:1.25}
+.dqap-tt small{display:block;font-size:12px;color:#64748b;margin-top:2px;line-height:1.35}
+.dqap-n{flex:none;min-width:26px;padding:3px 10px;border-radius:999px;background:var(--ag);color:#fff;font-size:11.5px;font-weight:800;text-align:center}
+.dqap-ch{flex:none;font-size:10px;color:#94a3b8;transition:transform .25s}
+.dqap-g.dqap-shut .dqap-ch{transform:rotate(-90deg)}
+.dqap-c{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:14px 16px 16px}
+.dqap-g.dqap-shut .dqap-c{display:none}
+.dqap-c .admin-nav-card{background:#fff!important;background-image:none!important;color:#1e293b!important;border:1px solid #e3e9f4!important;border-radius:12px!important;box-shadow:none!important;min-height:88px;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px 8px;font-size:12px;font-weight:600;line-height:1.3;text-align:center;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s,border-color .2s,background .2s}
+.dqap-c .admin-nav-card:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--ag);opacity:.85}
+.dqap-c .admin-nav-card .icon{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;font-size:18px;line-height:1;background:color-mix(in srgb,var(--ag) 10%,#fff)}
+.dqap-c .admin-nav-card:hover{background:color-mix(in srgb,var(--ag) 5%,#fff)!important;border-color:color-mix(in srgb,var(--ag) 45%,#e3e9f4)!important;transform:translateY(-2px);box-shadow:0 10px 20px -10px color-mix(in srgb,var(--ag) 55%,transparent)!important}
+.dqap-c .admin-nav-card:active{transform:scale(.97)}
+.dqap-c .admin-nav-card.dqap-hide{display:none!important}
+.dqap-g.dqap-empty{display:none}
+@media(max-width:600px){.dqap-c{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px}.dqap-h{padding:10px 12px}.dqap-c .admin-nav-card{min-height:80px;font-size:11.5px}.dqap-tog{flex:1}}
 </style>
-<script id="dqx-ag-js">(function(){"use strict";
+<script id="dqap-ag-js">(function(){"use strict";
 var G=[
 ["bank","📝","Suallar və sual bankı","Sual daxiletmə, bank və redaktə","#1e3a8a",/suallar modulu|sual bank|sual baza|məntiq sual|sual studiya|ardıcıl daxil|şablon|sual idarəsi|redakt[əe]\s*m[əe]rk/],
 ["ai","✨","AI & PDF idxal alətləri","PDF/OCR, Gemini, kəsmə və avtomatik yükləmə","#6d28d9",/pdf|\bai\b|ocr|kəsmə|telefon|gemini|sinxron/],
@@ -4897,39 +4905,39 @@ function build(){
  busy=true;
  try{
   var seen={},map={};G.concat([other]).forEach(function(g){map[g[0]]=[]});
-  cards.forEach(function(c){var k=key(lab(c));c.classList.remove("dqx-hide");
-   if(seen[k]){c.style.display="none";c.setAttribute("data-dqx-dup","1");return}
-   seen[k]=1;c.style.display="";c.removeAttribute("data-dqx-dup");
+  cards.forEach(function(c){var k=key(lab(c));c.classList.remove("dqap-hide");
+   if(seen[k]){c.style.display="none";c.setAttribute("data-dqap-dup","1");return}
+   seen[k]=1;c.style.display="";c.removeAttribute("data-dqap-dup");
    map[pick(lab(c))].push(c)});
-  var old=grid.querySelector(":scope>.dqx-root");if(old)old.remove();
-  var root=document.createElement("div");root.className="dqx-root";
-  var bar=document.createElement("div");bar.className="dqx-bar";
-  bar.innerHTML='<input class="dqx-search" type="search" placeholder="🔎 Paneldə axtar…" aria-label="Axtar"><button type="button" class="dqx-tog" data-a="open">Hamısını aç</button><button type="button" class="dqx-tog" data-a="shut">Hamısını yığ</button>';
+  var old=grid.querySelector(":scope>.dqap-root");if(old)old.remove();
+  var root=document.createElement("div");root.className="dqap-root";
+  var bar=document.createElement("div");bar.className="dqap-bar";
+  bar.innerHTML='<input class="dqap-search" type="search" placeholder="🔎 Paneldə axtar…" aria-label="Axtar"><button type="button" class="dqap-tog" data-a="open">Hamısını aç</button><button type="button" class="dqap-tog" data-a="shut">Hamısını yığ</button>';
   root.appendChild(bar);
   var shut={};try{shut=JSON.parse(localStorage.getItem("dqx_shut")||"{}")}catch(e){}
   G.concat([other]).forEach(function(g){var arr=map[g[0]];if(!arr.length)return;
-   var s=document.createElement("section");s.className="dqx-g"+(shut[g[0]]?" dqx-shut":"");s.style.setProperty("--ag",g[4]);s.setAttribute("data-g",g[0]);
-   s.innerHTML='<div class="dqx-h" role="button" tabindex="0"><span class="dqx-i">'+g[1]+'</span><span class="dqx-tt"><b>'+g[2]+'</b><small>'+g[3]+'</small></span><span class="dqx-n">'+arr.length+'</span><span class="dqx-ch">▼</span></div><div class="dqx-c"></div>';
-   var c=s.querySelector(".dqx-c");arr.forEach(function(x){c.appendChild(x)});root.appendChild(s)});
+   var s=document.createElement("section");s.className="dqap-g"+(shut[g[0]]?" dqap-shut":"");s.style.setProperty("--ag",g[4]);s.setAttribute("data-g",g[0]);
+   s.innerHTML='<div class="dqap-h" role="button" tabindex="0"><span class="dqap-i">'+g[1]+'</span><span class="dqap-tt"><b>'+g[2]+'</b><small>'+g[3]+'</small></span><span class="dqap-n">'+arr.length+'</span><span class="dqap-ch">▼</span></div><div class="dqap-c"></div>';
+   var c=s.querySelector(".dqap-c");arr.forEach(function(x){c.appendChild(x)});root.appendChild(s)});
   // köhnə qrup qabıqlarını və qalan kartları (dublikatlar) saxla, gizli
   var hold=document.createElement("div");hold.style.display="none";
-  cards.forEach(function(c){if(c.getAttribute("data-dqx-dup"))hold.appendChild(c)});
+  cards.forEach(function(c){if(c.getAttribute("data-dqap-dup"))hold.appendChild(c)});
   root.appendChild(hold);
   grid.querySelectorAll(":scope>.dq-ag").forEach(function(e){e.remove()});
-  grid.appendChild(root);grid.classList.add("dqx-on");
-  var inp=root.querySelector(".dqx-search");inp.value=q;
-  function filt(){q=inp.value.trim().toLocaleLowerCase("az");root.querySelectorAll(".dqx-g").forEach(function(s){var n=0;
-    s.querySelectorAll(".admin-nav-card").forEach(function(c){var m=!q||lab(c).toLocaleLowerCase("az").indexOf(q)>-1;c.classList.toggle("dqx-hide",!m);if(m)n++});
-    s.classList.toggle("dqx-empty",!n);if(q&&n)s.classList.remove("dqx-shut")})}
+  grid.appendChild(root);grid.classList.add("dqap-on");
+  var inp=root.querySelector(".dqap-search");inp.value=q;
+  function filt(){q=inp.value.trim().toLocaleLowerCase("az");root.querySelectorAll(".dqap-g").forEach(function(s){var n=0;
+    s.querySelectorAll(".admin-nav-card").forEach(function(c){var m=!q||lab(c).toLocaleLowerCase("az").indexOf(q)>-1;c.classList.toggle("dqap-hide",!m);if(m)n++});
+    s.classList.toggle("dqap-empty",!n);if(q&&n)s.classList.remove("dqap-shut")})}
   inp.addEventListener("input",filt);filt();
   root.addEventListener("click",function(e){
-   var tg=e.target.closest(".dqx-tog");
-   if(tg){var o=tg.getAttribute("data-a")==="open";shut={};root.querySelectorAll(".dqx-g").forEach(function(s){s.classList.toggle("dqx-shut",!o);if(!o)shut[s.getAttribute("data-g")]=1});try{localStorage.setItem("dqx_shut",JSON.stringify(shut))}catch(x){}return}
-   var h=e.target.closest(".dqx-h");if(h){var s=h.parentNode;s.classList.toggle("dqx-shut");shut[s.getAttribute("data-g")]=s.classList.contains("dqx-shut")?1:0;try{localStorage.setItem("dqx_shut",JSON.stringify(shut))}catch(x){}}});
+   var tg=e.target.closest(".dqap-tog");
+   if(tg){var o=tg.getAttribute("data-a")==="open";shut={};root.querySelectorAll(".dqap-g").forEach(function(s){s.classList.toggle("dqap-shut",!o);if(!o)shut[s.getAttribute("data-g")]=1});try{localStorage.setItem("dqx_shut",JSON.stringify(shut))}catch(x){}return}
+   var h=e.target.closest(".dqap-h");if(h){var s=h.parentNode;s.classList.toggle("dqap-shut");shut[s.getAttribute("data-g")]=s.classList.contains("dqap-shut")?1:0;try{localStorage.setItem("dqx_shut",JSON.stringify(shut))}catch(x){}}});
  }finally{busy=false}}
 function sched(){if(busy)return;clearTimeout(t);t=setTimeout(function(){var g=document.querySelector("#admin-panel .admin-nav-grid");if(!g)return;
-  var loose=g.querySelectorAll(".admin-nav-card").length,mine=g.querySelectorAll(".dqx-root .admin-nav-card").length;
-  if(!g.querySelector(".dqx-root")||loose!==mine||g.querySelector(":scope>.dq-ag"))build()},250)}
+  var loose=g.querySelectorAll(".admin-nav-card").length,mine=g.querySelectorAll(".dqap-root .admin-nav-card").length;
+  if(!g.querySelector(".dqap-root")||loose!==mine||g.querySelector(":scope>.dq-ag"))build()},250)}
 function init(){var g=document.querySelector("#admin-panel .admin-nav-grid");if(!g)return;
  build();new MutationObserver(sched).observe(g,{childList:true,subtree:true});
  setTimeout(build,800);setTimeout(build,2500)}
