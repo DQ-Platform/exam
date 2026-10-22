@@ -1,12 +1,10 @@
 /* DQ Panel Patch: (1) şablon cədvəlinə «Sınaq №» (2) idarəetmə panelindən sifariş/məzun kartlarının silinməsi (3) Pro Add statistikası */
 (function(){"use strict";
 var $=function(i){return document.getElementById(i)},DB=null,tm=null;
-var _c=null;
 function sb(){
- if(_c)return _c;
- try{if(typeof _supabase!=="undefined"&&_supabase&&_supabase.from)return(_c=_supabase)}catch(e){}
- if(window._supabase&&window._supabase.from)return(_c=window._supabase);
- try{if(window.supabase&&window.supabase.createClient)return(_c=window.supabase.createClient("https://cpzwliqlgaplroscvduo.supabase.co","sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF"))}catch(e){}
+ try{if(typeof _supabase!=="undefined"&&_supabase&&_supabase.from)return _supabase}catch(e){}
+ var w=window,c=[w._supabase,w.sb,w.supabaseClient,w.parent&&w.parent!==w?w.parent._supabase:null];
+ for(var i=0;i<c.length;i++)if(c[i]&&c[i].from)return c[i];
  return null}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function nz(s){return String(s||"").toLowerCase().replace(/\s+/g," ").trim()}
