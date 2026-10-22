@@ -27,9 +27,9 @@ function msg(t,err){var m=$("rsp-msg");m.style.color=err?"#b91c1c":"#047857";m.t
 function chosen(){return Array.prototype.map.call(document.querySelectorAll("#rsp-cats .cat-btn.active"),function(b){return b.dataset.cat})}
 function link(){
  var u=new URL(location.href);u.search="";u.hash="";
- u.searchParams.set("sinaq",cur.exam);u.searchParams.set("kat",cur.cats.join(","));u.searchParams.set("is",cur.fin);
+ u.searchParams.set("giris","1");u.searchParams.set("qrup",cur.cats.join(","));u.searchParams.set("sinaq",cur.exam);
  return u.toString()}
-function text(){return "Salam, "+cur.name+"! Sınaq "+cur.exam+" ("+cur.cats.join(", ")+") üçün icazəniz verilib.\nİş nömrəniz: "+cur.fin+"\nGiriş linki: "+link()}
+function text(){return "Salam, "+cur.name+"!\n\nSizə sınaq "+cur.exam+" ("+cur.cats.join(", ")+" qrupları) üçün iştirak icazəsi verildi ✅\n\nDaxil olmaq üçün linkə keçin:\n"+link()+"\n\nİş nömrəniz: "+cur.fin+"\n\n⚠️ Xatırlatma: sualları qruplara və başqalarına göndərmək qadağandır. Sınaq zəhmətlə hazırlanıb və hər kəs ödəniş edib qoşulub. Linki də başqasına göndərməyin zəhmət olmasa.\nGöndərildikdə hesabınız bloklanır."}
 window.DQResep={
  async gen(){
   var name=$("rsp-name").value.trim(),exam=parseInt($("rsp-exam").value,10),cats=chosen();

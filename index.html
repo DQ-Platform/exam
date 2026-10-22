@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<script id="dqg-boot">try{if(new URLSearchParams(location.search).get("giris")==="1"){var d=document.documentElement;d.classList.add("dqg-pre");var st=document.createElement("style");st.textContent="html.dqg-pre,html.dqg-pre body{background:#071330!important}html.dqg-pre body>*{visibility:hidden}html.dqg-pre body>#dqg{visibility:visible}";document.head.appendChild(st);setTimeout(function(){d.classList.remove("dqg-pre")},8000)}}catch(e){}</script>
 <script id="dq-theme-boot">
 /* DQ Theme — səhifə ilk görünməzdən ƏVVƏL cihazın (sistemin) gündüz/gecə ayarını tətbiq edir.
    Rejimlər: "auto" (sistemə uyğun, standart) · "light" · "dark" (istifadəçi əl ilə seçib). */
@@ -5458,7 +5459,8 @@ function tick(){var ex=document.querySelector("#examFolderGrid .folder-card"),sc
  if(!sig){lastSig="";return}
  if(sig!==lastSig){lastSig=sig;load(true).then(render)}else{render();load(false).then(render)}}
 setInterval(tick,700)})();</script>
-<script src="dq-resepsiya.js?v=1"></script>
+<script src="dq-resepsiya.js?v=2"></script>
+<script src="dq-giris.js?v=1"></script>
 <script src="dq-panel-patch.js?v=1"></script>
 </body>
 </html>
