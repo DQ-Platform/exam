@@ -612,7 +612,7 @@
   }
 
   /* ---------- «Qrafik formanı gör»: nəticə cədvəli (cavab kartı) ---------- */
-  var chartBusy = false, chartMode = false;
+  var chartBusy = false, chartMode = false, chartSeen = false;
   async function launchChart(it) {
     if (chartBusy || reviewBusy || !session) return;
     chartBusy = true;
@@ -623,7 +623,8 @@
       if (!va) throw new Error("sistem hələ hazır deyil");
       try { currentStudentName = session.name || currentStudentName; currentActiveFin = session.fin; } catch (e) {}
       try { sessionStorage.setItem("dqg_flow", "1"); } catch (e) {}
-      chartMode = true;   /* «İmtahan tamamlandı» pəncərəsi və rəy sorğusu bu rejimdə çıxmasın */
+      try { if (resultCtl.rm) resultCtl.rm(); } catch (e) {}
+      chartMode = true; chartSeen = false;   /* «İmtahan tamamlandı» pəncərəsi və rəy sorğusu bu rejimdə çıxmasın */
       await va(String(it.exam), it.cat, session.fin, session.name || session.fin);
       if (!(await waitFor(function () { return screenOn("result-screen"); }, 8000))) throw new Error("nəticə yüklənmədi");
       try { window.scrollTo(0, 0); } catch (e) {}
@@ -833,8 +834,9 @@
       if (!flow || reviewBusy) return;
       var r = document.getElementById("result-screen");
       var on = !!(r && r.classList.contains("active") && r.offsetParent);
-      if (on && !shown) { shown = true; if (!chartMode) setTimeout(function () { if (!box) build(); }, 400); }
-      if (!on) { shown = false; chartMode = false; if (box) { rmBox(); document.documentElement.style.overflow = ""; } }
+      if (on && chartMode) chartSeen = true;
+      if (on && !shown) { shown = true; if (!chartMode) setTimeout(function () { if (!box && !chartMode) build(); }, 400); }
+      if (!on) { shown = false; if (!chartBusy && chartSeen) { chartMode = false; chartSeen = false; } if (box) { rmBox(); document.documentElement.style.overflow = ""; } }
     }, 600);
   })();
   setTimeout(function () { try { $("dqg-fin").focus(); } catch (e) {} }, 300);
