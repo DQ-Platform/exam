@@ -3596,6 +3596,24 @@ close:function(){$("mod-proadd").style.display="none";var g=grid();if(g)g.style.
 <div class="left-buttons">
 <button class="btn btn-secondary" onclick="prevQuestionEditor()">⬅️ Əvvəlki Sual</button>
 <button class="btn btn-success" onclick="saveQuestionToSupabase()">💾 Sualı Bazaya Saxla</button>
+<button class="btn btn-danger" onclick="deleteQuestionFromEditor()">🗑 Sualı Sil</button>
+<script>
+async function deleteQuestionFromEditor(){
+ try{
+  var cats=[].map.call(document.querySelectorAll(".editor-target-cat-chk:checked"),function(c){return c.value});
+  if(!cats.length)cats=[editorSelectedCategory];
+  cats=cats.filter(function(c,i){return c&&cats.indexOf(c)===i});
+  var n=editorCurrentQIndex;
+  if(!confirm("Sınaq "+editorSelectedExam+" · "+editorSelectedSubject+" · sual № "+n+"\n\nKateqoriyalar: "+cats.join(", ")+"\n\nBu sual bazadan həmişəlik silinsin?"))return;
+  var tot=0;
+  for(var i=0;i<cats.length;i++){
+   var r=await _supabase.from("exam_questions").delete().eq("exam_id",editorSelectedExam).eq("category",cats[i]).eq("q_number",n).select("id");
+   if(r.error)throw r.error;tot+=(r.data||[]).length}
+  alert(tot?("Silindi: "+tot+" qeyd (sual № "+n+")"):"Bu nömrədə baza qeydi tapılmadı (sual hələ saxlanmayıb).");
+  editorUploadedOptions={};
+  loadEditorQuestionData(n);
+ }catch(e){alert("Silinmədi: "+(e&&e.message||e))}}
+</script>
 </div>
 <button class="btn btn-primary" onclick="nextQuestionEditor()">➡️ Növbəti Sual</button>
 </div>
