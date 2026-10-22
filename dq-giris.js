@@ -573,7 +573,7 @@
       '<div class="chip"><span><em style="background:#64748b"></em>Cavabsız</span><b>' + u + '</b></div></div></div>' +
       (ps ? '<div class="ps">' + esc(ps) + '</div>' : '') +
       (subj ? '<h5>Fənlər üzrə statistika</h5>' + subj : '<div class="sb0">Fənn statistikası bu sınaq üçün mövcud deyil.</div>') +
-      '<div class="mact">' + (reviewEligible(it) ? '<button type="button" class="yes" data-a="review">🔍 Səhvləri təhlil et</button>' : '') +
+      '<div class="mact"><button type="button" class="yes" data-a="chart">📊 Qrafik formanı gör</button>' + (reviewEligible(it) ? '<button type="button" class="yes" data-a="review">🔍 Səhvləri təhlil et</button>' : '') +
       '<button type="button" class="sec" data-a="cancel">Bağla</button></div>');
   }
 
@@ -609,6 +609,119 @@
       ldHide(); showRoot(); if (session) refresh();
       toast("Təhlil açılmadı: " + (e && e.message ? e.message : e));
     } finally { reviewBusy = false; }
+  }
+
+  /* ---------- «Qrafik formanı gör»: nəticə cədvəli (cavab kartı) ---------- */
+  var chartBusy = false, chartMode = false;
+  async function launchChart(it) {
+    if (chartBusy || reviewBusy || !session) return;
+    chartBusy = true;
+    showRoot();
+    ldShow("Nəticə hazırlanır", [[0, "Nəticəniz yüklənir…"], [45, "Cədvəl qurulur…"], [80, "Ekran hazırlanır…"]]);
+    try {
+      var va = await waitFor(function () { return appFn("viewAnswerCard"); }, 8000);
+      if (!va) throw new Error("sistem hələ hazır deyil");
+      try { currentStudentName = session.name || currentStudentName; currentActiveFin = session.fin; } catch (e) {}
+      try { sessionStorage.setItem("dqg_flow", "1"); } catch (e) {}
+      chartMode = true;   /* «İmtahan tamamlandı» pəncərəsi və rəy sorğusu bu rejimdə çıxmasın */
+      await va(String(it.exam), it.cat, session.fin, session.name || session.fin);
+      if (!(await waitFor(function () { return screenOn("result-screen"); }, 8000))) throw new Error("nəticə yüklənmədi");
+      try { window.scrollTo(0, 0); } catch (e) {}
+      await leaveRoot();
+    } catch (e) {
+      chartMode = false; ldHide(); showRoot(); if (session) refresh();
+      toast("Nəticə cədvəli açılmadı: " + (e && e.message ? e.message : e));
+    } finally { chartBusy = false; }
+  }
+
+  /* ---------- imtahan bitəndən sonra push tipli rəy sorğusu ---------- */
+  var FBQ = "Sınaq haqqında təəssüratınızı paylaşa bilərsinizmi, zəhmət olmasa? (Hər hansı çatışmazlıq, uyğunsuzluq varsa onu da qeyd edə bilərsiniz)";
+  var FBTHX = "Diqqətiniz üçün təşəkkürlər 🙏";
+  var fbHost = null;
+  function fbKey(c) { return "dqg_fb:" + c.fin + ":" + c.exam + ":" + c.cat; }
+  function fbRemove() { try { if (fbHost) fbHost.remove(); } catch (e) {} fbHost = null; }
+  async function fbSave(c, text) {
+    var data = { name: c.name || c.fin, fin: c.fin, category: c.cat, exam: c.exam, score: c.score, rating: 0, text: text, kind: "post-exam", show: false, date: new Date().toLocaleDateString("az-AZ") };
+    try {
+      if (typeof V2 !== "undefined" && V2 && V2.put) { await V2.put("feedback", data); return true; }
+    } catch (e) {}
+    try {
+      var d = db(); if (!d) return false;
+      var r = await d.from("dq_v2_store").insert([{ collection: "feedback", data: data }]);
+      return !r.error;
+    } catch (e) { return false; }
+  }
+  function askFeedback(c) {
+    if (!c || !c.fin) return;
+    try { if (localStorage.getItem(fbKey(c)) === "1") return; localStorage.setItem(fbKey(c), "1"); } catch (e) {}
+    fbRemove();
+    var host = document.createElement("div"); host.id = "dqg-fbh"; fbHost = host;
+    [["position", "fixed"], ["top", "0"], ["left", "0"], ["right", "0"], ["z-index", "2147483646"], ["pointer-events", "none"], ["margin", "0"], ["padding", "0"], ["visibility", "visible"], ["opacity", "1"]]
+      .forEach(function (x) { host.style.setProperty(x[0], x[1], "important"); });
+    document.body.appendChild(host);
+    var sh = host.attachShadow ? host.attachShadow({ mode: "open" }) : host;
+    var st = document.createElement("style");
+    st.textContent =
+      ".n{box-sizing:border-box;pointer-events:auto;width:min(94vw,440px);margin:calc(env(safe-area-inset-top,0px) + 12px) auto 0;padding:14px 16px 14px;border-radius:18px;" +
+      "background:linear-gradient(180deg,#14306b,#0c2150);border:1px solid rgba(201,162,75,.75);color:#e8eefc;font-family:inherit;" +
+      "box-shadow:0 18px 50px rgba(0,0,0,.55);transform:translateY(-130%);opacity:0;transition:transform .5s cubic-bezier(.2,.9,.3,1.1),opacity .35s}" +
+      ".n.on{transform:none;opacity:1}" +
+      ".h{display:flex;align-items:center;gap:10px;margin-bottom:8px}" +
+      ".ic{flex:none;width:32px;height:32px;border-radius:9px;background:linear-gradient(180deg,#f3d98b,#c9a24b);color:#0a1a3a;display:grid;place-items:center;font-weight:900;font-size:13px}" +
+      ".t{flex:1;font-size:12px;letter-spacing:.6px;font-weight:800;color:#f3d98b;text-transform:uppercase}" +
+      ".x{flex:none;width:30px;height:30px;border-radius:50%;border:0;background:rgba(255,255,255,.1);color:#e8eefc;font-size:18px;line-height:1;cursor:pointer}" +
+      ".x:hover{background:rgba(255,255,255,.2)}" +
+      ".q{margin:0 0 12px;font-size:14.5px;line-height:1.55}" +
+      ".thx{margin:6px 0 4px;font-size:16px;font-weight:800;text-align:center;color:#f3d98b}" +
+      ".r{display:flex;gap:10px}" +
+      ".b{flex:1;padding:11px 14px;border-radius:11px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit}" +
+      ".y{border:0;color:#0a1a3a;background:linear-gradient(180deg,#f3d98b,#c9a24b)}" +
+      ".no{background:transparent;border:1px solid #c9a24b;color:#f3d98b}" +
+      ".b:disabled{opacity:.6;cursor:default}" +
+      "textarea{box-sizing:border-box;width:100%;min-height:96px;resize:vertical;margin:0 0 10px;padding:11px 12px;border-radius:11px;border:1px solid #4a63a0;background:#0a1a3f;color:#e8eefc;font:inherit;font-size:14px;line-height:1.5}" +
+      "textarea:focus{outline:2px solid #c9a24b;border-color:#c9a24b}" +
+      ".m{min-height:18px;margin:-2px 0 8px;font-size:12.5px;color:#fca5a5}";
+    sh.appendChild(st);
+    var n = document.createElement("div"); n.className = "n"; n.setAttribute("role", "alertdialog"); n.setAttribute("aria-live", "polite");
+    sh.appendChild(n);
+    var closed = false;
+    function hide(ms) {
+      if (closed) return; closed = true;
+      setTimeout(function () { n.classList.remove("on"); setTimeout(fbRemove, 550); }, ms || 0);
+    }
+    function head() {
+      return '<div class="h"><div class="ic">DQ</div><div class="t">DQ Platform · Rəy</div><button type="button" class="x" aria-label="Bağla">×</button></div>';
+    }
+    function thanks() {
+      n.innerHTML = head() + '<div class="thx">' + FBTHX + '</div>';
+      n.querySelector(".x").onclick = function () { hide(0); };
+      hide(2800);
+    }
+    function step1() {
+      n.innerHTML = head() + '<p class="q">' + esc(FBQ) + '</p><div class="r"><button type="button" class="b no" id="no">Xeyr</button><button type="button" class="b y" id="yes">Bəli</button></div>';
+      n.querySelector(".x").onclick = thanks;      /* bağla düyməsi də təşəkkür göstərir */
+      n.querySelector("#no").onclick = thanks;
+      n.querySelector("#yes").onclick = step2;
+    }
+    function step2() {
+      n.innerHTML = head() + '<p class="q">Fikirlərinizi, qeyd etdiyiniz çatışmazlıq və uyğunsuzluqları yazın:</p>' +
+        '<textarea id="tx" maxlength="1500" placeholder="Rəyinizi bura yazın…"></textarea><div class="m" id="mg"></div>' +
+        '<div class="r"><button type="button" class="b no" id="bk">Geri</button><button type="button" class="b y" id="sd">Göndər</button></div>';
+      var tx = n.querySelector("#tx"), mg = n.querySelector("#mg"), sd = n.querySelector("#sd");
+      n.querySelector(".x").onclick = thanks;
+      n.querySelector("#bk").onclick = step1;
+      try { tx.focus(); } catch (e) {}
+      sd.onclick = async function () {
+        var v = tx.value.trim();
+        if (!v) { mg.textContent = "Zəhmət olmasa rəyinizi yazın."; return; }
+        sd.disabled = true; sd.textContent = "Göndərilir…"; mg.textContent = "";
+        var ok = await fbSave(c, v);
+        if (ok) thanks();
+        else { sd.disabled = false; sd.textContent = "Göndər"; mg.textContent = "Göndərmək mümkün olmadı. İnterneti yoxlayıb yenidən cəhd edin."; }
+      };
+    }
+    step1();
+    requestAnimationFrame(function () { requestAnimationFrame(function () { n.classList.add("on"); }); });
   }
 
   /* ---------- kabinetə (kartlara) qayıdış ---------- */
@@ -670,6 +783,7 @@
     if (v === "ok") closeModal(true);
     else if (v === "cancel") closeModal(false);
     else if (v === "review") { var it = infoIt; closeModal(false); if (it) launchReview(it, false); }
+    else if (v === "chart") { var it2 = infoIt; closeModal(false); if (it2) launchChart(it2); }
   });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && ov2.classList.contains("on")) closeModal(false); });
 
@@ -695,6 +809,10 @@
         '<button type="button" class="gold" id="dqg-view">Nəticəyə bax</button>' +
         '<button type="button" class="rv" id="dqg-rv" style="display:none">🔍 Səhvləri təhlil et (1 dəfə)</button>' +
         '<button type="button" class="rv" id="dqg-cab">Kabinetə qayıt</button></div></div>';
+      try {
+        var fbc = { fin: session && session.fin, name: nm, exam: String(selectedExamId), cat: String(userGroup).toUpperCase(), score: sc ? sc[0] : "0" };
+        setTimeout(function () { askFeedback(fbc); }, 1800);
+      } catch (e) {}
       var wn = parseInt(txt("totalWrong"), 10) || 0, used = false;
       try { var iu = appFn("isReviewAlreadyUsed"); used = !!(iu && iu()); } catch (e) {}
       if (wn > 0 && !used) box.querySelector("#dqg-rv").style.display = "";
@@ -715,8 +833,8 @@
       if (!flow || reviewBusy) return;
       var r = document.getElementById("result-screen");
       var on = !!(r && r.classList.contains("active") && r.offsetParent);
-      if (on && !shown) { shown = true; setTimeout(function () { if (!box) build(); }, 400); }
-      if (!on) { shown = false; if (box) { rmBox(); document.documentElement.style.overflow = ""; } }
+      if (on && !shown) { shown = true; if (!chartMode) setTimeout(function () { if (!box) build(); }, 400); }
+      if (!on) { shown = false; chartMode = false; if (box) { rmBox(); document.documentElement.style.overflow = ""; } }
     }, 600);
   })();
   setTimeout(function () { try { $("dqg-fin").focus(); } catch (e) {} }, 300);
