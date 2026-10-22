@@ -3183,7 +3183,14 @@ function areaText(rx,ry,rw,rh){var pg=S.pg,vp=S.vpc;if(!pg||!vp)return Promise.r
 function copyArea(x,y,w,h){areaText(x,y,w,h).then(function(t){t?clip(t):toast("Mətn tapılmadı",1)}).catch(function(e){toast("Kopyalama alınmadı: "+(e&&e.message||e),1)})}
 
 /* ---------- Sırala: sualları və variantları avtomatik ayır ---------- */
-function parseQs(txt){return parseDoc(txt)}
+/* sonda «CAVABLAR: 1.E 2.E …» blokunu sual mətnindən ayır və açar kimi tətbiq et */
+function stripKeyTail(t){var L=String(t||"").replace(/\r/g,"").split("\n"),j,cut=-1,pre="",HD=/^(.*?)(?:^|\s)(?:düzgün\s+)?(?:cavablar|cavab\s+açar\w*|açar(?:lar)?)\s*:?\s*$/i;
+ for(j=L.length-1;j>=Math.floor(L.length/3);j--){var m=HD.exec(L[j].trim());if(m&&parseKeyB(L.slice(j+1).join("\n")).ok){cut=j;pre=m[1].trim();break}}
+ if(cut>=0)return{body:L.slice(0,cut).concat(pre?[pre]:[]).join("\n"),key:L.slice(cut+1).join("\n")};
+ var k=L.length;while(k>0&&KEYLN.test(L[k-1].trim()))k--;
+ if(L.length-k>=3&&parseKeyB(L.slice(k).join("\n")).ok)return{body:L.slice(0,k).join("\n"),key:L.slice(k).join("\n")};
+ return{body:L.join("\n"),key:""}}
+function parseQs(txt){var sp=stripKeyTail(txt);if(sp.key)setKeyFrom(sp.key);return parseDoc(sp.body)}
 
 function sortArea(x,y,w,h){toast("Oxunur…");areaText(x,y,w,h).then(function(t){var qs=parseQs(t);
   if(!qs.length&&setKeyFrom(t))return;if(!qs.length)return toast("Sual tapılmadı — “1.” kimi nömrəli sual və A) B) C) D) variantları olan sahə seçin",1);
@@ -3271,7 +3278,7 @@ function toRow(q,m,sm,no){var o={},ops=q.options.map(function(x){return hx(x.tex
  if(m.opts)o[m.opts]=ops;else m.each.forEach(function(k,j){if(k)o[k]=ops[j]||""});
  var cv=sm[m.corr];o[m.corr]=typeof cv==="number"?ci:(typeof cv==="string"&&/^[A-E]$/i.test(cv)?q.correct:ops[ci]);return o}
 $("bDb").addEventListener("click",async function(){var out=$("dbmsg"),btn=this;function say(t,k){out.textContent=t;out.style.color=k==="ok"?"#0f9d6b":k==="in"?"#6b6a85":"#d9363e"}
- var sb=window.parent&&window.parent._supabase;if(!sb)return say("Verilənlər bazası bağlantısı tapılmadı — saytda admin kimi daxil olun.");
+ var sb=null;try{var P=window.parent;sb=P&&(P._supabase||P.sb||P.supabaseClient);if(!sb&&P&&P.eval)sb=P.eval("typeof _supabase!=='undefined'?_supabase:null")}catch(e){}if(!sb||!sb.from)return say("Verilənlər bazası bağlantısı tapılmadı — Pro Add-i saytın admin panelindən (iframe daxilində) açın və admin kimi daxil olun.");
  if(!S.qs.length)return say("Bazaya yazmaq üçün sual yoxdur.");
  var nos=S.qs.filter(function(q){return!q.subject}).length;if(nos)return say(nos+" sualda fənn təyin edilməyib — “Düzəliş et” ilə fənni seçin.");
  btn.disabled=true;
@@ -3475,7 +3482,7 @@ var f=null;function $(i){return document.getElementById(i)}
 function grid(){return document.querySelector("#admin-panel .admin-nav-grid")}
 window.PRA={
 open:function(){document.querySelectorAll("#admin-panel .admin-module-block").forEach(function(b){b.style.display="none"});var g=grid();if(g)g.style.setProperty("display","none","important");
- $("mod-proadd").style.display="block";f=$("pra-frame");
+ $("mod-proadd").style.display="block";f=$("pra-frame");try{if(typeof _supabase!=="undefined"&&_supabase&&!window._supabase)window._supabase=_supabase}catch(e){}
  if(!f.__m){f.__m=1;var h=$("pra-tpl").textContent.split("<\\/"+"script>").join("<"+"/script>");f.src=URL.createObjectURL(new Blob([h],{type:"text/html"}))}
  window.scrollTo({top:0,behavior:"smooth"})},
 close:function(){$("mod-proadd").style.display="none";var g=grid();if(g)g.style.removeProperty("display")}};
