@@ -3604,12 +3604,15 @@ async function deleteQuestionFromEditor(){
   if(!cats.length)cats=[editorSelectedCategory];
   cats=cats.filter(function(c,i){return c&&cats.indexOf(c)===i});
   var n=editorCurrentQIndex;
-  if(!confirm("Sınaq "+editorSelectedExam+" · "+editorSelectedSubject+" · sual № "+n+"\n\nKateqoriyalar: "+cats.join(", ")+"\n\nBu sual bazadan həmişəlik silinsin?"))return;
-  var tot=0;
+  if(!confirm("Sınaq "+editorSelectedExam+" · "+editorSelectedSubject+" · sual № "+n+"\n\nKateqoriyalar: "+cats.join(", ")+"\n\nBu sual bazadan həmişəlik silinsin və sonrakı suallar bir nömrə yuxarı keçsin?"))return;
+  var tot=0,shifted=0;
   for(var i=0;i<cats.length;i++){
    var r=await _supabase.from("exam_questions").delete().eq("exam_id",editorSelectedExam).eq("category",cats[i]).eq("q_number",n).select("id");
-   if(r.error)throw r.error;tot+=(r.data||[]).length}
-  alert(tot?("Silindi: "+tot+" qeyd (sual № "+n+")"):"Bu nömrədə baza qeydi tapılmadı (sual hələ saxlanmayıb).");
+   if(r.error)throw r.error;var d=(r.data||[]).length;tot+=d;
+   if(d){var g=await _supabase.from("exam_questions").select("id,q_number").eq("exam_id",editorSelectedExam).eq("category",cats[i]).gt("q_number",n).order("q_number",{ascending:true}).limit(1000);
+    if(g.error)throw g.error;var rows=g.data||[];
+    for(var j=0;j<rows.length;j++){var u=await _supabase.from("exam_questions").update({q_number:rows[j].q_number-1}).eq("id",rows[j].id);if(u.error)throw u.error;shifted++}}}
+  alert(tot?("Silindi: "+tot+" qeyd (sual № "+n+"). "+shifted+" sual yuxarı sürüşdürüldü, sıra ardıcıldır."):"Bu nömrədə baza qeydi tapılmadı (sual hələ saxlanmayıb).");
   editorUploadedOptions={};
   loadEditorQuestionData(n);
  }catch(e){alert("Silinmədi: "+(e&&e.message||e))}}
