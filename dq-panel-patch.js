@@ -67,6 +67,38 @@ function menu(){
    cl.classList.remove("active","on","is-active");cl.style.cursor="pointer";
    var t=Array.prototype.find.call(cl.querySelectorAll("*"),function(e){return!e.children.length&&/Şablon/.test(e.textContent)})||cl;t.textContent="Pro Add Statistika";
    cl.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();stats()},true);it.parentElement.insertBefore(cl,it.nextSibling)}}}
+/* ---- Papka sayğacları: Sınaq → Kateqoriya → Fənn səhifələrində bankdakı sual sayı ---- */
+var FC=null,FCT=0,FCB=false,CATS=["BB","BA","AC"];
+async function fcLoad(){
+ if(FC&&Date.now()-FCT<8000)return FC;if(FCB)return FC;FCB=true;
+ try{var c=sb();if(!c)throw 0;
+  var one=await c.from("exam_questions").select("*").limit(1),r=one.data&&one.data[0],K=r?Object.keys(r):[],
+  sub=K.filter(function(k){return/^(subject(_name)?|fenn|fənn|section|topic|lesson|bolme|bölmə)$/i.test(k)})[0],
+  cols=["exam_id","category"].concat(sub?[sub]:[]).join(","),all=[],ord=true;
+  for(var f=0;;f+=1000){var q=ord?await c.from("exam_questions").select(cols).order("id").range(f,f+999):await c.from("exam_questions").select(cols).range(f,f+999);
+   if(q.error&&ord){ord=false;f-=1000;continue}if(q.error)throw q.error;var a=q.data||[];all=all.concat(a);if(a.length<1000)break}
+  var tot={},sc={};
+  all.forEach(function(x){var e=String(x.exam_id),k=x.category;tot[e]=tot[e]||{};tot[e][k]=(tot[e][k]||0)+1;if(sub){var y=e+"|"+k+"|"+nz(x[sub]);sc[y]=(sc[y]||0)+1}});
+  FC={tot:tot,sub:sc,hasSub:!!sub};FCT=Date.now()}catch(e){}
+ FCB=false;return FC}
+function chip(lb,n,t){var ok=t?n>=t:n>0,part=n>0&&!ok;
+ return'<span style="display:inline-block;margin:3px 4px 0 0;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;background:'+(ok?"#dcfce7":part?"#fef3c7":"#f1f5f9")+';color:'+(ok?"#15803d":part?"#b45309":"#64748b")+'">'+(lb?lb+" ":"")+n+(t?"/"+t:"")+" sual</span>"}
+function put(c,h){var e=c.querySelector(".dq-cnt");if(!e){e=document.createElement("div");e.className="dq-cnt";e.style.marginTop="6px";c.appendChild(e)}if(e.dataset.s!==h){e.dataset.s=h;e.innerHTML=h}}
+async function foldersTick(){
+ var eg=$("examFolderGrid"),cg=$("stepCategories"),sg=$("stepSubjects"),vE=eg&&eg.offsetParent,vC=cg&&cg.offsetParent,vS=sg&&sg.offsetParent;
+ if(!vE&&!vC&&!vS)return;var d=await fcLoad();if(!d)return;
+ if(vE)[].forEach.call(eg.querySelectorAll(".folder-card"),function(c){var t=c.querySelector(".folder-title"),m=t&&/(\d+)/.exec(t.textContent);if(!m)return;
+  var tot=d.tot[m[1]]||{},cs=CATS.concat(Object.keys(tot).filter(function(k){return CATS.indexOf(k)<0}));put(c,cs.map(function(k){return chip(k,tot[k]||0,100)}).join(""))});
+ var ex=(/(\d+)/.exec(($("navExam")||{}).textContent||"")||[])[1],ct=(/^\s*([A-Za-zƏəİıÖöÜüŞşÇçĞğ]+)/.exec(($("navCategory")||{}).textContent||"")||[])[1];
+ if(vC&&ex)[].forEach.call(cg.querySelectorAll(".folder-card"),function(c){var m=/selectCategory\('([^']+)'\)/.exec(c.getAttribute("onclick")||"");if(m)put(c,chip("",(d.tot[ex]||{})[m[1]]||0,100))});
+ if(vS&&ex&&ct){var sum=0;
+  [].forEach.call(sg.querySelectorAll(".folder-card"),function(c){var m=/openEditor\('([^']+)'\)/.exec(c.getAttribute("onclick")||"");if(!m)return;
+   var o=document.querySelector('#pdfauto-subject option[value="'+m[1]+'"]'),t=o?(+o.getAttribute("data-end")-+o.getAttribute("data-start")+1):0,n=d.sub[ex+"|"+ct+"|"+nz(m[1])]||0;
+   sum+=n;put(c,d.hasSub?chip("",n,t):"")});
+  var h4=sg.querySelector("h4"),sm=$("dq-sub-sum");
+  if(h4&&d.hasSub){if(!sm){sm=document.createElement("div");sm.id="dq-sub-sum";sm.style.cssText="margin:-4px 0 10px;font-weight:700";h4.parentNode.insertBefore(sm,h4.nextSibling)}
+   var tx="Sınaq "+ex+" · "+ct+": cəmi "+sum+"/100 sual";if(sm.dataset.s!==tx){sm.dataset.s=tx;sm.textContent=tx}}}}
+setInterval(function(){try{foldersTick()}catch(e){}},1500);
 function run(){try{dash();menu();templates()}catch(e){}}
 new MutationObserver(function(){clearTimeout(tm);tm=setTimeout(run,250)}).observe(document.body,{childList:true,subtree:true});run();
 })();
