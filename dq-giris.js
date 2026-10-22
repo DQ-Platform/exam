@@ -46,6 +46,23 @@
   function normFin(v) {
     return String(v || "").toUpperCase().replace(/[\s\u200b-\u200f\ufeff]/g, "").replace(/[А-ЯЁІЅЈ]/g, function (c) { return CYR[c] || c; });
   }
+  /* şərti gözləyir (app.js / verilənlər bazası gec yüklənəndə) */
+  function waitFor(fn, ms) {
+    return new Promise(function (res) {
+      var t0 = Date.now();
+      (function p() {
+        var v = null; try { v = fn(); } catch (e) {}
+        if (v) return res(v);
+        if (Date.now() - t0 > ms) return res(null);
+        setTimeout(p, 150);
+      })();
+    });
+  }
+  function appFn(name) {
+    try { if (typeof window[name] === "function") return window[name]; } catch (e) {}
+    try { if (window.DQ && typeof window.DQ[name] === "function") return window.DQ[name].bind(window.DQ); } catch (e) {}
+    return null;
+  }
   function pad(n) { return (n < 10 ? "0" : "") + n; }
   function fmtDate(d) { return pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "." + d.getFullYear(); }
   function fmtDT(d) { return fmtDate(d) + ", " + pad(d.getHours()) + ":" + pad(d.getMinutes()); }
@@ -80,14 +97,26 @@
     }
   }
 
+  /* başlama alınmayıbsa taymeri geri qaytar (istifadəçinin vaxtı boş yerə getməsin) */
+  function unsetRun(it) {
+    try { localStorage.removeItem(runKey(it)); } catch (e) {}
+    if (session && session.prog) {
+      delete session.prog[pkey(it)];
+      if (cols && cols.prog && db()) {
+        try { db().from(T).update(Object.fromEntries([[cols.prog, session.prog]])).eq(cols.fin, session.fin).then(function () {}, function () {}); } catch (e) {}
+      }
+    }
+  }
+
   /* ---------- üslub ---------- */
   var css = [
     "#dqg,#dqg *{box-sizing:border-box}",
     "#dqg{position:fixed;inset:0;z-index:2147483000;overflow-y:auto;-webkit-overflow-scrolling:touch;",
     "font-family:'Inter','Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e9eefb;",
     "background:radial-gradient(1200px 600px at 50% -10%,#16356f 0%,#0b1d44 45%,#071330 100%)}",
-    "html.dqg-auto #dq-cs{opacity:0!important;pointer-events:none!important}",
-    "html.dq13-dark #dqg{filter:invert(1) hue-rotate(180deg)}",
+    "#dqg .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:30;max-width:92%;padding:12px 16px;border-radius:12px;",
+    "background:#7f1d1d;border:1px solid #f87171;color:#fee2e2;font-size:13.5px;line-height:1.5;display:none;box-shadow:0 10px 30px rgba(0,0,0,.5)}",
+    "#dqg .toast.on{display:block}",
     "#dqg .hd{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:12px 20px;",
     "background:linear-gradient(180deg,#0b1d44,#091735);border-bottom:2px solid #c9a24b;box-shadow:0 6px 24px rgba(0,0,0,.35)}",
     "#dqg .logo{width:42px;height:42px;flex:none;border-radius:12px;display:block}",
@@ -163,15 +192,31 @@
     '<text x="24" y="29.5" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="17" fill="url(#dqgG)">DQ</text></svg>';
 
   /* ---------- quruluş ---------- */
+  /* səhifə səviyyəli qaydalar (yalnız bunlar shadow-un xaricindədir) */
   var st = document.createElement("style");
   st.id = "dqg-style";
-  st.textContent = css;
+  st.textContent =
+    "html.dqg-auto #dq-cs{opacity:0!important;pointer-events:none!important}" +
+    "html.dqg-on #dq-splash{display:none!important}" +
+    "html.dq13-dark #dqg,html.dq13-dark #dqg-rh{filter:invert(1) hue-rotate(180deg)}";
   document.head.appendChild(st);
 
-  var root = document.createElement("div");
-  root.id = "dqg";
-  root.setAttribute("data-dqg", "");
-  root.innerHTML =
+  /* Shadow DOM: index.html / digər skriptlərin qlobal CSS-i (.ov, .md, .hd, .grid, .logo …) bu pəncərəyə toxuna bilmir */
+  function mount(hostId) {
+    var host = document.createElement("div");
+    host.id = hostId;
+    document.body.appendChild(host);
+    [["position", "fixed"], ["top", "0"], ["right", "0"], ["bottom", "0"], ["left", "0"], ["z-index", "2147483600"],
+     ["visibility", "visible"], ["opacity", "1"], ["pointer-events", "auto"], ["margin", "0"], ["padding", "0"]
+    ].forEach(function (x) { host.style.setProperty(x[0], x[1], "important"); });
+    var sh = host.attachShadow ? host.attachShadow({ mode: "open" }) : host;
+    var sty = document.createElement("style"); sty.textContent = css; sh.appendChild(sty);
+    var ui = document.createElement("div"); ui.setAttribute("data-dqg", ""); sh.appendChild(ui);
+    return { host: host, sh: sh, ui: ui };
+  }
+
+  var M = mount("dqg"), root = M.host, SH = M.sh;
+  M.ui.innerHTML =
     '<div class="hd">' + LOGO + '<div class="brand"><b>DQ Platform</b><small>Dövlət Qulluğu Sınaq İmtahanı</small></div>' +
     '<button type="button" class="out" id="dqg-out" style="display:none">Çıxış</button></div>' +
     '<div class="wrap">' +
@@ -189,12 +234,19 @@
     '<h4>İmtahanı başlat</h4><div class="nm" id="dqg-mn"></div>' +
     '<p>Təsdiq edirəm düyməsini basdıqdan sonra imtahan başlayacaq və imtahanı dayandırmaq, yenidən başlatmaq mümkün olmayacaq. Razısınız?</p>' +
     '<div class="bt"><button type="button" class="no" id="dqg-no">Xeyr</button><button type="button" class="yes" id="dqg-yes">Bəli</button></div></div></div>';
-  document.body.appendChild(root);
+  var tst = document.createElement("div"); tst.className = "toast"; tst.id = "dqg-toast"; M.ui.appendChild(tst);
+  document.documentElement.classList.add("dqg-on");
   document.documentElement.classList.remove("dqg-pre");
   document.documentElement.style.overflow = "hidden";
 
-  var $ = function (id) { return document.getElementById(id); };
+  var $ = function (id) { return SH.getElementById ? SH.getElementById(id) : document.getElementById(id); };
 
+  var toastT = null;
+  function toast(t) {
+    var e = $("dqg-toast"); if (!e) return;
+    e.textContent = t; e.classList.add("on");
+    clearTimeout(toastT); toastT = setTimeout(function () { e.classList.remove("on"); }, 7000);
+  }
   function showErr(t, wa) {
     var e = $("dqg-err"); e.textContent = t; e.style.display = "block";
     var a = $("dqg-wa");
@@ -212,9 +264,9 @@
     if (!fin) return showErr("İş nömrəsini yazın.");
     if (fin.length < 4) return showErr("İş nömrəsi düzgün deyil.");
     var b = $("dqg-go");
-    if (!db()) return showErr("Verilənlər bazası ilə bağlantı qurulmayıb. Bir neçə saniyə sonra yenidən cəhd edin.");
     b.disabled = true; b.textContent = "Yoxlanılır…";
     try {
+      if (!(await waitFor(db, 8000))) return showErr("Verilənlər bazası ilə bağlantı qurulmayıb. İnternetinizi yoxlayıb yenidən cəhd edin.");
       var c = await schema();
       var q = await db().from(T).select("*").eq(c.fin, fin);
       if (q.error) throw q.error;
@@ -330,33 +382,46 @@
     }, 100);
   }
   async function start(it) {
-    var resume = hasLocalState(it);
+    var resume = hasLocalState(it), yes = $("dqg-yes");
+    if (yes) { yes.disabled = true; yes.textContent = "Hazırlanır…"; }
+    /* app.js tam yüklənməyibsə gözlə (açılış ekranı hələ 100% olmaya bilər) */
+    var fn = await waitFor(function () { return appFn(resume ? "restoreSession" : "startExamSession"); }, 15000);
+    if (yes) { yes.disabled = false; yes.textContent = "Bəli"; }
+    if (!fn) {
+      closeConfirm();
+      toast("Sistem hələ tam yüklənməyib və ya imtahan funksiyası tapılmadı. Səhifəni yeniləyib yenidən cəhd edin. Taymer işə düşmədi.");
+      console.error("dqg: " + (resume ? "restoreSession" : "startExamSession") + " tapılmadı");
+      return;
+    }
+    var fresh = !resume && !getRun(it);
     if (!resume) setRun(it);
     closeConfirm();
     try { sessionStorage.setItem("dqg_flow", "1"); } catch (e) {}
     try {
       currentStudentName = session.name || currentStudentName;
       currentActiveFin = session.fin;
-      if (window.DQ && DQ.saveCabinet) DQ.saveCabinet({ name: session.name, fin: session.fin });
     } catch (e) { console.warn("dqg: sessiya dəyişənləri", e); }
+    try { if (window.DQ && DQ.saveCabinet) DQ.saveCabinet({ name: session.name, fin: session.fin }); } catch (e) { console.warn("dqg: saveCabinet", e); }
     document.documentElement.classList.add("dqg-auto");
     root.style.display = "none";
     document.documentElement.style.overflow = "";
     if (!resume) autoConfirm();
-    try {
-      if (resume && typeof window.restoreSession === "function") await window.restoreSession();
-      else await window.startExamSession(it.exam, it.cat);
-    } catch (e) { console.warn("dqg: start", e); }
+    var err = null;
+    try { await fn(it.exam, it.cat); } catch (e) { err = e; console.warn("dqg: start", e); }
     document.documentElement.classList.remove("dqg-auto");
-    setTimeout(function () {
+    /* imtahan ekranının açılmasını 10 san gözlə (suallar şəbəkədən gələ bilər) */
+    var ok = await waitFor(function () {
       var es = document.getElementById("exam-screen"), rs = document.getElementById("result-screen");
-      var inExam = (es && es.classList.contains("active")) || (rs && rs.classList.contains("active"));
-      clearInterval(autoIv);
-      if (!inExam && session) {   /* başlamadı (icazə / ləğv) — kartlara qayıt */
-        root.style.display = ""; document.documentElement.style.overflow = "hidden";
-        $("dqg-list").style.display = "block"; refresh();
-      }
-    }, 1500);
+      return (es && es.classList.contains("active")) || (rs && rs.classList.contains("active"));
+    }, err ? 800 : 10000);
+    clearInterval(autoIv);
+    if (!ok && session) {   /* başlamadı — taymeri geri qaytar və kartlara qayıt */
+      if (fresh) unsetRun(it);
+      root.style.display = ""; document.documentElement.classList.add("dqg-on");
+      document.documentElement.style.overflow = "hidden";
+      $("dqg-list").style.display = "block"; refresh();
+      toast("İmtahan başlamadı" + (err && err.message ? ": " + err.message : ". İcazə yoxlanılmadı və ya imtahan tapılmadı.") + " Taymer işə düşmədi.");
+    }
   }
 
   /* ---------- hadisələr ---------- */
@@ -379,13 +444,13 @@
 
   /* ---------- imtahan bitəndən sonra: bal + «Nəticəyə bax» ---------- */
   (function () {
-    var shown = false, box = null;
+    var shown = false, box = null, boxHost = null;
+    function rmBox() { try { if (boxHost) boxHost.remove(); } catch (e) {} box = null; boxHost = null; }
     function txt(id) { var e = document.getElementById(id); return e ? e.textContent.trim() : ""; }
     function build() {
       var sc = txt("finalScoreText").match(/-?[\d]+(?:[.,]\d+)?/);
       var nm = txt("res-name") || (session && session.name) || "";
-      box = document.createElement("div");
-      box.id = "dqg-r"; box.setAttribute("data-dqg", "");
+      var RM = mount("dqg-rh"); boxHost = RM.host; box = RM.ui; box.id = "dqg-r";
       box.innerHTML =
         '<div class="hd">' + LOGO + '<div class="brand"><b>DQ Platform</b><small>Dövlət Qulluğu Sınaq İmtahanı</small></div></div>' +
         '<div class="wrap"><div class="lg" style="max-width:440px;text-align:center">' +
@@ -396,10 +461,9 @@
         '<div style="display:flex;gap:8px;justify-content:center;margin:16px 0 4px;font-size:13px;color:#c8d4f0">' +
         '<span>✅ ' + esc(txt("totalCorrect") || "0") + '</span><span>❌ ' + esc(txt("totalWrong") || "0") + '</span><span>➖ ' + esc(txt("totalUnanswered") || "0") + '</span></div>' +
         '<button type="button" class="gold" id="dqg-view">Nəticəyə bax</button></div></div>';
-      document.body.appendChild(box);
       document.documentElement.style.overflow = "hidden";
       box.querySelector("#dqg-view").onclick = function () {
-        box.remove(); box = null; document.documentElement.style.overflow = "";
+        rmBox(); document.documentElement.style.overflow = "";
         var r = document.getElementById("result-screen"); if (r && r.scrollIntoView) r.scrollIntoView();
       };
     }
@@ -409,7 +473,7 @@
       var r = document.getElementById("result-screen");
       var on = !!(r && r.classList.contains("active") && r.offsetParent);
       if (on && !shown) { shown = true; setTimeout(function () { if (!box) build(); }, 400); }
-      if (!on) { shown = false; if (box) { box.remove(); box = null; document.documentElement.style.overflow = ""; } }
+      if (!on) { shown = false; if (box) { rmBox(); document.documentElement.style.overflow = ""; } }
     }, 600);
   })();
   setTimeout(function () { try { $("dqg-fin").focus(); } catch (e) {} }, 300);
