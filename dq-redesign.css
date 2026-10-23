@@ -1,5 +1,5 @@
 /* DQ Platform — ana səhifə (mockup 2): tünd göy + qızılı. Yalnız #dqr daxilində. */
-#v3-home.dqr-on>:not(#dqr){display:none!important}
+#v3-home.dqr-on>:not(#dqr):not(.v3-ft){display:none!important}
 html.dq13-dark #v3-home.dqr-on{filter:invert(1) hue-rotate(180deg)}
 #v3-home.dqr-on{background:#020a1a;padding:0}
 #dqr{--bg:#020a1a;--ln:rgba(232,185,74,.32);--gd:#e8b94a;--tx:#f1f5ff;--mt:#9fb0d6;--pn:#061330;
@@ -229,3 +229,58 @@ body.dqr-hdr #dq13-dock>button,body.dqr-hdr #dq13-dock>.fb,body.dqr-hdr #dq13-do
 
 
 #dqr .tb .ic{font-size:18px}
+
+#dqr #dqr-chat{position:fixed;right:20px;bottom:22px;z-index:40;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;color:#fff;background:radial-gradient(circle at 30% 25%,#4f8dff,#1d4fd8 70%);border:2px solid #ffffff55;box-shadow:0 10px 28px #1d4fd877,0 0 0 6px #1d4fd822;transition:transform .2s}
+#dqr #dqr-chat:hover{transform:translateY(-3px) scale(1.05)}
+@media(max-width:600px){#dqr #dqr-chat{right:14px;bottom:16px;width:50px;height:50px}}
+
+/* Köhnə alt zolaq (©·Developed by) gizli admin giriş üçün SAXLANILIR — yeni dizayna uyğun üslub */
+#v3-home.dqr-on>.v3-ft{display:block!important;margin:0!important;padding:16px 14px 18px!important;background:#020a1a!important;border-top:1px solid #ffffff14!important;color:#9fb0d6!important;font:500 13px/1.6 "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;text-align:center;position:relative;z-index:1}
+#v3-home.dqr-on>.v3-ft div{margin-top:6px!important;font-size:12.5px!important}
+#v3-home.dqr-on>.v3-ft a{color:#e8b94a!important}
+#dqr .ft .cp>*:not(.by){display:none}
+
+#dqr .ft{padding-bottom:22px}
+
+/* Alt zolaq: menyu çıxarıldı, "©·Developed by" yazısı footerin ortasına qaldırıldı */
+#dqr .ft nav{display:block;visibility:hidden}
+#dqr .ft .w{min-height:64px}
+@media(min-width:861px){
+#dqr .ft .w{grid-template-columns:auto 1fr auto!important;justify-items:stretch!important;text-align:left!important}
+#v3-home.dqr-on>.v3-ft{margin-top:-86px!important;height:64px;padding:0!important;background:transparent!important;border:0!important;display:flex!important;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;z-index:2}
+#v3-home.dqr-on>.v3-ft *{pointer-events:auto}
+}
+
+/* Təkrar "Sınaq imtahanına başla" düyməsi (alt banner) gizlədilir; hero-dakı qalır */
+#dqr .bn .cta{display:none!important}
+
+/* Hero laptop ekranı: canlı sual maketi */
+#dqr #dqr-lvs{position:absolute;left:0;top:0;width:1188px;height:876px;transform-origin:0 0;pointer-events:none;z-index:1}
+#dqr #dqr-lvs .lv-sc{position:absolute;left:0;top:0;width:650px;height:460px;transform-origin:0 0;overflow:hidden;border-radius:6px;background:#0b1d4a}
+#dqr .lv-in{width:100%;height:100%;display:flex;flex-direction:column;padding:14px 16px;gap:12px;background:linear-gradient(180deg,#0f2a6b,#0a1a45);font-family:"Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;color:#0f1f46;transition:opacity .38s}
+#dqr .lv-in.sw .lv-q,#dqr .lv-in.sw .lv-g{opacity:0}
+#dqr .lv-h{display:flex;justify-content:space-between;align-items:center;background:#1e3f9a;border-radius:8px;padding:11px 14px;color:#fff;font-size:18px;white-space:nowrap}
+#dqr .lv-h b{font-weight:700}#dqr .lv-h em{font-style:normal;background:#ffffff1f;border:1px solid #ffffff44;border-radius:8px;padding:4px 12px;font-weight:700;color:#f3d27a}
+#dqr .lv-b{flex:1;display:grid;grid-template-columns:1.55fr 1fr;gap:12px;min-height:0}
+#dqr .lv-q,#dqr .lv-c{background:#eef2fb;border-radius:8px;padding:12px;transition:opacity .38s}
+#dqr .lv-m{display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:700;margin-bottom:8px}
+#dqr .lv-m u{text-decoration:none;font-size:13px;background:#fff;border-radius:6px;padding:3px 9px;color:#b7791f}
+#dqr .lv-q p{font-size:17px;line-height:1.35;font-weight:600;margin:0 0 10px;color:#0f1f46;max-width:none}
+#dqr .lv-opt{display:flex;gap:10px;align-items:center;background:#dce4f5;border-radius:6px;padding:9px 11px;margin-bottom:7px;font-size:16px;font-weight:600;transition:background .3s,color .3s}
+#dqr .lv-opt b{font-weight:800}
+#dqr .lv-opt.sel{background:#1a2f8a;color:#fff}
+#dqr .lv-ct{font-size:15px;font-weight:800;border-bottom:2px solid #1a2f8a;padding-bottom:6px;margin-bottom:10px}
+#dqr .lv-g{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;transition:opacity .38s}
+#dqr .lv-g i{font-style:normal;text-align:center;background:#fff;border:1px solid #c5cfe6;border-radius:4px;padding:6px 0;font-size:14px;font-weight:600}
+#dqr .lv-g i.on{background:#1a2f8a;color:#fff;border-color:#1a2f8a}#dqr .lv-g i.dn{background:#cfe0ff}
+#dqr .lv-g i:nth-child(n+11){display:none}
+#dqr .lv-sb{display:flex;justify-content:space-between;margin-top:12px;font-size:14px;font-weight:700}
+#dqr .lv-f{display:flex;gap:10px;font-size:14px;font-weight:700}
+#dqr .lv-f span{flex:1;text-align:center;border-radius:6px;padding:9px 4px;background:#e4e9f6;color:#33466f}
+#dqr .lv-f .r{background:#fff;color:#c0392b;border:1px solid #c0392b}#dqr .lv-f .d{background:#c0392b;color:#fff}#dqr .lv-f .n{background:#1a2f8a;color:#fff}
+@media(max-width:820px){#dqr #dqr-lvs{display:none}}
+#dqr .lv-q{overflow:hidden}
+#dqr .lv-q p{font-size:15.5px;margin-bottom:8px}
+#dqr .lv-opt{padding:6px 10px;margin-bottom:5px;font-size:15px}
+#dqr .lv-m{margin-bottom:6px}
+#dqr .lv-in{gap:10px;padding:12px 14px}

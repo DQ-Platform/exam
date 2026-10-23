@@ -2454,6 +2454,7 @@ button:active,.btn:active,[role=button]:active{transition-duration:.06s!importan
  mix-blend-mode:multiply;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;outline:0!important;filter:contrast(1.06)}
 #exam-screen .options *:has(>img),#exam-screen .annotatable-wrap:has(>img){background-color:transparent!important;border:0!important;box-shadow:none!important}
 </style>
+<link rel="stylesheet" href="dq-redesign.css?v=8">
 </head>
 <body class="v3on" oncontextmenu="return false;">
 <noscript><p>DQPlatform Exam (DQPlatform.exam) — Azərbaycanda dövlət qulluğuna qəbul üçün onlayn sınaq, fənn testləri və qanunvericilik hazırlığı platforması. Saytdan istifadə üçün JavaScript-i aktiv edin.</p></noscript>
@@ -5716,5 +5717,25 @@ setInterval(tick,700)})();</script>
 <script src="dq-resepsiya.js?v=2"></script>
 <script src="dq-giris.js?v=4"></script>
 <script src="dq-panel-patch.js?v=1"></script>
+<style id="dq-hide-sections">
+/* Ana səhifə: işarələnmiş bölmələr gizlədilir (elementlər DOM-da qalır, funksiyalar pozulmur) */
+#v3-home #dt-home,#v3-home #dt-grid,#v3-home #dtn,#v3-home #yq-news,#v3-home #dq-types,#v3-home .dqh-hide{display:none!important}
+</style>
+<script id="dq-hide-sections-js">
+(function(){"use strict";
+var T=[/^\s*(\S{0,3}\s*)?Yenilikl[əe]r\s*$/i,/Aktiv sınaqlar və mövzu testləri/i];
+var KEEP="#dq-stats,#dq-count,#lxp-ban,.v3-hero,.v3-nav,.v3-top,.v3-ft";
+function run(){try{var h=document.getElementById("v3-home");if(!h||h.classList.contains("dqr-on"))return;
+ var els=h.querySelectorAll("h1,h2,h3,h4,div,span,b");
+ for(var i=0;i<els.length;i++){var e=els[i];if(e.children.length>2||e.closest(".dqh-hide"))continue;
+  var t=(e.textContent||"").trim();if(!t||t.length>60)continue;
+  if(!T.some(function(r){return r.test(t)}))continue;
+  var n=e;while(n.parentElement&&n.parentElement!==h&&!n.parentElement.querySelector(KEEP))n=n.parentElement;
+  if(n&&n!==h&&!n.matches(KEEP)&&!n.querySelector(KEEP))n.classList.add("dqh-hide")}
+}catch(x){}}
+setInterval(run,700);run()})();
+</script>
+<script src="dq-assets.js?v=8"></script>
+<script src="dq-redesign.js?v=8"></script>
 </body>
 </html>
