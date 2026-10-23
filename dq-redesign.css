@@ -254,3 +254,6 @@ body.dqr-hdr #dq13-dock>button,body.dqr-hdr #dq13-dock>.fb,body.dqr-hdr #dq13-do
  #dqr .tabs{left:0}
 }
 @media(max-width:560px){#dqr .feat{grid-template-columns:1fr}#dqr .hbtn{width:100%;justify-content:center;padding:16px 20px}#dqr .hb{align-items:stretch}#dqr .lap{--u:1.7vw}}
+
+/* köhnə zəng düyməsi başlıqdakı zənglə əvəzlənir (klik proqramla ötürülür) */
+body.dqr-hdr #dq-bell{display:none!important}
