@@ -2698,6 +2698,7 @@ window.__dqSplashCalc=calc;window.DQSplash={complete:complete};
 <div class="admin-nav-card" onclick="window.DQCD&&DQCD.openAdmin()" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">⏳</span> Sayğac</div>
 <div class="admin-nav-card" onclick="PPU.open()" style="background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff"><span class="icon">📥</span> Peşəkar PDF Sınaq Yükləyici</div>
 <div class="admin-nav-card" onclick="window.DQST&&DQST.openAdmin()" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">📊</span> Ana Səhifə Statistikası</div>
+<div class="admin-nav-card" onclick="window.GZL&&GZL.open()" style="background:linear-gradient(135deg,#475569,#0f172a);color:#fff"><span class="icon">🙈</span> Gizləmə</div>
 </div>
 <style id="ppu-css">
 #mod-propdf .ppu-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
@@ -5718,5 +5719,218 @@ setInterval(tick,700)})();</script>
 <script src="dq-resepsiya.js?v=2"></script>
 <script src="dq-giris.js?v=4"></script>
 <script src="dq-panel-patch.js?v=1"></script>
+<style id="dq-gz-css">
+#mod-gizleme .gz-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+#mod-gizleme .gz-top h4{margin:0;text-align:left;font-size:17px}
+#mod-gizleme .gz-b{border:0;border-radius:10px;padding:9px 14px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;background:#0f172a;color:#fff}
+#mod-gizleme .gz-b.l{background:#e2e8f0;color:#0f172a}
+#mod-gizleme .gz-b.r{background:#fff;color:#dc2626;border:1.5px solid #fecaca}
+#mod-gizleme .gz-tabs{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}
+#mod-gizleme .gz-tab{flex:1 1 auto;padding:10px 12px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;font-weight:800;font-size:13px;cursor:pointer;color:#334155;font-family:inherit}
+#mod-gizleme .gz-tab small{opacity:.7;font-weight:700}
+#mod-gizleme .gz-tab.on{background:#0f172a;color:#facc15;border-color:#0f172a}
+#mod-gizleme .gz-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px}
+#mod-gizleme .gz-q{flex:1 1 180px;min-width:0;padding:10px 12px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:14px;font-family:inherit}
+#mod-gizleme .gz-st{font-size:12.5px;font-weight:700;color:#475569;background:#f1f5f9;border-radius:8px;padding:8px 12px}
+#mod-gizleme .gz-st.ok{background:#dcfce7;color:#166534}#mod-gizleme .gz-st.w{background:#fef3c7;color:#92400e}
+#mod-gizleme .gz-hint{font-size:12.5px;color:#64748b;line-height:1.5;margin:0 0 12px}
+#mod-gizleme .gz-h{margin:16px 2px 8px;font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:#94a3b8;font-weight:800}
+#mod-gizleme .gz-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;margin:0 0 8px;border:1px solid #e2e8f0;border-left:4px solid #10b981;border-radius:12px;background:#fff}
+#mod-gizleme .gz-row.off{border-left-color:#ef4444;background:#fef2f2}
+#mod-gizleme .gz-nm{flex:1 1 200px;min-width:0}
+#mod-gizleme .gz-nm b{display:block;font-size:14.5px;color:#0f172a;line-height:1.3;word-break:break-word}
+#mod-gizleme .gz-nm small{display:block;color:#64748b;font-size:12px;margin-top:2px;line-height:1.4}
+#mod-gizleme .gz-tag{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;margin-left:6px;vertical-align:middle;background:#d1fae5;color:#047857}
+#mod-gizleme .gz-row.off .gz-tag{background:#fee2e2;color:#b91c1c}
+#mod-gizleme .gz-ac{display:flex;gap:6px;flex-wrap:wrap}
+#mod-gizleme .gz-ac .gz-b{padding:8px 12px;font-size:12.5px}
+#mod-gizleme .gz-ed{background:#2563eb}
+#mod-gizleme .gz-hd{background:#b45309}
+#mod-gizleme .gz-row.off .gz-hd{background:#059669}
+#mod-gizleme .gz-empty{text-align:center;color:#94a3b8;padding:22px 0;font-size:13px}
+#mod-gizleme .gz-toast{position:sticky;bottom:8px;margin-top:10px;padding:10px 14px;border-radius:10px;background:#0f172a;color:#fff;font-size:13px;font-weight:600;text-align:center;display:none}
+@media(max-width:520px){#mod-gizleme .gz-ac{width:100%}#mod-gizleme .gz-ac .gz-b{flex:1}}
+</style>
+<script id="dq-gizleme">
+/* DQ Gizləmə — ana ekran bölmələrini və sayt elementlərini gizlət/göstər.
+   Ayarlar Supabase dq_v2_store (collection="gizleme") + cihaz keşində saxlanır; səhifə açılanda hamı üçün tətbiq olunur. */
+(function(){"use strict";
+if(window.GZL)return;
+var U="https://cpzwliqlgaplroscvduo.supabase.co",K="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF",COL="gizleme",LS="dq_gz_cfg_v1";
+var cfg={hidden:{},names:{}},rowId=null,tab="home",q="",saveT=0,statusTxt="",statusCls="";
+function $(i){return document.getElementById(i)}
+function qa(s){try{return Array.prototype.slice.call(document.querySelectorAll(s))}catch(e){return[]}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function norm(t){return String(t||"").replace(/[\u2190-\u21FF\u25A0-\u27BF\u2B00-\u2BFF\uFE0F\u200D]|[\uD83C-\uD83E][\uDC00-\uDFFF]|[\u203A\u2039\u00BB\u00AB]/g,"").replace(/\s+/g," ").trim().toLocaleLowerCase("az")}
+function clean(t){return String(t||"").replace(/[\u2190-\u21FF\u25A0-\u27BF\u2B00-\u2BFF\uFE0F\u200D]|[\uD83C-\uD83E][\uDC00-\uDFFF]|[\u203A\u2039\u00BB\u00AB]/g,"").replace(/\s+/g," ").trim()}
+function cssEsc(s){return window.CSS&&CSS.escape?CSS.escape(s):String(s).replace(/[^a-zA-Z0-9_-]/g,"\\$&")}
+
+/* ---------- Qeydiyyat: bilinən sayt elementləri ---------- */
+var HB="#v3-home button,#v3-home a";
+var KNOWN=[
+ /* Ana ekran bölmələri */
+ {k:"hero",g:"home",n:"Qeydiyyat bannerı",d:"«Dövlət qulluğu hədəfinə doğru ilk addımını at!» + «Qeydiyyatdan keç» düyməsi",sel:"#lxp-ban",ed:"v3"},
+ {k:"news",g:"home",n:"Yeniliklər",d:"Xəbər, elan və qanun dəyişiklikləri slayderi",sel:"#yq-news",ed:"news"},
+ {k:"types",g:"home",n:"Aktiv sınaqlar və mövzu testləri",d:"Sınaq və fənn testi karuseli",sel:"#dq-types",ed:"types"},
+ {k:"daily",g:"home",n:"Günün tövsiyə testi",d:"Sol kart: Məntiq / Ümumi, «Testə başla», «Bütün testlər»",sel:"#dt-home",ed:"types"},
+ {k:"exam",g:"home",n:"Sınaq kartı (Hazırlaş)",d:"Sağ kart: Sınaq 1, Başla, Qeydiyyatdan keç, Paylaş, Qeydiyyat paneli",sel:"#dt-grid",ed:"types"},
+ {k:"count",g:"home",n:"Geri sayım (Sayğac)",d:"İmtahana qalan vaxt zolağı",sel:"#dq-count",ed:"count"},
+ {k:"stats",g:"home",n:"Ana səhifə statistikası",d:"Statistika kartları",sel:"#dq-stats",ed:"stats"},
+ /* Düymələr və keçidlər */
+ {k:"b_reg",g:"btn",n:"«Qeydiyyatdan keç» düymələri",d:"Bannerdə və sınaq kartında",scope:HB,re:/^qeydiyyatdan keç$/,ed:"v3"},
+ {k:"b_regp",g:"btn",n:"«Qeydiyyat paneli» düyməsi",d:"Sınaq kartının altındakı sarı düymə",scope:HB,re:/^qeydiyyat paneli$/,ed:"v3"},
+ {k:"b_start",g:"btn",n:"«Başla» / «Testə başla» düymələri",d:"Sınaq və gündəlik test kartlarında",scope:HB,re:/^(testə )?başla$/,ed:"types"},
+ {k:"b_share",g:"btn",n:"«Paylaş» düymələri",d:"Xəbər və sınaq kartlarında",scope:HB,re:/^paylaş$/,ed:"news"},
+ {k:"b_allnews",g:"btn",n:"«Bütün xəbərlər» keçidi",d:"Yeniliklər bölməsinin başlığında",scope:HB,re:/^bütün xəbərlər$/,ed:"news"},
+ {k:"b_allex",g:"btn",n:"«Bütün sınaqlar» keçidi",d:"Aktiv sınaqlar bölməsinin başlığında",scope:HB,re:/^bütün sınaqlar$/,ed:"types"},
+ {k:"b_alltest",g:"btn",n:"«Bütün testlər» düyməsi",d:"Günün tövsiyə testi kartında",scope:HB,re:/^bütün testlər$/,ed:"types"},
+ {k:"b_more",g:"btn",n:"«Ətraflı oxu» düymələri",d:"Yeniliklər slayderində",scope:HB,re:/^ətraflı oxu$/,ed:"news"},
+ {k:"b_exgo",g:"btn",n:"«Sınağa keç» düymələri",d:"Aktiv sınaqlar karuselində",scope:HB,re:/^sınağa keç$/,ed:"types"},
+ /* Üst / alt hissə */
+ {k:"topbar",g:"frame",n:"Üst zolaq (sosial şəbəkə ikonları)",d:"Səhifənin ən yuxarı zolağı",sel:".v3-top",ed:"v3"},
+ {k:"header",g:"frame",n:"Başlıq (logo və giriş düymələri)",d:"Logo, Daxil ol / Qeydiyyat düymələri",sel:".v3-hd",ed:"v3"},
+ {k:"navbar",g:"frame",n:"Əsas menyu zolağı",d:"Bütün menyu bəndləri birlikdə",sel:".v3-nav",ed:"v3"},
+ {k:"footer",g:"frame",n:"Alt hissə (footer)",d:"Səhifənin aşağı hissəsi",sel:".v3-ft",ed:"v3"},
+ {k:"fab",g:"frame",n:"Üzən / sosial düymələr",d:"WhatsApp, Telegram və s.",sel:".dq-fab",ed:"v3"},
+ /* Giriş ekranı */
+ {k:"feednews",g:"login",n:"«Elanlar» düyməsi",d:"Giriş ekranının yuxarı küncündə",sel:"#feed-news-btn",ed:"news"},
+ {k:"examreg",g:"login",n:"İmtahana qeydiyyat düyməsi",d:"Giriş ekranının yuxarı küncündə",sel:"#exam-reg-btn",ed:"v3"},
+ {k:"exwrap",g:"login",n:"İmtahan elanı düyməsi",d:"Ana səhifədə «İmtahan elanı» düyməsi",sel:".dq-exwrap",ed:"news"},
+ {k:"reviews",g:"login",n:"Təəssüratlar",d:"İştirakçı rəyləri bölməsi",sel:"#login-reviews",ed:"reviews"}
+];
+var GROUPS=[["home","🏠 Ana ekran"],["btn","🔘 Düymələr"],["frame","🧱 Üst/alt"],["nav","🧭 Menyu"],["tests","🧪 Testlər"],["info","ℹ️ Məlumat"],["hz","📚 Hazırlıq"],["login","🔑 Giriş"]];
+var SCREENS=[["home","#v3-home","Ana səhifə"],["tests","#v3-tests","Testlər səhifəsi"],["info","#v3-info","Məlumat səhifəsi"],["hz","#v3-hz","Hazırlıq səhifəsi"],["login","#login-screen","Giriş ekranı"]];
+var ED={
+ news:function(){V2.open();V2.go("news")},
+ reviews:function(){V2.open();V2.go("res")},
+ types:function(){YQ.openAdmin()},
+ count:function(){DQCD.openAdmin()},
+ stats:function(){DQST.openAdmin()},
+ v3:function(){V3.open()}
+};
+
+/* ---------- Tətbiq ---------- */
+var styleEl=null,mo=null,moT=0;
+function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(cfg))}catch(e){}}
+function loadLocal(){try{var d=JSON.parse(localStorage.getItem(LS)||"null");if(d&&d.hidden)cfg={hidden:d.hidden||{},names:d.names||{}}}catch(e){}}
+function isOn(k){return !!cfg.hidden[k]}
+function hasTextHidden(){return Object.keys(cfg.hidden).some(function(k){return cfg.hidden[k]&&(k.indexOf("nav:")===0||(function(){for(var i=0;i<KNOWN.length;i++)if(KNOWN[i].k===k&&KNOWN[i].re)return 1})())})}
+function hideEl(e,k){e.style.setProperty("display","none","important");e.setAttribute("data-gz-t",k)}
+function applyText(){
+ qa("[data-gz-t]").forEach(function(e){if(!cfg.hidden[e.getAttribute("data-gz-t")]){e.style.removeProperty("display");e.removeAttribute("data-gz-t")}});
+ KNOWN.forEach(function(it){if(!it.re||!cfg.hidden[it.k])return;qa(it.scope).forEach(function(e){if(it.re.test(norm(e.textContent)))hideEl(e,it.k)})});
+ Object.keys(cfg.hidden).forEach(function(k){if(k.indexOf("nav:")!==0||!cfg.hidden[k])return;var t=k.slice(4);qa(".v3-nav a").forEach(function(e){if(norm(e.textContent)===t)hideEl(e,k)})});
+}
+function apply(){
+ if(!styleEl){styleEl=document.getElementById("dq-gz-rules");if(!styleEl){styleEl=document.createElement("style");styleEl.id="dq-gz-rules";(document.head||document.documentElement).appendChild(styleEl)}}
+ var r=[],h=cfg.hidden;
+ KNOWN.forEach(function(it){if(it.sel&&h[it.k])r.push(it.sel+"{display:none!important}")});
+ Object.keys(h).forEach(function(k){if(h[k]&&k.indexOf("sel:")===0)r.push(k.slice(4)+"{display:none!important}")});
+ var full="{width:calc(100% - 28px)!important;max-width:none!important;margin-left:14px!important;margin-right:14px!important}";
+ if(h.daily&&!h.exam)r.push("#v3-home.active>#dt-grid"+full);
+ if(h.exam&&!h.daily)r.push("#v3-home.active>#dt-home"+full);
+ styleEl.textContent=r.join("\n");
+ applyText();
+ if(!mo&&window.MutationObserver&&document.body){mo=new MutationObserver(function(){if(moT)return;moT=setTimeout(function(){moT=0;if(hasTextHidden())applyText()},180)});mo.observe(document.body,{childList:true,subtree:true})}
+}
+
+/* ---------- Server ---------- */
+function hdr(x){var h={apikey:K,Authorization:"Bearer "+K,"Content-Type":"application/json"};for(var k in x)h[k]=x[k];return h}
+function ft(u,o,ms){var ac=window.AbortController?new AbortController():null,t=setTimeout(function(){try{ac&&ac.abort()}catch(e){}},ms||9000);o=o||{};if(ac)o.signal=ac.signal;return fetch(u,o).then(function(r){clearTimeout(t);return r},function(e){clearTimeout(t);throw e})}
+function findRow(){return ft(U+"/rest/v1/dq_v2_store?select=id,data&collection=eq."+COL+"&order=id.desc&limit=1",{headers:hdr()}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(a){return a&&a[0]?a[0]:null})}
+function loadServer(){return findRow().then(function(row){if(row){rowId=row.id;var d=row.data||{};cfg={hidden:d.hidden||{},names:d.names||{}};saveLocal()}return true}).catch(function(){return false})}
+function saveServer(){
+ var go=function(){
+  if(rowId)return ft(U+"/rest/v1/dq_v2_store?id=eq."+rowId,{method:"PATCH",headers:hdr({Prefer:"return=minimal"}),body:JSON.stringify({data:cfg})}).then(function(r){return r.ok});
+  return ft(U+"/rest/v1/dq_v2_store",{method:"POST",headers:hdr({Prefer:"return=representation"}),body:JSON.stringify({collection:COL,data:cfg})}).then(function(r){if(!r.ok)return false;return r.json().then(function(a){rowId=a&&a[0]&&a[0].id;return true})});
+ };
+ return(rowId?Promise.resolve():findRow().then(function(row){if(row)rowId=row.id}).catch(function(){})).then(go).catch(function(){return false});
+}
+function setStatus(t,c){statusTxt=t;statusCls=c||"";var e=$("gz-status");if(e){e.textContent=t;e.className="gz-st "+(c||"")}}
+function persist(){saveLocal();setStatus("Saxlanır…","");clearTimeout(saveT);saveT=setTimeout(function(){saveServer().then(function(ok){setStatus(ok?"✅ Saxlandı — bütün istifadəçilər üçün tətbiq olunur":"⚠️ Server yazmadı — yalnız bu cihazda saxlandı",ok?"ok":"w")})},400)}
+
+/* ---------- Siyahı ---------- */
+function grpOf(k){for(var i=0;i<SCREENS.length;i++)if(k.indexOf("sel:"+SCREENS[i][1]+">")===0)return SCREENS[i][0];return"home"}
+function items(){
+ var out=KNOWN.map(function(it){return{k:it.k,g:it.g,n:it.n,d:it.d,ed:it.ed}}),seen={};
+ out.forEach(function(x){seen[x.k]=1});
+ qa(".v3-nav a").forEach(function(a){var t=norm(a.textContent),k="nav:"+t;if(!t||seen[k])return;seen[k]=1;out.push({k:k,g:"nav",n:"Menyu: "+clean(a.textContent),d:"Əsas menyu bəndi",ed:"v3"})});
+ SCREENS.forEach(function(sc){var root=qa(sc[1])[0];if(!root)return;
+  Array.prototype.forEach.call(root.children,function(el){
+   var tg=el.tagName;if(tg==="SCRIPT"||tg==="STYLE"||tg==="LINK")return;
+   for(var i=0;i<KNOWN.length;i++){var s2=KNOWN[i].sel;if(s2&&(el.matches(s2)||el.querySelector(s2)))return}
+   var sel=el.id?sc[1]+">#"+cssEsc(el.id):(el.classList.length?sc[1]+">."+cssEsc(el.classList[0]):"");
+   if(!sel)return;var k="sel:"+sel;if(seen[k])return;
+   var hd=el.querySelector("h1,h2,h3,h4"),nm=hd?clean(hd.textContent).slice(0,60):"";
+   if(!nm)nm=el.id?("#"+el.id):("."+el.classList[0]);
+   seen[k]=1;out.push({k:k,g:sc[0],n:nm,d:sc[2]+" · "+sel.replace(sc[1]+">",""),ed:"v3"});
+  })});
+ Object.keys(cfg.hidden).forEach(function(k){if(!cfg.hidden[k]||seen[k])return;if(k.indexOf("nav:")===0||k.indexOf("sel:")===0){seen[k]=1;out.push({k:k,g:k.indexOf("nav:")===0?"nav":grpOf(k),n:cfg.names[k]||k.slice(4),d:"Gizlədilib",ed:"v3"})}});
+ return out;
+}
+function row(it){
+ var off=isOn(it.k);
+ return '<div class="gz-row'+(off?' off':'')+'"><div class="gz-nm"><b>'+esc(it.n)+'<span class="gz-tag">'+(off?'Gizlidir':'Göstərilir')+'</span></b>'+(it.d?'<small>'+esc(it.d)+'</small>':'')+'</div>'+
+  '<div class="gz-ac"><button type="button" class="gz-b gz-ed" data-a="ed" data-k="'+esc(it.k)+'">✏️ Redaktə et</button>'+
+  '<button type="button" class="gz-b gz-hd" data-a="tg" data-k="'+esc(it.k)+'">'+(off?'👁 Göstər':'🙈 Gizlət')+'</button></div></div>';
+}
+function render(){
+ var b=$("gz-body");if(!b)return;
+ var all=items(),nh=Object.keys(cfg.hidden).filter(function(k){return cfg.hidden[k]}).length,html="",qq=norm(q);
+ var tb=$("gz-tabs");
+ if(tb)tb.innerHTML=GROUPS.map(function(g){var l=all.filter(function(x){return x.g===g[0]}),h=l.filter(function(x){return isOn(x.k)}).length;
+  return '<button type="button" class="gz-tab'+(g[0]===tab&&!qq?' on':'')+'" data-t="'+g[0]+'">'+g[1]+' <small>'+(h?h+'/':'')+l.length+'</small></button>'}).join("");
+ var cnt=$("gz-cnt");if(cnt)cnt.textContent="Gizli: "+nh+" / "+all.length;
+ if(qq){
+  var any=0;
+  GROUPS.forEach(function(g){var list=all.filter(function(x){return x.g===g[0]&&norm(x.n+" "+(x.d||"")).indexOf(qq)>-1});
+   if(!list.length)return;any=1;html+='<div class="gz-h">'+g[1]+' · '+list.length+'</div>'+list.map(row).join("")});
+  if(!any)html='<div class="gz-empty">Heç nə tapılmadı</div>';
+ }else{
+  var hints={home:"Ana ekrandakı bölmələri gizlədin — dəyişiklik dərhal bütün istifadəçilərdə görünür.",btn:"Ana səhifədəki ayrı-ayrı düymə və keçidlər.",frame:"Hər səhifədə görünən üst zolaq, başlıq, menyu və alt hissə.",nav:"Əsas menyudakı bəndlər (saytdan avtomatik oxunur).",tests:"Testlər səhifəsinin blokları.",info:"Məlumat səhifəsinin blokları.",hz:"Hazırlıq səhifəsinin blokları.",login:"Giriş ekranı və onun düymələri."};
+  var list2=all.filter(function(x){return x.g===tab});
+  html+='<p class="gz-hint">'+(hints[tab]||"")+'</p>';
+  html+=list2.length?list2.map(row).join(""):'<div class="gz-empty">Bu səhifənin blokları hələ yüklənməyib.<br>Saytda həmin səhifəni bir dəfə açın, sonra bura qayıdıb «Yenilə» düyməsinə basın.</div>';
+ }
+ b.innerHTML=html;
+}
+function toast(t){var e=$("gz-toast");if(!e)return;e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(function(){e.style.display="none"},2600)}
+function build(){
+ if($("mod-gizleme"))return;var p=$("admin-panel");if(!p)return;
+ var d=document.createElement("div");d.id="mod-gizleme";d.className="admin-module-block";
+ d.innerHTML='<div class="gz-top"><button type="button" class="gz-b l" data-a="close">← Panelə qayıt</button><h4>🙈 Gizləmə</h4></div>'+
+  '<div class="gz-tabs" id="gz-tabs"></div>'+
+  '<div class="gz-bar"><input id="gz-q" class="gz-q" type="search" placeholder="🔎 Bütün saytda ada görə axtar…"><span id="gz-cnt" class="gz-st">Gizli: 0</span><span id="gz-status" class="gz-st">'+esc(statusTxt)+'</span><button type="button" class="gz-b l" data-a="refresh">🔄 Yenilə</button><button type="button" class="gz-b r" data-a="reset">Hamısını göstər</button></div>'+
+  '<div id="gz-body"></div><div id="gz-toast" class="gz-toast"></div>';
+ p.appendChild(d);
+ d.addEventListener("click",function(ev){
+  var t=ev.target.closest("[data-a],[data-t]");if(!t||!d.contains(t))return;
+  if(t.dataset.t){tab=t.dataset.t;render();return}
+  var a=t.dataset.a,k=t.dataset.k;
+  if(a==="close")GZL.close();
+  else if(a==="refresh"){GZL.refresh().then(function(){toast("Siyahı yeniləndi")})}
+  else if(a==="reset"){if(Object.keys(cfg.hidden).some(function(x){return cfg.hidden[x]})&&confirm("Bütün gizlədilənlər yenidən göstərilsin?")){cfg.hidden={};apply();render();persist()}}
+  else if(a==="tg"){var it=items().filter(function(x){return x.k===k})[0];if(isOn(k)){delete cfg.hidden[k]}else{cfg.hidden[k]=1;if(it)cfg.names[k]=it.n.replace(/^Menyu:\s*/,"")}apply();render();persist()}
+  else if(a==="ed"){var it2=items().filter(function(x){return x.k===k})[0],fn=ED[it2&&it2.ed];try{if(!fn)throw 0;fn();toast("Redaktə bölməsi açıldı")}catch(e){toast("Bu element üçün redaktə bölməsi tapılmadı — «İdarə & Ayarlar»a baxın")}}
+ });
+ d.addEventListener("input",function(ev){if(ev.target.id==="gz-q"){q=ev.target.value;render()}});
+}
+window.GZL={
+ open:function(){build();try{window.switchAdminTab&&switchAdminTab("gizleme")}catch(e){}
+  var p=$("admin-panel");qa("#admin-panel .admin-module-block").forEach(function(b){b.style.display="none"});
+  var g=p&&p.querySelector(".admin-nav-grid");if(g)g.style.display="none";
+  var m=$("mod-gizleme");if(m)m.style.display="block";render();
+  loadServer().then(function(ok){apply();render();setStatus(ok?"Server ilə sinxron":"⚠️ Serverə qoşulmaq olmadı (cihaz keşi)",ok?"ok":"w")});
+  window.scrollTo({top:0,behavior:"smooth"})},
+ close:function(){var m=$("mod-gizleme");if(m)m.style.display="none";var g=document.querySelector("#admin-panel .admin-nav-grid");if(g)g.style.display=""},
+ refresh:function(){return loadServer().then(function(){apply();render()})}
+};
+/* Başlanğıc: əvvəl keşi dərhal tətbiq et, sonra serverdən yenilə */
+loadLocal();apply();
+function boot(){apply();loadServer().then(function(){apply()})}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
+})();
+</script>
+
 </body>
 </html>
