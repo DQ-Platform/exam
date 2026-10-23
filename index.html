@@ -6083,7 +6083,52 @@ loadLocal();apply();
 function boot(){apply();loadServer().then(function(){apply()})}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
 })();
+   <script>
+   // Bütün skriptlərin və bizim funksiyanın yeri buradır:
+   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
+   })();
+
+   function renderQuestionOptions(questionData, subjectName) {
+     var optionsContainer = document.querySelector('.options');
+     if (!optionsContainer) return;
+     
+     optionsContainer.innerHTML = '';
+
+     var isQanunvericilik = subjectName && /qanunvericilik/i.test(subjectName);
+     var maxOptions = isQanunvericilik ? 4 : 5;
+     
+     var optionKeys = ['A', 'B', 'C', 'D', 'E'].slice(0, maxOptions);
+
+     optionKeys.forEach(function(key) {
+       var optText = questionData['opt_' + key.toLowerCase()] || questionData['opt' + key] || (questionData.options && questionData.options[key]) || '';
+       var optImg = questionData['opt_img_' + key.toLowerCase()] || '';
+
+       var label = document.createElement('label');
+       label.className = 'dq-opt-label';
+       
+       var radio = document.createElement('input');
+       radio.type = 'radio';
+       radio.name = 'question_option';
+       radio.value = key;
+
+       var span = document.createElement('span');
+       span.className = 'dq-ot';
+       
+       var htmlContent = '<b>' + key + ')</b> ' + optText;
+       
+       if (optImg) {
+         htmlContent += '<br><img src="' + optImg + '" class="dq-ri" alt="Variant ' + key + '">';
+       }
+       
+       span.innerHTML = htmlContent;
+       label.appendChild(radio);
+       label.appendChild(span);
+       
+       optionsContainer.appendChild(label);
+     });
+   }
 </script>
+
 
 </body>
 </html>
