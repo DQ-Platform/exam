@@ -8,7 +8,7 @@ S={news:[],imgs:{},edit:false,hist:[],fut:[],id:null,dirty:false,sel:null,base:"
 AZ=["Yan","Fev","Mar","Apr","May","İyn","İyl","Avq","Sen","Okt","Noy","Dek"],
 SN={ex:"İmtahanlar",an:"Nəticə analizi",why:"Niyə DQ Platform",news:"Yeniliklər"},
 cfg=null,DEFC=null;
-try{var lk=document.createElement("link");lk.rel="stylesheet";lk.href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap";document.head.appendChild(lk)}catch(e){}
+try{var lk=document.createElement("link");lk.rel="stylesheet";lk.href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Caveat:wght@600&display=swap";document.head.appendChild(lk)}catch(e){}
 
 function gp(o,p){return String(p).split(".").reduce(function(a,k){return a==null?a:a[k]},o)}
 function sp(o,p,v){var k=p.split("."),l=k.pop();k.reduce(function(a,x){return a[x]},o)[l]=v}
@@ -21,10 +21,11 @@ function makeDef(){
   soc=gs.filter(function(k){return it[k]&&!it[k].h}).map(function(k){return{t:it[k].t,a:it[k].a||"none"}});
   var card=function(i,t,c){return{i:"img/"+i+".png",t:t,cat:c,ch:["Onlayn","Real format"],b:{t:"İştirak et →",a:"exam"}}};
   return{theme:{gd:"#e8b94a",bg:"#020a1a",pn:"#030d26",tx:"#f1f5ff"},order:["ex","an","why","news"],hide:{},st:{},
-  nav:[{t:"Ana səhifə",a:"home"},{t:"Yeniliklər",a:"news"},{t:"Sınaqlar",a:"exam"},{t:"Testlər",a:"tests"},{t:"İmtahan",a:"exam"},{t:"Materiallar",a:"sc:dqr-why"},{t:"Haqqımızda",a:"sc:dqr-ft"}],
+  nav:[{t:"Ana səhifə",a:"home"},{t:"Yeniliklər",a:"news"},{t:"Sınaqlar",a:"exam"},{t:"Testlər",a:"tests"},{t:"İmtahan",a:"exam"},{t:"Materiallar",a:"law"},{t:"Haqqımızda",a:"sc:dqr-ft"}],
   brand:"PLATFORM",logo:"img/logo.png",
-  hero:{ey:"DÖVLƏT QULLUĞU",t1:"Hədəfiniz\ndövlət qulluğudur?",t2:"Biz sizinləyik!",p:"DQ Platform – dövlət qulluğu üzrə sınaq imtahanları, aktual materiallar və peşəkar hazırlıq imkanı verir. Uğur səninlədir!",btn:{t:"Sınaq imtahanına başla",a:"exam"},img:"img/hero.jpg",
-   mini:[{i:"img/m1.png",t:"DİM modelinə uyğun imtahanlar"},{i:"img/m2.png",t:"Təhlil və nəticə analizi"},{i:"img/m3.png",t:"Hər zaman və hər yerdə"},{i:"img/m4.png",t:"Təkmilləşdirilmiş platforma"}]},
+  hero:{t1:"Dövlət qulluğuna hazırlığın",t2:"ən doğru yolu",p:"DQ Platform dövlət qulluğu üzrə sınaq imtahanları, aktual materiallar və peşəkar hazırlıq imkanı verir. Uğur səninlədir!",btn:{t:"▶ Sınaq imtahanına başla",a:"exam"},btn2:{t:"📚 Materiallar",a:"law"},img:"img/bg.jpg",
+   feat:[{e:"✔",t:"DİM modelinə uyğun imtahanlar"},{e:"🛡️",t:"Təhlükəsiz və stabil platforma"},{e:"📱",t:"Hər zaman və hər yerdə"}],
+   cap:"Dəqiq məlumat,\nDüzgün hazırlıq,\nUğurlu nəticə",tabs:["Qanunvericilik","İnformatika","Azərbaycan dili","Məntiq"]},
   ex:{t:"İmtahanlar və sınaqlar",s:"Öz səviyyəni yoxla, nəticəni təhlil et, uğura bir addım da yaxın ol!",lk:{t:"Bütün sınaqlar →",a:"exam"},auto:true,
    cards:[card("i1","Ümumi sınaq imtahanı","BB"),card("i2","Azərbaycan dili","BB"),card("i3","Qanunvericilik","AC"),card("i4","İnformatika","BA")]},
   an:{t:"Nəticəni təhlil et, gələcəyini planla",p:"Hər sınaqdan sonra detallı nəticə analizi, zəif mövzuların müəyyənləşdirilməsi və fərdi inkişaf planı ilə hazırlığını daha səmərəli qur.",btn:{t:"Nəticə analizi →",a:"exam"},img:"img/chart.jpg",
@@ -40,7 +41,7 @@ function SRC(v){v=v||"";return v.indexOf("img:")===0?(S.imgs[v.slice(4)]||""):v}
 function ST(p){var s=cfg.st&&cfg.st[p];if(!s)return"";return' style="'+(s.c?"color:"+E(s.c)+";":"")+(s.s?"font-size:calc(var(--k,1)*"+(+s.s)+"px);":"")+'"'}
 function ced(){return S.edit?' contenteditable="true" spellcheck="false"':""}
 function X(p,tag,cls,ml){return"<"+tag+(cls?' class="'+cls+'"':"")+' data-p="'+p+'"'+(ml?' data-ml="1"':"")+ST(p)+ced()+">"+NL(gp(cfg,p))+"</"+tag+">"}
-function LK(p,cls,post){return'<a class="'+cls+'" data-lp="'+p+'">'+X(p+".t","span")+(post||"")+"</a>"}
+function LK(p,cls,post,pre){return'<a class="'+cls+'" data-lp="'+p+'">'+(pre||"")+X(p+".t","span")+(post||"")+"</a>"}
 function IMG(p,cls){return'<img class="'+(cls||"")+'" data-ip="'+p+'" src="'+E(SRC(gp(cfg,p)))+'" alt="" loading="lazy">'}
 function BG(p,cls){return'<div class="'+cls+'" data-ip="'+p+'" style="background-image:url(\''+E(SRC(gp(cfg,p)))+'\')">'+(S.edit?'<b class="chip">📷 Şəkli dəyiş</b>':"")+"</div>"}
 function IB(l,i){return S.edit?'<div class="ibar" data-l="'+l+'" data-i="'+i+'"><b data-x="l" title="Sola">◀</b><b data-x="r" title="Sağa">▶</b><b data-x="c" title="Kopyala">⧉</b><b data-x="d" title="Sil">✕</b></div>':""}
@@ -53,6 +54,11 @@ function dmy(d){var p=function(n){return String(n).padStart(2,"0")};return p(d.g
 function icon(s){s=String(s||"");return/qanun|hüquq/i.test(s)?"i3":/az[əe]rbaycan|dil/i.test(s)?"i2":/informat|kompüter/i.test(s)?"i4":"i1"}
 function live(){try{return(LX.cache||[]).filter(function(x){return x&&x.start&&!ended(x)}).sort(function(a,b){return new Date(a.start)-new Date(b.start)}).slice(0,4)}catch(e){return[]}}
 
+function laptop(){var n="",q=["Şəxsiyyət vəsiqələrinin fərdiləşdirilməsi zamanı sertifikatın verilməsi müvafiq icra...","Şəxsiyyət vəsiqələrinin fərdiləşdirilməsi zamanı sertifikatın verilməsi müvafiq icra...","Şəxsiyyət vəsiqələrinin fərdiləşdirilməsi zamanı sertifikatın verilməsi müvafiq icra..."],L=["A","B","C"];
+ for(var k=11;k<=45;k++)n+="<b"+(k===16?' class="c"':"")+">"+k+"</b>";
+ return'<div class="lap" aria-hidden="true"><div class="scr"><div class="tt"><span>Dövlət Qulluğu Sınaq 1 (BB Kateqoriyası)</span><em>02:59:24</em></div><div class="bd"><div class="qa"><div class="qh"><span>Sual 16 (Qanunvericilik)</span><em>⭐ 1 Bal</em></div><p>“Elektron imza və elektron sənəd haqqında” Azərbaycan Respublikasının Qanununa əsasən şəxsiyyət vəsiqələrinin fərdiləşdirilməsi zamanı...</p>'
+ +q.map(function(t,i){return'<div class="o'+(i?"":" on")+'"><u></u><span>'+L[i]+") "+t+"</span></div>"}).join("")+'<div class="bt"><span>Əvvəlki</span><span class="rd">Seçimi Ləğv Et</span><span class="rr">Testi Bitir</span><span class="nv">Növbəti</span></div></div>'
+ +'<div class="ac"><h6>Cavab Kartı</h6><div class="ln"></div><small>Qanunvericilik <b>1 / 40</b></small><div class="gd">'+n+"</div></div></div></div><div class=\"base\"></div></div>"}
 /* ---------- bölmələr ---------- */
 var SEC={
 ex:function(){var c=cfg.ex,lv=(!S.edit&&c.auto)?live():[],h;
@@ -73,17 +79,18 @@ function newsHtml(){if(!S.news.length)return'<div class="em">Hələlik yenilik y
 function build(){
   var on=logged(),nav=cfg.nav.map(function(n,i){return'<a data-ix="'+i+'" data-lp="nav.'+i+'"'+(i?"":' class="on"')+">"+IB("nav",i)+X("nav."+i+".t","span")+"</a>"}).join("")+ADD("nav"),
   brand='<div class="lg" data-a="home"><img src="'+E(SRC(cfg.logo))+'" alt="DQ">'+X("brand","span")+"</div>",
-  h=cfg.hero,mini=h.mini.map(function(m,i){return'<div data-ix="'+i+'">'+IB("hero.mini",i)+IMG("hero.mini."+i+".i")+X("hero.mini."+i+".t","span")+"</div>"}).join("")+ADD("hero.mini");
+  h=cfg.hero,feat=h.feat.map(function(m,i){return'<div data-ix="'+i+'">'+IB("hero.feat",i)+X("hero.feat."+i+".e","i")+X("hero.feat."+i+".t","span")+"</div>"}).join("")+ADD("hero.feat"),
+  tabs=h.tabs.map(function(t,i){return'<span class="tc" data-ix="'+i+'">'+IB("hero.tabs",i)+X("hero.tabs."+i,"span")+"</span>"}).join("")+ADD("hero.tabs");
   var fnav=cfg.nav.map(function(n,i){return'<a data-lp="nav.'+i+'">'+E(n.t)+"</a>"}).join(""),
   soc=cfg.ft.soc.map(function(s,i){return'<a data-ix="'+i+'" data-lp="ft.soc.'+i+'">'+IB("ft.soc",i)+X("ft.soc."+i+".t","span")+"</a>"}).join("")+ADD("ft.soc"),
   fl=cfg.ft.links.map(function(s,i){return'<a data-ix="'+i+'" data-lp="ft.links.'+i+'">'+IB("ft.links",i)+X("ft.links."+i+".t","span")+"</a>"}).join("");
   var mid=cfg.order.filter(function(s){return SEC[s]&&(S.edit||!cfg.hide[s])}).map(function(s){return SEC[s]()}).join("");
   return'<header class="hd"><div class="w">'+brand+'<nav aria-label="Əsas menyu">'+nav+'</nav><div class="au"><span class="tl"><button type="button" class="tb tl-bell" data-tl="bell" title="Bildirişlər" hidden>🔔<i></i></button><button type="button" class="tb" data-tl="theme" title="Görünüş (gündüz / gecə)">🌓</button><button type="button" class="tb" data-tl="eye" title="Göz rahatlığı">👁</button><button type="button" class="tb sq" data-tl="search" title="Axtar">🔍</button></span>'+(on?'<a class="b g" data-a="kab">Kabinet</a><a class="b" data-a="out">Çıxış</a>':'<a class="b" data-a="in">Daxil ol</a><a class="b g" data-a="reg">Qeydiyyat</a>')+"</div></div></header>"
-  +'<main><div class="hero">'+BG("hero.img","bg")+'<div class="w"><div class="tx"><div class="ey">'+X("hero.ey","span")+"</div><h1>"+X("hero.t1","span","t1",1)+X("hero.t2","span","t2")+"</h1>"+X("hero.p","p","",1)+LK("hero.btn","cta","<i>→</i>")+'</div><div class="mini">'+mini+"</div></div></div>"+mid+"</main>"
+  +'<main><div class="hero">'+BG("hero.img","bg")+'<div class="w"><div class="tx"><h1>'+X("hero.t1","span","t1",1)+" "+X("hero.t2","span","t2")+"</h1>"+X("hero.p","p","",1)+'<div class="hb">'+LK("hero.btn","hbtn")+LK("hero.btn2","hbtn o")+'</div><div class="feat">'+feat+'</div></div><div class="vz">'+X("hero.cap","div","cap",1)+'<svg class="sw" viewBox="0 0 200 14" aria-hidden="true"><path d="M2 11 C60 5 130 4 198 2" stroke="#e8b94a" stroke-width="3" fill="none" stroke-linecap="round"/></svg>'+laptop()+'<div class="tabs">'+tabs+"</div></div></div></div>"+mid+"</main>"
   +'<footer class="ft" id="dqr-ft"><div class="w"><div><div class="lg" data-a="home"><img src="'+E(SRC(cfg.logo))+'" alt="DQ"><span>'+E(cfg.brand)+"</span></div><small>"+X("ft.tag","span")+"</small></div><nav>"+fnav+'</nav><div class="so">'+soc+'</div><div class="cp">'+X("ft.copy","span")+"<span>"+fl+"</span></div></div></footer>"}
 
 /* ---------- əməliyyatlar ---------- */
-var A={home:function(){try{showScreen("v3-home");scrollTo(0,0)}catch(e){}},exam:function(){if(window.LXP&&typeof LXP.open==="function")LXP.open();else V3.go("n2")},
+var A={home:function(){try{showScreen("v3-home");scrollTo(0,0)}catch(e){}},law:function(){if(window.LAW2&&LAW2.open)LAW2.open();else V3.go("n4")},exam:function(){if(window.LXP&&typeof LXP.open==="function")LXP.open();else V3.go("n2")},
  reg:function(){YQ.open("reg")},in:function(){YQ.open("in")},kab:function(){V3.go("kab")},out:function(){DQ.logout()},tests:function(){V3.showTests()},news:function(){openFeedModal("news")},
  info:function(k){V3.info(k)},sc:function(id){var e=$(id);if(e)e.scrollIntoView({behavior:"smooth"})},none:function(){}};
 function run(a){a=a||"none";if(/^https?:/i.test(a)){window.open(a,"_blank","noopener");return}var m=a.split(":"),f=A[m[0]];if(f)try{f(m.slice(1).join(":"))}catch(e){}}
@@ -115,7 +122,7 @@ function secOp(s,op){var o=cfg.order,i=o.indexOf(s),t;snap();
  dirty();rebuild()}
 function secList(){var b=$("dqe-secs");if(!b)return;b.innerHTML=cfg.order.map(function(s){return'<div class="r"><span'+(cfg.hide[s]?' style="opacity:.5"':"")+">"+SN[s]+'</span><span><b data-sx="'+s+'|u">▲</b><b data-sx="'+s+'|d">▼</b><b data-sx="'+s+'|h">'+(cfg.hide[s]?"👁":"🚫")+"</b></span></div>"}).join("");var a=$("dqe-auto");if(a)a.checked=!!cfg.ex.auto;
  [].forEach.call(document.querySelectorAll("#dqe-p [data-th]"),function(i){i.value=cfg.theme[i.dataset.th]})}
-var PRE=[["exam","Sınaq / Kabinet"],["reg","Qeydiyyat"],["in","Daxil ol"],["kab","Kabinet"],["tests","Testlər"],["news","Yeniliklər"],["home","Ana səhifə"],["sc:dqr-ex","→ İmtahanlar bölməsi"],["sc:dqr-an","→ Analiz bölməsi"],["sc:dqr-why","→ Niyə DQ bölməsi"],["sc:dqr-news","→ Yeniliklər bölməsi"],["sc:dqr-ft","→ Səhifənin altı"],["info:terms","İstifadə Şərtləri"],["info:priv","Məxfilik Siyasəti"],["none","Keçid yoxdur"]];
+var PRE=[["exam","Sınaq / Kabinet"],["reg","Qeydiyyat"],["in","Daxil ol"],["kab","Kabinet"],["tests","Testlər"],["law","Materiallar (Qanunvericilik)"],["news","Yeniliklər"],["home","Ana səhifə"],["sc:dqr-ex","→ İmtahanlar bölməsi"],["sc:dqr-an","→ Analiz bölməsi"],["sc:dqr-why","→ Niyə DQ bölməsi"],["sc:dqr-news","→ Yeniliklər bölməsi"],["sc:dqr-ft","→ Səhifənin altı"],["info:terms","İstifadə Şərtləri"],["info:priv","Məxfilik Siyasəti"],["none","Keçid yoxdur"]];
 function hex(c){var m=String(c).match(/\d+/g)||[255,255,255];return"#"+m.slice(0,3).map(function(n){return(+n).toString(16).padStart(2,"0")}).join("")}
 function select(t){var tx=t.closest("[data-p]"),lkn=t.closest("[data-lp]"),im=t.closest("[data-ip]");S.sel={tx:tx,lk:lkn,im:im};tbar()}
 function tbar(){var tb=$("dqe-tb"),s=S.sel;if(!tb)return;if(!S.edit||!s||!(s.tx||s.lk||s.im)||!document.contains(s.tx||s.lk||s.im)){tb.hidden=true;return}
