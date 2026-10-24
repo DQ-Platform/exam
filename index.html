@@ -3082,8 +3082,8 @@ function validate(d){var en=effN(d),vis=KEYS.slice(1,en+1);
  if(!d.correct)return S.open?"Ən azı bir doğru ifadəni işarələyin (nömrənin yanındakı düymə).":"Düzgün cavabı seçin (variantın yanındakı dairə).";
  var bad=cset(d).filter(function(k){return!d.o[k].t.trim()&&!d.o[k].img});if(bad.length)return S.open?"Doğru işarələnmiş ifadə boşdur.":"Düzgün cavab boş variantdır.";return""}
 $("bSave").addEventListener("click",function(){var d=S.draft,e=validate(d);$("msg").textContent=e;if(e)return;
- var vis=KEYS.slice(1,effN(d)+1),q={id:d.id||("q"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),category:$("cat").value,exam:String(+$("exam").value||1),subject:$("subj").value,no:d.no||0,text:d.text.trim(),textImg:d.o.Q.img||"",
-  options:vis.map(function(k){return{label:S.open?lab(k):k,text:d.o[k].t.trim(),img:d.o[k].img||""}}),correct:S.open?cset(d).map(lab).join(","):d.correct,type:S.open?"open":"mc",explanation:d.expl.trim()};
+ var vis=KEYS.slice(1,effN(d)+1),q={id:d.id||("q"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),category:$("cat").value,exam:String(+$("exam").value||1),subject:$("subj").value,no:d.no||0,text:dqDec(d.text.trim()),textImg:d.o.Q.img||"",
+  options:vis.map(function(k){return{label:S.open?lab(k):k,text:dqDec(d.o[k].t.trim()),img:d.o[k].img||""}}),correct:S.open?cset(d).map(lab).join(","):d.correct,type:S.open?"open":"mc",explanation:d.expl.trim()};
  var b=$("bSave");b.disabled=true;
  Promise.resolve().then(function(){return window.ProAdd&&window.ProAdd.onSave?window.ProAdd.onSave(q,!!S.edit):0}).then(function(){
   if(S.edit){var i=S.qs.findIndex(function(x){return x.id===S.edit});if(i>-1)S.qs[i]=q;else S.qs.push(q)}else S.qs.push(q);
@@ -3568,7 +3568,7 @@ document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("scO").h
 
 /* ---------- Mətn sahəsi: sual başlığı + variantlar → avtomatik ayır və əlavə et ---------- */
 function newId(){return"q"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
-function mkQ(q,m){if(q.open){var nn=+q.no||0;if(dqNos({subject:m.s,category:m.c,type:"open"}).indexOf(nn)<0)nn=0;return{id:newId(),category:m.c,exam:m.e,subject:m.s,no:nn,text:q.text,textImg:"",options:q.o.map(function(o,i){return{label:String(i+1),text:o.t,img:""}}),correct:q.c,type:"open",explanation:""}}return{id:newId(),category:m.c,exam:m.e,subject:m.s,text:q.text,textImg:"",options:q.o.map(function(o,i){return{label:"ABCDE"[i],text:o.t,img:""}}),correct:q.c,explanation:""}}
+function mkQ(q,m){if(q.open){var nn=+q.no||0;if(dqNos({subject:m.s,category:m.c,type:"open"}).indexOf(nn)<0)nn=0;return{id:newId(),category:m.c,exam:m.e,subject:m.s,no:nn,text:dqDec(q.text),textImg:"",options:q.o.map(function(o,i){return{label:String(i+1),text:dqDec(o.t),img:""}}),correct:q.c,type:"open",explanation:""}}return{id:newId(),category:m.c,exam:m.e,subject:m.s,text:dqDec(q.text),textImg:"",options:q.o.map(function(o,i){return{label:"ABCDE"[i],text:dqDec(o.t),img:""}}),correct:q.c,explanation:""}}
 function qOk(q){if(q.open)return!!q.text&&q.o.length>=3&&q.o.every(function(o){return!!o.t})&&!!q.c;var n=q.o.length;return!!q.text&&(n===4||n===5)&&q.o.every(function(o){return!!o.t})&&!!q.c&&"ABCDE".indexOf(q.c)>-1&&"ABCDE".indexOf(q.c)<n}
 /* Açıq sual mətni: "68. Sual..." + 1. 2. 3. … nömrəli ifadələr (sayı məhdud deyil); doğru ifadə: sətrin sonunda * və ya "Cavab: 1,3,4" */
 function qpOpen(t){var lines=String(t||"").replace(/\r/g,"").split("\n"),out=[],cur=null,optRe=/^\s*\(?[A-Ea-e][\)\.]\s*\S/;
@@ -3604,7 +3604,11 @@ var qpT=null;$("qpTx").addEventListener("input",function(){clearTimeout(qpT);qpT
 
 /* ---------- Başlanğıc ---------- */
 load();S.draft=blank();buildFields();render();
-window.ProAdd={onSave:null,questions:function(){return S.qs.slice()}};
+/* HTML entity təmizləyici: &quot; &amp; &lt; &#39; kimi yazıları normal simvola çevirir */
+function dqDec(s){s=String(s==null?"":s);for(var i=0;i<3&&/&(#\d+|#x[0-9a-f]+|[a-z][a-z0-9]+);/i.test(s);i++){var t=document.createElement("textarea");t.innerHTML=s;var v=t.value;if(v===s)break;s=v}return s}
+function dqFix(q){if(!q)return q;if(q.text!=null)q.text=dqDec(q.text);if(q.explanation!=null)q.explanation=dqDec(q.explanation);if(q.options)q.options.forEach(function(o){if(o&&o.text!=null)o.text=dqDec(o.text)});return q}
+var _dqOs=null;window.ProAdd={questions:function(){return S.qs.slice()}};
+Object.defineProperty(window.ProAdd,"onSave",{configurable:true,enumerable:true,get:function(){return _dqOs},set:function(f){_dqOs=typeof f==="function"?function(q,ed){dqFix(q);return f.call(this,q,ed)}:f}});
 })();
 <\/script>
 </body>
