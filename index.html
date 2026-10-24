@@ -6135,7 +6135,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 
 <script src="dq-variant-fix.js?v=2"></script>
 <script id="dq-fix-sec">/* DQ Fix: (1) variantlarda &#39; kimi xam entity-lərin təmizlənməsi, (2) çoxseçimli düymə sayı = sualdakı real say */
-(function(){"use strict";
+(function(){"use strict";if(/[?&]nofix=1/.test(location.search))return;
 var ENT=/&(#\d+|#x[0-9a-f]+|[a-z][a-z0-9]+);/i,SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,INPUT:1,SELECT:1};
 function dec(s){for(var i=0;i<3&&ENT.test(s);i++){var t=document.createElement("textarea");t.innerHTML=s;if(t.value===s)break;s=t.value}return s}
 function fixEntities(root){
