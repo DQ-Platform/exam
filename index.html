@@ -3303,67 +3303,80 @@ var L5="ABCDE";
 function setSubj(v){var s=$("subj");if(!v)return;var f=[].some.call(s.options,function(o){return o.value===v});if(!f){var o=document.createElement("option");o.textContent=v;s.insertBefore(o,s.querySelector('[value="__new"]'))}s.value=v}
 var lastSubj="";$("subj").addEventListener("focus",function(){lastSubj=this.value});
 $("subj").addEventListener("change",function(){if(this.value!=="__new")return;var p=(prompt("Yeni fənnin adı:")||"").trim();if(p)setSubj(p);else this.value=lastSubj||this.options[0].value});
-function dbMap(sm){var K=Object.keys(sm),f=function(re){return K.filter(function(k){return re.test(k)})[0]},m={};
- m.cat=f(/^category$/);m.exam=f(/^exam_id$/);m.num=f(/^(q_?num(ber)?|question_(num|no|number|index)|num(ber)?|q_?no|order(_?index)?|position|idx|index|sira)$/i);
- m.q=f(/^(question(_text)?|q_?text|text|title|sual)$/i);m.opts=f(/^(options?|variants?|choices|answers)$/i);m.corr=f(/^(correct(_?(answer|option|index|idx))?|answer|right_?answer|dogru)$/i);
- m.sub=f(/^(subject(_name)?|fenn|fənn|section|topic|lesson|bolme|bölmə)$/i);m.exp=f(/^(explanation|izah|note|notes|comment|sherh|şərh)$/i);
- if(!m.opts){m.each=L5.split("").map(function(L){return f(new RegExp("^(opt(ion)?_?"+L+"|variant_?"+L+"|"+L+")$","i"))});if(m.each.filter(Boolean).length<4)m.each=null}return m}
-function hx(t,img){return img?(t?"<p>"+esc(t).replace(/\n/g,"<br>")+"</p>":"")+'<img class="dq-ri" src="'+img+'" alt="">':t}
-function ev(sm,m,x){return typeof sm[m.exam]==="number"?+x:String(x)}
-function toRow(q,m,sm,no){var o={},ops=q.options.map(function(x){return hx(x.text,x.img)}),ci=L5.indexOf(q.correct),op=q.type==="open";
- if(op&&typeof sm[m.corr]==="number")throw new Error("Açıq sual üçün «"+m.corr+"» sütunu mətn (text) tipli olmalıdır — hazırda rəqəmdir.");
- o[m.exam]=ev(sm,m,q.exam);o[m.cat]=q.category;if(m.num)o[m.num]=no;o[m.q]=(op?'<span data-qt="open" hidden></span>':"")+hx(q.text,q.textImg);o[m.sub]=q.subject;if(m.exp&&q.explanation)o[m.exp]=q.explanation;
- if(m.opts)o[m.opts]=ops;else m.each.forEach(function(k,j){if(k)o[k]=ops[j]||""});
- var cv=sm[m.corr];if(op){o[m.corr]=q.correct;return o}o[m.corr]=typeof cv==="number"?ci:(typeof cv==="string"&&/^[A-E]$/i.test(cv)?q.correct:ops[ci]);return o}
+/* ---------- Bazaya yazma (exam_questions) — v2: saytın öz formatı, əvvəl-yoxla/sonra-yaz, oxuyub təsdiqlə ---------- */
+function dbHtml(t){return t?esc(t).replace(/\n/g,"<br>"):""}
+/* Saytın (app.js) formatı: options=[{text,image}], image_url, correct = test üçün index (0-4), açıq sual üçün hərf (A-E) */
+function toRow(q,no){var ci=L5.indexOf(String(q.correct||"").toUpperCase()),op=q.type==="open";
+ var o={exam_id:String(q.exam),category:q.category,q_number:no,subject:q.subject,question:dbHtml(q.text),image_url:q.textImg||null};
+ if(q.explanation)o.explanation=q.explanation;
+ if(op){o.options=[];o.correct=String(q.correct).toUpperCase()}
+ else{o.options=q.options.map(function(x){return{text:dbHtml(x.text),image:x.img||null}});o.correct=ci}
+ return o}
 $("bDb").addEventListener("click",async function(){var out=$("dbmsg"),btn=this;out.style.whiteSpace="pre-line";function say(t,k){out.textContent=t;out.style.color=k==="ok"?"#0f9d6b":k==="in"?"#6b6a85":"#d9363e"}
  var sb=null;try{var P=window.parent;sb=P&&(P._supabase||P.sb||P.supabaseClient);if(!sb&&P&&P.eval)sb=P.eval("typeof _supabase!=='undefined'?_supabase:null")}catch(e){}if(!sb||!sb.from)return say("Verilənlər bazası bağlantısı tapılmadı — Pro Add-i saytın admin panelindən (iframe daxilində) açın və admin kimi daxil olun.");
  if(!S.qs.length)return say("Bazaya yazmaq üçün sual yoxdur.");
  var nos=S.qs.filter(function(q){return!q.subject}).length;if(nos)return say(nos+" sualda fənn təyin edilməyib — “Düzəliş et” ilə fənni seçin.");
- /* Saytın sınaq strukturu (app.js: examStructure + openQuestionIds ilə eynidir) */
  var LAY={"Azərbaycan dili":[1,15],"Qanunvericilik":[16,55],"İnformatika":[56,70],"Məntiq":[71,100]},OPENN=[13,14,15,48,49,50,51,52,53,54,55,68,69,70,95,96,97,98,99,100];
  var unk=[];S.qs.forEach(function(q){if(!LAY[q.subject]&&unk.indexOf(q.subject)<0)unk.push(q.subject)});
- if(unk.length)return say("Bu fənn sınaq strukturunda yoxdur: "+unk.join(", ")+".\nİcazəli fənlər: "+Object.keys(LAY).join(", ")+". “Düzəliş et” ilə fənni dəyişin.");
- btn.disabled=true;
- try{say("Bazanın strukturu yoxlanılır…","in");
-  var s=await sb.from("exam_questions").select("*").limit(1);if(s.error)throw s.error;var sm=s.data&&s.data[0];
-  if(!sm)throw new Error("Bazada nümunə sual yoxdur — sütunlar təyin edilə bilmədi");
-  var m=dbMap(sm);if(!m.exam||!m.cat||!m.q||!m.corr||!(m.opts||m.each)||!m.sub||!m.num)throw new Error("Cədvəl sütunları tanınmadı ("+Object.keys(sm).join(", ")+"). Heç nə yazılmadı.");
-  /* 1) qruplaşdır: sınaq | kateqoriya | fənn */
+ if(unk.length)return say("Bu fənn sınaq strukturunda yoxdur: "+unk.join(", ")+".\nİcazəli fənlər: "+Object.keys(LAY).join(", ")+".");
+ if(btn.disabled)return;btn.disabled=true;
+ try{
+  /* 1) qruplaşdır */
   var G={},ks=[];S.qs.forEach(function(q){var k=[q.exam,q.category,q.subject].join("|");if(!G[k]){G[k]=[];ks.push(k)}G[k].push(q)});
-  /* 2) hər qrup üçün yerləşdirmə planı (heç nə yazmadan yoxla) */
+  /* 2) plan + tam yoxlama (heç nə yazmadan) */
   var plan=[],errs=[];
-  for(var gi=0;gi<ks.length;gi++){var p=ks[gi].split("|"),g=G[ks[gi]],rg=LAY[p[2]],tag="Sınaq "+p[0]+" · "+p[1]+" · "+p[2];
-   var slots=[];for(var n=rg[0];n<=rg[1];n++)slots.push(n);
-   var isOp=function(n){return p[1]==="BA"&&OPENN.indexOf(n)>-1};
-   var oSl=slots.filter(isOp),mSl=slots.filter(function(n){return!isOp(n)});
+  ks.forEach(function(key){var p=key.split("|"),g=G[key],rg=LAY[p[2]],tag="Sınaq "+p[0]+" · "+p[1]+" · "+p[2],slots=[];
+   for(var n=rg[0];n<=rg[1];n++)slots.push(n);
+   var isOp=function(n){return p[1]==="BA"&&OPENN.indexOf(n)>-1},oSl=slots.filter(isOp),mSl=slots.filter(function(n){return!isOp(n)});
    var mc=g.filter(function(q){return q.type!=="open"}),op=g.filter(function(q){return q.type==="open"});
-   if(mc.length>mSl.length)errs.push(tag+": "+mc.length+" test sualı var, yer isə cəmi "+mSl.length+" (sual № "+rg[0]+"–"+rg[1]+").");
-   if(op.length>oSl.length)errs.push(tag+": "+op.length+" açıq sual var, açıq sual yeri isə "+oSl.length+(p[1]!=="BA"?" (açıq suallar yalnız BA kateqoriyasındadır)":"")+".");
+   if(mc.length>mSl.length)errs.push(tag+": "+mc.length+" test sualı var, yer isə cəmi "+mSl.length+".");
+   if(op.length>oSl.length)errs.push(tag+": "+op.length+" açıq sual var, açıq sual yeri "+oSl.length+(p[1]!=="BA"?" (açıq suallar yalnız BA-dadır)":"")+".");
    var lim=(rg[0]>=16&&rg[1]<=55)?4:5;
-   mc.forEach(function(q){if(q.options.length!==lim)errs.push(tag+": test sualında "+lim+" variant olmalıdır — “"+String(q.text||"şəkilli sual").slice(0,35)+"” sualında "+q.options.length+" var.")});
+   mc.forEach(function(q){var nm=String(q.text||"şəkilli sual").slice(0,35);
+    if(q.options.length!==lim)errs.push(tag+": test sualında "+lim+" variant olmalıdır — “"+nm+"” sualında "+q.options.length+" var.");
+    if(!(L5.indexOf(String(q.correct||"").toUpperCase())>-1&&L5.indexOf(String(q.correct).toUpperCase())<lim))errs.push(tag+": “"+nm+"” sualının düzgün cavabı seçilməyib.");
+    if(!q.text&&!q.textImg)errs.push(tag+": mətni və şəkli olmayan sual var.")});
+   op.forEach(function(q){if(!/^[A-Ea-e]$/.test(String(q.correct||"").trim()))errs.push(tag+": açıq sualın cavabı (A–E hərfi) yoxdur — “"+String(q.text||"").slice(0,35)+"”.")});
    var items=[];mc.forEach(function(q,i){if(mSl[i]!=null)items.push({q:q,no:mSl[i]})});op.forEach(function(q,i){if(oSl[i]!=null)items.push({q:q,no:oSl[i]})});
    items.sort(function(x,y){return x.no-y.no});
-   plan.push({p:p,rg:rg,tag:tag,items:items,old:[],by:{}})}
+   plan.push({p:p,rg:rg,tag:tag,items:items,old:[],by:{}})});
   if(errs.length)throw new Error("Heç nə yazılmadı. Əvvəlcə düzəldin:\n• "+errs.join("\n• "));
-  /* 3) bazadakı köhnə sualları tap: fənnin aralığındakılar + bu fənnin adı ilə aralıqdan kənarda qalmış səhv sətirlər */
-  say("Köhnə suallar yoxlanılır…","in");
-  for(var pi=0;pi<plan.length;pi++){var pl=plan[pi],r=await sb.from("exam_questions").select("id,"+m.num+","+m.sub).eq(m.exam,ev(sm,m,pl.p[0])).eq(m.cat,pl.p[1]).limit(5000);if(r.error)throw r.error;
-   (r.data||[]).forEach(function(x){var no=+x[m.num],inR=no>=pl.rg[0]&&no<=pl.rg[1];if(inR||String(x[m.sub])===pl.p[2]){pl.old.push(x.id);if(inR&&pl.by[no]==null)pl.by[no]=x.id}})}
-  if(!confirm(S.qs.length+" sual bazaya yazılsın?\n\nHər fənn üzrə köhnə suallar SİLİNİB yeniləri ilə ƏVƏZ OLUNACAQ:\n\n"+plan.map(function(x){return x.tag+": "+x.items.length+" yeni sual (№ "+x.rg[0]+"–"+x.rg[1]+" aralığına), "+x.old.length+" köhnə sual əvəz olunur"}).join("\n")+"\n\nBu geri qaytarılmır."))return say("Ləğv edildi.","in");
-  /* 4) yaz: mövcud nömrələrdə yenilə, boş yerlərə əlavə et */
-  var reused={},ins=[],done=0;
-  for(var qi=0;qi<plan.length;qi++){var pl2=plan[qi];
-   for(var ii=0;ii<pl2.items.length;ii++){var it=pl2.items[ii],row=toRow(it.q,m,sm,it.no),oid=pl2.by[it.no];
-    if(oid!=null){if(Object.prototype.hasOwnProperty.call(sm,"image_url")&&!("image_url" in row))row.image_url=null;if(m.exp&&!(m.exp in row))row[m.exp]="";
-     var u=await sb.from("exam_questions").update(row).eq("id",oid);if(u.error)throw new Error(u.error.message+" ("+pl2.tag+", № "+it.no+")");reused[oid]=1}
-    else ins.push(row)}}
-  for(var bi=0;bi<ins.length;bi+=50){var w=await sb.from("exam_questions").insert(ins.slice(bi,bi+50));if(w.error)throw new Error(w.error.message+" ("+bi+" sətirdən sonra dayandı)")}
-  /* 5) əvəz olunmayan köhnə sətirləri sil */
-  var del=[],seen={};plan.forEach(function(x){x.old.forEach(function(id){if(!reused[id]&&!seen[id]){seen[id]=1;del.push(id)}})});
-  for(var di=0;di<del.length;di+=50){var d=await sb.from("exam_questions").delete().in("id",del.slice(di,di+50));if(d.error)throw new Error("Köhnə suallar silinmədi: "+d.error.message)}
-  var okIds={};plan.forEach(function(x){x.items.forEach(function(i){okIds[i.q.id]=1;done++})});
+  /* 3) bütün sətirləri əvvəlcədən hazırla — burada xəta olsa heç nə yazılmır */
+  plan.forEach(function(pl){pl.items.forEach(function(it){it.row=toRow(it.q,it.no)})});
+  /* 4) bazanı yoxla (oxuma/icazə) və köhnə sualları tap */
+  say("Baza yoxlanılır…","in");
+  for(var pi=0;pi<plan.length;pi++){var pl=plan[pi],r=await sb.from("exam_questions").select("id,q_number,subject").eq("exam_id",pl.p[0]).eq("category",pl.p[1]).limit(5000);
+   if(r.error)throw new Error("Bazadan oxumaq mümkün olmadı: "+r.error.message);
+   (r.data||[]).forEach(function(x){var no=+x.q_number,inR=no>=pl.rg[0]&&no<=pl.rg[1];if(inR||String(x.subject)===pl.p[2]){pl.old.push(x.id);if(inR&&pl.by[no]==null)pl.by[no]=x.id}})}
+  if(!confirm(S.qs.length+" sual bazaya yazılsın?\n\nHər fənn üzrə köhnə suallar yeniləri ilə ƏVƏZ OLUNACAQ:\n\n"+plan.map(function(x){return x.tag+": "+x.items.length+" yeni sual (№ "+x.rg[0]+"–"+x.rg[1]+"), "+x.old.length+" köhnə sual əvəz olunur"}).join("\n")+"\n\nBu geri qaytarılmır."))return say("Ləğv edildi.","in");
+  /* 5) yaz: mövcud nömrədə yenilə, boşa əlavə et; hər xətanı topla */
+  var reused={},failed=[],total=0,wr=0;plan.forEach(function(x){total+=x.items.length});
+  for(var qi=0;qi<plan.length;qi++){var pl2=plan[qi],toIns=[];
+   for(var ii=0;ii<pl2.items.length;ii++){var it=pl2.items[ii],oid=pl2.by[it.no];
+    if(oid!=null){var u=await sb.from("exam_questions").update(it.row).eq("id",oid);
+     if(u.error)failed.push(pl2.tag+" № "+it.no+": "+u.error.message);else{reused[oid]=1;it.ok=1;wr++}}
+    else toIns.push(it);
+    say("Yazılır… "+wr+" / "+total,"in")}
+   for(var bi=0;bi<toIns.length;bi+=25){var chunk=toIns.slice(bi,bi+25),w=await sb.from("exam_questions").insert(chunk.map(function(c){return c.row}));
+    if(!w.error){chunk.forEach(function(c){c.ok=1});wr+=chunk.length}
+    else{for(var ci2=0;ci2<chunk.length;ci2++){var w1=await sb.from("exam_questions").insert([chunk[ci2].row]);
+      if(w1.error)failed.push(pl2.tag+" № "+chunk[ci2].no+": "+w1.error.message);else{chunk[ci2].ok=1;wr++}}}
+    say("Yazılır… "+wr+" / "+total,"in")}}
+  /* 6) oxuyub təsdiqlə: həqiqətən bazadadırmı? */
+  say("Yoxlanılır…","in");var verified=0,missing=[];
+  for(var vi=0;vi<plan.length;vi++){var pv=plan[vi],rv=await sb.from("exam_questions").select("id,q_number").eq("exam_id",pv.p[0]).eq("category",pv.p[1]).gte("q_number",pv.rg[0]).lte("q_number",pv.rg[1]);
+   var have={};((rv&&rv.data)||[]).forEach(function(x){have[+x.q_number]=x.id});
+   pv.items.forEach(function(it){if(have[it.no]!=null){it.ver=1;verified++;pv.by[it.no]=have[it.no]}else if(it.ok)missing.push(pv.tag+" № "+it.no)})}
+  /* 7) köhnələri YALNIZ hər şey təsdiqlənibsə sil */
+  var del=[];
+  if(!failed.length&&!missing.length){var seen={};plan.forEach(function(x){var keep={};x.items.forEach(function(i){if(x.by[i.no]!=null)keep[x.by[i.no]]=1});x.old.forEach(function(id){if(!reused[id]&&!keep[id]&&!seen[id]){seen[id]=1;del.push(id)}})});
+   for(var di=0;di<del.length;di+=50){var d=await sb.from("exam_questions").delete().in("id",del.slice(di,di+50));if(d.error)failed.push("Köhnə suallar silinmədi: "+d.error.message)}}
+  /* 8) siyahını yenilə: yalnız təsdiqlənənləri çıxar */
+  var okIds={};plan.forEach(function(x){x.items.forEach(function(i){if(i.ver)okIds[i.q.id]=1})});
   S.qs=S.qs.filter(function(q){return!okIds[q.id]});save();render();
-  say("✅ "+done+" sual bazaya yazıldı, "+del.length+" köhnə sual silindi. Saytda fənn kartlarını yeniləyin.","ok");toast(done+" sual bazaya yazıldı")}
+  try{window.parent.dispatchEvent(new window.parent.CustomEvent("dq:questions-changed"))}catch(e){}
+  if(failed.length||missing.length||verified<total)say("⚠️ "+verified+" / "+total+" sual bazada təsdiqləndi.\n"+failed.concat(missing.map(function(m){return m+": yazıldı, amma bazada tapılmadı (icazə/RLS?)"})).slice(0,8).map(function(x){return"• "+x}).join("\n")+"\nYazılmayan suallar siyahıda qalır; köhnə suallara toxunulmadı.");
+  else{say("✅ "+verified+" sual bazaya yazıldı və bazadan oxunub təsdiqləndi"+(del.length?", "+del.length+" köhnə sual silindi":"")+". Fənn kartlarını görmək üçün səhifəni yeniləyin.","ok");toast(verified+" sual bazaya yazıldı")}}
  catch(e){say("Xəta: "+(e.message||e)+"\nYazılmayan suallar siyahıda qalır.")}
  btn.disabled=false});
 /*PURE-START*/
