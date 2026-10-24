@@ -6134,5 +6134,130 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 </script>
 
 <script src="dq-variant-fix.js?v=2"></script>
+<script id="dq-fix-sec">/* DQ Fix: (1) variantlarda &#39; kimi xam entity-lərin təmizlənməsi, (2) çoxseçimli düymə sayı = sualdakı real say */
+(function(){"use strict";
+var ENT=/&(#\d+|#x[0-9a-f]+|[a-z][a-z0-9]+);/i,SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,INPUT:1,SELECT:1};
+function dec(s){for(var i=0;i<3&&ENT.test(s);i++){var t=document.createElement("textarea");t.innerHTML=s;if(t.value===s)break;s=t.value}return s}
+function fixEntities(root){
+  var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),n,list=[];
+  while((n=w.nextNode())){var p=n.parentNode;if(p&&SKIP[p.nodeName])continue;if(ENT.test(n.nodeValue))list.push(n)}
+  list.forEach(function(x){var v=dec(x.nodeValue);if(v!==x.nodeValue)x.nodeValue=v});
+}
+function isNum(el){return el.children.length===0&&/^\d{1,2}$/.test((el.textContent||"").trim())}
+function countLines(root){
+  var txt=(root.innerText||"").split(/\n/),nums={},max=0,i,m;
+  for(i=0;i<txt.length;i++){m=/^\s*(\d{1,2})\s*[.)]\s*\S/.exec(txt[i]);if(m)nums[+m[1]]=1}
+  while(nums[max+1])max++;return max;
+}
+function setNum(el,from,to){
+  var re=new RegExp("(^|\\D)"+from+"(?!\\d)","g");
+  [el].concat([].slice.call(el.querySelectorAll("*"))).forEach(function(e){
+    [].slice.call(e.attributes).forEach(function(a){if(re.test(a.value)){re.lastIndex=0;e.setAttribute(a.name,a.value.replace(re,function(_,p){return p+to}))}re.lastIndex=0});
+  });
+  var w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null),n;
+  while((n=w.nextNode())){if(n.nodeValue.trim()===String(from))n.nodeValue=String(to)}
+}
+function fixPicker(c){
+  var w=document.createTreeWalker(c,NodeFilter.SHOW_TEXT,null),n,lab=null;
+  while((n=w.nextNode())){if(/oxseçimli cavab seçicisi/i.test(n.nodeValue)){lab=n.parentElement;break}}
+  if(!lab)return null;
+  var cand=[],node=lab,k;
+  for(k=0;k<5&&node&&node!==c;k++){
+    node=node.parentElement;if(!node)return null;
+    cand=[].slice.call(node.querySelectorAll("*")).filter(isNum);
+    if(cand.length>=2)break;
+  }
+  if(cand.length<2)return null;
+  var N=countLines(c);if(N<2||N>30)return null;
+  var par=cand[0].parentNode;cand=cand.filter(function(e){return e.parentNode===par});
+  var cur=cand.length;
+  if(cur>N){cand.forEach(function(e){if(+e.textContent.trim()>N)e.remove()});cand=cand.filter(function(e){return e.isConnected})}
+  else if(cur<N){
+    var last=cand[cand.length-1],lastN=+last.textContent.trim(),ref=last;
+    for(var v=lastN+1;v<=N;v++){var cl=last.cloneNode(true);cl.removeAttribute("id");
+      cl.classList.remove("selected","active","on","sel","picked","checked");
+      setNum(cl,lastN,v);ref.parentNode.insertBefore(cl,ref.nextSibling);ref=cl;cand.push(cl)}
+  }
+  return {lab:lab,par:par,row:node,circles:cand,N:N};
+}
+/* ---- kart dizaynı ---- */
+var CSS="\
+.dq-cards-host{white-space:normal!important}\
+.dq-stem{font-weight:600;line-height:1.5;margin:0 0 14px;color:inherit}\
+.dq-cards{display:flex;flex-direction:column;gap:10px;margin:2px 0 10px}\
+.dq-card{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1.5px solid #c9d3e6;border-radius:14px;background:#f4f7fc;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .15s,background .15s,box-shadow .15s,transform .1s;line-height:1.45;user-select:none}\
+.dq-card:hover{border-color:#6f8fd0;background:#eef3fc}\
+.dq-card:active{transform:scale(.99)}\
+.dq-card .dq-no{flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:2px solid #0b2a6b;color:#0b2a6b;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;background:#fff;transition:background .15s,color .15s,box-shadow .15s}\
+.dq-card .dq-tx{flex:1;min-width:0;color:#10224a;word-break:break-word}\
+.dq-card.sel{border-color:#0b2a6b;background:#e6edfb;box-shadow:0 2px 10px rgba(11,42,107,.15)}\
+.dq-card.sel .dq-no{background:#0b2a6b;color:#f0c35a;box-shadow:0 0 0 3px rgba(240,195,90,.35)}\
+.dq-picker-hide{display:none!important}";
+function addCss(){if(document.getElementById("dq-cards-css"))return;var s=document.createElement("style");s.id="dq-cards-css";s.textContent=CSS;document.head.appendChild(s)}
+var SELRE=/(^|[\s_-])(selected|active|on|sel|picked|checked|chosen)($|[\s_-])/i;
+function selected(circles){
+  var byCls=circles.map(function(e){return SELRE.test(e.className||"")||e.getAttribute("aria-pressed")==="true"||e.getAttribute("aria-checked")==="true"});
+  if(byCls.some(Boolean))return byCls;
+  var keys=circles.map(function(e){var s=getComputedStyle(e);return s.backgroundColor+"|"+s.color+"|"+s.borderTopColor}),cnt={},mode="",m=0;
+  keys.forEach(function(k){cnt[k]=(cnt[k]||0)+1;if(cnt[k]>m){m=cnt[k];mode=k}});
+  return keys.map(function(k){return k!==mode&&Object.keys(cnt).length>1&&cnt[k]<m});
+}
+function findHost(c,info){
+  var best=null,all=c.querySelectorAll("*");
+  for(var i=0;i<all.length;i++){var el=all[i];
+    if(el.contains(info.row)||info.row.contains(el)||el.classList.contains("dq-cards-host"))continue;
+    if(countLines(el)===info.N&&!el.querySelector("input,textarea,button"))best=el;
+  }
+  /* ən dərin uyğun element */
+  if(!best)return null;
+  var deeper=true;while(deeper){deeper=false;var ch=best.children;for(var j=0;j<ch.length;j++){if(countLines(ch[j])===info.N){best=ch[j];deeper=true;break}}}
+  return best;
+}
+function buildCards(c,info){
+  if(!info)return;
+  var host=c.querySelector(".dq-cards-host");
+  if(!host){
+    host=findHost(c,info);if(!host)return;
+    var lines=(host.innerText||"").split(/\n/),stem=[],opts=[],m;
+    lines.forEach(function(L){if(!L.trim())return;m=/^\s*(\d{1,2})\s*[.)]\s*(.*)$/.exec(L);
+      if(m&&+m[1]===opts.length+1)opts.push({n:+m[1],t:m[2]});
+      else if(opts.length)opts[opts.length-1].t+=" "+L.trim();else stem.push(L.trim())});
+    if(opts.length!==info.N)return;
+    addCss();host.textContent="";host.classList.add("dq-cards-host");
+    if(stem.length){var st=document.createElement("div");st.className="dq-stem";st.textContent=stem.join(" ");host.appendChild(st)}
+    var wrap=document.createElement("div");wrap.className="dq-cards";
+    opts.forEach(function(o){
+      var d=document.createElement("div");d.className="dq-card";d.setAttribute("role","button");d.tabIndex=0;d.dataset.n=o.n;
+      var a=document.createElement("span");a.className="dq-no";a.textContent=o.n;
+      var b=document.createElement("span");b.className="dq-tx";b.textContent=o.t;
+      d.appendChild(a);d.appendChild(b);wrap.appendChild(d)});
+    host.appendChild(wrap);
+    var go=function(d){var n=d.dataset.n,ci=info.circles.filter(function(e){return e.textContent.trim()===n})[0];
+      if(ci){ci.click();setTimeout(function(){sync(host,info)},40)}};
+    wrap.addEventListener("click",function(e){var d=e.target.closest(".dq-card");if(d)go(d)});
+    wrap.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){var d=e.target.closest(".dq-card");if(d){e.preventDefault();go(d)}}});
+    new MutationObserver(function(){sync(host,info)}).observe(info.row,{attributes:true,subtree:true,childList:true});
+  }
+  info.lab.classList.add("dq-picker-hide");info.par.classList.add("dq-picker-hide");
+  host._info=info;sync(host,info);
+}
+function sync(host,info){
+  var st=selected(info.circles);
+  info.circles.forEach(function(e,i){var n=e.textContent.trim(),d=host.querySelector('.dq-card[data-n="'+n+'"]');if(d)d.classList.toggle("sel",!!st[i])});
+}
+var busy=false,t=null;
+function run(){
+  if(busy)return;var c=document.getElementById("single-question-container");if(!c)return;
+  busy=true;try{fixEntities(c);var inf=fixPicker(c);if(inf)buildCards(c,inf)}catch(e){}busy=false;
+}
+function start(){
+  var c=document.getElementById("single-question-container");
+  if(!c){setTimeout(start,400);return}
+  new MutationObserver(function(){clearTimeout(t);t=setTimeout(run,30)}).observe(c,{childList:true,subtree:true,characterData:true});
+  run();
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
+})();
+</script>
 </body>
 </html>
