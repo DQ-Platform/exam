@@ -1192,7 +1192,7 @@ var A={
   yq:function(){run("Təsdiq paneli",function(){return YQ.openAdmin()})},
   yx:function(){run("Yoxlama rejimi",function(){return YX.open()})},
   tm:function(){run("Testlər idarəsi",function(){return TM.open()})},
-  cab:function(){dqAdminAsk().then(function(ok){if(ok&&window.DQStudio)window.DQStudio.liveEdit()})}
+  cab:function(){dqAdminAsk().then(function(ok){if(!(ok&&window.DQStudio))return;window.DQStudio.liveEdit();var n=0,t=setInterval(function(){if(++n>50){clearInterval(t);return}var ex=document.getElementById("exam-screen");if(isLiveEditMode&&allQuestions.length&&ex&&ex.classList.contains("active")){clearInterval(t);if(!inlineEditOn)toggleInlineEdit()}},300)})}
 };
 function has(f){try{return !!f()}catch(e){return false}}
 var AVAIL={

@@ -108,7 +108,7 @@ window.setInterval=function(fn,d){
 })();
 </script>
 <link rel="preload" as="script" href="dq-net.js?v=1">
-<link rel="preload" as="script" href="app.js?v=42">
+<link rel="preload" as="script" href="app.js?v=43">
 <link rel="preload" as="script" href="dq-qapaq.js?v=2">
 <link rel="preload" as="script" href="dq-birlesdirme.js?v=5">
 <link rel="preload" as="script" href="dq-lock.js?v=1">
@@ -4998,7 +4998,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 </style>
 <script src="dq-qapaq.js?v=2"></script>
 <script src="/dq-ceo.js?v=2"></script>
-<script src="app.js?v=42"></script>
+<script src="app.js?v=43"></script>
 <script src="sual-studio.js?v=1"></script>
 <script src="dq-birlesdirme.js?v=5"></script>
 <script src="dq-oxuyucu.js?v=1"></script>
@@ -6192,6 +6192,10 @@ var CSS="\
 .dq-card .dq-tx{flex:1;min-width:0;color:#10224a;word-break:break-word}\
 .dq-card.sel{border-color:#0b2a6b;background:#e6edfb;box-shadow:0 2px 10px rgba(11,42,107,.15)}\
 .dq-card.sel .dq-no{background:#0b2a6b;color:#f0c35a;box-shadow:0 0 0 3px rgba(240,195,90,.35)}\
+.dq-card::before{content:\"\";flex:0 0 auto;width:22px;height:22px;box-sizing:border-box;border:2px solid #9fb0d3;border-radius:6px;background:#fff;transition:background .15s,border-color .15s}\
+.dq-card.sel::before{background:#0b2a6b url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3 8.5l3.2 3.2L13 4.8' fill='none' stroke='%23f0c35a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>\") center/14px no-repeat;border-color:#0b2a6b}\
+.dq-card .dq-no{order:2;width:30px;height:30px;font-size:14px}\
+.dq-card .dq-tx{order:3}\
 .dq-picker-hide{display:none!important}";
 function addCss(){if(document.getElementById("dq-cards-css"))return;var s=document.createElement("style");s.id="dq-cards-css";s.textContent=CSS;document.head.appendChild(s)}
 var SELRE=/(^|[\s_-])(selected|active|on|sel|picked|checked|chosen)($|[\s_-])/i;
