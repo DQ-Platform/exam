@@ -3309,7 +3309,9 @@ function dbHtml(t){return t?esc(t).replace(/\n/g,"<br>"):""}
 function toRow(q,no){var ci=L5.indexOf(String(q.correct||"").toUpperCase()),op=q.type==="open";
  var o={exam_id:String(q.exam),category:q.category,q_number:no,subject:q.subject,question:dbHtml(q.text),image_url:q.textImg||null};
  if(q.explanation)o.explanation=q.explanation;
- if(op){o.options=[];o.correct=String(q.correct).toUpperCase()}
+ if(op){/* Açıq sual: ifadələr sual mətninə nömrələnmiş sətirlər kimi əlavə olunur; cavab = doğru ifadə nömrələri (məs. "123") */
+  o.question=dbHtml(q.text)+"<br>"+q.options.map(function(x,i){return(x.label||String(i+1))+". "+dbHtml(x.text)+(x.img?'<br><img class="dq-ri" src="'+x.img+'" alt="">':"")}).join("<br>");
+  o.options=[];o.correct=String(q.correct).split(/[^0-9]+/).filter(Boolean).sort().join("")}
  else{o.options=q.options.map(function(x){return{text:dbHtml(x.text),image:x.img||null}});o.correct=ci}
  return o}
 $("bDb").addEventListener("click",async function(){var out=$("dbmsg"),btn=this;out.style.whiteSpace="pre-line";function say(t,k){out.textContent=t;out.style.color=k==="ok"?"#0f9d6b":k==="in"?"#6b6a85":"#d9363e"}
@@ -3336,7 +3338,7 @@ $("bDb").addEventListener("click",async function(){var out=$("dbmsg"),btn=this;o
     if(q.options.length!==lim)errs.push(tag+": test sualında "+lim+" variant olmalıdır — “"+nm+"” sualında "+q.options.length+" var.");
     if(!(L5.indexOf(String(q.correct||"").toUpperCase())>-1&&L5.indexOf(String(q.correct).toUpperCase())<lim))errs.push(tag+": “"+nm+"” sualının düzgün cavabı seçilməyib.");
     if(!q.text&&!q.textImg)errs.push(tag+": mətni və şəkli olmayan sual var.")});
-   op.forEach(function(q){if(!/^[A-Ea-e]$/.test(String(q.correct||"").trim()))errs.push(tag+": açıq sualın cavabı (A–E hərfi) yoxdur — “"+String(q.text||"").slice(0,35)+"”.")});
+   op.forEach(function(q){var nm=String(q.text||"").slice(0,35);if(!/[0-9]/.test(String(q.correct||"")))errs.push(tag+": açıq sualda doğru ifadələr seçilməyib — “"+nm+"”.");if(q.options.length<3)errs.push(tag+": açıq sualda ən azı 3 ifadə olmalıdır — “"+nm+"”.")});
    var items=[];mc.forEach(function(q,i){if(mSl[i]!=null)items.push({q:q,no:mSl[i]})});op.forEach(function(q,i){if(oSl[i]!=null)items.push({q:q,no:oSl[i]})});
    items.sort(function(x,y){return x.no-y.no});
    plan.push({p:p,rg:rg,tag:tag,items:items,old:[],by:{}})});
