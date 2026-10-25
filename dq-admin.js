@@ -91,22 +91,28 @@
     }
   } catch (e) {}
 
-  /* ---------- Sınaq siyahısı ---------- */
-  async function examList() {
-    var map = {};
-    try {
-      var r = await _supabase.from("exam_questions").select("exam_id,category").eq("q_number", 1);
-      (r.data || []).forEach(function (x) {
-        var k = String(x.exam_id);
-        (map[k] = map[k] || {})[String(x.category || "BA").toUpperCase()] = 1;
-      });
-    } catch (e) {}
-    var n = +g(function () { return totalExamsCount; }, 2) || 2;
-    for (var i = 1; i <= n; i++) map[String(i)] = map[String(i)] || {};
-    return Object.keys(map).map(Number)
-      .filter(function (x) { return x > 0; })
+  /* ---------- Sınaq siyahısı (dərhal göstərilir, baza məlumatı arxa fonda gəlir) ---------- */
+  var CK = "dq_adm_cats";
+  function baseList(map) {
+    var n = +g(function () { return totalExamsCount; }, 2) || 2, out = [], i;
+    for (i = 1; i <= n; i++) map[String(i)] = map[String(i)] || {};
+    return Object.keys(map).map(Number).filter(function (x) { return x > 0; })
       .sort(function (a, b) { return a - b; })
       .map(function (k) { return { n: k, cats: map[String(k)] }; });
+  }
+  function cachedMap() { try { return JSON.parse(sessionStorage.getItem(CK) || "{}") || {}; } catch (e) { return {}; } }
+  function fetchMap() {
+    var q = Promise.resolve(_supabase.from("exam_questions").select("exam_id,category").eq("q_number", 1))
+      .then(function (r) {
+        var map = {};
+        (r.data || []).forEach(function (x) {
+          (map[String(x.exam_id)] = map[String(x.exam_id)] || {})[String(x.category || "BA").toUpperCase()] = 1;
+        });
+        try { sessionStorage.setItem(CK, JSON.stringify(map)); } catch (e) {}
+        return map;
+      });
+    var t = new Promise(function (res) { setTimeout(function () { res(null); }, 4000); });
+    return Promise.race([q, t]).catch(function () { return null; });
   }
 
   /* ---------- Sual redaktorunu aç ---------- */
@@ -120,7 +126,8 @@
       currentActiveFin = "ADMIN";
       var p = $("live-edit-panel");
       if (p) p.style.display = "block";
-      Promise.resolve(startExamSession(n, cat)).catch(function (e) {
+      if (window.__dqLiveKick) window.__dqLiveKick();
+      Promise.resolve(startExamSession(n, cat)).then(function () { if (window.__dqLiveKick) window.__dqLiveKick(); }).catch(function (e) {
         console.error(e); toast("Redaktor açıla bilmədi: " + (e && e.message || e));
       });
     } catch (e) { console.error(e); toast("Redaktor açıla bilmədi: " + e.message); }
@@ -128,28 +135,28 @@
 
   /* ---------- Admin siyahısı ---------- */
   var rendering = false;
-  async function adminRender() {
+  function listHtml(L) {
+    var h = '<div class="dqadm-root"><div class="dq-note" style="margin:0 auto 14px"><i class="fa-solid fa-user-shield"></i><span><b>Admin rejimi:</b> bütün sınaqlar aktivdir. Sınağı açın və sualları birbaşa redaktə edin.</span></div>';
+    h += '<div class="exam-item-card"><div class="exam-item-header"><span>Sınaq nömrəsini yazın</span></div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
+      '<input id="dqadm-n" type="number" min="1" inputmode="numeric" placeholder="№" style="width:90px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font-size:16px">' +
+      CATS.map(function (c) { return '<button type="button" class="btn btn-primary btn-sm" data-dqadm-n="' + c + '">' + c + '</button>'; }).join("") +
+      '</div></div>';
+    return h + L.map(function (x) {
+      return '<div class="exam-item-card"><div class="exam-item-header"><span>Sınaq ' + x.n + '</span><span style="font-size:12px;color:#15803d;font-weight:800">● AKTİV</span></div><div style="display:flex;flex-direction:column;gap:6px">' +
+        CATS.map(function (c) {
+          return '<div class="cat-action-row"><span class="cat-action-title">' + c + ' kateqoriyası' +
+            (x.cats[c] ? '' : ' <small class="dqadm-empty" style="color:#94a3b8;font-weight:600">(boşdur)</small>') +
+            '</span><button type="button" class="btn btn-primary btn-sm" data-dqadm="' + x.n + '|' + c + '">✏️ Aç və redaktə et</button></div>';
+        }).join("") + '</div></div>';
+    }).join("") + '</div>';
+  }
+  function adminRender() {
     var box = $("registered-exams-list");
-    if (!box || rendering) return;
+    if (!box || rendering) return Promise.resolve();
     rendering = true;
     try {
-      box.innerHTML = '<p class="dqadm-root">Sınaqlar yüklənir...</p>';
-      var L = await examList();
-      var h = '<div class="dqadm-root"><div class="dq-note" style="margin:0 auto 14px"><i class="fa-solid fa-user-shield"></i><span><b>Admin rejimi:</b> bütün sınaqlar aktivdir. Sınağı açın və sualları birbaşa redaktə edin.</span></div>';
-      h += '<div class="exam-item-card"><div class="exam-item-header"><span>Sınaq nömrəsini yazın</span></div>' +
-        '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
-        '<input id="dqadm-n" type="number" min="1" inputmode="numeric" placeholder="№" style="width:90px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font-size:16px">' +
-        CATS.map(function (c) { return '<button type="button" class="btn btn-primary btn-sm" data-dqadm-n="' + c + '">' + c + '</button>'; }).join("") +
-        '</div></div>';
-      h += L.map(function (x) {
-        return '<div class="exam-item-card"><div class="exam-item-header"><span>Sınaq ' + x.n + '</span><span style="font-size:12px;color:#15803d;font-weight:800">● AKTİV</span></div><div style="display:flex;flex-direction:column;gap:6px">' +
-          CATS.map(function (c) {
-            return '<div class="cat-action-row"><span class="cat-action-title">' + c + ' kateqoriyası' +
-              (x.cats[c] ? '' : ' <small style="color:#94a3b8;font-weight:600">(boşdur)</small>') +
-              '</span><button type="button" class="btn btn-primary btn-sm" data-dqadm="' + x.n + '|' + c + '">✏️ Aç və redaktə et</button></div>';
-          }).join("") + '</div></div>';
-      }).join("") + '</div>';
-      box.innerHTML = h;
+      box.innerHTML = listHtml(baseList(cachedMap()));
       box.onclick = function (e) {
         var b = e.target.closest("[data-dqadm]");
         if (b) { var p = b.getAttribute("data-dqadm").split("|"); launch(p[0], p[1]); return; }
@@ -158,6 +165,11 @@
       };
       try { DQ.setReg(true); } catch (e) {}
     } finally { rendering = false; }
+    return fetchMap().then(function (map) {          /* arxa fonda "(boşdur)" qeydlərini dəqiqləşdir */
+      if (!map || !isAdm()) return;
+      var cur = $("registered-exams-list");
+      if (cur && cur.querySelector(".dqadm-root")) { rendering = true; try { cur.innerHTML = listHtml(baseList(map)); } finally { rendering = false; } }
+    });
   }
 
   /* ---------- Admin kabinetini birbaşa aç (tələbə kabinetini yan keç) ---------- */
@@ -250,32 +262,41 @@
   }
 
   /* ---------- Kodun tutulması: formanın öz yoxlamasından ƏVVƏL ---------- */
-  function find() {
-    var L = D.querySelectorAll("input"), t, ty, i;
-    for (i = 0; i < L.length; i++) {
-      t = L[i]; ty = (t.type || "text").toLowerCase();
-      if (ty === "file" || ty === "checkbox" || ty === "radio" || ty === "hidden") continue;
-      if (isCode(t.value)) return t;
-    }
-    return null;
+  var armed = null;     /* admin kodu yazılmış sahə */
+  function textLike(t) {
+    if (!t || t.tagName !== "INPUT") return false;
+    var ty = (t.type || "text").toLowerCase();
+    return !(ty === "file" || ty === "checkbox" || ty === "radio" || ty === "hidden");
   }
-  function intercept(e) {
-    var t = find();
-    if (!t) return;
+  function trigger(e) {
+    var t = armed;
+    armed = null;
     if (e && e.cancelable) e.preventDefault();
     if (e) { e.stopImmediatePropagation(); e.stopPropagation(); }
-    t.value = "";
-    try { t.blur(); } catch (x) {}
+    if (t) { t.value = ""; try { t.blur(); } catch (x) {} }
     enter();
   }
-  ["input", "change", "paste", "keyup", "click", "touchend", "pointerup", "submit"].forEach(function (ev) {
+  function onType(e) {                                  /* yalnız yazılan sahəyə baxılır */
+    var t = e.target;
+    if (!textLike(t) || t.value.length < 7 || t.value.length > 12) return;
+    if (isCode(t.value)) { armed = t; trigger(e); }
+  }
+  function onAct(e) {                                   /* düymə/forma təsdiqi: yalnız bir dəfə skan */
+    var t = e.target && e.target.closest && e.target.closest("button,[role=button],a,input[type=submit],form");
+    if (!t && e.type !== "submit" && e.type !== "keydown") return;
+    var L = D.querySelectorAll("input"), i;
+    for (i = 0; i < L.length; i++) {
+      if (textLike(L[i]) && L[i].value.length >= 7 && L[i].value.length <= 12 && isCode(L[i].value)) { armed = L[i]; trigger(e); return; }
+    }
+  }
+  ["input", "change", "paste", "keyup"].forEach(function (ev) {
     window.addEventListener(ev, function (e) {
-      intercept(e);
-      if (ev === "paste" || ev === "input") setTimeout(function () { intercept(null); }, 0);
+      onType(e);
+      if (ev === "paste") setTimeout(function () { if (textLike(e.target) && isCode(e.target.value)) { armed = e.target; trigger(null); } }, 0);
     }, true);
   });
-  window.addEventListener("keydown", function (e) { if (e.key === "Enter") intercept(e); }, true);
-
+  ["click", "pointerup", "touchend", "submit"].forEach(function (ev) { window.addEventListener(ev, onAct, true); });
+  window.addEventListener("keydown", function (e) { if (e.key === "Enter") onAct(e); }, true);
 
   /* ---------- Müstəqil giriş yolu: saytın ünvanının sonuna #adm yazın ---------- */
   function codeModal() {
@@ -426,7 +447,8 @@
   /* ---------- 3) Sınmış simvollar ---------- */
   var ENT = /&#0*39;|&#x27;|&apos;|&quot;|&#0*34;/gi;
   function fixEntities(root) {
-    if (!FIX_ENTITIES || !root) return;
+    if (!FIX_ENTITIES || !root || !ENT.test(root.textContent || "")) { ENT.lastIndex = 0; return; }   /* təmizdirsə ağacı gəzmə */
+    ENT.lastIndex = 0;
     var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n, hit = [];
     while ((n = w.nextNode())) {
       if (ENT.test(n.nodeValue)) hit.push(n);
@@ -619,25 +641,23 @@
     toast("↩ Sual " + ctx.qNum + " bərpa edildi", { ms: 2500 });
   }
 
-  /* ---------- Dövr + müşahidə ---------- */
-  var raf = 0, watched = null;
+  /* ---------- Müşahidə (dövrsüz: yalnız DOM dəyişəndə, 120 ms birləşdirilmiş) ---------- */
+  var timer = 0, watched = null, watchedEx = null;
   function tick() {
-    raf = 0;
+    timer = 0;
+    if (!isLive()) return;                      /* admin redaktor rejimində deyilsə heç nə etmə */
     autoEdit();
     decorate();
     var c = $("single-question-container");
     if (c) fixEntities(c);
   }
-  function schedule() { if (!raf) raf = requestAnimationFrame(tick); }
-
+  function schedule() { if (!timer) timer = setTimeout(tick, 120); }
   function watch() {
-    var c = $("single-question-container");
-    if (c && c !== watched) {
-      watched = c;
-      new MutationObserver(schedule).observe(c, { childList: true, subtree: true });
-    }
+    var c = $("single-question-container"), ex = $("exam-screen");
+    if (c && c !== watched) { watched = c; new MutationObserver(schedule).observe(c, { childList: true, subtree: true }); }
+    if (ex && ex !== watchedEx) { watchedEx = ex; new MutationObserver(schedule).observe(ex, { attributes: true, attributeFilter: ["class"] }); }
+    return !!(watched && watchedEx);
   }
-  setInterval(function () { watch(); schedule(); }, 500);
-  watch();
-  schedule();
+  (function boot() { var n = 0; (function t() { if (!watch() && ++n < 120) setTimeout(t, 500); })(); })();
+  window.__dqLiveKick = function () { [200, 700, 1500, 3000, 6000].forEach(function (ms) { setTimeout(function () { watch(); schedule(); }, ms); }); };
 })();
