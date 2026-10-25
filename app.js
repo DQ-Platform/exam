@@ -1180,6 +1180,99 @@ function run(label,fn){
     if(r&&r.catch)r.catch(function(){toast(label+" açıla bilmədi")});
   }catch(e){toast(label+" yüklənmədi — səhifəni yeniləyin")}
 }
+
+/* ---------- Redaktor kodu pəncərəsi (Suallar düyməsi) ---------- */
+var EC={pending:null,fails:0,lock:0,css:false};
+function ecCode(){try{if(typeof ADMIN_PASS==="string"&&ADMIN_PASS)return ADMIN_PASS}catch(e){}return "6675157"}
+function ecCss(){
+  if(EC.css)return;EC.css=true;
+  var s=D.createElement("style");s.id="dqec-css";
+  s.textContent=
+  "#dqec-ov{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,15,40,.62);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);font-family:Mulish,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;animation:dqecFade .25s ease both}"+
+  "#dqec{width:100%;max-width:370px;background:#fff;border-radius:22px;padding:26px 22px 20px;box-shadow:0 30px 70px rgba(10,10,30,.4);position:relative;overflow:hidden;color:#1c1b2e;animation:dqecPop .4s cubic-bezier(.22,.9,.24,1) both}"+
+  "#dqec:before{content:'';position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,#0b2a6b,#c9a063)}"+
+  "#dqec.shake{animation:dqecShake .45s ease}"+
+  "#dqec .ic{width:54px;height:54px;margin:2px auto 10px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:25px;background:#eaf1fc}"+
+  "#dqec h3{margin:0 0 4px;font-size:20px;font-weight:800;text-align:center;color:#0b2a6b}"+
+  "#dqec p{margin:0 0 14px;text-align:center;font-size:13px;color:#6b6f85;line-height:1.5}"+
+  "#dqec .f{position:relative}"+
+  "#dqec input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;letter-spacing:3px;text-align:center;padding:13px 46px 13px 14px;border:1.5px solid #dfe2ee;border-radius:12px;background:#fbfbfd;color:#1c1b2e;outline:none;transition:border-color .2s,box-shadow .2s}"+
+  "#dqec input:focus{border-color:#0b2a6b;box-shadow:0 0 0 4px rgba(11,42,107,.1)}"+
+  "#dqec.bad input{border-color:#d64545;box-shadow:0 0 0 4px rgba(214,69,69,.12)}"+
+  "#dqec .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:transparent;font-size:17px;cursor:pointer;border-radius:10px;padding:0}"+
+  "#dqec .m{min-height:18px;font-size:13px;color:#d64545;margin:8px 0 0;text-align:center}"+
+  "#dqec .r{display:flex;gap:10px;margin-top:10px}"+
+  "#dqec .r button{flex:1;font:inherit;font-weight:700;font-size:15px;border-radius:12px;padding:13px;cursor:pointer;border:1px solid #dfe2ee;background:#fff;color:#1c1b2e;transition:transform .15s,opacity .2s}"+
+  "#dqec .r button:active{transform:scale(.97)}"+
+  "#dqec .r button.ok{flex:1.5;background:#0b2a6b;border-color:#0b2a6b;color:#fff}"+
+  "#dqec .r button:disabled{opacity:.55;cursor:not-allowed}"+
+  "@keyframes dqecFade{from{opacity:0}to{opacity:1}}"+
+  "@keyframes dqecPop{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}"+
+  "@keyframes dqecShake{0%,100%{transform:none}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}"+
+  "@media(prefers-reduced-motion:reduce){#dqec-ov,#dqec,#dqec.shake{animation:none!important}}";
+  D.head.appendChild(s);
+}
+function ecAsk(){
+  if(EC.pending)return EC.pending.__p;
+  ecCss();
+  var prev=D.activeElement,res;
+  var p=new Promise(function(r){res=r});
+  EC.pending={__p:p};
+  var o=D.createElement("div");o.id="dqec-ov";
+  o.innerHTML='<div id="dqec" role="dialog" aria-modal="true" aria-labelledby="dqec-t"><div class="ic">📝</div><h3 id="dqec-t">Sual redaktoru</h3><p>Redaktə rejiminə keçmək üçün admin kodunu daxil edin.</p>'+
+    '<div class="f"><input id="dqec-c" type="password" inputmode="numeric" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="••••••••" aria-label="Admin kodu"><button type="button" class="eye" id="dqec-eye" aria-label="Kodu göstər" tabindex="-1">👁</button></div>'+
+    '<div class="m" id="dqec-m" role="alert" aria-live="polite"></div>'+
+    '<div class="r"><button type="button" id="dqec-no">Ləğv et</button><button type="button" class="ok" id="dqec-go">Daxil ol</button></div></div>';
+  D.body.appendChild(o);
+  var inp=$("dqec-c"),box=$("dqec"),msg=$("dqec-m"),go=$("dqec-go"),tick=null;
+  function done(v){
+    clearInterval(tick);o.remove();EC.pending=null;
+    try{prev&&prev.focus&&prev.focus()}catch(e){}
+    res(!!v)
+  }
+  function bad(t){
+    msg.textContent=t;box.classList.remove("shake");void box.offsetWidth;box.classList.add("shake","bad");
+    inp.value="";inp.focus()
+  }
+  function locked(){
+    var left=Math.ceil((EC.lock-Date.now())/1000);
+    if(left>0){msg.textContent="Çox sayda səhv cəhd. "+left+" san. sonra yenidən yoxlayın.";go.disabled=true;return true}
+    if(go.disabled){go.disabled=false;msg.textContent="";EC.lock=0}
+    return false
+  }
+  function submit(){
+    if(locked())return;
+    var v=inp.value.trim();
+    if(!v){bad("Kodu yazın.");return}
+    if(v===ecCode()){EC.fails=0;done(true);return}
+    if(++EC.fails>=5){
+      EC.fails=0;EC.lock=Date.now()+60000;
+      bad("Çox sayda səhv cəhd.");locked();
+      tick=setInterval(function(){if(!locked())clearInterval(tick)},1000);
+      return
+    }
+    bad("Kod yanlışdır. Qalan cəhd: "+(5-EC.fails))
+  }
+  inp.addEventListener("input",function(){box.classList.remove("bad");if(!go.disabled)msg.textContent=""});
+  $("dqec-eye").onclick=function(){var h=inp.type==="password";inp.type=h?"text":"password";this.textContent=h?"🙈":"👁";inp.focus()};
+  $("dqec-no").onclick=function(){done(false)};
+  go.onclick=submit;
+  o.addEventListener("keydown",function(e){
+    if(e.key==="Enter"){e.preventDefault();submit()}
+    else if(e.key==="Escape"){done(false)}
+    else if(e.key==="Tab"){   /* fokus pəncərə daxilində qalsın */
+      var f=[].slice.call(o.querySelectorAll("input,button:not([tabindex='-1']):not(:disabled)"));
+      if(!f.length)return;var i=f.indexOf(D.activeElement);
+      if(e.shiftKey&&i<=0){e.preventDefault();f[f.length-1].focus()}
+      else if(!e.shiftKey&&i===f.length-1){e.preventDefault();f[0].focus()}
+    }
+  });
+  o.addEventListener("pointerdown",function(e){if(e.target===o)done(false)});
+  locked()&&(tick=setInterval(function(){if(!locked())clearInterval(tick)},1000));
+  setTimeout(function(){inp.focus()},60);
+  return p
+}
+
 var A={
   mod:function(){run("Mərkəzi modullar",function(){
     try{localStorage.setItem("dq_admin_logged","true")}catch(e){}
@@ -1192,7 +1285,7 @@ var A={
   yq:function(){run("Təsdiq paneli",function(){return YQ.openAdmin()})},
   yx:function(){run("Yoxlama rejimi",function(){return YX.open()})},
   tm:function(){run("Testlər idarəsi",function(){return TM.open()})},
-  cab:function(){var poll=function(){var n=0,t=setInterval(function(){if(++n>60){clearInterval(t);return}var ex=document.getElementById("exam-screen");if(isLiveEditMode&&allQuestions.length&&ex&&ex.classList.contains("active")){clearInterval(t);if(!inlineEditOn)toggleInlineEdit()}},300)};var go=function(){try{window.__dqAuthed=true;isLiveEditMode=true;currentStudentName="ADMIN REDAKTOR";currentActiveFin="ADMIN";var p=document.getElementById("live-edit-panel");p&&(p.style.display="block");Promise.resolve(startExamSession("1","BA")).then(poll).catch(function(e){console.error(e);toast("Redaktor açıla bilmədi: "+(e&&e.message||e))})}catch(e){console.error(e);toast("Redaktor açıla bilmədi: "+e.message)}};if(unlocked())go();else dqAdminAsk().then(function(ok){ok&&go()})}
+  cab:function(){var poll=function(){var n=0,t=setInterval(function(){if(++n>60){clearInterval(t);return}var ex=document.getElementById("exam-screen");if(isLiveEditMode&&allQuestions.length&&ex&&ex.classList.contains("active")){clearInterval(t);if(!inlineEditOn)toggleInlineEdit()}},300)};var go=function(){try{window.__dqEditOk=true;isLiveEditMode=true;currentStudentName="ADMIN REDAKTOR";currentActiveFin="ADMIN";var p=document.getElementById("live-edit-panel");p&&(p.style.display="block");Promise.resolve(startExamSession("1","BA")).then(poll).catch(function(e){console.error(e);toast("Redaktor açıla bilmədi: "+(e&&e.message||e))})}catch(e){console.error(e);toast("Redaktor açıla bilmədi: "+e.message)}};if(window.__dqAuthed===true||window.__dqEditOk===true)go();else ecAsk().then(function(ok){ok&&go()})}
 };
 function has(f){try{return !!f()}catch(e){return false}}
 var AVAIL={
