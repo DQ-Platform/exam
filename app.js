@@ -1192,7 +1192,7 @@ var A={
   yq:function(){run("Təsdiq paneli",function(){return YQ.openAdmin()})},
   yx:function(){run("Yoxlama rejimi",function(){return YX.open()})},
   tm:function(){run("Testlər idarəsi",function(){return TM.open()})},
-  cab:function(){(unlocked()?(window.__dqAuthed=true,Promise.resolve(true)):dqAdminAsk()).then(function(ok){if(!(ok&&window.DQStudio))return;window.DQStudio.liveEdit();var n=0,t=setInterval(function(){if(++n>50){clearInterval(t);return}var ex=document.getElementById("exam-screen");if(isLiveEditMode&&allQuestions.length&&ex&&ex.classList.contains("active")){clearInterval(t);if(!inlineEditOn)toggleInlineEdit()}},300)})}
+  cab:function(){var poll=function(){var n=0,t=setInterval(function(){if(++n>60){clearInterval(t);return}var ex=document.getElementById("exam-screen");if(isLiveEditMode&&allQuestions.length&&ex&&ex.classList.contains("active")){clearInterval(t);if(!inlineEditOn)toggleInlineEdit()}},300)};var go=function(){try{window.__dqAuthed=true;isLiveEditMode=true;currentStudentName="ADMIN REDAKTOR";currentActiveFin="ADMIN";var p=document.getElementById("live-edit-panel");p&&(p.style.display="block");Promise.resolve(startExamSession("1","BA")).then(poll).catch(function(e){console.error(e);toast("Redaktor açıla bilmədi: "+(e&&e.message||e))})}catch(e){console.error(e);toast("Redaktor açıla bilmədi: "+e.message)}};if(unlocked())go();else dqAdminAsk().then(function(ok){ok&&go()})}
 };
 function has(f){try{return !!f()}catch(e){return false}}
 var AVAIL={
