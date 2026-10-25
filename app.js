@@ -1352,7 +1352,7 @@ function build(nav){
     var k=b.dataset.k;
     if(k==="lock")return lock();
     var fn={y2:A.y2,ysl:A.ysl,"77":A.v2,by:A.by,cab:A.cab}[k];if(!fn)return;
-    b.classList.add("busy");setTimeout(function(){b.classList.remove("busy")},700);fn();
+    b.classList.add("busy");setTimeout(function(){b.classList.remove("busy")},700);try{fn()}catch(err){console.error(err);toast("Açıla bilmədi: "+(err&&err.message||err))}
   });
   nav.appendChild(g);return g;
 }
@@ -7162,4 +7162,112 @@ var n=0,t=setInterval(function(){(install()||++n>150)&&clearInterval(t)},400);
 /* Hər dəfə kabinet açılanda da fonda sinxronlaşdır (başqa cihazdan edilən qeydiyyatlar üçün) */
 setTimeout(function(){heal(!0)},4000);
 setInterval(function(){document.hidden||heal()},120000);
+})();
+;
+/* ===== dq-admin-cab: xüsusi kodla Admin kabineti ===== */
+(function(){
+"use strict";
+var CODE="Y7C7UF7",FLAG="dq_admin_cab",D=document;
+function $(i){return D.getElementById(i)}
+function isAdm(){return window.__dqAdminCab===true}
+function setFlag(on){
+  window.__dqAdminCab=!!on;
+  try{on?sessionStorage.setItem(FLAG,"1"):sessionStorage.removeItem(FLAG)}catch(e){}
+}
+function toast(m){try{if(typeof V2!=="undefined"&&V2.toast)return V2.toast(m)}catch(e){}
+  var o=D.createElement("div");o.textContent=m;o.style.cssText="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#0f2d6b;color:#fff;padding:11px 18px;border-radius:99px;font:600 14px system-ui;z-index:2147483000;max-width:90vw;text-align:center";
+  D.body.appendChild(o);setTimeout(function(){o.remove()},2600)}
+
+/* Sessiya bərpası: yalnız eyni sessiyada admin qalır, köhnə ADMIN kabineti təmizlənir */
+try{
+  if(sessionStorage.getItem(FLAG)==="1")window.__dqAdminCab=true;
+  else{var c=JSON.parse(localStorage.getItem("dq_cabinet")||"null");if(c&&c.fin==="ADMIN")localStorage.removeItem("dq_cabinet")}
+}catch(e){}
+
+/* Sınaq nömrələri */
+async function examList(){
+  var map={};
+  try{
+    var r=await _supabase.from("exam_questions").select("exam_id,category").eq("q_number",1);
+    (r.data||[]).forEach(function(x){var k=String(x.exam_id);(map[k]=map[k]||{})[String(x.category||"BA").toUpperCase()]=1})
+  }catch(e){}
+  var n=+(typeof totalExamsCount!=="undefined"?totalExamsCount:2)||2;
+  for(var i=1;i<=n;i++)map[String(i)]=map[String(i)]||{};
+  return Object.keys(map).map(Number).filter(function(x){return x>0}).sort(function(a,b){return a-b}).map(function(k){return{n:k,cats:map[String(k)]}})
+}
+
+/* Redaktoru aç */
+function launch(n,c){
+  try{
+    window.__dqEditOk=true;isLiveEditMode=true;
+    currentStudentName="ADMIN REDAKTOR";currentActiveFin="ADMIN";
+    var p=$("live-edit-panel");p&&(p.style.display="block");
+    Promise.resolve(startExamSession(String(n),c)).then(function(){
+      var t=0,iv=setInterval(function(){
+        if(++t>60){clearInterval(iv);return}
+        var ex=$("exam-screen");
+        if(isLiveEditMode&&allQuestions.length&&ex&&ex.classList.contains("active")){clearInterval(iv);if(!inlineEditOn)toggleInlineEdit()}
+      },300)
+    }).catch(function(e){console.error(e);toast("Redaktor açıla bilmədi: "+(e&&e.message||e))})
+  }catch(e){console.error(e);toast("Redaktor açıla bilmədi: "+e.message)}
+}
+window.dqAdminLaunch=launch;
+
+/* Admin siyahısı */
+async function adminRender(){
+  var box=$("registered-exams-list");if(!box)return;
+  box.innerHTML="<p>Sınaqlar yüklənir...</p>";
+  var L=await examList(),h='<div class="dq-note" style="margin:0 auto 14px"><i class="fa-solid fa-user-shield"></i><span><b>Admin rejimi:</b> bütün sınaqlar aktivdir. Sınağı açın və sualları birbaşa redaktə edin.</span></div>';
+  h+=L.map(function(x){
+    return '<div class="exam-item-card"><div class="exam-item-header"><span>Sınaq '+x.n+'</span><span style="font-size:12px;color:#15803d;font-weight:800">● AKTİV</span></div><div style="display:flex;flex-direction:column;gap:6px">'+
+      ["BA","BB","AC"].map(function(c){
+        return '<div class="cat-action-row"><span class="cat-action-title">'+c+' kateqoriyası'+(x.cats[c]?'':' <small style="color:#94a3b8;font-weight:600">(boşdur)</small>')+'</span><button type="button" class="btn btn-primary btn-sm" data-dqadm="'+x.n+'|'+c+'">✏️ Aç və redaktə et</button></div>'
+      }).join("")+'</div></div>'
+  }).join("");
+  box.innerHTML=h;
+  box.onclick=function(e){var b=e.target.closest("[data-dqadm]");if(!b)return;var p=b.getAttribute("data-dqadm").split("|");launch(p[0],p[1])};
+  try{DQ.setReg(true)}catch(e){}
+}
+
+/* renderRegisteredExams-i sar */
+var orig=window.renderRegisteredExams;
+window.renderRegisteredExams=function(){
+  if(isAdm())return adminRender();
+  return orig?orig.apply(this,arguments):void 0
+};
+renderRegisteredExams=window.renderRegisteredExams;
+
+/* Admin kabinetinə giriş */
+function enter(){
+  setFlag(true);
+  currentStudentName="Admin";currentActiveFin="ADMIN";
+  try{DQ.saveCabinet({name:"Admin",fin:"ADMIN"})}catch(e){}
+  var e1=$("error-msg");e1&&(e1.textContent="");
+  try{DQ.pending=null;DQ.openCabinet()}catch(e){console.error(e);toast("Kabinet açıla bilmədi")}
+  setTimeout(function(){var f=$("cab-fin");f&&(f.textContent="İş nömrəsi: ADMIN")},80);
+  toast("Admin kimi daxil oldunuz ✅")
+}
+
+/* Kod hansı iş nömrəsi sahəsinə yazılırsa, tutulur */
+function norm(v){return String(v||"").replace(/\s+/g,"").toUpperCase()}
+function onIn(e){
+  var t=e.target;
+  if(!t||t.tagName!=="INPUT"||t.type==="password"||t.type==="file")return;
+  if(norm(t.value)!==CODE)return;
+  e.stopImmediatePropagation();
+  t.value="";try{t.blur()}catch(x){}
+  enter()
+}
+D.addEventListener("input",onIn,true);
+D.addEventListener("change",onIn,true);
+
+/* Çıxışda admin vəziyyətini sıfırla */
+if(typeof DQ!=="undefined"&&DQ.logout){
+  var ol=DQ.logout;
+  DQ.logout=function(){
+    if(isAdm()){setFlag(false);window.__dqEditOk=false;try{isLiveEditMode=false}catch(e){}var p=$("live-edit-panel");p&&(p.style.display="none")}
+    return ol.apply(this,arguments)
+  }
+}
+window.DQ_ADMIN_CAB={enter:enter,active:isAdm};
 })();
