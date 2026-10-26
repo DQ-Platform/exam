@@ -685,19 +685,231 @@
     if (box && mod) { var dz = mod.querySelector('.pdf-drop-zone'); (dz || mod.firstElementChild).insertAdjacentElement('afterend', box); }
     if (ov) ov.style.display = 'none';
   }
-  var PRO_TILES = [[/PDF\s*Pro\s*Oxuma/i, '📄 PDF Pro Oxuma — sual + variant avtomatik düzülüş'], [/Smart\s*K[əe]smə/i, '⚡ Smart Kəsmə & Sual Bankı PRO']];
+  /* ═════════════ Fənn papkaları (Sınaq — Sual Bankı) ═════════════ */
+  var F = { folder: '', tab: 'img', stage: [], bank: [], busy: false, sel: {}, q: '' };
+  var DEFSUBJ = ['Azərbaycan dili', 'Qanunvericilik', 'İnformatika', 'Məntiq'];
+  function textToQs(txt) {
+    var rows = String(txt || '').replace(/\r/g, '').split('\n').map(clean).filter(Boolean).map(function (t, i) { return { text: t, col: 0, x0: 0, x1: 500, top: i * 14, bot: i * 14 + 11, h: 11, first: t.charAt(0).toUpperCase(), firstSingle: false, page: 0, gx: null }; });
+    return parse(rows, {}).map(function (q) { return finish(q, false); });
+  }
+  root.DQPDF.textToQs = textToQs;
+  async function fLoad() { F.bank = v2ok() ? await V2.list('dqbank') : []; }
+  async function bankAdd(recs) {
+    await V2.probe();
+    if (V2.mode === 'cloud') { for (var k = 0; k < recs.length; k += 40) { var r = await _supabase.from('dq_v2_store').insert(recs.slice(k, k + 40).map(function (d) { return { collection: 'dqbank', data: d }; })); if (r.error) throw r.error; } return; }
+    var all = await V2.list('dqbank'), t = Date.now();
+    try { localStorage.setItem('dq_v2_dqbank', JSON.stringify(recs.map(function (d, i) { d._id = t + i; return d; }).concat(all))); } catch (e) { throw new Error('Yaddaş dolub (şəkillər çox böyükdür). Supabase cədvəlini (dq_v2_store) quraşdırın.'); }
+  }
+  async function bankDel(ids) {
+    await V2.probe();
+    if (V2.mode === 'cloud') { var r = await _supabase.from('dq_v2_store').delete().in('id', ids); if (r.error) throw r.error; }
+    else localStorage.setItem('dq_v2_dqbank', JSON.stringify((await V2.list('dqbank')).filter(function (x) { return ids.indexOf(x._id) < 0; })));
+  }
+  function toRec(q, subject) {
+    var letters = LET.split('').filter(function (l) { return q.opts[l] !== undefined; });
+    return { subject: subject, num: q.num || 0, text: (q.text || '').trim(), img: q.img || null, opts: letters.map(function (l) { return { text: String(q.opts[l] || '').trim(), img: q.optImg[l] || null }; }), correct: q.correct, ts: Date.now() };
+  }
+  function fErr(q) { var n = Object.keys(q.opts).length; if (!q.text && !q.img) return 'mətn yoxdur'; if (n < 2) return 'variant azdır'; if (q.correct < 0) return 'düzgün cavab seçilməyib'; return ''; }
+  function fOv() {
+    var ov = $('dqf-ov');
+    if (!ov) { css(); ov = document.createElement('div'); ov.id = 'dqf-ov'; ov.style.cssText = 'position:fixed;inset:0;z-index:100002;background:#eef1f7;overflow:auto;padding:12px;padding-top:calc(12px + env(safe-area-inset-top,0px))'; document.body.appendChild(ov); ov.addEventListener('click', fClick); ov.addEventListener('change', fChange); ov.addEventListener('input', fInput); }
+    ov.style.display = 'block'; return ov;
+  }
+  async function openFolders() { F.folder = ''; F.stage = []; F.sel = {}; fOv().innerHTML = '<div class="dqx-st" style="padding:20px">Yüklənir…</div>'; await fLoad(); fDraw(); }
+  function fSubjects() { var a = DEFSUBJ.slice(); F.bank.forEach(function (b) { if (b.subject && a.indexOf(b.subject) < 0) a.push(b.subject); }); return a; }
+  function fDraw() {
+    var ov = fOv(), h = '<div style="max-width:900px;margin:0 auto"><div class="dqx-row" style="justify-content:space-between"><h3 style="margin:0;text-align:left">🗂️ Sınaq — Sual Bankı (fənn papkaları)</h3><button class="dqx-b r" data-f="close">✕ Bağla</button></div>';
+    if (!F.folder) {
+      h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px">' + fSubjects().map(function (s) { var n = F.bank.filter(function (b) { return b.subject === s; }).length; return '<button class="dqx-b" style="padding:22px 8px;background:#fff;border:1px solid #dbe1ea" data-f="open" data-s="' + esc(s) + '">📁 ' + esc(s) + '<br><small>' + n + ' sual</small></button>'; }).join('') + '<button class="dqx-b p" style="padding:22px 8px" data-f="newf">＋ Yeni papka</button></div>';
+    } else {
+      var tabs = [['img', '🖼️ Şəkil'], ['pdf', '📄 PDF'], ['cp', '📋 Copy-Paste'], ['list', '📚 Suallar']];
+      h += '<div class="dqx-row"><button class="dqx-b" data-f="back">← Papkalar</button><b style="font-size:18px">📂 ' + esc(F.folder) + '</b></div><div class="dqx-row">' + tabs.map(function (t) { return '<button class="dqx-b ' + (F.tab === t[0] ? 'p' : '') + '" data-f="tab" data-t="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>';
+      if (F.tab === 'img' || F.tab === 'pdf') h += '<div class="dqx-row"><input type="file" id="dqf-file" class="dqx-in" multiple accept="' + (F.tab === 'pdf' ? 'application/pdf' : 'image/*') + '"><label><input type="checkbox" id="dqf-ocr"> OCR-ı məcburi işlət</label></div><div class="dqx-bar"><i id="dqf-pb"></i></div><div class="dqx-st" id="dqf-msg"></div>';
+      if (F.tab === 'cp') h += '<textarea id="dqf-txt" class="dqx-in" style="width:100%;min-height:160px" placeholder="1. Sual mətni&#10;A) variant&#10;B) variant&#10;C) variant&#10;D) variant&#10;Cavab: B&#10;(bir neçə sualı birlikdə yapışdırın)"></textarea><div class="dqx-row"><button class="dqx-b p" data-f="split">✨ Sualları ayır</button><span class="dqx-st" id="dqf-msg"></span></div>';
+      if (F.tab !== 'list') h += fStage(); else h += fList();
+    }
+    ov.innerHTML = h + '</div>';
+  }
+  function fStage() {
+    if (!F.stage.length) return '';
+    var ok = F.stage.filter(function (q) { return !fErr(q); }).length;
+    return '<div class="dqx-row"><b>' + F.stage.length + ' sual · ' + ok + ' hazır</b><button class="dqx-b g" data-f="save">💾 «' + esc(F.folder) + '» papkasına yaz</button><button class="dqx-b r" data-f="clr">🗑 Təmizlə</button></div>' + F.stage.map(function (q, i) {
+      var e = fErr(q), L = LET.split('').filter(function (l) { return q.opts[l] !== undefined; });
+      return '<div class="dqx-q' + (e ? ' bad' : '') + '" data-i="' + i + '"><div class="dqx-h"><b>№ ' + (q.num || i + 1) + '</b><span class="dqx-tag ' + (e ? 'w' : 'ok') + '">' + (e ? '⚠ ' + e : '✓ hazırdır') + '</span><button class="dqx-b r" data-f="sdel" style="margin-left:auto">🗑</button></div><textarea data-k="text">' + esc(q.text) + '</textarea>' + (q.img ? '<img src="' + q.img + '"><button class="dqx-b r" data-f="simg">✕ Şəkli sil</button>' : '') +
+        L.map(function (l) { var ci = LET.indexOf(l); return '<div class="dqx-o"><input type="radio" name="dqfc' + i + '" data-k="cor" data-l="' + ci + '"' + (q.correct === ci ? ' checked' : '') + '><b>' + l + ')</b><input class="dqx-in" data-k="opt" data-l="' + l + '" value="' + esc(q.opts[l]) + '">' + (q.optImg[l] ? '<img class="dqx-oi" src="' + q.optImg[l] + '">' : '') + '</div>'; }).join('') + '</div>';
+    }).join('');
+  }
+  function fList() {
+    var l = F.bank.filter(function (b) { return b.subject === F.folder && (!F.q || (b.text + ' ' + b.opts.map(function (o) { return o.text; }).join(' ')).toLowerCase().indexOf(F.q.toLowerCase()) > -1); }).sort(function (a, b) { return (a.num || 0) - (b.num || 0) || a.ts - b.ts; });
+    F.view = l;
+    var nsel = Object.keys(F.sel).filter(function (k) { return F.sel[k]; }).length;
+    return '<div class="dqx-row"><input id="dqf-q" class="dqx-in" placeholder="🔍 Axtar…" value="' + esc(F.q) + '"><b>' + l.length + ' sual · ' + nsel + ' seçilib</b><button class="dqx-b" data-f="all">☑ Hamısı</button><button class="dqx-b" data-f="none">☐ Sil</button><button class="dqx-b r" data-f="del">🗑 Seçilənləri sil</button></div>' +
+      '<div class="dqx-row" style="background:#f5f7ff;border:1px solid #c7d2fe;border-radius:12px;padding:10px"><b>Sınağa göndər:</b><input id="dqf-ex" type="number" class="dqx-in" value="1" style="width:80px" title="Sınaq №">' + ['BA', 'BB', 'AC'].map(function (c, i) { return '<label><input type="checkbox" class="dqf-cat" value="' + c + '"' + (i ? '' : ' checked') + '> ' + c + '</label>'; }).join('') + '<label>Başlanğıc №<input id="dqf-st" type="number" class="dqx-in" value="1" style="width:80px"></label><button class="dqx-b g" data-f="send">⬆ Göndər</button></div>' +
+      l.map(function (b, i) { return '<div class="dqx-q"><div class="dqx-h"><input type="checkbox" data-f="chk" data-id="' + b._id + '"' + (F.sel[b._id] ? ' checked' : '') + '><b>' + (b.num || i + 1) + '.</b><button class="dqx-b" data-f="edit" data-id="' + b._id + '" style="margin-left:auto">✏️ Düzəlt</button></div><div style="margin:4px 0">' + esc(b.text) + '</div>' + (b.img ? '<img src="' + b.img + '">' : '') + b.opts.map(function (o, j) { return '<div style="font-size:13px;' + (j === b.correct ? 'color:#059669;font-weight:800' : '') + '">' + LET[j] + ') ' + esc(o.text) + (o.img ? ' <img class="dqx-oi" src="' + o.img + '">' : '') + '</div>'; }).join('') + '</div>'; }).join('');
+  }
+  function fMsg(m, p) { var e = $('dqf-msg'); if (e) e.textContent = m || ''; if (p != null && $('dqf-pb')) $('dqf-pb').style.width = Math.round(p * 100) + '%'; }
+  async function fScan(files) {
+    if (F.busy || !files.length) return; F.busy = true;
+    try { var r = await parseFiles(files, { forceOcr: !!($('dqf-ocr') && $('dqf-ocr').checked), noise: ['DQplatform', 'By Yunis', '0504305162'], onProgress: fMsg }); F.stage = F.stage.concat(r.questions); fDraw(); fMsg(r.questions.length + ' sual tapıldı' + (r.ocr ? ' · OCR istifadə olundu, mətni yoxlayın' : '') + '.', 1); }
+    catch (e) { fMsg('Xəta: ' + (e.message || e), 0); }
+    F.busy = false;
+  }
+  async function fClick(e) {
+    var b = e.target.closest('[data-f]'); if (!b) return; var a = b.dataset.f, i = b.closest('.dqx-q') ? +b.closest('.dqx-q').dataset.i : -1;
+    try {
+      if (a === 'close') $('dqf-ov').style.display = 'none';
+      else if (a === 'open') { F.folder = b.dataset.s; F.tab = 'img'; F.stage = []; F.sel = {}; F.q = ''; fDraw(); }
+      else if (a === 'newf') { var n = (prompt('Yeni papkanın adı:') || '').trim(); if (n) { F.folder = n; F.tab = 'img'; F.stage = []; fDraw(); } }
+      else if (a === 'back') { await fLoad(); F.folder = ''; fDraw(); }
+      else if (a === 'tab') { F.tab = b.dataset.t; if (F.tab === 'list') await fLoad(); fDraw(); }
+      else if (a === 'split') { var q = textToQs($('dqf-txt').value); F.stage = F.stage.concat(q); fDraw(); fMsg(q.length ? q.length + ' sual ayrıldı.' : 'Sual tapılmadı. «1. sual», «A) …» formatını yoxlayın.'); }
+      else if (a === 'sdel') { F.stage.splice(i, 1); fDraw(); }
+      else if (a === 'simg') { F.stage[i].img = null; fDraw(); }
+      else if (a === 'clr') { F.stage = []; fDraw(); }
+      else if (a === 'save') {
+        var good = F.stage.filter(function (q) { return !fErr(q); }), bad = F.stage.length - good.length;
+        if (!good.length) return toast('Yazıla bilən sual yoxdur (mətn, ≥2 variant və düzgün cavab lazımdır).');
+        if (bad && !confirm(bad + ' natamam sual atılacaq. Davam?')) return;
+        var upd = good.filter(function (q) { return q._id; }), neu = good.filter(function (q) { return !q._id; });
+        for (var u = 0; u < upd.length; u++) { var rec = toRec(upd[u], F.folder); await V2.put('dqbank', rec, upd[u]._id); }
+        if (neu.length) await bankAdd(neu.map(function (q) { return toRec(q, F.folder); }));
+        toast('✅ ' + good.length + ' sual «' + F.folder + '» papkasına yazıldı'); F.stage = F.stage.filter(function (q) { return fErr(q); }); await fLoad(); fDraw();
+      }
+      else if (a === 'all') { (F.view || []).forEach(function (x) { F.sel[x._id] = true; }); fDraw(); }
+      else if (a === 'none') { F.sel = {}; fDraw(); }
+      else if (a === 'del') { var ids = Object.keys(F.sel).filter(function (k) { return F.sel[k]; }).map(Number); if (!ids.length) return toast('Sual seçilməyib.'); if (!confirm(ids.length + ' sual silinsin?')) return; await bankDel(ids); F.sel = {}; await fLoad(); fDraw(); }
+      else if (a === 'edit') { var rr = F.bank.filter(function (x) { return x._id == b.dataset.id; })[0]; if (!rr) return; var o = {}, oi = {}; rr.opts.forEach(function (x, j) { o[LET[j]] = x.text; if (x.img) oi[LET[j]] = x.img; }); F.stage = [{ _id: rr._id, num: rr.num, text: rr.text, img: rr.img, opts: o, optImg: oi, correct: rr.correct }]; F.tab = 'img'; fDraw(); toast('Düzəliş üçün yuxarıya yükləndi, saxlayın.'); }
+      else if (a === 'send') {
+        var sids = Object.keys(F.sel).filter(function (k) { return F.sel[k]; }).map(Number), items = (F.view || []).filter(function (x) { return sids.indexOf(x._id) > -1; });
+        var cats = [].map.call(document.querySelectorAll('.dqf-cat:checked'), function (x) { return x.value; }), ex = String($('dqf-ex').value || '1'), st = parseInt($('dqf-st').value) || 1;
+        if (!items.length) return toast('Göndəriləcək sual seçin.'); if (!cats.length) return toast('Kateqoriya seçin.');
+        if (!confirm(items.length + ' sual → Sınaq ' + ex + ' [' + cats.join(', ') + '], №' + st + '–' + (st + items.length - 1) + '. Eyni nömrəli suallar əvəz olunacaq. Davam?')) return;
+        var ex2 = await _supabase.from('exam_questions').select('id,category,q_number').eq('exam_id', ex).in('category', cats), have = {}; (ex2.data || []).forEach(function (x) { have[x.category + '|' + x.q_number] = x.id; });
+        var ins = [], cnt = 0;
+        for (var k = 0; k < items.length; k++) for (var c = 0; c < cats.length; c++) {
+          var num = st + k, sj = subj(num), it = items[k];
+          var row = { exam_id: ex, category: cats[c], q_number: num, subject: sj, question: it.text, image_url: it.img || null, options: it.opts.slice(0, sj === 'Qanunvericilik' ? 4 : 5).map(function (x) { return { text: x.text, image: x.img || null }; }), correct: it.correct >= (sj === 'Qanunvericilik' ? 4 : 5) ? 0 : it.correct };
+          var id = have[cats[c] + '|' + num];
+          if (id) { var up = await _supabase.from('exam_questions').update(row).eq('id', id); if (up.error) throw up.error; cnt++; } else ins.push(row);
+        }
+        for (var z = 0; z < ins.length; z += 40) { var ri = await _supabase.from('exam_questions').insert(ins.slice(z, z + 40)); if (ri.error) throw ri.error; cnt += Math.min(40, ins.length - z); }
+        toast('✅ ' + cnt + ' qeyd Sınaq ' + ex + '-ə yazıldı');
+      }
+    } catch (er) { toast('Xəta: ' + (er && er.message || er)); }
+  }
+  function fChange(e) {
+    var el = e.target;
+    if (el.id === 'dqf-file') { var fs = [].slice.call(el.files); el.value = ''; fScan(fs); return; }
+    if (el.dataset.f === 'chk') { F.sel[el.dataset.id] = el.checked; return; }
+    var c = el.closest('.dqx-q'); if (!c || c.dataset.i === undefined) return; var q = F.stage[+c.dataset.i]; if (!q) return;
+    if (el.dataset.k === 'cor') { q.correct = +el.dataset.l; fDraw(); }
+    else if (el.dataset.k === 'text' || el.dataset.k === 'opt') fDraw();
+  }
+  function fInput(e) {
+    var el = e.target; if (el.id === 'dqf-q') { F.q = el.value; var pos = el.selectionStart; fDraw(); var n = $('dqf-q'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } return; }
+    var c = el.closest('.dqx-q'); if (!c || c.dataset.i === undefined) return; var q = F.stage[+c.dataset.i]; if (!q) return;
+    if (el.dataset.k === 'text') q.text = el.value; else if (el.dataset.k === 'opt') q.opts[el.dataset.l] = el.value;
+  }
+  root.DQPDF.openFolders = openFolders;
+
+  var PRO_TILES = [[/PDF\s*Pro\s*Oxuma/i, '📄 PDF Pro Oxuma — sual + variant avtomatik düzülüş'], [/Smart\s*K[əe]smə/i, '⚡ Smart Kəsmə & Sual Bankı PRO'], [/Sınaq\s*[—–-]\s*Sual\s*Bank/i, '', openFolders], [/^[^\p{L}]*Sual\s*Studiyası[^\p{L}]*$/iu, '🧼 Sual Studiyası — PDF / şəkil → təmiz sual → sınağa əlavə']];
   document.addEventListener('click', function (e) {
     if (e.shiftKey) return; // Shift basılıbsa köhnə modul açılır
     var n = e.target, hops = 0;
     while (n && n !== document.body && hops++ < 5) {
       var tx = (n.textContent || '').replace(/\s+/g, ' ').trim();
-      if (tx.length && tx.length < 90 && !n.closest('#dqx-ov, #dqx-box')) {
-        for (var i = 0; i < PRO_TILES.length; i++) if (PRO_TILES[i][0].test(tx)) { e.preventDefault(); e.stopImmediatePropagation(); openPro(PRO_TILES[i][1]); return; }
+      if (tx.length && tx.length < 90 && !n.closest('#dqx-ov, #dqx-box, #dqf-ov')) {
+        for (var i = 0; i < PRO_TILES.length; i++) if (PRO_TILES[i][0].test(tx)) { e.preventDefault(); e.stopImmediatePropagation(); (PRO_TILES[i][2] || openPro)(PRO_TILES[i][1]); return; }
       }
       n = n.parentElement;
     }
   }, true);
   root.DQPDF.openPro = openPro;
+
+  /* ═════════════ Gemini: köhnəlmiş model xətasının avtomatik düzəlişi ═════════════ */
+  var _fetch = root.fetch ? root.fetch.bind(root) : null, GEMRE = /(generativelanguage\.googleapis\.com\/v1beta\/models\/)([\w.\-]+)(:\w+)/;
+  function oldGem(m) { return /^gemini-(1|2)\./.test(m); }
+  async function pickModel(key) {
+    try {
+      var c = localStorage.getItem('dq_gem_model'); if (c) return c;
+      var r = await _fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key=' + encodeURIComponent(key)); if (!r.ok) return null;
+      var j = await r.json(), best = null, bv = -1;
+      (j.models || []).forEach(function (m) {
+        var n = String(m.name || '').replace(/^models\//, '');
+        if (!/^gemini-[\d.]+-flash$/.test(n) || (m.supportedGenerationMethods || []).indexOf('generateContent') < 0) return;
+        var v = parseFloat(n.match(/gemini-([\d.]+)-flash/)[1]); if (v > bv) { bv = v; best = n; }
+      });
+      if (best) localStorage.setItem('dq_gem_model', best); return best;
+    } catch (e) { return null; }
+  }
+  if (_fetch && !root.fetch.__dqx) {
+    root.fetch = async function (u, init) {
+      var url = typeof u === 'string' ? u : (u && u.url) || '', m = url.match(GEMRE);
+      if (!m) return _fetch.apply(null, arguments);
+      var cached = null; try { cached = localStorage.getItem('dq_gem_model'); } catch (e) { }
+      var url2 = (cached && cached !== m[2] && oldGem(m[2])) ? url.replace(m[2], cached) : url;
+      var r = await _fetch(url2, init);
+      if (r.ok) return r;
+      var txt = ''; try { txt = await r.clone().text(); } catch (e) { }
+      if (r.status === 404 || /no longer available|is not found|deprecat/i.test(txt)) {
+        var key = (url.match(/[?&]key=([^&]+)/) || [])[1] || (init && init.headers && (init.headers['x-goog-api-key'] || init.headers['X-Goog-Api-Key']));
+        try { localStorage.removeItem('dq_gem_model'); } catch (e) { }
+        var nm = key && await pickModel(decodeURIComponent(key));
+        if (nm && nm !== m[2]) return _fetch(url.replace(m[2], nm), init);
+      }
+      return r;
+    };
+    root.fetch.__dqx = 1;
+  }
+
+  /* ═════════════ Pro sınaq → "Şəkil, PDF və ya DOCX-dən idxal": AI-siz dəqiq ayırıcı ═════════════ */
+  function dataToFile(d, name) { var p = d.split(','), b = atob(p[1]), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return new File([u], name, { type: 'image/jpeg' }); }
+  function setFile(inp, file) { var dt = new DataTransfer(); dt.items.add(file); inp.files = dt.files; inp.dispatchEvent(new Event('change', { bubbles: true })); }
+  var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  function qsToText(qs) {
+    return qs.map(function (q, i) {
+      var L = LET.split('').filter(function (l) { return q.opts[l] !== undefined; });
+      return (q.num || i + 1) + '. ' + (q.text || (q.img ? '(şəkilli sual)' : '')) + '\n' + L.map(function (l) { return l + ') ' + (q.opts[l] || (q.optImg[l] ? '(şəkil)' : '')); }).join('\n') + (q.correct >= 0 ? '\nCavab: ' + LET[q.correct] : '');
+    }).join('\n\n');
+  }
+  var proBusy = false;
+  async function proImport(files, modal) {
+    if (proBusy) return; proBusy = true;
+    var tx = modal.querySelector('#tx'), pv = modal.querySelector('#pv'), say = function (m) { if (pv) pv.textContent = m; };
+    try {
+      var r = await parseFiles(files, { noise: ['DQplatform', 'By Yunis', '0504305162'], onProgress: function (m) { say(m); } });
+      if (!r.questions.length) { say('Sual tapılmadı. Sənəddə nömrəli suallar və A–E variantları olmalıdır.'); proBusy = false; return; }
+      var before = (tx.value || '').trim(); tx.value = (before ? before + '\n\n' : '') + qsToText(r.questions);
+      tx.dispatchEvent(new Event('input', { bubbles: true }));
+      await wait(120);
+      var base = modal.querySelectorAll('.pq').length - r.questions.length; // yeni suallar siyahının sonundadır
+      for (var i = 0; i < r.questions.length; i++) {
+        var q = r.questions[i], pi = base + i;
+        if (q.img) { var ii = modal.querySelector('input[data-pk="img"][data-pi="' + pi + '"]'); if (ii) { setFile(ii, dataToFile(q.img, 'q' + i + '.jpg')); await wait(90); } }
+        for (var l in q.optImg) { var oi = modal.querySelector('input[data-pk="oimg"][data-pi="' + pi + '"][data-po="' + LET.indexOf(l) + '"]'); if (oi) { setFile(oi, dataToFile(q.optImg[l], 'o.jpg')); await wait(90); } }
+      }
+      say(r.questions.length + ' sual dəqiq ayrıldı' + (r.ocr ? ' · OCR istifadə olundu, mətni yoxlayın' : '') + '. Düzgün cavabı seçin.');
+    } catch (e) { say('Xəta: ' + (e && e.message || e)); }
+    proBusy = false;
+  }
+  function proModal(el) { return el && el.closest ? el.closest('.modal, [class*="modal"], #modal') || (el.closest('.ig') && el.closest('.ig').parentElement) : null; }
+  function wantsEngine(f) { return /\.pdf$/i.test(f.name) || /^image\//.test(f.type) || /\.(png|jpe?g|webp|bmp)$/i.test(f.name); }
+  document.addEventListener('change', function (e) {
+    var el = e.target; if (!el || el.id !== 'f' || el.type !== 'file') return;
+    var m = el.closest('.ig') ? el.closest('.ig').parentElement : null; if (!m || !m.querySelector('#tx')) return;
+    var fs = [].slice.call(el.files || []), mine = fs.filter(wantsEngine); if (!mine.length) return;
+    e.stopImmediatePropagation(); el.value = '';
+    var rest = fs.filter(function (f) { return !wantsEngine(f); });
+    proImport(mine, m);
+    if (rest.length) { /* DOCX/TXT/JSON köhnə yolla qalır */ var dt = new DataTransfer(); rest.forEach(function (f) { dt.items.add(f); }); el.files = dt.files; el.dispatchEvent(new Event('change', { bubbles: true })); }
+  }, true);
+  document.addEventListener('drop', function (e) {
+    var m = e.target && e.target.closest ? e.target : null;
+    while (m && m !== document.body && !(m.querySelector && m.querySelector('#tx') && m.querySelector('.ig'))) m = m.parentElement;
+    if (!m || m === document.body) return;
+    var fs = [].slice.call(e.dataTransfer && e.dataTransfer.files || []).filter(wantsEngine); if (!fs.length) return;
+    e.preventDefault(); e.stopImmediatePropagation(); proImport(fs, m);
+  }, true);
 
   /* ═════════════ qoşulma ═════════════ */
   function hook() {
