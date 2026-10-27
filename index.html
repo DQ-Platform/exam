@@ -108,7 +108,7 @@ window.setInterval=function(fn,d){
 })();
 </script>
 <link rel="preload" as="script" href="dq-net.js?v=1">
-<link rel="preload" as="script" href="app.js?v=44">
+<link rel="preload" as="script" href="app.js?v=45">
 <link rel="preload" as="script" href="dq-qapaq.js?v=2">
 <link rel="preload" as="script" href="dq-birlesdirme.js?v=5">
 <link rel="preload" as="script" href="dq-lock.js?v=1">
@@ -2558,7 +2558,7 @@ window.__dqSplashCalc=calc;window.DQSplash={complete:complete};
 <option value="AC">AC Kateqoriyası</option>
 </select>
 <button id="inline-edit-toggle-btn" class="btn btn-primary btn-sm" onclick="toggleInlineEdit()">📝 Sualı Redaktə Et</button>
-<button type="button" class="btn btn-secondary btn-sm" id="dq-go-admin" onclick="dqGoAdmin()" title="Admin panelə keç">🛠 Admin panelə keç</button>
+<button type="button" class="btn btn-secondary btn-sm" id="dq-go-admin" onclick="dqGoAdmin()" title="Admin panelə keç">🛠 Admin panelə qayıt</button>
 <button class="btn btn-secondary btn-sm" onclick="toggleLiveEditForm()" title="Köhnə redaktə formu (qarışdırma və s.)">⚙️</button>
 </div>
 </div>
@@ -3017,7 +3017,7 @@ label.l{display:flex;justify-content:space-between;align-items:center;font-size:
    <div id="fields"></div>
    <div class="two">
     <div><label class="l" for="cat">Təsnifat</label><select class="f" id="cat"><option>BA</option><option>BB</option><option>AC</option></select></div>
-    <div><label class="l">Düzgün cavab</label><div id="corr" style="font-weight:600;padding:10px 0">Seçilməyib</div></div>
+    <div><label class="l">Düzgün cavab</label><div id="corr" style="font-weight:600;padding:10px 0 4px">Seçilməyib</div><input class="f" id="corrMan" type="text" autocomplete="off" placeholder="Əl ilə yaz: məs. 134 (açıq) və ya B" style="max-width:260px;text-transform:uppercase" aria-label="Düzgün cavabı əl ilə daxil et"></div>
    </div>
    <label class="l" for="expl">Qanunvericilik izahı (istəyə bağlı)</label>
    <textarea class="f" id="expl" rows="3" placeholder="Düzgün cavabın hüquqi əsaslandırması (maddə və şərh)…"></textarea>
@@ -3171,10 +3171,15 @@ function paint(){var d=S.draft;KEYS.forEach(function(k){var f=document.querySele
  var ta=f.querySelector("textarea");if(ta!==document.activeElement)ta.value=v.t;
  var th=f.querySelector(".thumb");th.classList.toggle("show",!!v.img);if(v.img)th.querySelector("img").src=v.img;
  var r=f.querySelector(".rad");if(r){r.classList.toggle("ok",S.open?cset(d).indexOf(k)>-1:d.correct===k);r.classList.toggle("sq",S.open)}});
- $("corr").textContent=S.open?(d.correct?"Doğru ifadələr: "+cset(d).map(lab).join(", "):"Seçilməyib"):(d.correct?d.correct+" variantı":"Seçilməyib");$("expl").value=d.expl;
+ $("corr").textContent=S.open?(d.correct?"Doğru ifadələr: "+cset(d).map(lab).join(", "):"Seçilməyib"):(d.correct?d.correct+" variantı":"Seçilməyib");if(S.open&&!d.correct&&d.manual)$("corr").textContent="Əl ilə cavab: "+d.manual;var cm=$("corrMan");if(cm&&cm!==document.activeElement)cm.value=d.manual!=null&&d.manual!==""?d.manual:(S.open?cset(d).map(lab).join(""):(d.correct||""));$("expl").value=d.expl;
  $("edTitle").textContent=S.edit?"Sualı redaktə et":"Sual redaktoru";$("bSave").textContent=S.edit?"Dəyişiklikləri saxla":"Siyahıya əlavə et";
  var t=$("targets");t.innerHTML="";KEYS.forEach(function(k){if(!shown(k))return;var b=document.createElement("button");b.type="button";var has=k==="Q"?d.o.Q.img:d.o[k].img;
   b.className="chip"+(S.target===k?" on":"")+(has?" has":"");b.textContent=k==="Q"?"Sual":(S.open?"İfadə "+lab(k):"Variant "+k);b.dataset.k=k;t.appendChild(b)})}
+$("corrMan").addEventListener("input",function(){var v=this.value.trim().toUpperCase(),d=S.draft;
+ if(S.open){var dg=v.replace(/[\s,;.\/-]+/g,"");if(/^[1-9]+$/.test(dg)&&dg.split("").every(function(x){return+x<=S.n})){d.correct=KEYS.filter(function(k){return dg.indexOf(lab(k))>-1}).join("");d.manual=null}else{d.correct="";d.manual=v}}
+ else{d.manual=null;d.correct=(/^[A-E]$/.test(v)&&KEYS.indexOf(v)<=S.n)?v:""}
+ var c=$("corr");c.textContent=S.open?(d.correct?"Doğru ifadələr: "+cset(d).map(lab).join(", "):(d.manual?"Əl ilə cavab: "+d.manual:"Seçilməyib")):(d.correct?d.correct+" variantı":"Seçilməyib");
+ KEYS.forEach(function(k){var f=document.querySelector('.fld[data-k="'+k+'"]');var r=f&&f.querySelector(".rad");if(r)r.classList.toggle("ok",S.open?cset(d).indexOf(k)>-1:d.correct===k)})});
 function setTarget(k){S.target=k;paint()}
 function setImg(k,u){S.draft.o[k].img=u;paint()}
 $("fields").addEventListener("input",function(e){var f=e.target.closest(".fld");if(!f||e.target.dataset.a!=="txt")return;var k=f.dataset.k;if(k==="Q")S.draft.text=e.target.value;else S.draft.o[k].t=e.target.value});
@@ -3187,7 +3192,7 @@ $("expl").addEventListener("input",function(e){S.draft.expl=e.target.value});
 function setMode(v){var wasOpen=S.open;S.open=v==="o";S.n=S.open?S.on:+v;
  document.querySelectorAll("#modeSeg button").forEach(function(x){x.classList.toggle("on",x.dataset.n===(S.open?"o":String(S.n)))});
  document.querySelectorAll("#opn button").forEach(function(x){x.classList.toggle("on",+x.dataset.c===S.on)});$("opnRow").hidden=!S.open;
- if(wasOpen!==S.open)S.draft.correct="";
+ if(wasOpen!==S.open){S.draft.correct="";S.draft.manual=null}
  KEYS.forEach(function(k){if(k!=="Q"&&!shown(k)){S.draft.o[k]={t:"",img:""};S.draft.correct=S.draft.correct.split(k).join("");if(S.target===k)S.target="Q"}});buildFields()}
 $("modeSeg").addEventListener("click",function(e){var b=e.target.closest("button");if(b)setMode(b.dataset.n)});
 $("opn").addEventListener("click",function(e){var b=e.target.closest("button");if(!b||!S.open)return;S.on=+b.dataset.c;setMode("o")});
@@ -3210,11 +3215,11 @@ function validate(d){var vis=KEYS.slice(1,S.n+1);
  if(!d.text.trim()&&!d.o.Q.img)return"Sual mətni və ya sual şəkli daxil edin.";
  var filled=vis.filter(function(k){return d.o[k].t.trim()||d.o[k].img});
  if(filled.length<S.n)return S.open?"Bütün "+S.n+" ifadəni doldurun (mətn və ya şəkil).":"Bütün "+S.n+" variantı doldurun (mətn və ya şəkil).";
- if(!d.correct)return S.open?"Ən azı bir doğru ifadəni işarələyin (nömrənin yanındakı düymə).":"Düzgün cavabı seçin (variantın yanındakı dairə).";
+ if(!d.correct&&!(S.open&&d.manual))return S.open?"Ən azı bir doğru ifadəni işarələyin (nömrənin yanındakı düymə).":"Düzgün cavabı seçin (variantın yanındakı dairə).";
  var bad=cset(d).filter(function(k){return!d.o[k].t.trim()&&!d.o[k].img});if(bad.length)return S.open?"Doğru işarələnmiş ifadə boşdur.":"Düzgün cavab boş variantdır.";return""}
 $("bSave").addEventListener("click",function(){var d=S.draft,e=validate(d);$("msg").textContent=e;if(e)return;
  var vis=KEYS.slice(1,S.n+1),q={id:d.id||("q"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),category:$("cat").value,exam:String(+$("exam").value||1),subject:$("subj").value,no:(+$("qno").value>0?Math.floor(+$("qno").value):null),text:d.text.trim(),textImg:d.o.Q.img||"",
-  options:vis.map(function(k){return{label:S.open?lab(k):k,text:d.o[k].t.trim(),img:d.o[k].img||""}}),correct:S.open?cset(d).map(lab).join(","):d.correct,type:S.open?"open":"mc",explanation:d.expl.trim()};
+  options:vis.map(function(k){return{label:S.open?lab(k):k,text:d.o[k].t.trim(),img:d.o[k].img||""}}),correct:S.open?((d.manual&&!cset(d).length)?String(d.manual).trim().toUpperCase():cset(d).map(lab).join(",")):d.correct,type:S.open?"open":"mc",explanation:d.expl.trim()};
  var b=$("bSave");b.disabled=true;
  Promise.resolve().then(function(){return window.ProAdd&&window.ProAdd.onSave?window.ProAdd.onSave(q,!!S.edit):0}).then(function(){
   if(S.edit){var i=S.qs.findIndex(function(x){return x.id===S.edit});if(i>-1)S.qs[i]=q;else S.qs.push(q)}else S.qs.push(q);
@@ -3275,7 +3280,7 @@ $("bkAuto").addEventListener("click",function(){var ch=S.qs.filter(function(q){r
 $("list").addEventListener("click",function(e){var b=e.target.closest("[data-a]");if(!b)return;var id=b.closest(".q").dataset.id,i=S.qs.findIndex(function(x){return x.id===id}),a=b.dataset.a;if(i<0)return;
  if(a==="del"){if(confirm("Bu sual silinsin?")){S.qs.splice(i,1);save();render()}}
  else if(a==="up"||a==="dn"){var j=a==="up"?i-1:i+1;if(j<0||j>=S.qs.length)return;var t=S.qs[i];S.qs[i]=S.qs[j];S.qs[j]=t;save();render()}
- else if(a==="ed"){var q=S.qs[i],d=blank();d.id=q.id;d.text=q.text;d.o.Q.img=q.textImg||"";d.expl=q.explanation||"";S.open=q.type==="open";d.correct=S.open?String(q.correct).split(",").map(function(n){return KEYS[+n]}).filter(Boolean).join(""):q.correct;S.n=S.open?q.options.length:(q.options.length>4?5:4);if(S.open)S.on=Math.min(6,Math.max(3,S.n));
+ else if(a==="ed"){var q=S.qs[i],d=blank();d.id=q.id;d.text=q.text;d.o.Q.img=q.textImg||"";d.expl=q.explanation||"";S.open=q.type==="open";d.correct=S.open?String(q.correct).split(",").map(function(n){return KEYS[+n]}).filter(Boolean).join(""):q.correct;if(S.open&&!d.correct&&q.correct)d.manual=String(q.correct);S.n=S.open?q.options.length:(q.options.length>4?5:4);if(S.open)S.on=Math.min(6,Math.max(3,S.n));
   q.options.forEach(function(o,ix){d.o[S.open?KEYS[ix+1]:o.label]={t:o.text,img:o.img||""}});S.draft=d;S.edit=q.id;S.target="Q";$("cat").value=q.category;$("exam").value=q.exam||1;$("qno").value=q.no||"";setSubj(q.subject);
   document.querySelectorAll("#modeSeg button").forEach(function(x){x.classList.toggle("on",x.dataset.n===(S.open?"o":String(S.n)))});document.querySelectorAll("#opn button").forEach(function(x){x.classList.toggle("on",+x.dataset.c===S.on)});$("opnRow").hidden=!S.open;buildFields();$("ed").scrollIntoView({behavior:"smooth",block:"start"})}});
 $("bAll").addEventListener("click",function(){if(S.qs.length&&confirm("Bütün "+S.qs.length+" sual silinsin? Bu geri qaytarılmır.")){S.qs=[];save();render()}});
@@ -5572,7 +5577,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 </style>
 <script src="dq-qapaq.js?v=2"></script>
 <script src="/dq-ceo.js?v=2"></script>
-<script src="app.js?v=44"></script>
+<script src="app.js?v=45"></script>
 <script src="sual-studio.js?v=1"></script>
 <script src="dq-birlesdirme.js?v=5"></script>
 <script src="dq-oxuyucu.js?v=1"></script>
@@ -6710,5 +6715,10 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 
 <script src="dq-variant-fix.js?v=2"></script>
 <script src="dq-pdf-engine.js?v=1"></script>
+<script src="dq-pdf-secim.js?v=3"></script>
+<script src="dq-sual-papka.js?v=2"></script>
+<script src="dq-admin-fix.js?v=2"></script>
+<script src="dq-open-pro.js?v=1"></script>
+<script src="dq-nav.js?v=1"></script>
 </body>
 </html>
