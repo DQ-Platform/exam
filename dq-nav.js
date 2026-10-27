@@ -280,6 +280,16 @@
 
   var DQNav = {
     version: 1,
+    openEditor: function (e, c) {
+      if (typeof g("startExamSession") !== "function") { alert("Redaktor açıla bilmədi: app.js tam yüklənməyib. Səhifəni yeniləyin."); return; }
+      return Promise.resolve(openEditorAt({ e: e || 1, c: c || "BA", i: 0, n: false })).then(function () {
+        var t = 0, w = setInterval(function () {
+          var ex = $("exam-screen");
+          if (ex && ex.classList.contains("active")) { clearInterval(w); try { window.scrollTo(0, 0); } catch (x) { } }
+          else if (++t > 40) { clearInterval(w); alert("Redaktor pəncərəsi açılmadı. Sınaq 1 (BA) üçün sual olmaya bilər."); }
+        }, 250);
+      });
+    },
     toAdmin: function () { suppress = true; hist = hist.filter(function (x) { return x.scr === "admin-panel" && !x.tab && !x.ov; }).slice(0, 1); showAdmin(); },
     home: function () {
       closeOverlays();
@@ -304,6 +314,82 @@
     save: track, snap: snap, go: go, isAdmin: isAdmin, restore: restore
   };
   window.DQNav = DQNav;
+
+  /* ------------------------------------------------------------------
+     4b) canlı redaktor: sınaq №/kateqoriya dəyişəndə hamar keçid
+     ------------------------------------------------------------------ */
+  (function smoothSwitch() {
+    if (window.__dqSmoothLive) return; window.__dqSmoothLive = true;
+    var st = D.createElement("style");
+    st.id = "dq-smooth-live-css";
+    st.textContent =
+      "#single-question-container,#grid-nav-container,#active-exam-title{transition:opacity .16s ease,transform .16s ease,filter .16s ease}" +
+      "#single-question-container.dq-out,#grid-nav-container.dq-out{opacity:.25;transform:translateY(6px);filter:blur(1.5px);pointer-events:none}" +
+      "#single-question-container.dq-in,#grid-nav-container.dq-in{animation:dqLeIn .42s cubic-bezier(.22,1,.36,1) both}" +
+      "#grid-nav-container.dq-in{animation-delay:.05s}" +
+      "@keyframes dqLeIn{from{opacity:0;transform:translateY(14px) scale(.992)}to{opacity:1;transform:none}}" +
+      "#active-exam-title.dq-in{animation:dqLeTitle .5s ease both}" +
+      "@keyframes dqLeTitle{0%{opacity:.2;transform:translateX(-10px)}100%{opacity:1;transform:none}}" +
+      "#live-edit-panel.dq-sw-lock select,#live-edit-panel.dq-sw-lock input,#live-edit-panel.dq-sw-lock button{pointer-events:none;opacity:.7}" +
+      "#dq-le-chip{position:fixed;left:50%;top:max(12px,env(safe-area-inset-top));z-index:100003;transform:translate(-50%,-16px);opacity:0;" +
+      "padding:9px 16px;border-radius:999px;background:#0f2d6b;color:#fff;font:700 13px/1.2 system-ui,-apple-system,Arial,sans-serif;" +
+      "box-shadow:0 10px 26px -8px #0f2d6b99;pointer-events:none;white-space:nowrap;transition:opacity .3s ease,transform .45s cubic-bezier(.22,1,.36,1)}" +
+      "#dq-le-chip.on{opacity:1;transform:translate(-50%,0)}#dq-le-chip.ok{background:#15803d}" +
+      "@media(prefers-reduced-motion:reduce){#single-question-container,#grid-nav-container,#active-exam-title,#dq-le-chip{transition:none!important;animation:none!important}}";
+    D.head.appendChild(st);
+
+    var chipT = 0;
+    function chip(text, ok, ms) {
+      var c = $("dq-le-chip");
+      if (!c) { c = D.createElement("div"); c.id = "dq-le-chip"; D.body.appendChild(c); }
+      c.textContent = text; c.classList.toggle("ok", !!ok);
+      requestAnimationFrame(function () { c.classList.add("on"); });
+      clearTimeout(chipT);
+      if (ms) chipT = setTimeout(function () { c.classList.remove("on"); }, ms);
+    }
+    function els() { return [$("single-question-container"), $("grid-nav-container")]; }
+    function replay(el, cls) { if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+
+    function wrap(name, label) {
+      var orig = window[name];
+      if (typeof orig !== "function" || orig.__dqSm) return false;
+      var w = function () {
+        var args = arguments, panel = $("live-edit-panel"), busy = false;
+        try { busy = g("isLiveEditMode") === true; } catch (e) { }
+        if (!busy) return orig.apply(this, args);
+        var ex = String(g("selectedExamId") || ""), cat = String(g("userGroup") || "");
+        els().forEach(function (e) { if (e) { e.classList.remove("dq-in"); e.classList.add("dq-out"); } });
+        panel && panel.classList.add("dq-sw-lock");
+        chip("⏳ " + label(args) + " yüklənir…", false, 0);
+        var t0 = Date.now(), res;
+        try { res = orig.apply(this, args); } catch (e) { res = Promise.reject(e); }
+        return Promise.resolve(res).then(function (r) {
+          var wait = Math.max(0, 180 - (Date.now() - t0));   /* fade-out görünsün */
+          return new Promise(function (ok) { setTimeout(function () { ok(r); }, wait); });
+        }).then(function (r) {
+          els().forEach(function (e) { if (e) { e.classList.remove("dq-out"); replay(e, "dq-in"); } });
+          replay($("active-exam-title"), "dq-in");
+          panel && panel.classList.remove("dq-sw-lock");
+          var nex = String(g("selectedExamId") || ""), ncat = String(g("userGroup") || "");
+          if (r === false) chip("⚠️ Dəyişiklik alınmadı", false, 2200);
+          else chip("✅ Sınaq " + nex + " · " + ncat, true, 1400);
+          return r;
+        }, function (err) {
+          els().forEach(function (e) { e && e.classList.remove("dq-out"); });
+          panel && panel.classList.remove("dq-sw-lock");
+          chip("⚠️ Yüklənmədi", false, 2500);
+          throw err;
+        });
+      };
+      w.__dqSm = true; window[name] = w; return true;
+    }
+    function install() {
+      var a = wrap("changeLiveExam", function (x) { return "Sınaq " + (parseInt(x[0]) || ""); });
+      var b = wrap("changeLiveCategory", function (x) { return String(x[0] || "") + " kateqoriyası"; });
+      return a || b || (window.changeLiveExam && window.changeLiveExam.__dqSm && window.changeLiveCategory && window.changeLiveCategory.__dqSm);
+    }
+    if (!install()) { var n = 0, iv = setInterval(function () { if (install() || ++n > 40) clearInterval(iv); }, 500); }
+  })();
 
   /* ------------------------------------------------------------------
      5) yeniləmədən sonra qaldığın yerə qayıt
