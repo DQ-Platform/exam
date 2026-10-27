@@ -2708,6 +2708,7 @@ window.scrollTo({top:0,behavior:"smooth"})};</script>
 <div class="admin-nav-card" onclick="window.DQST&&DQST.openAdmin()" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">📊</span> Ana Səhifə Statistikası</div>
 <div class="admin-nav-card" onclick="window.GZL&&GZL.open()" style="background:linear-gradient(135deg,#475569,#0f172a);color:#fff"><span class="icon">🙈</span> Gizləmə</div>
 <div class="admin-nav-card" onclick="window.DQNav&&DQNav.openEditor?DQNav.openEditor():alert('Canlı redaktə modulu yüklənməyib (dq-nav.js)')" style="background:linear-gradient(135deg,#b45309,#d9a23a);color:#fff"><span class="icon">📝</span> Canlı Redaktə</div>
+<div class="admin-nav-card" onclick="window.DQK&&DQK.open()" style="background:linear-gradient(135deg,#0a2f7a,#d9a441);color:#fff"><span class="icon">📚</span> Sınaq Toplusu (Kitab)</div>
 </div>
 <style id="ppu-css">
 #mod-propdf .ppu-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
@@ -6338,6 +6339,7 @@ function lab(c){return (c.textContent||"").replace(/\s+/g," ").trim()}
 function key(s){return s.toLocaleLowerCase("az").replace(/[^\p{L}\p{N} ]/gu,"").replace(/\s+/g," ").trim()}
 function pick(t){var l=t.toLocaleLowerCase("az");
  if(/canlı redaktə/.test(l))return "other";
+ if(/sınaq toplusu/.test(l))return "exam";
  if(/pro add/.test(l))return "bank";
  // xüsusi sıralama: dəqiq qaydalar əvvəl
  if(/ana səhifə/.test(l))return "home";
@@ -6721,6 +6723,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 <script src="dq-sual-papka.js?v=2"></script>
 <script src="dq-admin-fix.js?v=2"></script>
 <script src="dq-open-pro.js?v=1"></script>
+<script src="dq-kitab.js?v=1"></script>
 <script src="dq-nav.js?v=1"></script>
 </body>
 </html>

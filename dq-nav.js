@@ -205,7 +205,7 @@
     call(function () { window.DQPdfSecim && DQPdfSecim.closePreview && DQPdfSecim.closePreview(); });
     call(function () { var o = $("dqaf-ov"); o && o.remove(); });
     call(function () { var o = $("dqaf-diag"); o && o.remove(); });
-    ["tv2-root", "dqpr-root", "dqrt2-root"].forEach(function (id) { var r = $(id); if (r && r.classList.contains("on")) { r.classList.remove("on"); } });
+    ["tv2-root", "dqpr-root", "dqrt2-root", "dqk-root", "dqk-rd"].forEach(function (id) { var r = $(id); if (r && r.classList.contains("on")) { r.classList.remove("on"); } });
     try { D.body.style.overflow = ""; D.documentElement.style.overflow = ""; } catch (e) { }
   }
 
