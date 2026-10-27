@@ -3405,7 +3405,7 @@ $("copyT").addEventListener("click",function(){S.copy=!S.copy;this.classList.tog
 $("sortT").addEventListener("click",function(){S.sort=!S.sort;this.classList.toggle("on",S.sort);this.textContent="🧩 Sırala: "+(S.sort?"açıq":"bağlı");this.setAttribute("aria-pressed",S.sort);$("view").classList.toggle("crop",S.crop||S.sort);if(S.sort)toast("Sırala: bir neçə sualı birlikdə seçin — sual və variantlar avtomatik ayrılacaq")});
 function clip(t){var done=function(){toast("Kopyalandı ✓ ("+t.length+" simvol)")},fb=function(){var a=document.createElement("textarea");a.value=t;a.style.cssText="position:fixed;opacity:0;top:0;left:0";document.body.appendChild(a);a.focus();a.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}a.remove();ok?done():toast("Kopyalama icazəsi verilmədi",1)};
  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,fb);else fb()}
-function cropImg(x,y,w,h,mx){var c=$("cv"),k=c.width/c.clientWidth,o=document.createElement("canvas"),sw=w*k,sh=h*k,m=Math.min(1,mx/sw);o.width=Math.round(sw*m);o.height=Math.round(sh*m);var g=o.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,o.width,o.height);g.drawImage(c,x*k,y*k,sw,sh,0,0,o.width,o.height);returntrimWhite(o).toDataURL("image/jpeg",.9)}
+function cropImg(x,y,w,h,mx){var c=$("cv"),k=c.width/c.clientWidth,o=document.createElement("canvas"),sw=w*k,sh=h*k,m=Math.min(1,mx/sw);o.width=Math.round(sw*m);o.height=Math.round(sh*m);var g=o.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,o.width,o.height);g.drawImage(c,x*k,y*k,sw,sh,0,0,o.width,o.height);return trimWhite(o).toDataURL("image/jpeg",.9)}
 /* seçilmiş sahənin mətni: əvvəl PDF mətn qatı, yoxdursa OCR */
 function areaText(rx,ry,rw,rh){var pg=S.pg,vp=S.vpc;if(!pg||!vp)return Promise.resolve("");
  if((S.clean||S.wmr)&&S.wm>.003)return ocrArea(rx,ry,rw,rh,"Su nişanı/rəngli yazı silindi — təmiz şəkildən OCR…");
@@ -3428,13 +3428,22 @@ function stripKeyTail(t){var L=String(t||"").replace(/\r/g,"").split("\n"),j,cut
  return{body:L.join("\n"),key:""}}
 function parseQs(txt){var sp=stripKeyTail(txt);if(sp.key)setKeyFrom(sp.key);return parseDoc(sp.body)}
 
-function sortArea(x,y,w,h){toast("Oxunur…");areaText(x,y,w,h).then(function(t){var qs=parseQs(t);
+/* seçilmiş sahə: şəkil (fiqur) varsa kəs, fiqurun daxilindəki yazını mətndən çıxar */
+function sortRead(x,y,w,h){var c=$("cv"),k=c.width/c.clientWidth,sc=Math.max(1,Math.min(2.5,1800/(w*k))),o=document.createElement("canvas");
+ o.width=Math.round(w*k*sc);o.height=Math.round(h*k*sc);var g=o.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,o.width,o.height);g.imageSmoothingQuality="high";g.drawImage(c,x*k,y*k,w*k,h*k,0,0,o.width,o.height);
+ return ocrEng().then(function(E){return E.rec(o)}).then(function(r){var pics=[],ft=null;try{ft=dqPics(o,r&&r.data,pics)}catch(e){}
+  if(pics.length&&ft)return{t:ft,pics:pics};return null}).catch(function(){return null})
+ .then(function(res){if(res)return res;return areaText(x,y,w,h).then(function(t){return{t:t,pics:[]}})})}
+function sortAttach(qs,pics){if(!pics||!pics.length)return qs;
+ qs.forEach(function(q,i){var m=pics.filter(function(p){return p.n===q.n})[0]||(qs.length===1&&pics.length===1?pics[0]:null);if(m){if(m.img)q.img=m.img;if(m.oimgs&&m.oimgs.length>=4)q.oimgs=m.oimgs}});
+ qs.forEach(function(q){if(q.o&&q.o.length>5)q.o=q.o.slice(0,5)});return qs}
+function sortArea(x,y,w,h){toast("Oxunur…");sortRead(x,y,w,h).then(function(rd){var t=rd.t,qs=sortAttach(parseQs(t),rd.pics);
   if(!qs.length&&setKeyFrom(t))return;if(!qs.length)return toast("Sual tapılmadı — “1.” kimi nömrəli sual və A) B) C) D) variantları olan sahə seçin",1);
   var last=qs[qs.length-1],ch=$("cv").clientHeight,pn=S.page;
   /* seçim səhifənin sonuna çatır və son sual yarımçıqdırsa — növbəti səhifənin başlanğıcından tamamla */
   if(last.o.length<4&&pn<S.pdf.numPages&&y+h>ch*.82){toast("Sual səhifənin sonunda yarımçıqdır — növbəti səhifədən tamamlanır…");
    return pageText(pn+1,"auto").then(function(r){var all=parseQs("§§P"+pn+"§§\n"+t+"\n§§P"+(pn+1)+"§§\n"+r.t).slice(0,qs.length),lq=all[all.length-1];endEng();
-    toast(lq&&lq.o.length>=4?"↪ Yarımçıq sual növbəti səhifədən tamamlandı":"Növbəti səhifədə də tam variant tapılmadı — əl ilə yoxlayın",!(lq&&lq.o.length>=4));S.qpNext=0;sxOpen(all)})
+    toast(lq&&lq.o.length>=4?"↪ Yarımçıq sual növbəti səhifədən tamamlandı":"Növbəti səhifədə də tam variant tapılmadı — əl ilə yoxlayın",!(lq&&lq.o.length>=4));S.qpNext=0;sxOpen(sortAttach(all,rd.pics))})
    .catch(function(){endEng();S.qpNext=0;sxOpen(qs)})}
   S.qpNext=0;sxOpen(qs)})
  .catch(function(e){toast("Oxunmadı: "+(e&&e.message||e),1)})}
