@@ -3920,14 +3920,13 @@ function dqTxtFix(t){
 /* ===== Yazılı variantlar (A) 12 B) 8 ...) — fiqur olmayan şəkil üçün OCR ehtiyatı ===== */
 function afTextQ(t){
  var one=String(t||"").replace(/\r/g,"").replace(/[ \t]+/g," ").replace(/\s*\n\s*/g," ").trim();if(!one)return null;
- var L="ABCDE",pos=[],from=0,i,m,re;
- for(i=0;i<5;i++){re=new RegExp("(^|\\s)\\(?"+L[i]+"\\s*[\\)\\.]\\s*","g");re.lastIndex=from;m=re.exec(one);if(!m)break;pos.push({l:L[i],s:m.index+m[1].length,e:m.index+m[0].length});from=m.index+m[0].length}
+ var L="ABCDE",ALT={A:"A",B:"B8",C:"C",D:"D0O",E:"EF"},pos=[],from=0,i,m,re;
+ for(i=0;i<5;i++){re=new RegExp("(^|[^A-Za-z0-9ƏəİıÖöÜüŞşÇçĞğ])\\(?["+ALT[L[i]]+"]\\s*[\\)\\.]\\s*","g");re.lastIndex=from;m=re.exec(one);if(!m)break;pos.push({l:L[i],s:m.index+m[1].length,e:m.index+m[0].length});from=m.index+m[0].length}
  if(pos.length<4)return null;
  var head=one.slice(0,pos[0].s).trim(),n=0,mm=/^\s*(\d{1,3})\s*[.)]\s*/.exec(head);if(mm){n=+mm[1];head=head.slice(mm[0].length)}
- var o=pos.map(function(q,j){return{l:q.l,t:one.slice(q.e,pos[j+1]?pos[j+1].s:one.length).trim().replace(/[\s,;]+$/,"")}});
+ var o=pos.map(function(q,j){return{l:q.l,t:one.slice(q.e,pos[j+1]?pos[j+1].s:one.length).trim().replace(/[\s,;_\-–—~|=]+$/,"").trim()}});
  if(!head||o.some(function(x){return!x.t}))return null;
  return{n:n,text:dqTxtFix(head),o:o}}
-/* ===== Yazılı variantlı + sxemli suallar (qraf, cədvəl, fiqur): sxemi sual şəkli kimi kəs, mətni və variantları ayır ===== */
 function dqLinesOf(data){var out=[];function add(l){var b=l.bbox||{};if(l.text&&b.x1>b.x0)out.push({t:String(l.text).replace(/\s+$/,""),x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1})}
  if(data&&data.lines&&data.lines.length)data.lines.forEach(add);else if(data&&data.blocks)data.blocks.forEach(function(b){(b.paragraphs||[]).forEach(function(q){(q.lines||[]).forEach(add)})});
  return out.sort(function(a,b){return a.y0-b.y0})}
@@ -3947,6 +3946,10 @@ function afTextFig(c,data){var lines=dqLinesOf(data);if(!lines.length)return nul
   var inn=tl.filter(function(l){return l.x0>=b.x0-8&&l.x1<=b.x1+8&&l.y0>=b.y0-8&&l.y1<=b.y1+8}).length;return inn*2<=tl.length});
  if(!bs.length)return null;
  var u={x0:1e9,y0:1e9,x1:0,y1:0};bs.forEach(function(b){u.x0=Math.min(u.x0,b.x0);u.y0=Math.min(u.y0,b.y0);u.x1=Math.max(u.x1,b.x1);u.y1=Math.max(u.y1,b.y1)});
+ var yT=0;tl.forEach(function(l){if(l.y1<=u.y0+6&&l.y1>yT)yT=l.y1});yT=Math.min(u.y0,yT+2);
+ (function(){var w=c.width,d=c.getContext("2d").getImageData(0,yT,w,Math.max(1,Math.min(c.height,oy-4)-yT)).data,hh=d.length/4/w,x,y,p,x0=u.x0,x1=u.x1,y0=u.y0,y1=u.y1;
+  for(y=0;y<hh;y++){var ay=y+yT,inT=tl.some(function(l){return ay>=l.y0-3&&ay<=l.y1+3});if(inT)continue;for(x=0;x<w;x++){p=(y*w+x)*4;if(((d[p]*77+d[p+1]*150+d[p+2]*29)>>8)<150||Math.max(d[p],d[p+1],d[p+2])-Math.min(d[p],d[p+1],d[p+2])>45){if(x<x0)x0=x;if(x>x1)x1=x;if(ay<y0)y0=ay;if(ay>y1)y1=ay+1}}}
+  u={x0:x0,y0:y0,x1:x1,y1:y1}})();
  var fc=dqCrop(c,u);dqWmLite(fc);var img=afOut(figPad(trimWhite(fc),12),900);
  var keep=lines.filter(function(l){var cx=(l.x0+l.x1)/2,cy=(l.y0+l.y1)/2;return!(cx>=u.x0-8&&cx<=u.x1+8&&cy>=u.y0-8&&cy<=u.y1+8)});
  var P=afTextQ(keep.map(function(l){return l.t}).join("\n"));if(!P)return null;P.img=img;return P}
@@ -3962,7 +3965,8 @@ async function autoRun(){
    var A=afFromBin(afBin(c));
    if(!A){
     try{toast("Yazılı variantlar OCR ilə oxunur…");var E0=await ocrEng(),r0=await E0.rec(c),P0=null;
-     try{P0=afTextFig(c,r0&&r0.data)}catch(e1){P0=null}
+     try{P0=dqTabQ(c,r0&&r0.data)}catch(e1){P0=null}
+     if(!P0)try{P0=afTextFig(c,r0&&r0.data)}catch(e1){P0=null}
      if(!P0)P0=afTextQ(String((r0&&r0.data&&r0.data.text)||""));
      if(P0){qs.push({n:P0.n||p,p0:p,p1:p,b:0,text:P0.text,o:P0.o,c:"",img:P0.img||"",oimgs:null});continue}}catch(e0){}
     bad++;continue}
@@ -4072,7 +4076,7 @@ var _dqP0=dqPics,BLKB=[];dqPics=function(ic,data,out){var t=_dqP0(ic,data,out);B
 function blkApply(ic,data,out){var wd=(data&&data.words)||[],L=(data&&data.lines)||[];if(!wd.length||!L.length)return;
  var b=geoBin(ic),f=b.f,O=blkObjs(b),labs=wd.filter(function(w){return w.bbox&&/^\(?[A-E]\)$/.test(String(w.text||"").trim())}).map(function(w){return{c:String(w.text).replace(/[^A-E]/g,""),x0:w.bbox.x0*f,y0:w.bbox.y0*f,x1:w.bbox.x1*f,y1:w.bbox.y1*f}}),st=[],cur=0,tw=wd.filter(function(w){var t=String(w.text||"").trim();return w.bbox&&(w.confidence==null||w.confidence>=45)&&!/^\(?[A-E]\)$/.test(t)&&(t.replace(/[^A-Za-zƏəİıÖöÜüŞşÇçĞğ0-9]/g,"").length>=3)}).map(function(w){return{cy:(w.bbox.y0+w.bbox.y1)/2*f}});
  L.slice().sort(function(a,c){return a.bbox.y0-c.bbox.y0}).forEach(function(l){var m=/^\s*(\d{1,3})\s*[.)]\s*\S/.exec(String(l.text||""));if(!m||/^\s*\d{1,2}[.\/]\d{1,2}[.\/]\d{2,4}/.test(l.text))return;var n=+m[1];if(!cur||(n>cur&&n<=cur+15)){st.push({n:n,y:l.bbox.y0});cur=n}});
- var bx=[];st.forEach(function(s,k){var P={objs:O.objs,cc:O.cc,labs:labs,words:tw,y0:s.y*f-4,y1:(k+1<st.length?st[k+1].y:ic.height)*f-4},r=blkSplit(P);
+ if(!st.length)st.push({n:0,y:0});var bx=[];st.forEach(function(s,k){var P={objs:O.objs,cc:O.cc,labs:labs,words:tw,W:b.w,optY:dqOptY(L,s.y,k+1<st.length?st[k+1].y:ic.height,f),ln:dqLn(L,f),y0:s.y*f-4,y1:(k+1<st.length?st[k+1].y:ic.height)*f-4},r=blkSplit(P);
   if(!r){var r2=blkImg(P);if(r2){for(var j=out.length-1;j>=0;j--)if(out[j].n===s.n)out.splice(j,1);out.push({n:s.n,img:afOut(figPad(trimWhite(afSub(ic,r2.qbox,f,3)),12),900),oimgs:null});bx.push(r2.qbox)}return}
   bx.push(r.qbox);r.vars.forEach(function(v){bx.push(v)});
   for(var i=out.length-1;i>=0;i--)if(out[i].n===s.n)out.splice(i,1);
@@ -4083,6 +4087,39 @@ var _dqAS=dqAfterScan;dqAfterScan=function(qs,pb){qs=_dqAS(qs,pb);
 
 /* kəsilən şəkillərdə qalıq boz/krem fon dümağ ağ olur (yalnız sual/variant fiquru qalır) */
 var _dqTW=trimWhite;trimWhite=function(o){try{var g=o.getContext("2d"),im=g.getImageData(0,0,o.width,o.height),d=im.data,i;for(i=0;i<d.length;i+=4)if(d[i]>226&&d[i+1]>226&&d[i+2]>226){d[i]=d[i+1]=d[i+2]=255}g.putImageData(im,0,0)}catch(e){}return _dqTW(o)};
+
+/* ===== DQ cədvəl/fiqur: sual mətni ilə variantlar arasındakı cədvəl, qrafik və fiqur ayrıca şəkil kimi kəsilir; içindəki rəqəm/hərf OCR ilə sual mətninə qarışmır ===== */
+function dqOptY(L,y0,y1,f){var m=1e9;(L||[]).forEach(function(l){var b=l.bbox,s=String(l.text||"");if(!b||b.y0<y0-2||b.y0>=y1)return;if(/^\s*\(?[A8]\s*[).]/.test(s)||/(^|\s)\(?A\s*\)/.test(s))m=Math.min(m,b.y0*f)});return m}
+function dqLn(L,f){return(L||[]).filter(function(l){return l.bbox}).map(function(l){var b=l.bbox;return{x0:b.x0*f,y0:b.y0*f,x1:b.x1*f,y1:b.y1*f,t:String(l.text||""),c:l.confidence==null?100:l.confidence}})}
+blkImg=function(P){
+ var cc=P.cc.filter(function(r){var cy=(r.y0+r.y1)/2;return cy>=P.y0&&cy<P.y1&&r.n>=4});if(cc.length<3)return null;
+ var hs=cc.map(function(r){return r.y1-r.y0}).sort(function(a,b){return a-b}),th=hs[hs.length>>1];if(!(th>0))return null;
+ var fy=P.optY==null?1e9:P.optY;P.labs.forEach(function(l){var cy=(l.y0+l.y1)/2;if(cy>=P.y0&&cy<P.y1&&l.y0<fy)fy=l.y0});
+ var lim=fy<1e9?fy:P.y1,bh=P.y1-P.y0,
+  big=cc.filter(function(r){var w=r.x1-r.x0,h=r.y1-r.y0;return h>=2.2*th&&w>=2.2*th&&(r.y0+r.y1)/2<lim-2&&!(P.W&&w>=.92*P.W&&h>=.85*bh)});
+ if(!big.length)return null;
+ var pad=Math.max(2,Math.round(.3*th)),bx=big.map(function(r){return{x0:r.x0,y0:r.y0,x1:r.x1,y1:r.y1}}),sm=cc.filter(function(r){return big.indexOf(r)<0&&(r.y0+r.y1)/2<lim-2}),ch=true,it=0,i,j;
+ function hit(a,b,g){return a.x0-g<=b.x1&&b.x0-g<=a.x1&&a.y0-g<=b.y1&&b.y0-g<=a.y1}
+ while(ch&&it++<6){ch=false;
+  sm.forEach(function(r){bx.forEach(function(b){if(hit(b,r,pad)&&(r.x0<b.x0||r.y0<b.y0||r.x1>b.x1||r.y1>b.y1)){b.x0=Math.min(b.x0,r.x0);b.y0=Math.min(b.y0,r.y0);b.x1=Math.max(b.x1,r.x1);b.y1=Math.max(b.y1,r.y1);ch=true}})});
+  for(i=0;i<bx.length&&!ch;i++)for(j=i+1;j<bx.length;j++)if(hit(bx[i],bx[j],0)){var a=bx[i],q=bx[j];a.x0=Math.min(a.x0,q.x0);a.y0=Math.min(a.y0,q.y0);a.x1=Math.max(a.x1,q.x1);a.y1=Math.max(a.y1,q.y1);bx.splice(j,1);ch=true;break}}
+ /* çərçivəyə alınmış adi mətn fiqur deyil: içində yüksək dəqiqlikli çoxlu söz varsa at */
+ bx=bx.filter(function(b){var n=0;(P.ln||[]).forEach(function(l){var cx=(l.x0+l.x1)/2,cy=(l.y0+l.y1)/2;if(cx>=b.x0&&cx<=b.x1&&cy>=b.y0&&cy<=b.y1&&l.c>=78&&/[A-Za-zƏəİıÖöÜüŞşÇçĞğ]{5,}/.test(l.t))n++});return n<2});
+ if(!bx.length)return null;
+ var u={x0:1e9,y0:1e9,x1:0,y1:0};bx.forEach(function(b){u.x0=Math.min(u.x0,b.x0);u.y0=Math.min(u.y0,b.y0);u.x1=Math.max(u.x1,b.x1);u.y1=Math.max(u.y1,b.y1)});
+ return{qbox:u,vars:[]}};
+/* variant etiketləri səhv oxunanda (© = C), &B) = E) …) düzəlt; bir sətirdəki A) B) C) D) E) ayrı sətirlərə bölünür */
+var TF_LB=["\\(?A\\s*[).]","\\(?[B8]\\s*[).]","\\(?[CG]\\s*[).]|©","\\(?[D0O]\\s*[).]","\\(?[EF]\\s*[).]|&\\s*[BE]?\\s*\\)|€"];
+function dqLabLine(s){var t=String(s||"").replace(/\s+$/,""),st=/^\s*(?:\(?([A-E])\s*[).]|(©)|(&\s*[BE]?\s*\))|(€))\s*/.exec(t);if(!st)return[s];
+ var k=st[1]?"ABCDE".indexOf(st[1]):st[2]?2:4,pos=[{k:k,s:0,e:st[0].length}],cur=st[0].length,j,m;
+ for(j=k+1;j<5;j++){m=new RegExp("(^|[\\s~|_])(?:"+TF_LB[j]+")\\s*").exec(t.slice(cur));if(!m)break;pos.push({k:j,s:cur+m.index+m[1].length,e:cur+m.index+m[0].length});cur=cur+m.index+m[0].length}
+ if(pos.length<3)return[s];
+ return pos.map(function(q,i){return"ABCDE"[q.k]+") "+t.slice(q.e,pos[i+1]?pos[i+1].s:t.length).trim().replace(/[\s,;_~|=–—-]+$/,"")})}
+function dqLabText(t){t=String(t||"").replace(/©/g,"C) ").replace(/€/g,"E) ").replace(/(^|[\s~|])&\s*[BE]?\s*\)/g,"$1E)");return t.split("\n").reduce(function(a,l){return a.concat(dqLabLine(l))},[]).join("\n")}
+var _dqP1=dqPics;dqPics=function(ic,data,out){var t=_dqP1(ic,data,out);return typeof t==="string"?dqLabText(t):t};
+var _afTQ=afTextQ;afTextQ=function(t){return _afTQ(dqLabText(t))||_afTQ(t)};
+/* avto-sual: cədvəl/fiqurlu, variantları mətn olan sual */
+function dqTabQ(c,data){var pics=[],t=dqPics(c,data,pics);if(!t||!pics.length||!pics[0].img)return null;var P=afTextQ(t);if(!P)return null;P.img=pics[0].img;if(!P.n&&pics[0].n)P.n=pics[0].n;return P}
 
 var _dqOs=null;window.ProAdd={questions:function(){return S.qs.slice()}};
 Object.defineProperty(window.ProAdd,"onSave",{configurable:true,enumerable:true,get:function(){return _dqOs},set:function(f){_dqOs=typeof f==="function"?function(q,ed){dqFix(q);return f.call(this,q,ed)}:f}});
