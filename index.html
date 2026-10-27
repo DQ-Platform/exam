@@ -3968,7 +3968,7 @@ async function autoRun(){
      try{P0=dqTabQ(c,r0&&r0.data)}catch(e1){P0=null}
      if(!P0)try{P0=afTextFig(c,r0&&r0.data)}catch(e1){P0=null}
      if(!P0)P0=afTextQ(String((r0&&r0.data&&r0.data.text)||""));
-     if(P0){qs.push({n:P0.n||p,p0:p,p1:p,b:0,text:P0.text,o:P0.o,c:"",img:P0.img||"",oimgs:null});continue}}catch(e0){}
+     if(P0){qs.push({n:P0.n||p,p0:p,p1:p,b:0,text:P0.text,o:P0.o,c:"",img:P0.img||"",oimgs:P0.oimgs||null});continue}}catch(e0){}
     bad++;continue}
    var f=A.f,vs=figSort(A.vars),L="ABCDE".slice(0,vs.length).split(""),img="",txt="",n=0;
    if(A.qbox)img=afOut(figPad(afSub(c,A.qbox,f,3),12),900);
@@ -4041,7 +4041,7 @@ sortRead=function(x,y,w,h){var c=$("cv"),k=c.width/c.clientWidth,sc=Math.max(1,M
   if(pics.length&&ft)return{t:ft,pics:pics};return null}).catch(function(){return null})
  .then(function(res){if(res)return res;return areaText(x,y,w,h).then(function(t){return{t:t,pics:[]}})})};
 var _dqSA=sortAttach;sortAttach=function(qs,pics){qs=_dqSA(qs,pics);
- qs.forEach(function(q){if(q.oimgs&&q.oimgs.length>=4){var n=Math.min(5,q.oimgs.length);q.o=[];for(var i=0;i<n;i++)q.o.push({l:"ABCDE"[i],t:""});q.text=String(q.text||"").split("\n").filter(function(l){return!/^\s*[?·.]?\s*$/.test(l)&&!/^\s*\(?[A-E]\s*[.)]\s*[·.?]?\s*$/.test(l)}).join("\n").trim()}});return qs};
+ qs.forEach(function(q){if(q.oimgs&&q.oimgs.length>=4&&q.oimgs.every(Boolean)){var n=Math.min(5,q.oimgs.length);q.o=[];for(var i=0;i<n;i++)q.o.push({l:"ABCDE"[i],t:""});q.text=String(q.text||"").split("\n").filter(function(l){return!/^\s*[?·.]?\s*$/.test(l)&&!/^\s*\(?[A-E]\s*[.)]\s*[·.?]?\s*$/.test(l)}).join("\n").trim()}});return qs};
 
 /* ===== DQ yamaq 2: çoxsuallı səhifə — hər sual blokunda sual fiquru və variant fiqurları (A) B) C) … etiketinin sağındakı şəkil) ===== */
 function blkObjs(b){var W=b.w,H=b.h,ref=Math.min(W,H),cc=afCC(b),sd=cc.filter(function(r){return(r.y1-r.y0)>=ref*.05||(r.x1-r.x0)>=ref*.1}),G=Math.max(2,W*.004),objs=sd.map(function(r){return{x0:r.x0,y0:r.y0,x1:r.x1,y1:r.y1}}),ch=true,i,j;
@@ -4076,14 +4076,14 @@ var _dqP0=dqPics,BLKB=[];dqPics=function(ic,data,out){var t=_dqP0(ic,data,out);B
 function blkApply(ic,data,out){var wd=(data&&data.words)||[],L=(data&&data.lines)||[];if(!wd.length||!L.length)return;
  var b=geoBin(ic),f=b.f,O=blkObjs(b),labs=wd.filter(function(w){return w.bbox&&/^\(?[A-E]\)$/.test(String(w.text||"").trim())}).map(function(w){return{c:String(w.text).replace(/[^A-E]/g,""),x0:w.bbox.x0*f,y0:w.bbox.y0*f,x1:w.bbox.x1*f,y1:w.bbox.y1*f}}),st=[],cur=0,tw=wd.filter(function(w){var t=String(w.text||"").trim();return w.bbox&&(w.confidence==null||w.confidence>=45)&&!/^\(?[A-E]\)$/.test(t)&&(t.replace(/[^A-Za-zƏəİıÖöÜüŞşÇçĞğ0-9]/g,"").length>=3)}).map(function(w){return{cy:(w.bbox.y0+w.bbox.y1)/2*f}});
  L.slice().sort(function(a,c){return a.bbox.y0-c.bbox.y0}).forEach(function(l){var m=/^\s*(\d{1,3})\s*[.)]\s*\S/.exec(String(l.text||""));if(!m||/^\s*\d{1,2}[.\/]\d{1,2}[.\/]\d{2,4}/.test(l.text))return;var n=+m[1];if(!cur||(n>cur&&n<=cur+15)){st.push({n:n,y:l.bbox.y0});cur=n}});
- if(!st.length)st.push({n:0,y:0});var bx=[];st.forEach(function(s,k){var P={objs:O.objs,cc:O.cc,labs:labs,words:tw,W:b.w,optY:dqOptY(L,s.y,k+1<st.length?st[k+1].y:ic.height,f),ln:dqLn(L,f),y0:s.y*f-4,y1:(k+1<st.length?st[k+1].y:ic.height)*f-4},r=blkSplit(P);
+ if(!st.length)st.push({n:0,y:0});var bx=[];st.forEach(function(s,k){var P={objs:O.objs,cc:O.cc,labs:labs,words:tw,W:b.w,optY:dqOptY(L,s.y,k+1<st.length?st[k+1].y:ic.height,f),ln:dqLn(L,f),optT:dqOptT(L,s.y,k+1<st.length?st[k+1].y:ic.height),y0:s.y*f-4,y1:(k+1<st.length?st[k+1].y:ic.height)*f-4},r=blkSplit(P);
   if(!r){var r2=blkImg(P);if(r2){for(var j=out.length-1;j>=0;j--)if(out[j].n===s.n)out.splice(j,1);out.push({n:s.n,img:afOut(figPad(trimWhite(afSub(ic,r2.qbox,f,3)),12),900),oimgs:null});bx.push(r2.qbox)}return}
   bx.push(r.qbox);r.vars.forEach(function(v){bx.push(v)});
   for(var i=out.length-1;i>=0;i--)if(out[i].n===s.n)out.splice(i,1);
   var res={n:s.n,img:"",oimgs:figSame(r.vars.map(function(o){return trimWhite(afSub(ic,o,f,2))}),500)};
   if(r.qbox)res.img=afOut(figPad(trimWhite(afSub(ic,r.qbox,f,3)),12),900);out.push(res)});BLKB=bx.map(function(q){return{x0:q.x0/f,y0:q.y0/f,x1:q.x1/f,y1:q.y1/f}})}
 var _dqAS=dqAfterScan;dqAfterScan=function(qs,pb){qs=_dqAS(qs,pb);
- qs.forEach(function(q){if(q.oimgs&&q.oimgs.length>=4){var n=Math.min(5,q.oimgs.length);q.o=[];for(var i=0;i<n;i++)q.o.push({l:"ABCDE"[i],t:""});q.text=String(q.text||"").split("\n").filter(function(l){return!/^\s*[?·.]?\s*$/.test(l)&&!/^\s*\(?[A-E]\s*[.)]\s*[·.?]?\s*$/.test(l)}).join("\n").trim()}});return qs};
+ qs.forEach(function(q){if(q.oimgs&&q.oimgs.length>=4&&q.oimgs.every(Boolean)){var n=Math.min(5,q.oimgs.length);q.o=[];for(var i=0;i<n;i++)q.o.push({l:"ABCDE"[i],t:""});q.text=String(q.text||"").split("\n").filter(function(l){return!/^\s*[?·.]?\s*$/.test(l)&&!/^\s*\(?[A-E]\s*[.)]\s*[·.?]?\s*$/.test(l)}).join("\n").trim()}});return qs};
 
 /* kəsilən şəkillərdə qalıq boz/krem fon dümağ ağ olur (yalnız sual/variant fiquru qalır) */
 var _dqTW=trimWhite;trimWhite=function(o){try{var g=o.getContext("2d"),im=g.getImageData(0,0,o.width,o.height),d=im.data,i;for(i=0;i<d.length;i+=4)if(d[i]>226&&d[i+1]>226&&d[i+2]>226){d[i]=d[i+1]=d[i+2]=255}g.putImageData(im,0,0)}catch(e){}return _dqTW(o)};
@@ -4120,6 +4120,66 @@ var _dqP1=dqPics;dqPics=function(ic,data,out){var t=_dqP1(ic,data,out);return ty
 var _afTQ=afTextQ;afTextQ=function(t){return _afTQ(dqLabText(t))||_afTQ(t)};
 /* avto-sual: cədvəl/fiqurlu, variantları mətn olan sual */
 function dqTabQ(c,data){var pics=[],t=dqPics(c,data,pics);if(!t||!pics.length||!pics[0].img)return null;var P=afTextQ(t);if(!P)return null;P.img=pics[0].img;if(!P.n&&pics[0].n)P.n=pics[0].n;return P}
+
+/* ehtiyat: cədvəl xətləri solğun/qırıqdırsa — sual başlığı ilə variantlar arasındakı mürəkkəbli sahə fiqur sayılır */
+var _blkI=blkImg;blkImg=function(P){var r=_blkI(P);if(r)return r;
+ var cc=P.cc.filter(function(r){var cy=(r.y0+r.y1)/2;return cy>=P.y0&&cy<P.y1&&r.n>=3});if(cc.length<6)return null;
+ var hs=cc.map(function(r){return r.y1-r.y0}).sort(function(a,b){return a-b}),th=hs[hs.length>>1];if(!(th>0))return null;
+ var fy=P.optY==null?1e9:P.optY;P.labs.forEach(function(l){var cy=(l.y0+l.y1)/2;if(cy>=P.y0&&cy<P.y1&&l.y0<fy)fy=l.y0});
+ if(fy>=1e9)return null;
+ var real=(P.ln||[]).filter(function(l){return l.y0>=P.y0-4&&l.y1<=fy+2&&l.c>=70&&/[A-Za-zƏəİıÖöÜüŞşÇçĞğ]{4,}/.test(l.t)}).sort(function(a,b){return a.y0-b.y0});
+ if(!real.length)return null;
+ var hy=real[0].y1,i;for(i=1;i<real.length;i++){if(real[i].y0-hy>2.2*th)break;hy=Math.max(hy,real[i].y1)}
+ var y0=hy+.3*th,y1=fy-.3*th;if(y1-y0<3*th)return null;
+ var inn=cc.filter(function(r){var cy=(r.y0+r.y1)/2;return cy>=y0&&cy<=y1});if(inn.length<4)return null;
+ var u={x0:1e9,y0:1e9,x1:0,y1:0};inn.forEach(function(r){u.x0=Math.min(u.x0,r.x0);u.y0=Math.min(u.y0,r.y0);u.x1=Math.max(u.x1,r.x1);u.y1=Math.max(u.y1,r.y1)});
+ if(u.y1-u.y0<2.5*th||u.x1-u.x0<3*th)return null;
+ return{qbox:u,vars:[]}};
+
+/* ===== DQ qərar qatı: hər sətir/variant üçün «mətn mi, şəkil mi» — OCR keyfiyyətinə və həndəsəyə görə ===== */
+function dqGarb(s,c){s=String(s||"").trim();if(!s)return 0;var tk=s.split(/\s+/),sc=0,sh=0,mx=0,ws=0;
+ if(c!=null&&c<60)sc++;
+ tk.forEach(function(t){if(/^[A-Za-zƏəİıÖöÜüŞşÇçĞğ]{1,2}$/.test(t))sh++;if(/[A-Za-zƏəİıÖöÜüŞşÇçĞğ]\d|\d[A-Za-zƏəİıÖöÜüŞşÇçĞğ]{2,}/.test(t)&&t.length>3)mx++});
+ if(tk.length>=4&&sh/tk.length>=.45)sc++;if(mx>=1&&tk.length>=4)sc++;
+ ws=(s.match(/[|\\~`^{}<>_]/g)||[]).length;if(ws>=2)sc++;if(/[(:]\d|\d-\s|\/\s*\d+\(/.test(s)&&tk.length>=4)sc++;
+ return sc}
+var _blkI2=blkImg;blkImg=function(P){var r=_blkI2(P);
+ var fy=P.optY==null?1e9:P.optY;P.labs.forEach(function(l){var cy=(l.y0+l.y1)/2;if(cy>=P.y0&&cy<P.y1&&l.y0<fy)fy=l.y0});
+ var gl=(P.ln||[]).filter(function(l){if(l.y0<P.y0-2||l.y1>(fy<1e9?fy:P.y1)+2)return false;if(/^\s*\d{1,3}\s*[.)]/.test(l.t)||/^\s*\(?[A-E]\s*[).]/.test(l.t))return false;
+  if(r&&l.y0>=r.qbox.y0-4&&l.y1<=r.qbox.y1+4)return false;return dqGarb(l.t,l.c)>=2});
+ if(!gl.length)return r;
+ var y0=Math.min.apply(0,gl.map(function(l){return l.y0}))-2,y1=Math.max.apply(0,gl.map(function(l){return l.y1}))+2,
+  inn=P.cc.filter(function(c){var cy=(c.y0+c.y1)/2;return cy>=y0&&cy<=y1&&c.n>=3});if(!inn.length)return r;
+ var u=r?{x0:r.qbox.x0,y0:r.qbox.y0,x1:r.qbox.x1,y1:r.qbox.y1}:{x0:1e9,y0:1e9,x1:0,y1:0};
+ inn.forEach(function(c){u.x0=Math.min(u.x0,c.x0);u.y0=Math.min(u.y0,c.y0);u.x1=Math.max(u.x1,c.x1);u.y1=Math.max(u.y1,c.y1)});
+ return{qbox:u,vars:[]}};
+/* variantlar: oxunmayan/pozuq variant mətn əvəzinə şəkil olur, təmiz olanlar mətn qalır (qarışıq) */
+function dqVarImgs(ic,data,out,t){var L=(data&&data.lines)||[],W=(data&&data.words)||[];if(!L.length||!W.length||typeof t!=="string")return t;
+ var st=[],cur=0;L.slice().sort(function(a,b){return a.bbox.y0-b.bbox.y0}).forEach(function(l){var m=/^\s*(\d{1,3})\s*[.)]\s*\S/.exec(String(l.text||""));if(!m||/^\s*\d{1,2}[.\/]\d{1,2}[.\/]\d{2,4}/.test(l.text))return;var n=+m[1];if(!cur||(n>cur&&n<=cur+15)){st.push({n:n,y:l.bbox.y0});cur=n}});
+ var tl=t.split("\n"),changed=false;
+ L.forEach(function(l){var b=l.bbox;if(!b)return;var parts=dqLabLine(String(l.text||"").replace(/©/g,"C) ").replace(/€/g,"E) ").replace(/(^|[\s~|])&\s*[BE]?\s*\)/g,"$1E)"));if(parts.length<3)return;
+  var ks=parts.map(function(p){return"ABCDE".indexOf(p.charAt(0))}),bad=[];
+  parts.forEach(function(p,j){var x=p.slice(3).trim();if(!x||(dqGarb(x,l.confidence)>=2&&!/^[\d\s.,\/%+\-–]+$/.test(x))||(x.match(/[|\\~`^{}<>_]/g)||[]).length>=1)bad.push(j)});
+  if(!bad.length)return;
+  var ws=W.filter(function(w){if(!w.bbox)return false;var cy=(w.bbox.y0+w.bbox.y1)/2;return cy>=b.y0-4&&cy<=b.y1+4}).sort(function(a,b){return a.bbox.x0-b.bbox.x0}),xs=[],wi=0,j;
+  for(j=0;j<parts.length;j++){var re=new RegExp("^(?:"+TF_LB[ks[j]]+")"),f=null;for(;wi<ws.length;wi++){var m=re.exec(String(ws[wi].text||"").replace(/^[\s~|_]+/,""));if(m){f=ws[wi];wi++;var wl=Math.max(1,String(f.text).length),wx=f.bbox.x1-f.bbox.x0;xs.push({s:f.bbox.x0+Math.min(wx,wx*m[0].length/wl),a:f.bbox.x0});break}}
+   if(!f)return}
+  var n0=0;st.forEach(function(s){if(s.y<=b.y0+2)n0=s.n});var arr=[],mxk=Math.max.apply(0,ks);for(j=0;j<=mxk;j++)arr.push(null);
+  bad.forEach(function(j){var x1=j+1<xs.length?xs[j+1].a-4:b.x1+6;if(x1-xs[j].s<10)return;
+   arr[ks[j]]=dqNeat(dqCrop(ic,{x0:xs[j].s+2,y0:b.y0-2,x1:x1,y1:b.y1+2}),500);
+   var idx=tl.indexOf(parts[j]);if(idx>=0){tl[idx]=parts[j].slice(0,3)+"";changed=true}});
+  if(!arr.some(Boolean))return;
+  var e=null;out.forEach(function(o){if(o.n===n0)e=o});if(!e){e={n:n0,img:"",oimgs:null};out.push(e)}
+  e.oimgs=arr});
+ return changed?tl.join("\n"):t}
+var _dqP2=dqPics;dqPics=function(ic,data,out){var t=_dqP2(ic,data,out);try{t=dqVarImgs(ic,data,out,t)}catch(e){}return t};
+dqTabQ=function(c,data){var pics=[],t=dqPics(c,data,pics);if(!t||!pics.length||!(pics[0].img||pics[0].oimgs))return null;var P=afTextQ(t);if(!P)return null;P.img=pics[0].img||"";P.oimgs=pics[0].oimgs||null;if(!P.n&&pics[0].n)P.n=pics[0].n;return P};
+
+/* variantlar mətn kimi oxunubsa (A) 35 B) 15 …), onları «fiqur variantı» saymaq olmaz */
+function dqOptT(L,y0,y1){var r=false;(L||[]).forEach(function(l){var b=l.bbox;if(!b||b.y0<y0-2||b.y0>=y1)return;var p=dqLabLine(String(l.text||"").replace(/©/g,"C) ").replace(/€/g,"E) ").replace(/(^|[\s~|])&\s*[BE]?\s*\)/g,"$1E)"));if(p.length<3)return;
+ var ok=p.filter(function(q){var x=q.slice(3).trim();return/[A-Za-z0-9ƏəİıÖöÜüŞşÇçĞğ]/.test(x)&&dqGarb(x,l.confidence)<2&&(x.match(/[|\\~`^{}<>_]/g)||[]).length<1}).length;if(ok>=3)r=true});return r}
+var _blkS=blkSplit;blkSplit=function(P){if(P.optT)return null;return _blkS(P)};
+var _blkF=blkFall;blkFall=function(P){if(P.optT)return null;return _blkF(P)};
 
 var _dqOs=null;window.ProAdd={questions:function(){return S.qs.slice()}};
 Object.defineProperty(window.ProAdd,"onSave",{configurable:true,enumerable:true,get:function(){return _dqOs},set:function(f){_dqOs=typeof f==="function"?function(q,ed){dqFix(q);return f.call(this,q,ed)}:f}});
