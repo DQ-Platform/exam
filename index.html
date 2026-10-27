@@ -2919,6 +2919,12 @@ label.l{display:flex;justify-content:space-between;align-items:center;font-size:
 .sg span{text-align:center;font-size:12.5px;font-weight:700;border-radius:8px;padding:5px 0;background:#f1f0f6;color:#a09fb5}
 .sg span.f{background:#d9f3e8;color:#0b7a53}.sg span.o{box-shadow:inset 0 0 0 1.5px #c9973a}
 .sg .lg{grid-column:1/-1;text-align:left;background:none;font-weight:600;color:#6b6f85;font-size:12px;padding:0}
+.bn{display:grid;gap:8px;margin:0 0 12px}
+.bi{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:#fff;font-size:13.5px}
+.bi label{display:flex;gap:8px;align-items:flex-start;flex:1;min-width:0;cursor:pointer}
+.bi input[type=checkbox]{width:18px;height:18px;margin:2px 0 0;accent-color:var(--navy);flex:none}
+.bi .tx{overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;word-break:break-word}
+.bi .tag{margin:0 4px 0 0;white-space:nowrap}
 .q.picked{border-color:var(--navy);box-shadow:0 0 0 2px rgba(26,26,74,.12)}
 .bk{display:grid;gap:8px;border:1px dashed #cfcde6;background:#faf9ff;border-radius:12px;padding:10px 12px;margin:0 0 12px}
 .bk .bkRow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -3035,9 +3041,27 @@ label.l{display:flex;justify-content:space-between;align-items:center;font-size:
   <div class="bk" id="bk" hidden>
    <div class="bkRow"><label class="bkAll"><input type="checkbox" id="bkSel"> Hamısını seç</label><span class="hint" id="bkCnt" style="margin:0">0 seçilib</span></div>
    <div class="bkRow"><select id="bkC" aria-label="Təsnifat"><option value="">Təsnifat…</option><option>BA</option><option>BB</option><option>AC</option></select><input id="bkN" type="number" min="1" placeholder="Sınaq №" aria-label="Sınaq №"><select id="bkS" aria-label="Fənn"><option value="">Fənn…</option></select><input id="bkNo" type="number" min="1" placeholder="Başlanğıc №" aria-label="Sual № başlanğıc" style="width:120px"></div>
-   <div class="bkRow"><button class="btn pri sm" id="bkGo" type="button">Seçilənlərə tətbiq et</button><button class="btn sm" id="bkAuto" type="button">Sual №: avtomatik</button><span class="hint" style="margin:0">Boş buraxdığınız xana dəyişmir. Sual № boşdursa, bazaya yazarkən avtomatik düzülür.</span></div>
+   <div class="bkRow"><button class="btn pri sm" id="bkGo" type="button">Seçilənlərə tətbiq et</button><button class="btn sm" id="bkAuto" type="button">Sual №: avtomatik</button><button class="btn sm" id="bkBank" type="button">📁 Bankaya at</button><span class="hint" style="margin:0">Boş buraxdığınız xana dəyişmir. Sual № boşdursa, bazaya yazarkən avtomatik düzülür.</span></div>
   </div>
   <div class="list" id="list"></div>
+ </section>
+
+ <section class="card" id="bankCard" style="margin-top:18px">
+  <h2><span>📁 ProAdd bazası (<span id="bnkTot">0</span>)</span><span class="pa-row"><button class="btn sm" id="bnkExp" type="button">İxrac et</button><button class="btn sm" id="bnkImpB" type="button">İdxal et</button><input type="file" id="bnkImp" accept="application/json,.json" hidden></span></h2>
+  <p class="hint" style="margin:0 0 8px">Sınaq/təsnifatda yer çatmayan suallar fənn üzrə qovluğa düşür. Oradan seçib istənilən başqa sınaq və təsnifata əlavə edə bilərsən. Bank bu brauzerdə saxlanır — köçürmək üçün «İxrac et».</p>
+  <label style="display:flex;gap:8px;align-items:center;font-size:13.5px;font-weight:600;margin:0 0 10px"><input type="checkbox" id="bnAuto" checked> Yerə sığmayan artıq suallar avtomatik bankaya getsin</label>
+  <div class="sl" id="bnkFold"></div>
+  <div id="bnkBody" hidden>
+   <div class="bn">
+    <div class="bkRow" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><label class="bkAll" style="display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:13.5px;color:var(--navy)"><input type="checkbox" id="bnkSel" style="width:18px;height:18px;accent-color:var(--navy)"> Hamısını seç</label><span class="hint" id="bnkCnt" style="margin:0">0 seçilib</span></div>
+    <div class="bk" style="margin:0">
+     <div class="bkRow"><span style="font-size:13px;font-weight:700;color:var(--navy)">Əlavə et:</span><input id="bnN" type="number" min="1" value="1" aria-label="Sınaq №" placeholder="Sınaq №"><select id="bnC" aria-label="Təsnifat"><option>BA</option><option>BB</option><option>AC</option></select><button class="btn pri sm" id="bnGo" type="button">Seçilənləri əlavə et</button><button class="btn sm danger" id="bnDel" type="button">Seçilənləri sil</button></div>
+     <span class="hint" id="bnHint" style="margin:0"></span>
+    </div>
+   </div>
+   <div class="list" id="bnkList"></div>
+  </div>
+  <div class="empty" id="bnkEmpty">Bank boşdur.</div>
  </section>
 </main>
 </div>
@@ -3093,6 +3117,36 @@ function renderSlots(){var sm=$("slSum"),dt=$("slDet"),sb=$("slotBox");if(!sm||!
  if(!e){sb.innerHTML="";return}
  sb.innerHTML='<button type="button" class="slB '+(S.slotEd?"on ":"")+(e.cnt>e.tot?"over":e.cnt===e.tot?"full":"")+'" id="slotEd">'+esc(slotTxt(e))+": "+e.cnt+"/"+e.tot+" əlavə olunub</button>"+(S.slotEd?'<div style="margin-top:8px">'+slotGrid(e)+"</div>":"")}
 function subjList(){var a=Object.keys(LAY);S.qs.forEach(function(q){if(q&&q.subject&&a.indexOf(q.subject)<0)a.push(q.subject)});return a}
+/* ---------- ProAdd bazası (bank): yerə sığmayan suallar fənn üzrə qovluqlara yığılır ---------- */
+var LSB="proadd_bank_v1";S.bank=[];try{S.bank=JSON.parse(localStorage.getItem(LSB)||"[]")||[]}catch(e){S.bank=[]}S.bsel={};S.bnkOpen=null;
+function saveBank(){try{localStorage.setItem(LSB,JSON.stringify(S.bank))}catch(e){toast("Brauzer yaddaşı doludur — bankı ixrac edin",1)}}
+function autoSpillOn(){try{return localStorage.getItem("proadd_autospill")!=="0"}catch(e){return true}}
+function newBid(){return"q"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
+function toBank(list){var ids={};list.forEach(function(q){ids[q.id]=1;var c=JSON.parse(JSON.stringify(q));delete c.no;c.from={exam:String(q.exam||1),category:q.category};c.id=newBid();S.bank.push(c)});
+ S.qs=S.qs.filter(function(q){return!ids[q.id]});if(S.sel)Object.keys(ids).forEach(function(k){delete S.sel[k]})}
+function spill(){if(!autoSpillOn()||!S.qs.length)return;var gm={},out=[],by={};
+ S.qs.forEach(function(q){var k=[q.exam||1,q.category,q.subject].join("|");(gm[k]=gm[k]||[]).push(q)});
+ Object.keys(gm).forEach(function(k){var p=k.split("|");if(!LAY[p[2]])return;var r=assignNos(gm[k],p[1],p[2]),ok={};r.items.forEach(function(it){ok[it.q.id]=1});
+  gm[k].forEach(function(q){if(ok[q.id]||(q.type==="open"&&p[1]!=="BA"))return;out.push(q);var t="Sınaq "+p[0]+" · "+p[1]+" · "+p[2];by[t]=(by[t]||0)+1})});
+ if(!out.length)return;toBank(out);save();saveBank();toast(out.length+" sual yerə sığmadı və ProAdd bankına köçürüldü ("+Object.keys(by).map(function(t){return t+": "+by[t]}).join("; ")+")")}
+function freeSlots(exam,cat,subj){var rg=LAY[subj];if(!rg)return{m:0,o:0};var tm=0,to=0,n;for(n=rg[0];n<=rg[1];n++){if(cat==="BA"&&OPENN.indexOf(n)>-1)to++;else tm++}
+ var g=S.qs.filter(function(q){return String(q.exam||1)===String(exam)&&q.category===cat&&q.subject===subj}),mc=g.filter(function(q){return q.type!=="open"}).length;
+ return{m:Math.max(0,tm-mc),o:Math.max(0,to-(g.length-mc))}}
+function bnTarget(){return{exam:String(Math.max(1,Math.floor(+$("bnN").value)||1)),cat:$("bnC").value,subj:S.bnkOpen}}
+function renderBank(){var bs={},subs=[];S.bank.forEach(function(q){bs[q.subject]=(bs[q.subject]||0)+1});
+ Object.keys(LAY).concat(Object.keys(bs).filter(function(x){return!LAY[x]})).forEach(function(x){if(bs[x])subs.push(x)});
+ $("bnkTot").textContent=S.bank.length;$("bnAuto").checked=autoSpillOn();
+ var ids={};S.bank.forEach(function(q){ids[q.id]=1});Object.keys(S.bsel).forEach(function(k){if(!ids[k])delete S.bsel[k]});
+ if(S.bnkOpen&&!bs[S.bnkOpen])S.bnkOpen=null;
+ $("bnkFold").innerHTML=subs.map(function(x){return'<button type="button" data-bf="'+esc(x)+'" class="'+(S.bnkOpen===x?"on":"")+'">📁 '+esc(x)+" ("+bs[x]+")</button>"}).join("");
+ $("bnkEmpty").hidden=S.bank.length>0;$("bnkBody").hidden=!S.bnkOpen;if(!S.bnkOpen)return;
+ var L=S.bank.filter(function(q){return q.subject===S.bnkOpen});
+ $("bnkList").innerHTML=L.map(function(q,i){var fr=q.from?"Sınaq "+esc(q.from.exam)+" · "+esc(q.from.category):"";
+  return'<div class="bi"><label><input type="checkbox" data-bs="'+q.id+'"'+(S.bsel[q.id]?" checked":"")+'><span style="min-width:0"><b>'+(i+1)+'.</b> '+(q.type==="open"?'<span class="tag">Açıq</span>':'')+(fr?'<span class="tag">'+fr+'-dən</span>':'')+'<span class="tag">'+q.options.length+' variant</span><span class="tx">'+(q.text?esc(q.text):"şəkilli sual")+'</span></span></label><button class="btn sm danger" type="button" data-bd="'+q.id+'" aria-label="Sil">✕</button></div>'}).join("");
+ bnRefresh()}
+function bnRefresh(){if(!S.bnkOpen)return;var L=S.bank.filter(function(q){return q.subject===S.bnkOpen}),n=L.filter(function(q){return S.bsel[q.id]}).length,a=$("bnkSel");
+ $("bnkCnt").textContent=n+" seçilib";a.checked=n>0&&n===L.length;a.indeterminate=n>0&&n<L.length;
+ var t=bnTarget(),f=freeSlots(t.exam,t.cat,t.subj);$("bnHint").textContent="Sınaq "+t.exam+" · "+t.cat+" · "+t.subj+": boş yer — test "+f.m+(t.cat==="BA"?", açıq "+f.o:"")+". Yerə sığmayanlar bankda qalır."}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function toast(t,err){var e=$("toast");e.textContent=t;e.className="toast on"+(err?" err":"");clearTimeout(toast.t);toast.t=setTimeout(function(){e.className="toast"},err?4500:2200)}
 function save(){try{localStorage.setItem(LS,JSON.stringify(S.qs))}catch(e){toast("Brauzer yaddaşı doludur — JSON ixrac edin",1)}}
@@ -3167,7 +3221,7 @@ $("bSave").addEventListener("click",function(){var d=S.draft,e=validate(d);$("ms
   save();toast(S.edit?"Dəyişikliklər saxlanıldı":"Siyahıya əlavə edildi — saytda görünməsi üçün “Bazaya yaz” basın");S.edit=null;$("qno").value="";var c=$("cat").value;S.draft=blank();$("cat").value=c;S.target="Q";buildFields();render()})
  .catch(function(er){$("msg").textContent="Saxlanmadı: "+(er&&er.message||er)}).then(function(){b.disabled=false})});
 function bkRefresh(){var n=S.qs.filter(function(q){return S.sel[q.id]}).length,a=$("bkSel");$("bkCnt").textContent=n+" seçilib";a.checked=n>0&&n===S.qs.length;a.indeterminate=n>0&&n<S.qs.length}
-function render(){var L=$("list");S.sel=S.sel||{};var ids={};S.qs.forEach(function(q){ids[q.id]=1});Object.keys(S.sel).forEach(function(k){if(!ids[k])delete S.sel[k]});$("bk").hidden=!S.qs.length;$("cnt").textContent=S.qs.length;$("bAll").disabled=!S.qs.length;bkRefresh();renderSlots();
+function render(){spill();var L=$("list");S.sel=S.sel||{};var ids={};S.qs.forEach(function(q){ids[q.id]=1});Object.keys(S.sel).forEach(function(k){if(!ids[k])delete S.sel[k]});$("bk").hidden=!S.qs.length;$("cnt").textContent=S.qs.length;$("bAll").disabled=!S.qs.length;bkRefresh();renderSlots();renderBank();
  if(!S.qs.length){L.innerHTML='<div class="empty">Hələ sual yoxdur. PDF yükləyin, sualı kəsin və “Siyahıya əlavə et” düyməsini basın, sonra “Bazaya yaz” ilə saytda yayımlayın.</div>';return}
  var gm={},nm={};S.qs.forEach(function(q){var k=[q.exam,q.category,q.subject].join("|");(gm[k]=gm[k]||[]).push(q)});
  Object.keys(gm).forEach(function(k){var p=k.split("|"),r=assignNos(gm[k],p[1],p[2]);r.items.forEach(function(it){nm[it.q.id]=it.no})});
@@ -3182,6 +3236,25 @@ function render(){var L=$("list");S.sel=S.sel||{};var ids={};S.qs.forEach(functi
   (q.textImg?'<img alt="Sual şəkli" src="'+q.textImg+'">':'')+(q.text?'<div class="tx">'+esc(q.text)+'</div>':'')+
   '<div class="opts">'+q.options.map(function(o){return'<div class="'+((q.type==="open"?String(q.correct).split(",").indexOf(o.label)>-1:o.label===q.correct)?"ok":"")+'">'+o.label+(q.type==="open"?". ":") ")+(o.img?'<img alt="Variant '+o.label+'" src="'+o.img+'">':'')+esc(o.text)+'</div>'}).join("")+'</div>'+
   (q.explanation?'<p class="hint"><b>İzah:</b> '+esc(q.explanation)+'</p>':'')+'</article>'}).join("")}
+$("bnAuto").addEventListener("change",function(){try{localStorage.setItem("proadd_autospill",this.checked?"1":"0")}catch(e){}toast(this.checked?"Artıq suallar avtomatik bankaya gedəcək":"Avtomatik köçürmə söndürüldü")});
+$("bnkFold").addEventListener("click",function(e){var b=e.target.closest("[data-bf]");if(!b)return;S.bnkOpen=S.bnkOpen===b.dataset.bf?null:b.dataset.bf;S.bsel={};renderBank()});
+$("bnkList").addEventListener("change",function(e){var id=e.target.dataset&&e.target.dataset.bs;if(!id)return;if(e.target.checked)S.bsel[id]=1;else delete S.bsel[id];bnRefresh()});
+$("bnkList").addEventListener("click",function(e){var b=e.target.closest("[data-bd]");if(!b)return;if(!confirm("Bu sual bankdan silinsin?"))return;S.bank=S.bank.filter(function(q){return q.id!==b.dataset.bd});saveBank();renderBank()});
+$("bnkSel").addEventListener("change",function(){var on=this.checked;S.bsel={};if(on)S.bank.forEach(function(q){if(q.subject===S.bnkOpen)S.bsel[q.id]=1});renderBank()});
+$("bnN").addEventListener("input",bnRefresh);$("bnC").addEventListener("change",bnRefresh);
+$("bnDel").addEventListener("click",function(){var ids=S.bank.filter(function(q){return S.bsel[q.id]&&q.subject===S.bnkOpen});if(!ids.length)return toast("Əvvəlcə sualları seçin",1);if(!confirm(ids.length+" sual bankdan silinsin? Bu geri qaytarılmır."))return;var m={};ids.forEach(function(q){m[q.id]=1});S.bank=S.bank.filter(function(q){return!m[q.id]});saveBank();renderBank()});
+$("bnGo").addEventListener("click",function(){var t=bnTarget(),sel=S.bank.filter(function(q){return S.bsel[q.id]&&q.subject===t.subj});if(!sel.length)return toast("Əvvəlcə sualları seçin",1);
+ var rg=LAY[t.subj];if(!rg)return toast("Bu fənn sınaq strukturunda yoxdur",1);var lim=(rg[0]>=16&&rg[1]<=55)?4:5,f=freeSlots(t.exam,t.cat,t.subj),moved=[],noFit=0,bad=0;
+ sel.forEach(function(q){var op=q.type==="open";if(op&&t.cat!=="BA"){bad++;return}if(!op&&q.options.length!==lim){bad++;return}
+  if(op?f.o<=0:f.m<=0){noFit++;return}if(op)f.o--;else f.m--;moved.push(q)});
+ if(!moved.length)return toast(bad?"Seçilənlər bu təsnifat/fənnə uyğun deyil ("+bad+")":"Bu sınaq və təsnifatda boş yer yoxdur",1);
+ moved.forEach(function(q){var c=JSON.parse(JSON.stringify(q));c.id=newBid();c.exam=t.exam;c.category=t.cat;delete c.from;delete c.no;S.qs.push(c)});
+ var m={};moved.forEach(function(q){m[q.id]=1});S.bank=S.bank.filter(function(q){return!m[q.id]});S.bsel={};save();saveBank();render();
+ toast(moved.length+" sual Sınaq "+t.exam+" · "+t.cat+"-ə əlavə olundu"+(noFit?"; "+noFit+" sual yer olmadığı üçün bankda qaldı":"")+(bad?"; "+bad+" sual uyğun olmadığından bankda qaldı":""),!!(noFit||bad))});
+$("bkBank").addEventListener("click",function(){var ch=S.qs.filter(function(q){return S.sel[q.id]});if(!ch.length)return toast("Əvvəlcə sualları seçin",1);if(!confirm(ch.length+" sual siyahıdan çıxarılıb ProAdd bankına köçürülsün?"))return;toBank(ch);save();saveBank();render();toast(ch.length+" sual bankaya köçürüldü")});
+$("bnkExp").addEventListener("click",function(){if(!S.bank.length)return toast("Bank boşdur",1);var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S.bank,null,2)],{type:"application/json"}));a.download="proadd-bank.json";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},2000)});
+$("bnkImpB").addEventListener("click",function(){$("bnkImp").click()});
+$("bnkImp").addEventListener("change",function(){var f=this.files[0];this.value="";if(!f)return;var r=new FileReader();r.onload=function(){try{var a=JSON.parse(r.result);if(!Array.isArray(a))throw 0;var n=0;a.forEach(function(x){if(x&&x.subject&&Array.isArray(x.options)&&(x.text||x.textImg)){x.id=newBid();S.bank.push(x);n++}});saveBank();renderBank();toast(n?n+" sual banka idxal edildi":"Etibarlı sual tapılmadı",!n)}catch(e){toast("Fayl oxunmadı",1)}};r.readAsText(f)});
 $("slSum").addEventListener("click",function(e){var b=e.target.closest("[data-sk]");if(!b)return;S.slotOpen=S.slotOpen===b.dataset.sk?null:b.dataset.sk;renderSlots()});
 $("slotBox").addEventListener("click",function(e){if(e.target.closest("#slotEd")){S.slotEd=!S.slotEd;renderSlots()}});
 ["exam","subj","cat"].forEach(function(id){$(id).addEventListener("input",renderSlots);$(id).addEventListener("change",renderSlots)});
