@@ -1,4 +1,4 @@
-/* DQ Kitab — "Sınaq Toplusu" modulu
+/* DQ Kitab v2 (başlıq/altlıq/filqran, yan-yana variantlar, ardıcıl Sınaq nömrəsi) — "Sınaq Toplusu" modulu
    Admin: toplu yarat (fənn seç, bazadakı sınaq + kateqoriyanı əlavə et, sırala, rəng seç)
    Oxu: üz qabığı → mündəricat → bölmələr → cavab açarı → arxa qabıq (səhifə çevirmə, çap/PDF)
    Məlumat: dq_v2_store, collection = "kitab"  */
@@ -26,6 +26,34 @@
     { n: "Okean", a: "#0e5a73", b: "#0891b2", g: "#fcd34d" }
   ];
 
+  var BXDEF = { phone: "0504305162", center: "DQplatform", sub: "Dövlət Qulluğu", author: "Yunis İmanov", footL: "DQplatform", wm1: "DQplatform", wm2: "Yunis İmanov", logo: "YS", showHead: true, showLogo: true, showWm: true };
+  function who(s) { s = String(s == null ? "" : s).trim().replace(/^by\s+/i, ""); return s; }
+  function BX(doc) {
+    var o = Object.assign({}, BXDEF, (doc && doc.bx) || {}), p = (doc && doc.pdf) || {};
+    if (!(doc && doc.bx && doc.bx.phone != null) && String(p.header || "").trim()) o.phone = p.header;
+    if (!(doc && doc.bx && doc.bx.footL != null) && String(p.footer || "").trim()) o.footL = p.footer;
+    if (!(doc && doc.bx && doc.bx.wm1 != null) && String(p.watermark || "").trim()) o.wm1 = p.watermark;
+    o.author = who(o.author);
+    return o;
+  }
+  function emblem(light, txt) {
+    var a = light ? "#ffffff" : "#0b2a6b", g = light ? "#f0c14b" : "#c9a063", f = light ? "#ffffff22" : "#0b2a6b";
+    return '<svg class="dqk-em" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="94" fill="none" stroke="' + a + '" stroke-width="6"/><circle cx="100" cy="100" r="82" fill="' + f + '"/><circle cx="100" cy="100" r="72" fill="none" stroke="' + g + '" stroke-width="2.5"/><text x="100" y="126" text-anchor="middle" font-size="' + (String(txt).length > 2 ? 52 : 76) + '" font-weight="800" fill="' + g + '" font-family="Georgia,serif">' + esc(txt || "YS") + '</text></svg>';
+  }
+  function headHTML(c) {
+    var x = BX(c.doc);
+    if (!x.showHead) return '<div class="dqk-rh none"></div>';
+    return '<div class="dqk-rh"><div class="l">' + esc(x.phone) + '</div><div class="c">' + esc(x.center) + (x.sub ? '<i>|</i>' + esc(x.sub) : "") + '</div><div class="r">' + esc(x.author) + '</div></div>';
+  }
+  function footHTML(p, c) {
+    var x = BX(c.doc), showNo = !(c.pdf && !c.pdf.pageNums);
+    return '<div class="dqk-pn"><div class="l">' + esc(x.footL) + '</div><div class="c">' + (showNo ? 'Səhifə ' + p.no + ' / ' + (c.last || "") : "") + '</div><div class="r">' + esc(x.author) + '</div></div>';
+  }
+  function wmHTML(c) {
+    var x = BX(c.doc);
+    if (!x.showWm) return "";
+    return '<div class="dqk-wm">' + (x.showLogo ? emblem(false, x.logo) : "") + '<div class="t1">' + esc(x.wm1) + '</div><div class="t2">' + esc(x.wm2) + '</div></div>';
+  }
   function $(i) { return D.getElementById(i); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function rich(s) {
@@ -173,20 +201,16 @@
       ".dqk-pg.bwd{animation:dqkBwd .5s cubic-bezier(.22,1,.36,1) both;transform-origin:right center}",
       "@keyframes dqkFwd{from{opacity:0;transform:perspective(1500px) rotateY(-30deg) translateX(22px)}to{opacity:1;transform:none}}",
       "@keyframes dqkBwd{from{opacity:0;transform:perspective(1500px) rotateY(30deg) translateX(-22px)}to{opacity:1;transform:none}}",
-      ".dqk-rh{display:flex;justify-content:space-between;gap:10px;padding:12px 22px 7px;font:700 10px/1.2 system-ui,sans-serif;letter-spacing:1.3px;text-transform:uppercase;color:#8a7f66;border-bottom:1px solid #e6dcc3;margin:0 14px;flex:none}",
-      ".dqk-rh span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
-      ".dqk-bd{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:14px 22px 6px}",
-      ".dqk-pn{flex:none;text-align:center;font:600 12px Georgia,serif;color:#8a7f66;padding:6px 0 11px}",
-      ".dqk-pn:before,.dqk-pn:after{content:'—';margin:0 8px;opacity:.5}",
-      ".dqk-pg.L .dqk-pn{text-align:left;padding-left:22px}.dqk-pg.R .dqk-pn{text-align:right;padding-right:22px}",
-      ".dqk-pg.L .dqk-pn:before,.dqk-pg.L .dqk-pn:after,.dqk-pg.R .dqk-pn:before,.dqk-pg.R .dqk-pn:after{content:none}",
+      ".dqk-rh{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:end;gap:6px;padding:11px 0 5px;margin:0 16px;border-bottom:1.5px solid #0b2a6b;flex:none;position:relative;z-index:2}.dqk-rh .l{font:700 .58em system-ui,sans-serif;color:#0b2a6b;white-space:nowrap}.dqk-rh .c{font:italic 700 .82em Georgia,'Noto Serif',serif;color:#0b2a6b;white-space:nowrap;text-align:center}.dqk-rh .c i{font-style:normal;color:#c9a063;margin:0 .3em}.dqk-rh .r{text-align:right;font:italic 700 .62em Georgia,serif;color:#0b2a6b;white-space:nowrap}",
+      ".dqk-bd{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:14px 16px 6px}",
+      ".dqk-pn{flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;margin:0 16px;padding:5px 0 9px;border-top:1px solid #c9a063;font-size:.6em;color:#6b7690;position:relative;z-index:2}.dqk-pn .l,.dqk-pn .r{font-style:italic;font-family:Georgia,serif}.dqk-pn .r{text-align:right}.dqk-pn .c{font:700 1.05em system-ui,sans-serif;color:#0b2a6b;text-align:center;white-space:nowrap}",
       ".dqk-ban{margin:2px 0 14px;padding:10px 14px;border-radius:10px;color:#fff;background:linear-gradient(120deg,var(--a),var(--b));font:800 15px Georgia,serif;display:flex;justify-content:space-between;align-items:center;gap:8px}",
       ".dqk-ban small{font:700 11px system-ui,sans-serif;opacity:.85;letter-spacing:.6px}",
-      ".dqk-q{display:flex;gap:10px;margin:0 0 15px;break-inside:avoid}",
+      ".dqk-q{display:flex;gap:9px;margin:0 0 13px;break-inside:avoid;padding-bottom:11px;border-bottom:1px dashed #e6dcc3}.dqk-bd.c2 .dqk-q:last-child{border-bottom:0}",
       ".dqk-n{flex:none;min-width:30px;height:30px;border-radius:50%;background:var(--a);color:#fff;font:800 13px/30px system-ui,sans-serif;text-align:center;padding:0 4px;box-sizing:border-box}",
       ".dqk-qb{flex:1;min-width:0}.dqk-qt{font-weight:700;overflow-wrap:anywhere}.dqk-qt p,.dqk-o li span p{margin:0 0 .4em}",
-      ".dqk-qb img{max-width:100%;height:auto;border-radius:6px}.dqk-im{max-height:260px;object-fit:contain}.dqk-oi{max-height:130px;object-fit:contain}.dqk-im{display:block;margin:8px auto 2px}.dqk-oi{display:block;max-width:60%;margin:5px 0}",
-      ".dqk-o{list-style:none;margin:7px 0 0;padding:0}.dqk-o li{display:flex;gap:8px;padding:3px 7px;margin:0 -7px;border-radius:7px;overflow-wrap:anywhere}",
+      ".dqk-qb img{max-width:100%;height:auto;border-radius:6px}.dqk-im{max-height:190px;object-fit:contain}.dqk-qb img.dqk-oi{height:72px;width:auto;max-width:100%;object-fit:contain}.dqk-bd.c2 .dqk-im{max-height:150px}.dqk-bd.c2 .dqk-qb img.dqk-oi{height:56px}.dqk-o li.hi{align-items:center}.dqk-o.gi{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:6px 12px}.dqk-o.gi li{flex-direction:column;align-items:flex-start;gap:1px;margin:0;padding:2px 0}.dqk-bd.c2 .dqk-o.gi{grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:6px 8px}.dqk-qb .dqk-o.gi img.dqk-oi{width:100%;height:auto;max-height:72px}.dqk-bd.c2 .dqk-qb .dqk-o.gi img.dqk-oi{max-height:54px}.dqk-im{display:block;margin:8px auto 2px}.dqk-oi{display:block;max-width:100%;margin:3px 0}",
+      ".dqk-o{list-style:none;margin:7px 0 0;padding:0;display:flex;flex-wrap:wrap;align-items:flex-start;gap:3px 16px}.dqk-o li{display:flex;gap:6px;padding:3px 7px;margin:0 -7px;border-radius:7px;overflow-wrap:anywhere;flex:0 1 auto;max-width:100%}.dqk-o li span{min-width:0}.dqk-o li img{max-width:100%}",
       ".dqk-o li b{flex:none;color:var(--a);font-family:system-ui,sans-serif;font-size:.86em;padding-top:.12em;min-width:1.4em}",
       ".dqk-o li.ok{background:#dcfce7;box-shadow:inset 3px 0 0 #16a34a}.dqk-o li.ok b{color:#15803d}",
       ".dqk-open{margin-top:8px;padding:8px 11px;border:1.5px dashed #b9ad8c;border-radius:8px;color:#8a7f66;font:600 .86em system-ui,sans-serif}",
@@ -236,10 +260,9 @@
       ".dqk-pdfbody{padding:2px 4px 6px;border-left:3px solid #d9a441;margin:10px 0 0 4px;padding-left:12px}",
       ".dqk-cks{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px}.dqk-ck{display:flex!important;align-items:center;gap:10px;margin:0!important;padding:10px 12px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;font-size:13.5px!important;font-weight:600!important;text-transform:none!important;letter-spacing:0!important;color:#0f172a!important;cursor:pointer}.dqk-ck input{width:20px;height:20px;accent-color:#0a2f7a;flex:none}",
       "#dqk-cvp{position:fixed;inset:0;z-index:100010;background:#0b1220d9;display:flex;align-items:center;justify-content:center;padding:14px;cursor:pointer;animation:dqkUp .3s ease both}.dqk-cvp-in{text-align:center}.dqk-cvp-in .dqk-pvw{margin:0 auto}.dqk-cvp-h{margin-top:12px;color:#cfd9ef;font:600 13px system-ui,sans-serif}",
-      ".dqk-pn.pdf{display:flex;justify-content:space-between;gap:10px;padding:6px 22px 11px;text-align:left}.dqk-pn.pdf:before,.dqk-pn.pdf:after{content:none}.dqk-pn.pdf span:last-child{font-weight:700}",
-      ".dqk-wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;font:900 70px/1 system-ui,sans-serif;letter-spacing:4px;color:#0a2f7a12;transform:rotate(-30deg);white-space:nowrap;z-index:0;overflow:hidden}.dqk-pg>.dqk-rh,.dqk-pg>.dqk-bd,.dqk-pg>.dqk-pn{position:relative;z-index:1}",
+      ".dqk-wm{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}.dqk-wm .dqk-em{position:absolute;left:50%;top:46%;width:46%;aspect-ratio:1;height:auto;transform:translate(-50%,-50%);opacity:.075}.dqk-wm .t1{position:absolute;left:0;right:0;top:55%;text-align:center;transform:rotate(-30deg);font:800 3.9em system-ui,sans-serif;color:#0b2a6b;opacity:.055;letter-spacing:1px}.dqk-wm .t2{position:absolute;left:0;right:0;top:66%;text-align:center;transform:rotate(-30deg);font:italic 600 1.7em Georgia,serif;color:#0b2a6b;opacity:.075}.dqk-pg>.dqk-rh,.dqk-pg>.dqk-bd,.dqk-pg>.dqk-pn{position:relative;z-index:2}.dqk-pg.cv .dqk-cem{width:64px;height:64px;margin:0 auto 4px;position:relative;z-index:2}.dqk-cem svg{width:100%;height:100%}",
       ".dqk-pg.sans{font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;line-height:1.5}",
-      ".dqk-bd.c2{column-count:2;column-gap:18px;column-fill:auto;overflow:hidden}.dqk-bd.c2 .dqk-ban{column-span:all}.dqk-bd.c2 .dqk-q{break-inside:avoid}",
+      ".dqk-bd.c2{column-count:2;column-gap:20px;column-rule:1px solid #d9cfb4;column-fill:auto;overflow:hidden}.dqk-bd.c2 .dqk-ban{column-span:all}.dqk-bd.c2 .dqk-q{break-inside:avoid}",
       ".dqk-pg.pdf{box-shadow:0 20px 40px -14px #000a;border-radius:3px}.dqk-pg.pdf.cv{border-radius:3px}.dqk-pg.pdf .dqk-bd{overflow:hidden}",
       ".dqk-pdfwrap{position:relative;flex:none}",
       "#dqk-rd.pdfm [data-r=fsm],#dqk-rd.pdfm [data-r=fsp]{display:none}",
@@ -252,16 +275,16 @@
 
   /* ------------------------------------------------------------------ ÜZ QABIĞI */
   function coverHTML(doc, st, print) {
-    var brand = String(doc.brand || "").trim() || "DQ PLATFORM", by = String(doc.byline || "").trim() || "© DQ PLATFORM";
+    var brand = String(doc.brand || "").trim() || "DQ PLATFORM", by = who(doc.byline) || (BX(doc).center + " · " + BX(doc).author);
     var stat = st ? ((st.n != null ? st.n + " sınaq" : "") + (st.q != null ? " · " + st.q + " sual" : "")) : "";
-    return '<div class="dqk-cvi"><div class="top">' + esc(brand) + '</div><div class="orn">❖</div><h1>' + esc(doc.title || "Kitabın adı") + '</h1>' +
+    return '<div class="dqk-cvi"><div class="top">' + esc(brand) + '</div><div class="dqk-cem">' + (BX(doc).showLogo ? emblem(true, BX(doc).logo) : "") + '</div><h1>' + esc(doc.title || "Kitabın adı") + '</h1>' +
       (doc.subtitle ? '<div class="sub">' + esc(doc.subtitle) + '</div>' : "") +
       '<div class="badge">' + esc(subjName(doc.subject)) + '</div>' + (stat ? '<div class="st">' + esc(stat) + '</div>' : "") +
       (print ? "" : '<button class="go" data-r="start">Oxumağa başla →</button>') + '<div class="foot">' + esc(by) + '</div></div>';
   }
   function backHTML(doc, print) {
-    return '<div class="dqk-cvi"><div class="orn">❖</div><h1 style="font-size:24px">Uğurlar!</h1><div class="sub">Hazırlığınız uğurlu olsun</div><div class="st">' + esc(doc.title) + '</div>' +
-      (print ? "" : '<button class="go" data-r="toc">Mündəricata qayıt</button>') + '<div class="foot">' + esc(String(doc.byline || "").trim() || "© DQ PLATFORM") + '</div></div>';
+    return '<div class="dqk-cvi"><div class="dqk-cem">' + (BX(doc).showLogo ? emblem(true, BX(doc).logo) : "") + '</div><h1 style="font-size:24px">Uğurlar!</h1><div class="sub">Hazırlığınız uğurlu olsun</div><div class="st">' + esc(doc.title) + '</div>' +
+      (print ? "" : '<button class="go" data-r="toc">Mündəricata qayıt</button>') + '<div class="foot">' + esc(who(doc.byline) || (BX(doc).center + " · " + BX(doc).author)) + '</div></div>';
   }
   function themeVars(d) { var t = theme(d.theme); return "--a:" + t.a + ";--b:" + t.b + ";--g:" + t.g; }
   function docTotal(d) {
@@ -330,9 +353,9 @@
     m.innerHTML = h;
   }
 
-  function newDoc() { return { title: "", subtitle: "Sınaq toplusu", subject: "all", theme: 0, brand: "", byline: "", items: [], pdf: Object.assign({}, PDF_DEF), created: new Date().toISOString() }; }
+  function newDoc() { return { title: "", subtitle: "Sınaq toplusu", subject: "all", theme: 0, brand: "", byline: "", items: [], bx: Object.assign({}, BXDEF), pdf: Object.assign({}, PDF_DEF), created: new Date().toISOString() }; }
   function openEditor(d) {
-    var doc = JSON.parse(JSON.stringify(d)); doc.items = doc.items || []; doc.pdf = pdfOf(doc);
+    var doc = JSON.parse(JSON.stringify(d)); doc.items = doc.items || []; doc.pdf = pdfOf(doc); doc.bx = Object.assign({}, BX(doc));
     A.ed = { doc: doc, loading: true, pdfOpen: false, catF: "" };
     drawEditor();
     loadIdx().then(function () { if (A.ed) { A.ed.loading = false; drawEditor(true); } }, function (e) {
@@ -340,6 +363,14 @@
     });
   }
   function val(id) { var e = $(id); return e ? e.value : null; }
+  var BXF = [["phone", "Başlıq — sol (nömrə)"], ["center", "Başlıq — mərkəz (ad)"], ["sub", "Başlıq — mərkəz (ikinci hissə)"], ["author", "Müəllif (başlıq sağ + altlıq sağ)"], ["footL", "Altlıq — sol"], ["wm1", "Filqran — böyük yazı"], ["wm2", "Filqran — kiçik yazı"], ["logo", "Loqo yazısı (1–3 hərf)"], ["showHead", "Başlıq göstərilsin", 1], ["showLogo", "Loqo göstərilsin", 1], ["showWm", "Filqran göstərilsin", 1]];
+  function bxFields(x, pre) {
+    var h = '<div class="dqk-2">';
+    BXF.filter(function (f) { return !f[2]; }).forEach(function (f) { h += '<div><label>' + f[1] + '</label><input class="dqk-in" id="' + pre + f[0] + '" maxlength="40" value="' + esc(x[f[0]]) + '"></div>'; });
+    h += '</div><div class="dqk-cks" style="margin-top:10px">';
+    BXF.filter(function (f) { return f[2]; }).forEach(function (f) { h += '<label class="dqk-ck"><input type="checkbox" id="' + pre + f[0] + '"' + (x[f[0]] ? " checked" : "") + '><span>' + f[1] + '</span></label>'; });
+    return h + '</div>';
+  }
   function readInputs() {
     if (!A.ed) return;
     var d = A.ed.doc, p = d.pdf, v;
@@ -347,9 +378,8 @@
     if ((v = val("dqk-st")) != null) d.subtitle = v;
     if ((v = val("dqk-br")) != null) d.brand = v;
     if ((v = val("dqk-by")) != null) d.byline = v;
-    if ((v = val("dqk-ph")) != null) p.header = v;
-    if ((v = val("dqk-pf")) != null) p.footer = v;
-    if ((v = val("dqk-pw")) != null) p.watermark = v;
+    d.bx = d.bx || Object.assign({}, BXDEF);
+    BXF.forEach(function (f) { var e = $("dqk-b-" + f[0]); if (e) d.bx[f[0]] = f[2] ? !!e.checked : e.value; });
     if ((v = val("dqk-pfs")) != null) p.fs = Math.max(10, Math.min(18, parseInt(v) || 13));
     ["cover", "toc", "dividers", "key", "back", "answers", "pageNums"].forEach(function (k) { var e = $("dqk-c-" + k); if (e) p[k] = !!e.checked; });
   }
@@ -378,6 +408,7 @@
     h += '<label>Fənn</label>' + chipRow(SUBJ_CHIPS, d.subject, "subj");
     h += '<label>Üz qabığının rəngi</label><div class="dqk-chips">' + THEMES.map(function (t, i) { return '<div class="dqk-sw' + (d.theme === i ? " on" : "") + '" data-a="theme" data-v="' + i + '" title="' + t.n + '" style="background:linear-gradient(135deg,' + t.a + ',' + t.b + ')"></div>'; }).join("") + '</div>';
 
+    h += '<div class="dqk-h">🏷 Loqo, başlıq, altlıq və filqran (hər səhifədə)</div>' + bxFields(d.bx || BX(d), "dqk-b-") + '<div class="dqk-meta" style="margin-top:6px">Yazılar istənilən vaxt dəyişdirilə bilər; kitab oxunarkən də 🏷 düyməsi ilə redaktə olunur.</div>';
     h += '<div class="dqk-h">Kitabın sınaqları (' + d.items.length + ')</div>';
     if (!d.items.length) h += '<div class="dqk-meta" style="padding:6px 2px 10px">Hələ sınaq əlavə olunmayıb. Aşağıdan seçin.</div>';
     d.items.forEach(function (x, i) {
@@ -410,9 +441,6 @@
     h += '<label>Sütun sayı (sual səhifələrində)</label>' + chipRow([[1, "1 sütun"], [2, "2 sütun"]], p.cols, "pset", "cols");
     h += '<label>Şrift</label>' + chipRow([["serif", "Kitab (Serif)"], ["sans", "Sadə (Sans)"]], p.font, "pset", "font");
     h += '<label>Şrift ölçüsü: <b id="dqk-pfsv">' + p.fs + ' px</b></label><input type="range" id="dqk-pfs" min="10" max="18" step="1" value="' + p.fs + '" style="width:100%">';
-    h += '<label>Səhifə başlığı (yuxarı)</label><input class="dqk-in" id="dqk-ph" maxlength="80" placeholder="Boş qalsa kitabın adı yazılır" value="' + esc(p.header) + '">';
-    h += '<label>Səhifə altlığı (aşağı sol)</label><input class="dqk-in" id="dqk-pf" maxlength="80" placeholder="Məsələn: Hazırladı — Y. İmanov" value="' + esc(p.footer) + '">';
-    h += '<label>Su nişanı (watermark, ixtiyari)</label><input class="dqk-in" id="dqk-pw" maxlength="30" placeholder="Məsələn: ys.imanoff" value="' + esc(p.watermark) + '">';
     h += '<label>PDF-ə daxil olsun</label><div class="dqk-cks">' + chk("cover", "Üz qabığı", p) + chk("toc", "Mündəricat", p) + chk("dividers", "Sınaq ayırıcı səhifələri", p) + chk("key", "Cavab açarı", p) + chk("back", "Arxa qabıq", p) + chk("answers", "Düzgün cavablar sualların içində", p) + chk("pageNums", "Səhifə nömrələri", p) + '</div>';
     h += '<div class="dqk-row" style="margin-top:12px"><button class="dqk-btn o s" data-a="pdfprev">📄 PDF ön baxışı</button><button class="dqk-btn g s" data-a="pdfprint">🖨 PDF yarat</button></div><div class="dqk-meta" style="margin-top:6px">«PDF yarat» çap pəncərəsini açır — orada «PDF kimi saxla» seçin. Dizayn ayarları kitabla birlikdə saxlanılır.</div>';
     h += '</div>';
@@ -495,7 +523,7 @@
       toast("✅ Kitab yadda saxlanıldı");
       A.docs = await listAll();
       var fresh = A.docs.filter(function (x) { return d._id ? x._id === d._id : x.created === d.created; })[0];
-      if (fresh) { A.ed.doc = JSON.parse(JSON.stringify(fresh)); A.ed.doc.pdf = pdfOf(A.ed.doc); }
+      if (fresh) { A.ed.doc = JSON.parse(JSON.stringify(fresh)); A.ed.doc.pdf = pdfOf(A.ed.doc); A.ed.doc.bx = Object.assign({}, BX(A.ed.doc)); }
       drawEditor(true);
     } catch (e) { toast("Yadda saxlanmadı: " + (e && e.message || e), true); }
     A.busy = false;
@@ -507,8 +535,8 @@
   function pageSize() {
     var w = window.innerWidth, h = window.innerHeight, spread = w >= 900;
     var stageH = Math.max(320, h - 56 - 62 - 20 - 3);
-    var pw = spread ? Math.min(560, Math.floor((Math.min(w, 1240) - 40) / 2)) : Math.min(w - 16, 560);
-    return { w: pw, h: Math.min(stageH, spread ? 820 : 900), spread: spread };
+    var pw = spread ? Math.floor(Math.min((Math.min(w, 1500) - 40) / 2, stageH / 1.414, 720)) : Math.min(w - 16, 560);
+    return { w: pw, h: spread ? Math.round(pw * 1.414) : Math.min(stageH, 900), spread: spread };
   }
 
   /* real DOM ölçmə: eyni CSS ilə gizli səhifədə hər sualın hündürlüyü ölçülür */
@@ -517,7 +545,7 @@
       var host = D.createElement("div");
       host.setAttribute("aria-hidden", "true");
       host.style.cssText = "position:fixed;left:-99999px;top:0;visibility:hidden;pointer-events:none;contain:layout";
-      host.innerHTML = '<div class="dqk-pg S' + (pdfPage ? " pdf" : "") + (font === "sans" ? " sans" : "") + '" style="width:' + sz.w + 'px;height:' + sz.h + 'px;font-size:' + fs + 'px"><div class="dqk-rh"><span>x</span><span>x</span></div><div class="dqk-bd"></div><div class="dqk-pn">1</div></div>';
+      host.innerHTML = '<div class="dqk-pg S' + (pdfPage ? " pdf" : "") + (font === "sans" ? " sans" : "") + '" style="width:' + sz.w + 'px;height:' + sz.h + 'px;font-size:' + fs + 'px">' + headHTML({}) + '<div class="dqk-bd' + (cols === 2 ? " c2" : "") + '" style="column-count:1;column-rule:0"></div>' + footHTML({ no: 1 }, { last: 99 }) + '</div>';
       D.body.appendChild(host);
       var bd = host.querySelector(".dqk-bd"), cs = getComputedStyle(bd);
       var padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight), padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
@@ -565,7 +593,7 @@
       if (isOpen(cat, r.q_number)) return w + 2.5;
       (Array.isArray(r.options) ? r.options : []).forEach(function (x) {
         var t = x && typeof x === "object" ? x.text : x;
-        w += ln(t) + 0.2 + (x && typeof x === "object" && x.image ? 7 : 0);
+        w += ln(t) * 0.55 + 0.1 + (x && typeof x === "object" && x.image ? 4 : 0);
       });
       return w;
     }
@@ -573,11 +601,13 @@
     var availH = o.m ? o.m.availH : H - 105;
     var kc = Math.max(4, Math.min(10, Math.floor((W - 44) / (fs * 5.2)))), keyRows = Math.max(4, Math.floor((availH - 60) / (fs * 2.5)));
 
+    var seq = 0;
     data.forEach(function (d, i) {
-      var it = d.it, label = "Sınaq " + it.exam + " · " + it.cat;
+      var it = d.it, label;
       var subs = subjList(doc.subject).map(function (k) { return { k: k, rows: d.rows.filter(inRange(k)) }; }).filter(function (x) { return x.rows.length; });
       var n = subs.reduce(function (s, x) { return s + x.rows.length; }, 0);
       if (!n) return;
+      seq++; label = "Sınaq " + seq + " · " + it.cat;
       total += n; nItems++;
       if (F.div) content.push({ t: "div", sec: i, label: label, subs: subs.map(function (x) { return { name: SUBJ[x.k].name, n: x.rows.length }; }), n: n });
       secs.push({ l: 0, text: label, local: content.length - (F.div ? 1 : 0), meta: n + " sual" });
@@ -640,7 +670,8 @@
       h += '<div class="dqk-open">Açıq sual — cavabı yazın: ____________</div>';
       if (ans) h += '<div class="dqk-ans">Cavab: <b>' + esc(r.correct) + '</b></div>';
     } else {
-      h += '<ol class="dqk-o">';
+      var gi = (Array.isArray(r.options) ? r.options : []).some(function (o) { return o && typeof o === "object" && o.image; });
+      h += '<ol class="dqk-o' + (gi ? " gi" : "") + '">';
       (Array.isArray(r.options) ? r.options : []).forEach(function (o, i) {
         var obj = o && typeof o === "object", t = obj ? o.text || "" : o, im = obj ? o.image : null;
         h += '<li' + (ans && parseInt(r.correct) === i ? ' class="ok"' : "") + '><b>' + (L[i] || "") + ')</b><span>' + rich(t) + (im ? '<img class="dqk-oi" src="' + esc(im) + '" alt="">' : "") + '</span></li>';
@@ -655,12 +686,7 @@
     var doc = c.doc, h;
     if (p.t === "cover") return coverHTML(doc, { n: c.n, q: c.total }, c.print);
     if (p.t === "back") return backHTML(doc, c.print);
-    var left = (c.pdf && String(c.pdf.header || "").trim()) || doc.title;
-    var head = '<div class="dqk-rh"><span>' + esc(left) + '</span><span>' + esc(p.label || (p.t === "toc" ? "Mündəricat" : "")) + '</span></div>';
-    var foot = c.pdf
-      ? '<div class="dqk-pn pdf"><span>' + esc(c.pdf.footer || "") + '</span><span>' + (c.pdf.pageNums ? p.no : "") + '</span></div>'
-      : '<div class="dqk-pn">' + p.no + '</div>';
-    var wm = c.pdf && String(c.pdf.watermark || "").trim() ? '<div class="dqk-wm">' + esc(c.pdf.watermark) + '</div>' : "";
+    var head = headHTML(c), foot = footHTML(p, c), wm = wmHTML(c);
     if (p.t === "toc") {
       h = '<h2 class="dqk-h2">Mündəricat' + (p.cont ? ' <small style="font-size:.5em;color:#8a7f66">(davamı)</small>' : "") + '</h2><ul class="dqk-toc">' + p.ents.map(function (s) {
         return '<li class="l' + s.l + '" data-go="' + s.page + '"><span>' + esc(s.text) + (s.meta ? '<em>' + esc(s.meta) + '</em>' : "") + '</span><i></i><b>' + s.page + '</b></li>';
@@ -677,7 +703,7 @@
         return '<div class="dqk-key" style="grid-template-columns:repeat(' + p.cols + ',1fr)">' + r.cells.map(function (x) { return '<div><span>' + esc(x.n) + '</span><b>' + esc(x.a) + '</b></div>'; }).join("") + '</div>';
       }).join("");
     }
-    var c2 = c.pdf && c.pdf.cols === 2 && p.t === "q" ? " c2" : "";
+    var c2 = c.cols === 2 && p.t === "q" ? " c2" : "";
     return wm + head + '<div class="dqk-bd' + c2 + '">' + h + '</div>' + foot;
   }
 
@@ -707,7 +733,7 @@
     var r = $("dqk-rd");
     if (r) return r;
     r = D.createElement("div"); r.id = "dqk-rd";
-    r.innerHTML = '<div class="dqk-rtop"><button class="dqk-ib" data-r="close" aria-label="Bağla">✕</button><h4 id="dqk-rt"></h4><button class="dqk-ib" data-r="toc" title="Mündəricat" aria-label="Mündəricat">☰</button><button class="dqk-ib" data-r="fsm" title="Kiçilt">A−</button><button class="dqk-ib" data-r="fsp" title="Böyüt">A+</button><button class="dqk-ib" data-r="ans" id="dqk-ansb" title="Cavabları göstər/gizlət">✓</button><button class="dqk-ib" data-r="pdf" id="dqk-pdfb" title="PDF səhifə görünüşü">📄</button><button class="dqk-ib" data-r="print" title="Çap / PDF yarat">🖨</button></div><div class="dqk-prog"><i id="dqk-pr"></i></div><div class="dqk-stage" id="dqk-stage"></div><div class="dqk-rbot"><button class="dqk-ib nv" data-r="prev" aria-label="Əvvəlki">‹</button><div class="dqk-pgi"><input id="dqk-pi" type="number" min="0" inputmode="numeric" aria-label="Səhifə nömrəsi"><span id="dqk-pt">/ 0</span></div><button class="dqk-ib nv" data-r="next" aria-label="Növbəti">›</button></div>';
+    r.innerHTML = '<div class="dqk-rtop"><button class="dqk-ib" data-r="close" aria-label="Bağla">✕</button><h4 id="dqk-rt"></h4><button class="dqk-ib" data-r="toc" title="Mündəricat" aria-label="Mündəricat">☰</button><button class="dqk-ib" data-r="fsm" title="Kiçilt">A−</button><button class="dqk-ib" data-r="fsp" title="Böyüt">A+</button><button class="dqk-ib" data-r="ans" id="dqk-ansb" title="Cavabları göstər/gizlət">✓</button><button class="dqk-ib" data-r="pdf" id="dqk-pdfb" title="PDF səhifə görünüşü">📄</button><button class="dqk-ib" data-r="brand" id="dqk-brandb" title="Loqo, başlıq, altlıq, filqran">🏷</button><button class="dqk-ib" data-r="print" title="Çap / PDF yarat">🖨</button></div><div class="dqk-prog"><i id="dqk-pr"></i></div><div class="dqk-stage" id="dqk-stage"></div><div class="dqk-rbot"><button class="dqk-ib nv" data-r="prev" aria-label="Əvvəlki">‹</button><div class="dqk-pgi"><input id="dqk-pi" type="number" min="0" inputmode="numeric" aria-label="Səhifə nömrəsi"><span id="dqk-pt">/ 0</span></div><button class="dqk-ib nv" data-r="next" aria-label="Növbəti">›</button></div>';
     D.body.appendChild(r);
     r.addEventListener("click", onReaderClick);
     var pi = r.querySelector("#dqk-pi");
@@ -754,6 +780,7 @@
     r.classList.toggle("pdfm", me.pdfMode);
     r.querySelector("#dqk-rt").textContent = doc.title || "Kitab";
     r.classList.add("on"); D.body.style.overflow = "hidden";
+    var bb = $("dqk-brandb"); if (bb) bb.style.display = isAdmin() ? "" : "none";
     r.querySelector("#dqk-stage").innerHTML = '<div class="dqk-load"><i></i>Kitab hazırlanır…</div>';
     var data;
     try {
@@ -785,8 +812,10 @@
       mp && mp.done();
     } else {
       R.sz = pageSize();
-      var ms = makeMeasurer(R.fs, R.sz, 1, "serif", false);
-      res = paginate(R.doc, R.data, R.fs, R.sz, { m: ms });
+      R.cols = R.sz.w >= 470 ? 2 : 1;
+      R.fsEff = R.cols === 2 ? Math.max(10, Math.min(R.fs - 2, Math.round(R.sz.w / 44))) : R.fs;
+      var ms = makeMeasurer(R.fsEff, R.sz, R.cols, "serif", false);
+      res = paginate(R.doc, R.data, R.fsEff, R.sz, { m: ms, cols: R.cols });
       ms && ms.done();
     }
     R.res = res; R.pages = res.pages; R.off = res.off;
@@ -798,7 +827,7 @@
   }
 
   function ctxOf(res) {
-    return { doc: R.doc, total: res.total, n: res.nItems, ans: R.pdfMode ? R.pdfAns : R.ans, pdf: R.pdfMode ? pdfOf(R.doc) : null, print: false };
+    return { cols: R.pdfMode ? pdfOf(R.doc).cols : (R.cols || 1), last: res.pages.length - 1 + res.off, doc: R.doc, total: res.total, n: res.nItems, ans: R.pdfMode ? R.pdfAns : R.ans, pdf: R.pdfMode ? pdfOf(R.doc) : null, print: false };
   }
 
   function draw(animate) {
@@ -817,7 +846,7 @@
       var side = view.length === 1 ? "S" : (kk === 0 ? "L" : "R");
       if (idx == null) { h += '<div class="dqk-pg ' + side + ' blank" style="width:' + sz.w + 'px;height:' + sz.h + 'px"></div>'; return; }
       var p = R.pages[idx], cls = "dqk-pg " + side + ((p.t === "cover" || p.t === "back") ? " cv" : "") + (animate ? " " + R.dir : "");
-      h += '<div class="' + cls + '" data-idx="' + idx + '" style="width:' + sz.w + 'px;height:' + sz.h + 'px;font-size:' + R.fs + 'px">' + pageInner(p, c) + '</div>';
+      h += '<div class="' + cls + '" data-idx="' + idx + '" style="width:' + sz.w + 'px;height:' + sz.h + 'px;font-size:' + (R.fsEff || R.fs) + 'px">' + pageInner(p, c) + '</div>';
     });
     st.innerHTML = h + '</div>';
     R.view = view;
@@ -869,6 +898,26 @@
     }
     if (a === "pdf") { R.pdfMode = !R.pdfMode; toast(R.pdfMode ? "PDF səhifə görünüşü (" + pdfOf(R.doc).size + ")" : "Oxu görünüşü"); return rebuild(true); }
     if (a === "print") return doPrint();
+    if (a === "brand") return brandDlg();
+  }
+  function brandDlg() {
+    if (!R) return;
+    var old = $("dqk-bxd"); if (old) old.remove();
+    var x = BX(R.doc), o = D.createElement("div"); o.id = "dqk-bxd";
+    o.setAttribute("style", "position:fixed;inset:0;z-index:100030;background:#0b1220b8;display:flex;align-items:center;justify-content:center;padding:14px;font-family:system-ui,sans-serif");
+    o.innerHTML = '<div class="dqk-ed" style="margin:0;max-width:520px;width:100%;max-height:92vh;overflow:auto;color:#0f172a;text-align:left"><b style="font-size:16px">🏷 Loqo, başlıq, altlıq və filqran</b>' + bxFields(x, "dqk-d-") +
+      '<div class="dqk-row" style="margin-top:14px"><button class="dqk-btn" data-q="ok">Tətbiq et</button>' + (R.doc._id ? '<button class="dqk-btn g" data-q="save">💾 Tətbiq et və saxla</button>' : "") + '<button class="dqk-btn o" data-q="no">Ləğv et</button><button class="dqk-btn o" data-q="def">İlkin</button></div></div>';
+    D.body.appendChild(o);
+    function read() { var b = {}; BXF.forEach(function (f) { var e = $("dqk-d-" + f[0]); if (e) b[f[0]] = f[2] ? !!e.checked : e.value; }); return b; }
+    o.addEventListener("click", async function (e) {
+      var q = e.target === o ? "no" : (e.target.getAttribute && e.target.getAttribute("data-q"));
+      if (!q) return;
+      if (q === "no") return o.remove();
+      if (q === "def") { R.doc.bx = Object.assign({}, BXDEF); o.remove(); rebuild(true); return brandDlg(); }
+      R.doc.bx = read();
+      if (q === "save") { try { R.doc.updated = new Date().toISOString(); await saveDoc(R.doc); toast("✅ Saxlanıldı"); } catch (er) { toast("Saxlanmadı", true); } }
+      o.remove(); rebuild(true);
+    });
   }
 
   function waitImgs(box) {
@@ -890,7 +939,7 @@
     sty.textContent = "@media print{@page{size:" + (pdf.size === "Letter" ? "letter" : pdf.size) + ";margin:10mm}#dqk-print .dqk-pg{width:" + ps.w + "px!important;height:" + ps.h + "px!important}}";
     D.head.appendChild(sty);
     var box = D.createElement("div"); box.id = "dqk-print"; box.setAttribute("style", themeVars(R.doc));
-    var c = { doc: R.doc, total: res.total, n: res.nItems, ans: R.pdfAns, pdf: pdf, print: true };
+    var c = { cols: pdf.cols, last: res.pages.length - 1 + res.off, doc: R.doc, total: res.total, n: res.nItems, ans: R.pdfAns, pdf: pdf, print: true };
     box.innerHTML = res.pages.map(function (p) {
       var cv = p.t === "cover" || p.t === "back";
       return '<div class="dqk-pg S pdf' + (cv ? " cv" : "") + (pdf.font === "sans" ? " sans" : "") + '" style="width:' + ps.w + 'px;height:' + ps.h + 'px;font-size:' + pdf.fs + 'px">' + pageInner(p, c) + '</div>';
