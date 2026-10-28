@@ -5,6 +5,7 @@
      • Hər modul üçün açar (göstər / gizlət), qruplar üzrə düzülüş
      • «Hamısını yığ» / «Hamısını aç» (qrup siyahıları), axtarış, «Hamısını göstər»
      • «👁 Gizlədilmiş modullar (N)» — toxunanda göstərir, 2-ci dəfə toxunanda gizlədir
+     • Hər hansı modulun ÜSTÜNDƏ BASILI TUTSAN → «🙈 Gizlət» menyusu çıxır (4 san «Geri al»)
      • Seçim brauzerdə saxlanılır (localStorage: dqx_hidden_mods)
    Qoşulma: index.html-in sonunda, dq-admin-fix.js-dən SONRA.
    ===================================================================== */
@@ -92,6 +93,11 @@
       ".dqm-hs .hh .n{min-width:24px;padding:2px 9px;border-radius:999px;background:#64748b;color:#fff;font-size:11.5px;text-align:center}.dqm-hs .hh i{font-style:normal;font-size:10px;color:#94a3b8;transition:transform .25s}",
       ".dqm-hs.on .hh i{transform:rotate(180deg)}.dqm-hs .hl{display:none}.dqm-hs.on .hl{display:block}",
       ".dqm-em{padding:18px;text-align:center;color:#94a3b8;font:600 13px system-ui,sans-serif}",
+      ".dqap-c .admin-nav-card{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}",
+      ".dqm-pop{position:fixed;z-index:2147483200;min-width:190px;max-width:260px;background:#fff;border-radius:16px;box-shadow:0 14px 40px #0006,0 0 0 1px #e3e9f4;overflow:hidden;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;animation:dqmIn .15s ease both;text-align:left}",
+      ".dqm-pop .pt{padding:10px 14px 8px;font:700 12px system-ui,sans-serif;color:#64748b;border-bottom:1px solid #eef2f9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+      ".dqm-pop button{display:flex;align-items:center;gap:10px;width:100%;padding:13px 14px;border:0;background:#fff;font:800 14px system-ui,sans-serif;color:#0f172a;cursor:pointer;text-align:left;font-family:inherit}.dqm-pop button:active{background:#f1f5fb}.dqm-pop button.d{color:#b91c1c}",
+      ".dqm-toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2147483300;display:flex;align-items:center;gap:12px;background:#0f172a;color:#fff;border-radius:14px;padding:11px 14px;font:600 13px system-ui,sans-serif;box-shadow:0 10px 30px #0006;max-width:92vw}.dqm-toast button{border:0;background:#facc15;color:#0f172a;border-radius:9px;padding:6px 11px;font:800 12.5px inherit;font-family:inherit;cursor:pointer}",
       "@keyframes dqmIn{from{opacity:0}to{opacity:1}}@media(prefers-reduced-motion:reduce){#dqm-ov{animation:none}}"
     ].join("\n");
     D.head.appendChild(s);
@@ -198,6 +204,54 @@
     if (a === "un") { var H = hidden(), p = H.indexOf(m.key); if (p > -1) H.splice(p, 1); saveHidden(H); apply(); return; }
     if (a === "go") { try { m.el.click(); } catch (x) { } }
   }, true);
+
+  /* ---------- uzun basma → «Gizlət» menyusu ---------- */
+  var lpT = null, lpX = 0, lpY = 0, lpDone = 0;
+  function closePop() { var o = D.querySelector(".dqm-pop"); if (o) o.remove(); }
+  function toast(msg, undo) {
+    var o = D.querySelector(".dqm-toast"); if (o) o.remove();
+    o = D.createElement("div"); o.className = "dqm-toast"; o.innerHTML = "<span>" + esc(msg) + "</span>" + (undo ? '<button type="button">Geri al</button>' : "");
+    D.body.appendChild(o);
+    var tm = setTimeout(function () { o.remove(); }, 4500);
+    if (undo) o.querySelector("button").onclick = function () { clearTimeout(tm); o.remove(); undo(); };
+  }
+  function showPop(card, x, y) {
+    closePop(); css();
+    var info = cardInfo(card), o = D.createElement("div");
+    o.className = "dqm-pop";
+    o.innerHTML = '<div class="pt">' + esc(info.icon + " " + info.name) + '</div><button type="button" class="d" data-p="hide">🙈 Gizlət</button><button type="button" data-p="x">✕ Ləğv et</button>';
+    D.body.appendChild(o);
+    var w = o.offsetWidth, h = o.offsetHeight;
+    o.style.left = Math.max(8, Math.min(x - w / 2, innerWidth - w - 8)) + "px";
+    o.style.top = Math.max(8, Math.min(y + 10, innerHeight - h - 8)) + "px";
+    o.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-p]"); if (!b) return;
+      e.stopPropagation();
+      closePop();
+      if (b.getAttribute("data-p") === "hide") {
+        var H = hidden(); if (H.indexOf(info.key) === -1) H.push(info.key);
+        saveHidden(H); apply();
+        toast("«" + info.name + "» gizlədildi", function () { var G = hidden(), p = G.indexOf(info.key); if (p > -1) G.splice(p, 1); saveHidden(G); apply(); });
+      }
+    });
+    lpDone = Date.now();
+  }
+  function cardOf(t) { var c = t && t.closest ? t.closest("#admin-panel .dqap-root .dqap-c .admin-nav-card") : null; return c && !c.closest(".dqm-hid") ? c : null; }
+  D.addEventListener("pointerdown", function (e) {
+    if (e.target.closest && e.target.closest(".dqm-pop")) return;
+    closePop();
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    var c = cardOf(e.target); if (!c) return;
+    lpX = e.clientX; lpY = e.clientY; clearTimeout(lpT);
+    lpT = setTimeout(function () { showPop(c, lpX, lpY); if (navigator.vibrate) try { navigator.vibrate(18); } catch (x) { } }, 520);
+  }, true);
+  D.addEventListener("pointermove", function (e) { if (lpT && (Math.abs(e.clientX - lpX) > 10 || Math.abs(e.clientY - lpY) > 10)) { clearTimeout(lpT); lpT = null; } }, true);
+  ["pointerup", "pointercancel", "scroll"].forEach(function (n) { D.addEventListener(n, function () { clearTimeout(lpT); lpT = null; }, true); });
+  D.addEventListener("contextmenu", function (e) { var c = cardOf(e.target); if (!c) return; e.preventDefault(); clearTimeout(lpT); lpT = null; if (!D.querySelector(".dqm-pop")) showPop(c, e.clientX, e.clientY); }, true);
+  D.addEventListener("click", function (e) {
+    if (Date.now() - lpDone < 700 && cardOf(e.target)) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); }
+  }, true);
+  D.addEventListener("keydown", function (e) { if (e.key === "Escape") closePop(); });
 
   function sched() {
     if (busy) return;
