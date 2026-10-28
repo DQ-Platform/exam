@@ -16,7 +16,7 @@
   window.__dqPdfSecim = 1;
 
   var D = document, LET = ["A", "B", "C", "D", "E"], NAVY = "#0b2a6b", GOLD = "#c9a063", Z = 2147483100;
-  var BYPASS = null, ST = null, CSS_ON = false, PV_URL = null, TAB_OPEN = false;
+  var BYPASS = null, ST = null, CSS_ON = false, PV_URL = null, TAB_OPEN = false, EX_URL = null, ED_MSG = null;
 
   function $(i) { return D.getElementById(i); }
   function esc(s) {
@@ -169,7 +169,8 @@
      ===================================================================== */
   function __layout() {
     var doc = document, src = doc.getElementById("src"), out = doc.getElementById("out"), tpl = doc.getElementById("tpl");
-    var pages = [], cur = null;
+    var pages = [], cur = null, secs = [];
+    out.innerHTML = "";
 
     function over(col) { return col.scrollHeight > col.clientHeight + 1; }
 
@@ -177,6 +178,8 @@
       var p = doc.createElement("div");
       p.className = "page";
       p.innerHTML = tpl.innerHTML;
+      p.setAttribute("data-si", String(secs.indexOf(sec)));
+      if (first) p.setAttribute("data-first", "1");
       var sbar = p.querySelector(".sbar"), colsEl = p.querySelector(".cols");
       var nc = +sec.getAttribute("data-cols") || 2, cols = [], i;
       var cover = sec.querySelector(":scope>.cover"), banner = sec.querySelector(":scope>.sb");
@@ -204,13 +207,7 @@
 
     function fitOps(b) {
       var o = b.querySelector(".ops[data-auto]");
-      if (!o) return;
-      var any = !!o.querySelector("img"), mx = 0;
-      [].forEach.call(o.querySelectorAll(".ot"), function (t) { mx = Math.max(mx, (t.textContent || "").trim().length); });
-      o.className = "ops row";
-      if (!(o.scrollWidth > o.clientWidth + 1)) return;
-      if (!any && mx <= 26) { o.className = "ops two"; return; }
-      o.className = "ops col";
+      if (o) o.className = "ops";          /* variantlar CSS flex-wrap ilə yan-yana düzülür */
     }
 
     function tighten(b) {
@@ -238,7 +235,7 @@
     }
 
     sec_loop: {
-      var secs = [].slice.call(src.querySelectorAll(":scope>section"));
+      secs = [].slice.call(src.querySelectorAll(":scope>section"));
       secs.forEach(function (sec) {
         var blocks = [].slice.call(sec.children).filter(function (c) { return c.classList.contains("q") || c.classList.contains("kb"); });
         if (!blocks.length) return;
@@ -251,6 +248,247 @@
     [].forEach.call(out.querySelectorAll(".pg-n"), function (e, i) { e.textContent = String(i + 1); });
     [].forEach.call(out.querySelectorAll(".pg-t"), function (e) { e.textContent = String(total); });
     return total;
+  }
+
+  /* =====================================================================
+     Word tipli redaktə rejimi — sənədin İÇİNDƏ işləyir (closure istifadə etmir).
+     Alətlər paneli: geri/ irəli, şrift, ölçü, B/I/U/S, rəng, fon, hizalama, siyahı,
+     başlıq/altlıq/filqran redaktoru, yenidən səhifələmə, HTML kimi saxlama.
+     ===================================================================== */
+  function __edit(layout) {
+    var doc = document, body = doc.body, out = doc.getElementById("out"), src = doc.getElementById("src"), tpl = doc.getElementById("tpl");
+    var ON = false, saved = null, savedHost = null;
+    var EDIT_SEL = ".qt,.ot,.stm span,.cover h1,.cover p,.cover .sj,.sb span,.sb small,.kb h3,.kc i";
+    function $(i) { return doc.getElementById(i); }
+    function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+    function each(l, f) { [].forEach.call(l, f); }
+
+    /* ---------- alətlər paneli ---------- */
+    var tb = doc.createElement("div");
+    tb.id = "etb";
+    tb.innerHTML =
+      '<button data-c="undo" title="Geri al">↶</button><button data-c="redo" title="İrəli">↷</button><i class="sp"></i>' +
+      '<select id="efont" title="Şrift"><option value="">Şrift</option><option value="Noto Serif">Noto Serif</option><option value="Roboto">Roboto</option><option value="Arial">Arial</option><option value="Georgia">Georgia</option><option value="Times New Roman">Times New Roman</option><option value="Courier New">Courier New</option></select>' +
+      '<select id="esize" title="Ölçü (pt)"><option value="">pt</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>28</option></select><i class="sp"></i>' +
+      '<button data-c="bold" title="Qalın"><b>B</b></button><button data-c="italic" title="Kursiv"><em>I</em></button><button data-c="underline" title="Altından xətt"><u>U</u></button><button data-c="strikeThrough" title="Üstündən xətt"><s>S</s></button>' +
+      '<button data-c="subscript" title="Aşağı indeks">x₂</button><button data-c="superscript" title="Yuxarı indeks">x²</button><i class="sp"></i>' +
+      '<label class="clr" title="Mətn rəngi">A<input type="color" id="ecol" value="#0b2a6b"></label><label class="clr hl" title="Fon rəngi (marker)">▮<input type="color" id="ehl" value="#fff176"></label><i class="sp"></i>' +
+      '<button data-c="justifyLeft" title="Sola">≡</button><button data-c="justifyCenter" title="Mərkəzə">☰</button><button data-c="justifyRight" title="Sağa">≣</button><button data-c="justifyFull" title="Hər iki tərəfə">▤</button><i class="sp"></i>' +
+      '<button data-c="insertUnorderedList" title="Nişanlı siyahı">• ≡</button><button data-c="insertOrderedList" title="Nömrəli siyahı">1.≡</button><button data-c="removeFormat" title="Formatı təmizlə">⌫</button><i class="sp"></i>' +
+      '<button data-a="reflow" id="erf" title="Mətn dəyişdikdən sonra səhifələri yenidən düz">↻ Səhifələ</button><button data-a="hf" title="Başlıq, altlıq və filqran">🧾 Başlıq/altlıq</button><button data-a="save" title="Redaktə olunmuş sənədi HTML kimi yüklə">💾 HTML</button><button data-a="reset" title="Bütün dəyişiklikləri ləğv et">↩ Sıfırla</button><button data-a="done" class="ok">✓ Bitir</button>';
+    body.appendChild(tb);
+
+    var eb = doc.createElement("button");
+    eb.id = "ebtn"; eb.type = "button"; eb.textContent = "✏️ Redaktə";
+    if (self !== top) eb.style.display = "none";
+    body.appendChild(eb);
+
+    /* ---------- seçimin saxlanması (düymələr fokusu aparmasın) ---------- */
+    doc.addEventListener("selectionchange", function () {
+      if (!ON) return;
+      var s = doc.getSelection();
+      if (!s || !s.rangeCount) return;
+      var r = s.getRangeAt(0), n = r.commonAncestorContainer, el = n.nodeType === 1 ? n : n.parentNode;
+      var host = el && el.closest ? el.closest('[contenteditable="true"]') : null;
+      if (host) { saved = r.cloneRange(); savedHost = host; state(); }
+    });
+    function restore() {
+      if (!saved || !savedHost) return false;
+      try { savedHost.focus({ preventScroll: true }); } catch (e) { }
+      var s = doc.getSelection();
+      s.removeAllRanges(); s.addRange(saved);
+      return true;
+    }
+    function state() {
+      each(tb.querySelectorAll("button[data-c]"), function (b) {
+        var c = b.getAttribute("data-c");
+        if (/^(bold|italic|underline|strikeThrough|subscript|superscript|insertUnorderedList|insertOrderedList)$/.test(c)) {
+          var on = false; try { on = doc.queryCommandState(c); } catch (e) { }
+          b.classList.toggle("on", !!on);
+        }
+      });
+    }
+    function dirtyMark() { window.__dirty = true; }
+    function exec(c, v) {
+      if (!restore()) return;
+      try { doc.execCommand("styleWithCSS", false, true); } catch (e) { }
+      doc.execCommand(c, false, v == null ? null : v);
+      dirtyMark(); state(); checkAll();
+    }
+    function applySize(pt) {
+      if (!restore()) return;
+      try { doc.execCommand("styleWithCSS", false, true); } catch (e) { }
+      doc.execCommand("fontSize", false, "7");
+      each(out.querySelectorAll('font[size="7"],[style*="xxx-large"]'), function (f) {
+        if (f.tagName === "FONT") {
+          var sp = doc.createElement("span");
+          sp.style.fontSize = pt + "pt";
+          while (f.firstChild) sp.appendChild(f.firstChild);
+          f.parentNode.replaceChild(sp, f);
+        } else f.style.fontSize = pt + "pt";
+      });
+      dirtyMark(); checkAll();
+    }
+
+    tb.addEventListener("mousedown", function (e) { if (!/^(SELECT|INPUT|OPTION)$/.test(e.target.tagName)) e.preventDefault(); });
+    tb.addEventListener("click", function (e) {
+      var b = e.target.closest ? e.target.closest("button") : null;
+      if (!b) return;
+      var c = b.getAttribute("data-c"), a = b.getAttribute("data-a");
+      if (c) { if (c === "undo" || c === "redo") { restore(); doc.execCommand(c); dirtyMark(); checkAll(); } else exec(c); return; }
+      if (a === "reflow") reflow();
+      else if (a === "hf") openHF();
+      else if (a === "save") download();
+      else if (a === "reset") { if (confirm("Bütün dəyişikliklər ləğv edilsin və sənəd ilkin halına qayıtsın?")) { try { location.reload(); } catch (er) { } } }
+      else if (a === "done") toggle(false);
+    });
+    $("efont").addEventListener("change", function () { if (this.value) exec("fontName", this.value); this.selectedIndex = 0; });
+    $("esize").addEventListener("change", function () { if (this.value) applySize(+this.value); this.selectedIndex = 0; });
+    $("ecol").addEventListener("input", function () { exec("foreColor", this.value); });
+    $("ehl").addEventListener("input", function () { exec("hiliteColor", this.value); });
+
+    /* ---------- redaktə rejimi ---------- */
+    function markEd() {
+      each(out.querySelectorAll(EDIT_SEL), function (e) { e.setAttribute("contenteditable", "true"); e.setAttribute("spellcheck", "false"); });
+      each(out.querySelectorAll(".qn,.op b,.stm b,.kc b"), function (e) { e.setAttribute("contenteditable", "false"); });
+    }
+    function unmarkEd() {
+      each(out.querySelectorAll("[contenteditable]"), function (e) { e.removeAttribute("contenteditable"); e.removeAttribute("spellcheck"); });
+    }
+    function toggle(v) {
+      ON = v == null ? !ON : !!v;
+      body.classList.toggle("ed", ON);
+      if (ON) { markEd(); try { doc.execCommand("defaultParagraphSeparator", false, "p"); } catch (e) { } }
+      else { unmarkEd(); saved = null; savedHost = null; }
+      eb.textContent = ON ? "✓ Redaktəni bitir" : "✏️ Redaktə";
+      eb.classList.toggle("on", ON);
+      try { parent.postMessage({ dqEd: ON }, "*"); } catch (e) { }
+      return ON;
+    }
+    eb.addEventListener("click", function () { toggle(); });
+
+    out.addEventListener("paste", function (e) {
+      if (!ON) return;
+      var cd = e.clipboardData || window.clipboardData;
+      if (!cd) return;
+      e.preventDefault();
+      doc.execCommand("insertText", false, cd.getData("text/plain"));
+    });
+    out.addEventListener("input", function (e) {
+      if (!ON) return;
+      dirtyMark();
+      var col = e.target && e.target.closest ? e.target.closest(".col") : null;
+      if (col && col.scrollHeight > col.clientHeight + 1) warn(true); else checkAll();
+    });
+    out.addEventListener("click", function (e) { if (ON && e.target.closest && (e.target.closest(".ph") || e.target.closest(".pf"))) openHF(); });
+
+    function warn(on) { var b = $("erf"); if (b) b.classList.toggle("warn", !!on); }
+    function checkAll() {
+      var any = false;
+      each(out.querySelectorAll(".col"), function (c) { if (c.scrollHeight > c.clientHeight + 1) any = true; });
+      warn(any);
+    }
+
+    /* ---------- yenidən səhifələmə: bloklar qaynağa qaytarılır, sonra təzədən düzülür ---------- */
+    function reflow() {
+      var was = ON;
+      if (ON) unmarkEd();
+      var secs = [].slice.call(src.querySelectorAll(":scope>section")), map = {};
+      secs.forEach(function (sec, i) {
+        var fp = out.querySelector('.page[data-si="' + i + '"][data-first="1"]');
+        if (!fp) return;
+        var cv = fp.querySelector(".sbar .cover"), sc = sec.querySelector(":scope>.cover");
+        if (cv && sc) sc.innerHTML = cv.innerHTML;
+        var bn = fp.querySelector(".sbar .sb:not(.cont)"), sb = sec.querySelector(":scope>.sb");
+        if (bn && sb) sb.innerHTML = bn.innerHTML;
+      });
+      each(out.querySelectorAll(".page"), function (p) {
+        var si = +p.getAttribute("data-si");
+        each(p.querySelectorAll(".col>.q,.col>.kb"), function (b) { (map[si] || (map[si] = [])).push(b); });
+      });
+      secs.forEach(function (sec, i) {
+        (map[i] || []).forEach(function (b) { b.style.zoom = ""; b.classList.remove("tight"); sec.appendChild(b); });
+      });
+      var t = layout();
+      if (was) markEd();
+      warn(false); checkAll();
+      return t;
+    }
+
+    /* ---------- başlıq / altlıq / filqran ---------- */
+    function pick(sel) {
+      var e = out.querySelector(".page " + sel) || (tpl.content && tpl.content.querySelector(sel));
+      return e ? e : null;
+    }
+    function txt(sel) { var e = pick(sel); return e ? e.textContent : ""; }
+    function putHF(root, v) {
+      function s(sel, fn) { var e = root.querySelector(sel); if (e) fn(e); }
+      s(".ph .l", function (e) { e.textContent = v.hl; });
+      s(".ph .c", function (e) { e.innerHTML = v.hc.split("|").map(function (x) { return esc(x.trim()); }).join("<i>|</i>"); });
+      s(".ph .r", function (e) { e.textContent = v.hr; });
+      s(".pf .l", function (e) { e.textContent = v.fl; });
+      s(".pf .r", function (e) { e.textContent = v.fr; });
+      s(".wm .t1", function (e) { e.textContent = v.w1; });
+      s(".wm .t2", function (e) { e.textContent = v.w2; });
+      s(".wm", function (e) { e.style.display = v.wm ? "" : "none"; });
+    }
+    function openHF() {
+      var old = $("edlg"); if (old) old.remove();
+      var wm = pick(".wm"), wmOn = !(wm && wm.style.display === "none");
+      var d = doc.createElement("div"); d.id = "edlg";
+      d.innerHTML = '<div class="box"><h3>Başlıq, altlıq və filqran</h3><p>Dəyişiklik <b>bütün səhifələrə</b> tətbiq olunur.</p>' +
+        '<label>Başlıq — sol</label><input id="hf_hl" maxlength="60">' +
+        '<label>Başlıq — mərkəz (hissələri | ilə ayırın)</label><input id="hf_hc" maxlength="80">' +
+        '<label>Başlıq — sağ</label><input id="hf_hr" maxlength="60">' +
+        '<label>Altlıq — sol</label><input id="hf_fl" maxlength="60">' +
+        '<label>Altlıq — sağ</label><input id="hf_fr" maxlength="60">' +
+        '<label>Filqran — böyük yazı</label><input id="hf_w1" maxlength="40">' +
+        '<label>Filqran — kiçik yazı</label><input id="hf_w2" maxlength="40">' +
+        '<label class="ck"><input type="checkbox" id="hf_wm"> Filqranı (loqo + yazı) göstər</label>' +
+        '<div class="row"><button data-x="ok" class="ok">Tətbiq et</button><button data-x="no">Ləğv et</button></div></div>';
+      body.appendChild(d);
+      $("hf_hl").value = txt(".ph .l"); $("hf_hc").value = txt(".ph .c"); $("hf_hr").value = txt(".ph .r");
+      $("hf_fl").value = txt(".pf .l"); $("hf_fr").value = txt(".pf .r");
+      $("hf_w1").value = txt(".wm .t1"); $("hf_w2").value = txt(".wm .t2"); $("hf_wm").checked = wmOn;
+      d.addEventListener("click", function (e) {
+        var x = e.target.getAttribute && e.target.getAttribute("data-x");
+        if (e.target === d || x === "no") { d.remove(); return; }
+        if (x === "ok") {
+          var v = { hl: $("hf_hl").value, hc: $("hf_hc").value, hr: $("hf_hr").value, fl: $("hf_fl").value, fr: $("hf_fr").value, w1: $("hf_w1").value, w2: $("hf_w2").value, wm: $("hf_wm").checked };
+          if (tpl.content) putHF(tpl.content, v);
+          each(out.querySelectorAll(".page"), function (p) { putHF(p, v); });
+          dirtyMark(); d.remove();
+        }
+      });
+    }
+
+    /* ---------- statik HTML (redaktələrlə) ---------- */
+    function exportStatic() {
+      var was = ON;
+      if (ON) unmarkEd();
+      var clone = doc.documentElement.cloneNode(true);
+      if (was) markEd();
+      ["script", "#etb", "#ebtn", "#edlg", "#src", "#ld", "template"].forEach(function (sel) { each(clone.querySelectorAll(sel), function (e) { e.parentNode.removeChild(e); }); });
+      var cb = clone.querySelector("body");
+      cb.className = (cb.className || "").replace(/\bed\b/, "").trim();
+      var s = doc.createElement("script");
+      s.textContent = '(function(){var d=document,r=d.documentElement;function fit(){var w=r.clientWidth,z=w<830?(w-8)/794:1;r.style.zoom=String(z>0?z:1)}fit();addEventListener("resize",fit);addEventListener("beforeprint",function(){r.style.zoom="1"});addEventListener("afterprint",fit);var b=d.getElementById("pbtn");if(b)b.onclick=function(){print()};if(/#print/.test(location.hash))setTimeout(function(){try{print()}catch(e){}},600)})();';
+      cb.appendChild(s);
+      return "<!DOCTYPE html>" + clone.outerHTML;
+    }
+    function download() {
+      try {
+        var blob = new Blob([exportStatic()], { type: "text/html;charset=utf-8" }), a = doc.createElement("a");
+        a.href = URL.createObjectURL(blob); a.download = (doc.title || "DQplatform") + "-redakte.html";
+        body.appendChild(a); a.click();
+        setTimeout(function () { try { URL.revokeObjectURL(a.href); a.remove(); } catch (e) { } }, 1500);
+      } catch (e) { alert("Yüklənmədi: " + e.message); }
+    }
+
+    window.__edToggle = toggle;
+    window.__dqExport = exportStatic;
+    window.__dqReflow = reflow;
+    window.__dirty = false;
   }
 
   /* ---------------- sənədin üslubu ---------------- */
@@ -296,18 +534,12 @@
       "img{max-width:100%;height:auto;object-fit:contain}.qimg,.qt img{display:block;margin:1.6mm 0;max-height:74mm}" +
       ".tight .qimg,.tight .qt img{max-height:46mm}.tight .op img{max-height:14mm!important}" +
       "table{border-collapse:collapse;max-width:100%;margin:1mm 0}td,th{border:1px solid #b8c0d4;padding:.7mm 1.5mm;font-size:8.8pt}" +
-      /* variantlar */
-      ".ops{margin:1.8mm 0 0 0}" +
-      ".op{display:flex;gap:1.7mm;align-items:flex-start;font-size:9.8pt}" +
+      /* variantlar: yan-yana, yer qurtaranda aşağı sətrə keçir */
+      ".ops{display:flex;flex-wrap:wrap;align-items:flex-start;gap:1.3mm 6mm;margin:1.8mm 0 0 0}" +
+      ".op{display:flex;gap:1.7mm;align-items:flex-start;font-size:9.8pt;flex:0 1 auto;max-width:100%;margin:0}" +
       ".op b{flex:none;width:5mm;height:5mm;border-radius:50%;border:.28mm solid " + NAVY + ";color:" + NAVY + ";font:700 7.4pt 'Roboto','Segoe UI',Arial,sans-serif;display:flex;align-items:center;justify-content:center;margin-top:.5mm}" +
       ".ot{min-width:0;flex:0 1 auto}" +
-      ".op img{max-height:30mm;display:block}" +
-      ".ops.col .op{margin:0 0 1.2mm}" +
-      ".ops.row{display:flex;flex-wrap:nowrap;justify-content:space-between;gap:2mm}" +
-      ".ops.row .op{flex:0 0 auto;white-space:nowrap;align-items:center}.ops.row .op b{margin-top:0}" +
-      ".ops.row .op img{max-height:19mm;max-width:none}" +
-      ".ops.two{display:grid;grid-template-columns:1fr 1fr;gap:1.2mm 4mm}" +
-      ".ops .op{margin:0}" +
+      ".op img{max-height:24mm;display:block}" +
       /* açıq sual */
       ".stm{display:flex;gap:1.7mm;align-items:flex-start;margin:0 0 1mm;font-size:9.8pt}" +
       ".stm b{flex:none;min-width:4.6mm;font:800 9pt 'Roboto',Arial,sans-serif;color:" + NAVY + ";margin-top:.2mm}.stm span{min-width:0;flex:1}" +
@@ -318,8 +550,25 @@
       ".kc{display:flex;justify-content:space-between;align-items:baseline;border:1px solid #d3d9e6;border-radius:1.4mm;padding:.9mm 2mm;font:500 9pt 'Roboto',Arial,sans-serif}.kc b{color:" + NAVY + "}.kc i{font-style:normal;font-weight:800}" +
       /* düymə */
       "#pbtn{position:fixed;right:14px;bottom:16px;z-index:60;border:0;border-radius:999px;background:" + NAVY + ";color:#fff;font:700 14px Roboto,Arial,sans-serif;padding:13px 20px;box-shadow:0 6px 18px rgba(0,0,0,.3);cursor:pointer}" +
+      /* redaktə rejimi */
+      "#ebtn{position:fixed;left:14px;bottom:16px;z-index:60;border:0;border-radius:999px;background:#fff;color:" + NAVY + ";font:700 14px Roboto,Arial,sans-serif;padding:13px 18px;box-shadow:0 6px 18px rgba(0,0,0,.3);cursor:pointer}#ebtn.on{background:" + GOLD + ";color:#1b2540}" +
+      "#etb{position:fixed;left:0;right:0;top:0;z-index:70;display:none;align-items:center;gap:4px;padding:7px 8px;background:" + NAVY + ";overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;box-shadow:0 4px 16px rgba(0,0,0,.35)}body.ed #etb{display:flex}" +
+      "#etb button,#etb select,#etb .clr{flex:none;height:36px;min-width:36px;border:0;border-radius:8px;padding:0 10px;background:rgba(255,255,255,.14);color:#fff;font:700 14px Roboto,Arial,sans-serif;cursor:pointer}" +
+      "#etb select{background:#fff;color:#1c2333;padding:0 4px;max-width:112px}#etb button.on{background:" + GOLD + ";color:#1b2540}#etb .ok{background:#16a34a}" +
+      "#etb .sp{flex:none;width:1px;height:22px;background:rgba(255,255,255,.28);margin:0 3px}" +
+      "#etb .clr{position:relative;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;width:36px;padding:0;font-size:17px}#etb .clr input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}" +
+      "#etb .clr.hl{color:#fff176}#erf.warn{background:#ef4444;animation:ep 1s ease-in-out infinite}@keyframes ep{50%{box-shadow:0 0 0 4px rgba(239,68,68,.4)}}" +
+      "body.ed #out{padding-top:58px}" +
+      "body.ed .page [contenteditable=true]{outline:1px dashed transparent;outline-offset:1px;border-radius:1mm;cursor:text;-webkit-user-select:text;user-select:text}" +
+      "body.ed .page [contenteditable=true]:hover{outline-color:" + GOLD + ";background:rgba(201,160,99,.08)}" +
+      "body.ed .page [contenteditable=true]:focus{outline:1.5px solid #2f63bd;background:rgba(47,99,189,.06)}" +
+      "body.ed .ph,body.ed .pf{cursor:pointer;outline:1px dotted rgba(47,99,189,.45)}" +
+      "#edlg{position:fixed;inset:0;z-index:90;background:rgba(11,18,32,.6);display:flex;align-items:center;justify-content:center;padding:14px;font-family:Roboto,Arial,sans-serif}" +
+      "#edlg .box{background:#fff;border-radius:14px;padding:18px;width:100%;max-width:440px;max-height:92vh;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.4)}#edlg h3{margin:0 0 4px;font-size:17px;color:" + NAVY + "}#edlg p{margin:0 0 8px;font-size:13px;color:#64748b}" +
+      "#edlg label{display:block;font-size:12px;font-weight:700;color:#475569;margin:10px 0 4px}#edlg input[type=text],#edlg input:not([type]){width:100%;padding:10px 11px;border:1.5px solid #cbd5e1;border-radius:9px;font:14px Roboto,Arial,sans-serif}" +
+      "#edlg .ck{display:flex;align-items:center;gap:8px;font-size:13.5px;margin-top:12px}#edlg .row{display:flex;gap:8px;margin-top:16px}#edlg button{flex:1;border:0;border-radius:10px;padding:12px;font:700 14px Roboto,Arial,sans-serif;cursor:pointer;background:#e2e8f0;color:#1c2333}#edlg .ok{background:" + NAVY + ";color:#fff}" +
       "@page{size:A4;margin:0}" +
-      "@media print{body{background:#fff}#out{padding:0}.page{margin:0;box-shadow:none}.page:last-child{page-break-after:auto;break-after:auto}#pbtn,#ld{display:none!important}}";
+      "@media print{body{background:#fff}#out{padding:0}.page{margin:0;box-shadow:none}.page:last-child{page-break-after:auto;break-after:auto}#pbtn,#ld,#etb,#ebtn,#edlg{display:none!important}body.ed #out{padding:0}.page [contenteditable]{outline:none!important;background:none!important}}";
   }
 
   function emblem() {
@@ -373,10 +622,10 @@
     h.push('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,600;1,700&family=Roboto:wght@400;500;700;800&display=swap">');
     h.push("<style>" + docCss() + "</style></head><body>");
     h.push('<div id="ld">PDF səhifələnir…</div>');
-    h.push('<template id="tpl"><div class="wm" aria-hidden="true">' + emblem() + '<div class="t1">DQplatform</div><div class="t2">By Yunis İmanov</div></div>' +
-      '<div class="ph"><div class="l">0504305162</div><div class="c">DQplatform<i>|</i>Dövlət Qulluğu</div><div class="r">By Yunis İmanov</div></div>' +
+    h.push('<template id="tpl"><div class="wm" aria-hidden="true">' + emblem() + '<div class="t1">DQplatform</div><div class="t2">Yunis İmanov</div></div>' +
+      '<div class="ph"><div class="l">0504305162</div><div class="c">DQplatform<i>|</i>Dövlət Qulluğu</div><div class="r">Yunis İmanov</div></div>' +
       '<div class="pb"><div class="sbar"></div><div class="cols"></div></div>' +
-      '<div class="pf"><div class="l">DQplatform</div><div class="c">Səhifə <span class="pg-n"></span> / <span class="pg-t"></span></div><div class="r">By Yunis İmanov</div></div></template>');
+      '<div class="pf"><div class="l">DQplatform</div><div class="c">Səhifə <span class="pg-n"></span> / <span class="pg-t"></span></div><div class="r">Yunis İmanov</div></div></template>');
     h.push('<div id="src">');
     o.groups.forEach(function (g, gi) {
       var f = g.items[0] && g.items[0].q_number, l = g.items[g.items.length - 1] && g.items[g.items.length - 1].q_number;
@@ -397,13 +646,13 @@
     }
     h.push("</div>");
     h.push('<div id="out"></div><button type="button" id="pbtn">⬇ PDF kimi saxla</button>');
-    h.push("<script>(" + boot.toString().replace(/<\/script/gi, "<\\/script") + ")(" + __layout.toString().replace(/<\/script/gi, "<\\/script") + ");<\/script>");
+    h.push("<script>(" + boot.toString().replace(/<\/script/gi, "<\\/script") + ")(" + __layout.toString().replace(/<\/script/gi, "<\\/script") + "," + __edit.toString().replace(/<\/script/gi, "<\\/script") + ");<\/script>");
     h.push("</body></html>");
     return h.join("");
   }
 
   /* sənədin içindəki başlatma kodu: şəkillər/şriftlər yüklənəndən sonra səhifələyir */
-  function boot(layout) {
+  function boot(layout, edit) {
     var doc = document, root = doc.documentElement;
     function fit() {
       var w = root.clientWidth, z = w < 830 ? (w - 8) / 794 : 1;
@@ -424,6 +673,7 @@
       try { layout(); }
       catch (e) { var s = doc.getElementById("src"); s.style.cssText = "position:static;visibility:visible;width:auto;padding:12mm"; doc.getElementById("out").style.display = "none"; }
       var ld = doc.getElementById("ld"); if (ld) ld.parentNode.removeChild(ld);
+      try { if (edit) edit(layout); } catch (e) { }
       fit();
       if (/#print/.test(location.hash)) setTimeout(function () { try { print(); } catch (e) { } }, 500);
     }
@@ -469,7 +719,7 @@
       "#dqps-pv .bar{display:flex;align-items:center;gap:8px;padding:9px 10px;background:" + NAVY + ";color:#fff;flex:none;padding-top:max(9px,env(safe-area-inset-top))}" +
       "#dqps-pv .bar .t{flex:1;font-weight:700;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:center}" +
       "#dqps-pv .bar button{border:0;border-radius:11px;padding:10px 13px;font:800 13.5px inherit;font-family:inherit;cursor:pointer;background:rgba(255,255,255,.14);color:#fff;white-space:nowrap}" +
-      "#dqps-pv .bar .r{display:flex;gap:6px;margin-left:auto}#dqps-pv .bar .g{background:" + GOLD + ";color:#1b2540}" +
+      "#dqps-pv .bar .r{display:flex;gap:6px;margin-left:auto}#dqps-pv .bar .g,#dqps-pv .bar .on{background:" + GOLD + ";color:#1b2540}" +
       "#dqps-pv iframe{flex:1;width:100%;border:0;background:#dfe5f1}#dqps-pv .ld{position:absolute;inset:56px 0 0;display:flex;align-items:center;justify-content:center;background:#dfe5f1;color:#334155;font-weight:700}" +
       "@media(max-width:480px){#dqps-pv .bar .t{display:none}}" +
       "@keyframes dqpsF{from{opacity:0}to{opacity:1}}@keyframes dqpsU{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}" +
@@ -596,18 +846,31 @@
     var p = $("dqps-pv"); if (p) p.remove();
     if (PV_URL && !TAB_OPEN) { try { URL.revokeObjectURL(PV_URL); } catch (e) { } }
     PV_URL = null; TAB_OPEN = false;
+    if (EX_URL) { try { URL.revokeObjectURL(EX_URL); } catch (e) { } EX_URL = null; }
+    if (ED_MSG) { window.removeEventListener("message", ED_MSG); ED_MSG = null; }
   }
   function showPreview(html, title) {
     css(); closePreview();
     PV_URL = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
     var o = D.createElement("div"); o.id = "dqps-pv";
-    o.innerHTML = '<div class="bar"><button type="button" id="dqps-x">⬅ Geri</button><span class="t">' + esc(title) + '</span><div class="r"><button type="button" id="dqps-ad" title="Admin panelə qayıt">🛠 Admin panel</button><button type="button" class="g" id="dqps-dl">⬇ Yüklə (PDF)</button><button type="button" id="dqps-tab" title="Ayrıca səhifədə aç">↗</button></div></div><iframe id="dqps-fr" title="PDF önbaxış"></iframe><div class="ld" id="dqps-ld">Önbaxış hazırlanır…</div>';
+    o.innerHTML = '<div class="bar"><button type="button" id="dqps-x">⬅ Geri</button><span class="t">' + esc(title) + '</span><div class="r"><button type="button" id="dqps-ed" title="Sənədi Word kimi redaktə et">✏️ Redaktə</button><button type="button" id="dqps-ad" title="Admin panelə qayıt">🛠 Admin panel</button><button type="button" class="g" id="dqps-dl">⬇ Yüklə (PDF)</button><button type="button" id="dqps-tab" title="Ayrıca səhifədə aç">↗</button></div></div><iframe id="dqps-fr" title="PDF önbaxış"></iframe><div class="ld" id="dqps-ld">Önbaxış hazırlanır…</div>';
     D.body.appendChild(o);
     var fr = $("dqps-fr");
     fr.onload = function () { var l = $("dqps-ld"); if (l) setTimeout(function () { var l2 = $("dqps-ld"); if (l2) l2.remove(); }, 500); };
     fr.src = PV_URL;
+    function curUrl() {
+      try {
+        var w = fr.contentWindow;
+        if (w && w.__dirty && w.__dqExport) {            /* redaktə olunubsa: dəyişikliklərlə statik sənəd */
+          if (EX_URL) { try { URL.revokeObjectURL(EX_URL); } catch (e) { } }
+          EX_URL = URL.createObjectURL(new Blob([w.__dqExport()], { type: "text/html;charset=utf-8" }));
+          return EX_URL;
+        }
+      } catch (e) { }
+      return PV_URL;
+    }
     function openTab(autoPrint) {
-      var w = window.open(PV_URL + (autoPrint ? "#print" : ""), "_blank");
+      var w = window.open(curUrl() + (autoPrint ? "#print" : ""), "_blank");
       if (w) TAB_OPEN = true; else alert("Yeni səhifə açılmadı. Brauzerdə pop-up icazəsi verin.");
       return !!w;
     }
@@ -618,6 +881,17 @@
       try { if (window.DQAdminFix && DQAdminFix.central) DQAdminFix.central(); } catch (e) { }
     };
     $("dqps-tab").onclick = function () { openTab(false); };
+    var edb = $("dqps-ed");
+    edb.onclick = function () {
+      try { var on = fr.contentWindow.__edToggle(); edb.classList.toggle("on", !!on); edb.textContent = on ? "✓ Redaktə" : "✏️ Redaktə"; }
+      catch (e) { alert("Sənəd hələ hazır deyil, bir az gözləyin."); }
+    };
+    if (ED_MSG) window.removeEventListener("message", ED_MSG);
+    ED_MSG = function (ev) {
+      if (!ev.data || typeof ev.data.dqEd !== "boolean" || !$("dqps-ed")) return;
+      edb.classList.toggle("on", ev.data.dqEd); edb.textContent = ev.data.dqEd ? "✓ Redaktə" : "✏️ Redaktə";
+    };
+    window.addEventListener("message", ED_MSG);
     $("dqps-dl").onclick = function () {
       if (isTouch()) { if (openTab(true)) return; }
       try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (e) { openTab(true); }
