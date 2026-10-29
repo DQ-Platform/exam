@@ -229,3 +229,12 @@ body.dqr-hdr #dq13-dock>button,body.dqr-hdr #dq13-dock>.fb,body.dqr-hdr #dq13-do
 
 
 #dqr .tb .ic{font-size:18px}
+
+/* ---- Geri sayım: sabit, titrəməsiz, ana dizaynla uyğun ---- */
+#dqr #dq-count,#dqr #dq-count *{animation:none!important}
+#dqr #dq-count .dqcd-in{background:linear-gradient(135deg,#0a2a63,#071a40);border:1px solid var(--ln);box-shadow:none}
+#dqr #dq-count .dqcd-in:before{display:none}
+#dqr #dq-count .dqcd-ic{background:var(--grad);color:#2a1c00;box-shadow:none}
+#dqr #dq-count .dqcd-c{background:#ffffff0d;border:1px solid #ffffff1f}
+#dqr #dq-count .dqcd-c b{color:var(--gd2);text-shadow:none;font-variant-numeric:tabular-nums;min-width:2ch}
+#dqr #dq-count .dqcd-btn{background:var(--grad);color:#2a1c00!important;box-shadow:none}
