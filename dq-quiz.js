@@ -19,6 +19,8 @@
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function fmt(ms) { var d = new Date(+ms); return pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "." + d.getFullYear() + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+  function fmtD(sec) { sec = Math.round(sec); if (sec < 60) return sec + " saniyə"; var m = sec / 60; if (m >= 60 && m % 60 === 0) return (m / 60) + " saat"; return (m % 1 ? String(Math.round(m * 10) / 10).replace(".", ",") : m) + " dəqiqə"; }
+  function mmss(s) { s = Math.max(0, Math.ceil(s)); return pad(Math.floor(s / 60)) + ":" + pad(s % 60); }
   function hms(s) { s = Math.max(0, Math.floor(s)); return pad(Math.floor(s / 3600)) + ":" + pad(Math.floor(s % 3600 / 60)) + ":" + pad(s % 60); }
   function toLocal(ms) { var d = new Date(+ms); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes()); }
   function fromLocal(v) { var t = new Date(v).getTime(); return isNaN(t) ? 0 : t; }
@@ -182,6 +184,11 @@
       ".dqqz-ban .ic{flex:none;width:46px;height:46px;border-radius:14px;background:#ffffff26;display:flex;align-items:center;justify-content:center;font-size:24px}.dqqz-ban .tx{flex:1 1 200px;min-width:0}.dqqz-ban b{display:block;font-size:16px;line-height:1.3}.dqqz-ban small{display:block;opacity:.85;font-size:12.5px;margin-top:2px}",
       ".dqqz-ban .tm{display:flex;gap:6px}.dqqz-ban .tm i{font-style:normal;background:#ffffff26;border-radius:10px;padding:6px 9px;text-align:center;min-width:42px}.dqqz-ban .tm i b{font-size:18px;font-variant-numeric:tabular-nums}.dqqz-ban .tm i span{display:block;font-size:10px;opacity:.8}",
       ".dqqz-ban button{border:0;border-radius:12px;padding:12px 18px;background:#facc15;color:#1e1b4b;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit}.dqqz-ban button.lv{background:#22c55e;color:#fff;animation:dqqzp 1.6s infinite}",
+      ".dqqz-big p.dqqz-ug{margin:18px 0 2px;font-weight:800;font-size:17px;color:#0b2a7a;letter-spacing:.02em}",
+      ".dqqz-inf{display:flex;flex-direction:column;gap:7px;margin:12px auto 4px;max-width:340px;text-align:left;font-size:15px;color:#0f172a}.dqqz-inf div{background:#f1f5f9;border-radius:12px;padding:9px 13px}.dqqz-inf b{color:#0b2a7a}",
+      ".dqqz-cdw{padding:34px 20px 30px}.dqqz-cdl{font-size:15px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#0b2a7a}.dqqz-cdr{position:relative;width:190px;height:190px;margin:22px auto 10px}.dqqz-cdr svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}.dqqz-cdr circle{fill:none;stroke-width:7}.dqqz-cdr .bg{stroke:#e2e8f0}.dqqz-cdr .fg{stroke:#d4af37;stroke-linecap:round;stroke-dasharray:339.3;stroke-dashoffset:0;animation:dqqzring 1s linear forwards}.dqqz-cdn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:92px;font-weight:900;color:#0b2a7a;animation:dqqznum 1s ease-out forwards}",
+      "@keyframes dqqzring{to{stroke-dashoffset:339.3}}@keyframes dqqznum{0%{transform:scale(2.1);opacity:0}25%{transform:scale(1);opacity:1}85%{transform:scale(.92);opacity:1}100%{transform:scale(.7);opacity:.2}}",
+      ".dqqz-qb{display:flex;align-items:center;gap:10px;margin:0 0 10px}.dqqz-qb span{font-weight:800;font-size:14px;min-width:92px;color:#0b2a7a}.dqqz-qb span.low{color:#dc2626}.dqqz-qb i{flex:1;height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden;display:block}.dqqz-qb.low span{color:#dc2626;animation:dqqzblink .7s ease-in-out infinite}.dqqz-qb.low u{background:#dc2626}@keyframes dqqzblink{50%{opacity:.25}}.dqqz-qb u{display:block;height:100%;width:100%;background:linear-gradient(90deg,#d4af37,#f59e0b);border-radius:99px;transition:width .5s linear}",
       "@media print{#dqqz-pl .dqqz-hd,#dqqz-pl .dqqz-noprint{display:none!important}}"
     ].join("\n");
     D.head.appendChild(s);
@@ -197,7 +204,7 @@
     D.body.appendChild(o); D.body.style.overflow = "hidden";
     o.addEventListener("click", onAdminClick);
     o.addEventListener("change", onAdminChange);
-    o.addEventListener("input", function (e) { var id = e.target && e.target.id; if (id === "dqqz-f-dur") { var v = parseInt(e.target.value) || 0; [].forEach.call(D.querySelectorAll("#dqqz-durp button"), function (b) { b.classList.toggle("on", +b.getAttribute("data-v") === v); }); } if (id && id.indexOf("dqqz-f-") === 0) updPrev(); });
+    o.addEventListener("input", function (e) { var id = e.target && e.target.id; if (id === "dqqz-f-dur") { var v = parseInt(e.target.value) || 0; [].forEach.call(D.querySelectorAll("#dqqz-durp button"), function (b) { b.classList.toggle("on", +b.getAttribute("data-v") === v); }); } if (id === "dqqz-f-qt") { var v2 = parseInt(e.target.value) || 0; [].forEach.call(D.querySelectorAll("#dqqz-qtp button"), function (b) { b.classList.toggle("on", +b.getAttribute("data-v") === v2); }); } if (id && id.indexOf("dqqz-f-") === 0) updPrev(); });
     o.addEventListener("paste", onPaste);
     A.view = "list"; refreshList();
   }
@@ -248,6 +255,10 @@
       '<div class="dqqz-meta" style="margin:12px 0 6px">2) İşləmə müddəti — iştirakçı başlayan anda onun şəxsi geri sayımı işə düşür.</div>' +
       '<div class="dqqz-seg" id="dqqz-durp">' + [[15, "15 dəq"], [30, "30 dəq"], [45, "45 dəq"], [60, "1 saat"], [90, "1,5 saat"], [120, "2 saat"], [0, "♾ Limitsiz"]].map(function (p) { return '<button type="button" data-a="durp" data-v="' + p[0] + '" class="' + ((q.dur || 0) === p[0] ? "on" : "") + '">' + p[1] + '</button>'; }).join("") + '</div>' +
       '<div class="dqqz-2"><div><label class="dqqz-l">Özəl müddət (dəq, 0 = limitsiz)</label><input class="dqqz-in" type="number" min="0" inputmode="numeric" id="dqqz-f-dur" value="' + (q.dur || 0) + '"></div><div></div></div>' +
+      '<div class="dqqz-meta" style="margin:12px 0 6px">3) Hər sual üçün vaxt (istəyə bağlı) — vaxt bitəndə növbəti suala keçir. Son 10 saniyədə sayğac qırmızı yanıb-sönür.</div>' +
+      '<div class="dqqz-seg" id="dqqz-qtp">' + [[0, "Yoxdur"], [30, "30 san"], [60, "1 dəq"], [90, "1,5 dəq"], [120, "2 dəq"], [180, "3 dəq"]].map(function (p) { return '<button type="button" data-a="qtp" data-v="' + p[0] + '" class="' + ((q.qt || 0) === p[0] ? "on" : "") + '">' + p[1] + '</button>'; }).join("") + '</div>' +
+      '<div class="dqqz-2"><div><label class="dqqz-l">Özəl: hər sual üçün saniyə (0 = yoxdur)</label><input class="dqqz-in" type="number" min="0" inputmode="numeric" id="dqqz-f-qt" value="' + (q.qt || 0) + '"></div><div></div></div>' +
+      '<label class="dqqz-ck"><input type="checkbox" id="dqqz-f-lock"' + (q.lock !== false ? " checked" : "") + '><span>Əvvəlki suala qayıtmaq olmasın (yalnız irəli)</span></label>' +
       '<div id="dqqz-prev" style="margin-top:10px;padding:10px 12px;border-radius:10px;background:#fff;border:1px solid #e0e7ff;font-size:13px;line-height:1.55"></div></div>' +
       '<div class="dqqz-2"><div><label class="dqqz-l">Keçid balı (%)</label><input class="dqqz-in" type="number" min="0" max="100" inputmode="numeric" id="dqqz-f-pass" value="' + q.pass + '"></div><div></div></div>' +
       '<label class="dqqz-ck"><input type="checkbox" id="dqqz-f-grace"' + (q.grace ? " checked" : "") + '><span>Bağlanma vaxtı keçsə belə, başlamış iştirakçı öz işləmə müddətini tam işləsin</span></label>' +
@@ -269,9 +280,12 @@
     function dl(m) { return m >= 60 && m % 60 === 0 ? (m / 60) + " saat" : m > 60 ? Math.floor(m / 60) + " saat " + (m % 60) + " dəq" : m + " dəq"; }
     if (!st || !en || en <= st) return '<span style="color:#b91c1c">⚠ Bağlanma vaxtı açılmadan sonra olmalıdır.</span>';
     var win = Math.round((en - st) / 6e4), t = "🟢 Link <b>" + hm(st) + " – " + hm(en) + "</b> arası açıqdır (" + dl(win) + ").";
-    if (!du) return t + "<br>⏳ Şəxsi taymer yoxdur — iştirakçı bağlanma vaxtına (" + hm(en) + ") qədər işləyir.";
+    var qt0 = Math.max(0, parseInt(($("dqqz-f-qt") || {}).value) || 0), nq0 = A.q && A.q.qs ? A.q.qs.length : 0, qinfo = qt0 ? "<br>⏱ Hər suala <b>" + fmtD(qt0) + "</b> — vaxt bitəndə növbəti suala keçir" + (lockChk() ? ", əvvəlki suala qayıtmaq olmur." : ".") + (nq0 ? " " + nq0 + " sual × " + fmtD(qt0) + " = " + fmtD(nq0 * qt0) + "." : "") : "";
+    if (!du) return t + (qt0 ? qinfo : "<br>⏳ Şəxsi taymer yoxdur — iştirakçı bağlanma vaxtına (" + hm(en) + ") qədər işləyir.");
     t += "<br>⏳ Başlayan hər kəs <b>" + dl(du) + "</b> alır.";
     if (du >= win && !gr) t += "<br>ℹ Müddət aralıqdan uzundur — hamı " + hm(en) + "-də bağlanır.";
+    var qt = Math.max(0, parseInt(($("dqqz-f-qt") || {}).value) || 0), nq = A.q && A.q.qs ? A.q.qs.length : 0;
+    if (qt) t += "<br>⏱ Hər suala <b>" + fmtD(qt) + "</b> — vaxt bitəndə növbəti suala keçir" + (lockChk() ? ", əvvəlki suala qayıtmaq olmur." : ".") + (nq ? " " + nq + " sual × " + fmtD(qt) + " = " + fmtD(nq * qt) + "." : "");
     var ex = en - 10 * 6e4; if (ex < st) ex = st;
     t += "<br>Misal: " + hm(ex) + "-də başlayan " + (gr ? hm(ex + du * 6e4) + "-də" : hm(Math.min(en, ex + du * 6e4)) + "-də") + " bitirir" + (gr ? " (tam müddət)." : (ex + du * 6e4 > en ? " (bağlanma vaxtı kəsir)." : "."));
     return t;
@@ -287,6 +301,8 @@
     if ((v = $("dqqz-f-pass"))) q.pass = Math.max(0, Math.min(100, parseInt(v.value) || 0));
     if ((v = $("dqqz-f-reg"))) q.reg = v.checked;
     if ((v = $("dqqz-f-grace"))) q.grace = v.checked;
+    if ((v = $("dqqz-f-qt"))) q.qt = Math.max(0, parseInt(v.value) || 0);
+    if ((v = $("dqqz-f-lock"))) q.lock = v.checked;
     if ((v = $("dqqz-f-ans"))) q.showAns = v.checked;
   }
   function onAdminChange(e) {
@@ -835,6 +851,7 @@
           var add = 0; DBC.rows.forEach(function (x) { if (A.sel[x.id]) { var f2 = rowToQ(x, DBC.m); if (f2.c >= 0 && f2.o.filter(function (o) { return o.t; }).length >= 2) { A.q.qs.push(f2); add++; } } });
           toast(add + " sual əlavə olundu" + (add < ids.length ? " (" + (ids.length - add) + " sualın doğru cavabı tanınmadı)" : ""), add < ids.length); return drawEdit();
         }
+        case "qtp": readEd(); A.q.qt = +t.getAttribute("data-v"); return drawEdit();
         case "durp": readEd(); A.q.dur = +t.getAttribute("data-v"); return drawEdit();
         case "print": return exportPrint();
         case "pdfimp": readEd(); return drawPdf();
@@ -878,7 +895,7 @@
   }
   /* ================================================================ İŞTİRAKÇI */
   var P = { q: null, run: null, tm: null, wt: null };
-  function plClear() { clearInterval(P.tm); clearInterval(P.wt); P.tm = P.wt = null; }
+  function plClear() { clearInterval(P.tm); clearInterval(P.wt); clearInterval(P.cdt); P.tm = P.wt = P.cdt = null; }
   function plBox() { var o = $("dqqz-pl"); if (!o) { css(); o = D.createElement("div"); o.id = "dqqz-pl"; D.body.appendChild(o); D.body.style.overflow = "hidden"; } return o; }
   function closePlayer() {
     plClear(); var o = $("dqqz-pl"); if (o) o.remove(); D.body.style.overflow = "";
@@ -893,6 +910,7 @@
     var a = t.getAttribute("data-p");
     if (a === "home") return closePlayer();
     if (a === "start") return startForm();
+    if (a === "look") return lookupAttempt();
     if (a === "opt") return setAns(+t.getAttribute("data-k"));
     if (a === "go") return goTo(+t.getAttribute("data-i"));
     if (a === "prev") return goTo(P.run.i - 1);
@@ -922,17 +940,20 @@
       P.wt = setInterval(function () { if (stateOf(q) !== "wait") { gate(); return; } var c = $("dqqz-cd"); if (c) c.innerHTML = cdBoxes(q.start - now()); }, 500);
       return;
     }
-    if (s === "ended" || s === "closed") return plMsg("⚫", "Bu quiz bitib", s === "closed" ? "Quiz müvəqqəti dayandırılıb." : "Quiz " + fmt(q.end) + " tarixində başa çatıb.");
+    if (s === "ended" || s === "closed") {
+      plBox().innerHTML = '<div class="dqqz-ctr"><div class="dqqz-big"><div style="font-size:42px">⚫</div><h2>Bu quiz bitib</h2><p>' + (s === "closed" ? "Quiz müvəqqəti dayandırılıb." : "Quiz " + fmt(q.end) + " tarixində başa çatıb.") + '</p><div class="dqqz-fm"><p style="font-size:13px;margin:10px 0 6px">İştirak etmisinizsə, nəticənizə baxın:</p><label>Ad Soyad</label><input class="dqqz-in" id="dqqz-nm" maxlength="60" value="' + esc(lget("dqqz_name") || "") + '">' + (q.reg ? '<label>Qeydiyyat (iş) nömrəniz</label><input class="dqqz-in" id="dqqz-rg" maxlength="40" value="' + esc(lget("dqqz_reg") || "") + '">' : "") + '</div><div class="dqqz-err" id="dqqz-er" style="display:none"></div><button class="dqqz-btn" data-p="look">Nəticəmə bax</button><button class="dqqz-btn l" data-p="home">Bağla</button><p class="dqqz-ug">🍀 Uğurlar!</p></div></div>';
+      return;
+    }
     var run = jparse(lget("dqqz_run_" + q.id), null);
     if (run && run.answers && run.answers.length === q.qs.length) { P.run = run; return drawRun(); }
     drawForm();
   }
   function drawForm(err) {
     var q = P.q, last = q.manual === "on" ? "" : "<br>Aktiv müddət: <b>" + fmt(q.end) + "</b> tarixinə qədər.";
-    plBox().innerHTML = '<div class="dqqz-ctr"><div class="dqqz-big"><div style="font-size:42px">🎯</div><h2>' + esc(q.title) + '</h2><p>' + esc(q.subject) + ' · ' + q.qs.length + ' sual' + (q.dur ? ' · ' + q.dur + ' dəqiqə' : "") + '</p><p style="font-size:13px">' + (q.dur ? 'Başladıqdan sonra <b>' + q.dur + ' dəqiqə</b> vaxtınız olacaq.' : "") + last + '</p>' +
+    plBox().innerHTML = '<div class="dqqz-ctr"><div class="dqqz-big"><div style="font-size:42px">🎲</div><h2>' + esc(q.title) + '</h2><p>' + esc(q.subject) + '</p><div class="dqqz-inf"><div>📝 <b>' + q.qs.length + ' sual</b></div>' + (q.dur ? '<div>⏱ Ümumi vaxt <b>' + fmtD(q.dur * 60) + '</b></div>' : "") + (q.qt ? '<div>⏳ Hər suala <b>' + fmtD(q.qt) + '</b></div>' : "") + '</div><p style="font-size:13px;margin-top:10px">' + (q.qt ? 'Hər sualın vaxtı bitəndə avtomatik növbəti suala keçilir' + (qLocked(q) ? ', əvvəlki suala qayıtmaq olmur.' : '.') : "") + last + '</p>' +
       '<div class="dqqz-fm"><label>Ad Soyad</label><input class="dqqz-in" id="dqqz-nm" autocomplete="name" maxlength="60" placeholder="Məsələn: Əli Məmmədov" value="' + esc(lget("dqqz_name") || "") + '">' +
       (q.reg ? '<label>Qeydiyyat (iş) nömrəniz</label><input class="dqqz-in" id="dqqz-rg" inputmode="text" autocomplete="off" maxlength="40" placeholder="Sayta qeydiyyatdan keçərkən aldığınız nömrə" value="' + esc(lget("dqqz_reg") || "") + '"><p style="font-size:12px;margin:6px 0 0">Quizdə iştirak üçün sayta qeydiyyatdan keçmiş olmalısınız.</p>' : "") + '</div>' +
-      '<div class="dqqz-err" id="dqqz-er" style="display:' + (err ? "block" : "none") + '">' + (err || "") + '</div><button class="dqqz-btn" id="dqqz-go" data-p="start">▶ Quizə başla</button><button class="dqqz-btn l" data-p="home">Bağla</button></div></div>';
+      '<div class="dqqz-err" id="dqqz-er" style="display:' + (err ? "block" : "none") + '">' + (err || "") + '</div><p style="font-size:12.5px;margin:12px 0 0">Başla düyməsinə basanda 7 saniyəlik geri sayım başlayır, sonra vaxt işə düşür.</p><button class="dqqz-btn" id="dqqz-go" data-p="start">🏁 Başla</button><button class="dqqz-btn l" data-p="home">Bağla</button><p class="dqqz-ug">🍀 Uğurlar!</p></div></div>';
   }
   var regInfo = null;
   async function regCol() {
@@ -961,10 +982,13 @@
   }
   async function startForm() {
     var q = P.q, nm = ($("dqqz-nm").value || "").trim().replace(/\s+/g, " "), rg = q.reg && $("dqqz-rg") ? $("dqqz-rg").value.trim() : "", btn = $("dqqz-go"), er = $("dqqz-er");
-    function bad(m) { er.style.display = "block"; er.textContent = m; btn.disabled = false; btn.textContent = "▶ Quizə başla"; }
+    function bad(m) { er.style.display = "block"; er.textContent = m; btn.disabled = false; btn.textContent = "🏁 Başla"; }
     if (nm.split(" ").filter(function (x) { return x.length > 1; }).length < 2) return bad("Ad və soyadınızı tam yazın.");
     if (q.reg && !rg) return bad("Qeydiyyat nömrənizi yazın.");
-    if (stateOf(q) !== "active") return gate();
+    if (stateOf(q) !== "active") {
+      try { var k0 = q.reg && rg ? "r:" + norm(rg) : "n:" + norm(nm), e0 = await findAttempt(q.id, k0); if (e0) { var a0 = e0.data; a0.rid = e0.id; return showResult(a0, true); } } catch (e) { }
+      return gate();
+    }
     btn.disabled = true; btn.textContent = "Yoxlanılır…"; er.style.display = "none";
     try {
       var rc = { ok: true }; if (q.reg) rc = await checkReg(rg);
@@ -972,29 +996,58 @@
       var key = q.reg && rg ? "r:" + norm(rg) : "n:" + norm(nm), ex = await findAttempt(q.id, key);
       if (ex) { var a = ex.data; a.rid = ex.id; return showResult(a, true); }
       lset("dqqz_name", nm); if (rg) lset("dqqz_reg", rg);
-      P.run = { name: nm, reg: rg, regOk: rc.unverified ? false : true, key: key, t0: now(), answers: q.qs.map(function () { return -1; }), i: 0 };
-      lset("dqqz_run_" + q.id, JSON.stringify(P.run)); drawRun();
+      P.run = { name: nm, reg: rg, regOk: rc.unverified ? false : true, key: key, t0: now() + 7000, qs: now() + 7000, answers: q.qs.map(function () { return -1; }), i: 0 };
+      lset("dqqz_run_" + q.id, JSON.stringify(P.run)); countdown(7, drawRun);
     } catch (e) { bad("Xəta: " + e.message); }
+  }
+  function qLocked(q) { return q.qt > 0 && q.lock !== false; }
+  function lockChk() { var e = $("dqqz-f-lock"); return e ? e.checked : !(A.q && A.q.lock === false); }
+  async function lookupAttempt() {
+    var q = P.q, nm = ($("dqqz-nm").value || "").trim().replace(/\s+/g, " "), rg = q.reg && $("dqqz-rg") ? $("dqqz-rg").value.trim() : "", er = $("dqqz-er");
+    function bad(m) { er.style.display = "block"; er.textContent = m; }
+    if (q.reg ? !rg : !nm) return bad(q.reg ? "Qeydiyyat nömrənizi yazın." : "Ad və soyadınızı yazın.");
+    try {
+      var ex = await findAttempt(q.id, q.reg && rg ? "r:" + norm(rg) : "n:" + norm(nm));
+      if (!ex) return bad("Bu məlumatla iştirak tapılmadı.");
+      var a = ex.data; a.rid = ex.id; showResult(a, true);
+    } catch (e) { bad("Xəta: " + e.message); }
+  }
+  function countdown(n, done) {
+    plClear(); var box = plBox(), k = n;
+    function paint() { box.innerHTML = '<div class="dqqz-ctr"><div class="dqqz-big dqqz-cdw"><div class="dqqz-cdl">Hazır olun</div><div class="dqqz-cdr"><svg viewBox="0 0 120 120"><circle class="bg" cx="60" cy="60" r="54"/><circle class="fg" cx="60" cy="60" r="54"/></svg><b class="dqqz-cdn">' + k + '</b></div><p>' + esc(P.q.title) + ' · ' + P.q.qs.length + ' sual</p><p class="dqqz-ug">🍀 Uğurlar!</p></div></div>'; }
+    paint();
+    P.cdt = setInterval(function () { k--; if (k <= 0) { clearInterval(P.cdt); P.cdt = null; done(); } else paint(); }, 1000);
   }
   function deadline() { var q = P.q, d = Infinity; if (q.dur > 0) d = P.run.t0 + q.dur * 6e4; if (q.manual !== "on" && !(q.dur > 0 && q.grace)) d = Math.min(d, q.end); return d; }
   function drawRun() {
-    plClear(); var q = P.q, run = P.run, i = run.i, x = q.qs[i], ans = run.answers, done = ans.filter(function (v) { return v >= 0; }).length;
-    var h = '<div class="dqqz-hd"><div class="tt">' + esc(q.title) + '</div><div class="tm" id="dqqz-tm">--:--:--</div></div><div class="dqqz-wrap"><div class="dqqz-main"><div class="dqqz-pn"><div class="dqqz-qc"><div class="dqqz-qh"><span>Sual ' + (i + 1) + ' (' + esc(q.subject) + ')</span><em>' + (ans[i] >= 0 ? "✔ cavablandı" : "cavabsız") + '</em></div><div class="dqqz-qt">' + qBody(x) + imgTag(x.i) + '</div>';
+    plClear(); var q = P.q, run = P.run;
+    if (q.qt > 0) {
+      if (!run.qs) run.qs = now();
+      var el0 = now() - run.qs;
+      if (el0 >= q.qt * 1000) { var sk = Math.floor(el0 / (q.qt * 1000)); run.i += sk; run.qs += sk * q.qt * 1000; if (run.i >= q.qs.length) { run.i = q.qs.length - 1; saveRun(); return finish(true); } saveRun(); }
+    }
+    var i = run.i, x = q.qs[i], ans = run.answers, done = ans.filter(function (v) { return v >= 0; }).length;
+    var h = '<div class="dqqz-hd"><div class="tt">' + esc(q.title) + '</div><div class="tm" id="dqqz-tm">--:--:--</div></div><div class="dqqz-wrap"><div class="dqqz-main"><div class="dqqz-pn"><div class="dqqz-qc"><div class="dqqz-qh"><span>Sual ' + (i + 1) + ' (' + esc(q.subject) + ')</span><em>' + (ans[i] >= 0 ? "✔ cavablandı" : "cavabsız") + '</em></div>' + (q.qt > 0 ? '<div class="dqqz-qb"><span id="dqqz-qtm">⏳ --:--</span><i><u id="dqqz-qbar"></u></i></div>' : "") + '<div class="dqqz-qt">' + qBody(x) + imgTag(x.i) + '</div>';
     x.o.forEach(function (o, k) { if (!(o.t || o.i || (x.oi && k < x.oi))) return; h += '<button class="dqqz-o' + (ans[i] === k ? " on" : "") + '" data-p="opt" data-k="' + k + '"><b>' + LET[k] + '</b><span>' + (o.t ? esc(o.t) : "") + imgTag(o.i, "dqqz-im dqqz-oi") + '</span></button>'; });
-    h += '</div><div class="dqqz-nv"><button class="g" data-p="prev"' + (i ? "" : " disabled style='opacity:.45'") + '>Əvvəlki</button><button class="o" data-p="clr">Seçimi Ləğv Et</button><button class="r" data-p="fin">Testi Bitir</button><button class="n" data-p="next"' + (i < q.qs.length - 1 ? "" : " disabled style='opacity:.45'") + '>Növbəti</button></div></div>' +
+    h += '</div><div class="dqqz-nv"><button class="g" data-p="prev"' + (i && !qLocked(q) ? "" : " disabled style='opacity:.45'") + '>Əvvəlki</button><button class="o" data-p="clr">Seçimi Ləğv Et</button><button class="r" data-p="fin">Testi Bitir</button><button class="n" data-p="next"' + (i < q.qs.length - 1 ? "" : " disabled style='opacity:.45'") + '>Növbəti</button></div></div>' +
       '<div class="dqqz-ca"><h5>Cavab Kartı</h5><div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:800;margin:0 0 8px"><span>' + esc(q.subject) + '</span><span>' + done + ' / ' + q.qs.length + '</span></div><div class="dqqz-gr">' + q.qs.map(function (_, k) { return '<button data-p="go" data-i="' + k + '" class="' + (ans[k] >= 0 ? "a " : "") + (k === i ? "c" : "") + '">' + (k + 1) + '</button>'; }).join("") + '</div></div></div></div>';
     var box = plBox(), sc = box.scrollTop; box.innerHTML = h; box.scrollTop = 0; void sc;
     var tick = function () {
       var el = $("dqqz-tm"); if (!el) return; var left = (deadline() - now()) / 1000;
-      if (deadline() === Infinity) { el.textContent = hms((now() - P.run.t0) / 1000); return; }
-      el.textContent = hms(left); el.classList.toggle("low", left < 60);
-      if (left <= 0) { plClear(); finish(true); }
+      if (deadline() === Infinity) el.textContent = hms((now() - P.run.t0) / 1000);
+      else { el.textContent = hms(left); el.classList.toggle("low", left < 60); if (left <= 0) { plClear(); finish(true); return; } }
+      if (q.qt > 0) {
+        var ql = (P.run.qs + q.qt * 1000 - now()) / 1000, qe = $("dqqz-qtm"), qb = $("dqqz-qbar");
+        if (qe) { qe.textContent = "⏳ " + mmss(Math.min(ql, q.qt)); qe.classList.toggle("low", ql <= 10); qe.parentNode.classList.toggle("low", ql <= 10); }
+        if (qb) qb.style.width = Math.max(0, Math.min(100, ql / q.qt * 100)) + "%";
+        if (ql <= 0) { if (P.run.i >= q.qs.length - 1) { plClear(); finish(true); } else { P.run.i++; P.run.qs = now(); saveRun(); drawRun(); } }
+      }
     };
     tick(); P.tm = setInterval(tick, 500);
   }
   function saveRun() { lset("dqqz_run_" + P.q.id, JSON.stringify(P.run)); }
   function setAns(k) { P.run.answers[P.run.i] = k; saveRun(); drawRun(); }
-  function goTo(i) { if (i < 0 || i >= P.q.qs.length) return; P.run.i = i; saveRun(); drawRun(); }
+  function goTo(i) { if (i < 0 || i >= P.q.qs.length) return; if (P.q.qt > 0) { if (qLocked(P.q) && i !== P.run.i + 1) return; P.run.qs = now(); } P.run.i = i; saveRun(); drawRun(); }
   async function finish(auto) {
     var q = P.q, run = P.run; if (!run) return;
     if (!auto) {
