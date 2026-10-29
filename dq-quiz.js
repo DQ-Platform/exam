@@ -197,6 +197,7 @@
     D.body.appendChild(o); D.body.style.overflow = "hidden";
     o.addEventListener("click", onAdminClick);
     o.addEventListener("change", onAdminChange);
+    o.addEventListener("input", function (e) { var id = e.target && e.target.id; if (id === "dqqz-f-dur") { var v = parseInt(e.target.value) || 0; [].forEach.call(D.querySelectorAll("#dqqz-durp button"), function (b) { b.classList.toggle("on", +b.getAttribute("data-v") === v); }); } if (id && id.indexOf("dqqz-f-") === 0) updPrev(); });
     o.addEventListener("paste", onPaste);
     A.view = "list"; refreshList();
   }
@@ -240,22 +241,42 @@
       '<div class="dqqz-card"><label class="dqqz-l" style="margin-top:0">Quizin adı</label><input class="dqqz-in" id="dqqz-f-title" maxlength="120" placeholder="Məsələn: Məntiq — axşam quizi" value="' + esc(q.title) + '">' +
       '<label class="dqqz-l">Fənn</label><div class="dqqz-seg" id="dqqz-subj">' + SUBJ.map(function (s) { return '<button type="button" data-a="subj" data-v="' + esc(s) + '" class="' + (q.subject === s ? "on" : "") + '">' + esc(s) + '</button>'; }).join("") + '</div>' +
       '<label class="dqqz-l">Kimlər görsün</label><div class="dqqz-seg"><button type="button" data-a="mode" data-v="link" class="' + (q.mode === "link" ? "on" : "") + '">🔗 Yalnız link ilə (qrupa göndər)</button><button type="button" data-a="mode" data-v="public" class="' + (q.mode === "public" ? "on" : "") + '">🌐 Hamıya açıq (ana səhifədə taymer)</button></div>' +
-      '<div class="dqqz-2"><div><label class="dqqz-l">Başlama vaxtı</label><input class="dqqz-in" type="datetime-local" id="dqqz-f-start" value="' + toLocal(q.start) + '"></div><div><label class="dqqz-l">Aktiv qalma müddəti (dəq)</label><input class="dqqz-in" type="number" min="1" inputmode="numeric" id="dqqz-f-min" value="' + minutes + '"></div></div>' +
-      '<div class="dqqz-2"><div><label class="dqqz-l">Bitmə vaxtı</label><input class="dqqz-in" type="datetime-local" id="dqqz-f-end" value="' + toLocal(q.end) + '"></div><div><label class="dqqz-l">İştirakçıya düşən vaxt (dəq, 0 = bitmə vaxtına qədər)</label><input class="dqqz-in" type="number" min="0" inputmode="numeric" id="dqqz-f-dur" value="' + (q.dur || 0) + '"></div></div>' +
-      '<div class="dqqz-meta" style="margin-top:6px">Məsələn: başlama 22:00, müddət 30 dəq → quiz 22:00–22:30 aralığında özü aktiv olur və özü bağlanır.</div>' +
+      '<div style="margin-top:14px;padding:12px;border:1.5px solid #c7d2fe;border-radius:14px;background:#f5f7ff"><div style="font-weight:800;margin-bottom:2px">⏱ Vaxt idarəsi</div>' +
+      '<div class="dqqz-meta" style="margin:0 0 8px">1) Quizin açıq olduğu aralıq — linkə yalnız bu aralıqda girib başlamaq olur.</div>' +
+      '<div class="dqqz-2"><div><label class="dqqz-l" style="margin-top:0">Açılma vaxtı</label><input class="dqqz-in" type="datetime-local" id="dqqz-f-start" value="' + toLocal(q.start) + '"></div><div><label class="dqqz-l" style="margin-top:0">Bağlanma vaxtı</label><input class="dqqz-in" type="datetime-local" id="dqqz-f-end" value="' + toLocal(q.end) + '"></div></div>' +
+      '<div class="dqqz-2"><div><label class="dqqz-l">Aralığın uzunluğu (dəq)</label><input class="dqqz-in" type="number" min="1" inputmode="numeric" id="dqqz-f-min" value="' + minutes + '"></div><div></div></div>' +
+      '<div class="dqqz-meta" style="margin:12px 0 6px">2) İşləmə müddəti — iştirakçı başlayan anda onun şəxsi geri sayımı işə düşür.</div>' +
+      '<div class="dqqz-seg" id="dqqz-durp">' + [[15, "15 dəq"], [30, "30 dəq"], [45, "45 dəq"], [60, "1 saat"], [90, "1,5 saat"], [120, "2 saat"], [0, "♾ Limitsiz"]].map(function (p) { return '<button type="button" data-a="durp" data-v="' + p[0] + '" class="' + ((q.dur || 0) === p[0] ? "on" : "") + '">' + p[1] + '</button>'; }).join("") + '</div>' +
+      '<div class="dqqz-2"><div><label class="dqqz-l">Özəl müddət (dəq, 0 = limitsiz)</label><input class="dqqz-in" type="number" min="0" inputmode="numeric" id="dqqz-f-dur" value="' + (q.dur || 0) + '"></div><div></div></div>' +
+      '<div id="dqqz-prev" style="margin-top:10px;padding:10px 12px;border-radius:10px;background:#fff;border:1px solid #e0e7ff;font-size:13px;line-height:1.55"></div></div>' +
       '<div class="dqqz-2"><div><label class="dqqz-l">Keçid balı (%)</label><input class="dqqz-in" type="number" min="0" max="100" inputmode="numeric" id="dqqz-f-pass" value="' + q.pass + '"></div><div></div></div>' +
+      '<label class="dqqz-ck"><input type="checkbox" id="dqqz-f-grace"' + (q.grace ? " checked" : "") + '><span>Bağlanma vaxtı keçsə belə, başlamış iştirakçı öz işləmə müddətini tam işləsin</span></label>' +
       '<label class="dqqz-ck"><input type="checkbox" id="dqqz-f-reg"' + (q.reg ? " checked" : "") + '><span>Qeydiyyat tələb olunsun (iştirakçı sayta qeydiyyatdan keçməlidir)</span></label>' +
       '<label class="dqqz-ck"><input type="checkbox" id="dqqz-f-ans"' + (q.showAns ? " checked" : "") + '><span>Nəticədə doğru cavablar göstərilsin</span></label></div>';
     h += '<div class="dqqz-h">Suallar (' + q.qs.length + ')</div>';
     if (!q.qs.length) h += '<div class="dqqz-card dqqz-meta" style="text-align:center">Hələ sual yoxdur.</div>';
     q.qs.forEach(function (x, i) {
-      var bad = x.c < 0 || !x.o || x.o.filter(function (o) { return o.t || o.i; }).length < 2;
+      var bad = x.c < 0 || !x.o || (!x.oi && x.o.filter(function (o) { return o.t || o.i; }).length < 2);
       h += '<div class="dqqz-q' + (bad ? " bad" : "") + '"><span>' + (i + 1) + '</span><div>' + esc(strip(qBody(x)).slice(0, 150) || "(şəkilli sual)") + (x.i ? " 🖼" : "") + '<small>' + (x.c >= 0 ? "Doğru: " + LET[x.c] : "⚠ doğru cavab seçilməyib") + " · " + x.o.filter(function (o) { return o.t || o.i; }).length + ' variant</small></div><div class="ac"><button data-a="qup" data-i="' + i + '"' + (i ? "" : " disabled") + '>↑</button><button data-a="qdn" data-i="' + i + '"' + (i < q.qs.length - 1 ? "" : " disabled") + '>↓</button></div><div class="ac"><button data-a="qed" data-i="' + i + '">✏️</button><button data-a="qrm" data-i="' + i + '" style="color:#b91c1c">✕</button></div></div>';
     });
-    h += '<div class="dqqz-row" style="margin-top:10px"><button class="dqqz-b p" data-a="qnew">➕ Sual əlavə et</button><button class="dqqz-b" data-a="bulk">📥 Toplu yapışdır</button><button class="dqqz-b" data-a="dbimp">🗄 Bazadan seç</button></div>';
+    h += '<div class="dqqz-row" style="margin-top:10px"><button class="dqqz-b p" data-a="qnew">➕ Sual əlavə et</button><button class="dqqz-b" data-a="bulk">📥 Toplu yapışdır</button><button class="dqqz-b" data-a="pdfimp">📄 PDF-dən əlavə et</button><button class="dqqz-b" data-a="dbimp">🗄 Bazadan seç</button></div>';
     h += '<div class="dqqz-row" style="margin-top:18px"><button class="dqqz-b g" data-a="save">💾 Yadda saxla</button>' + (q.id ? '<button class="dqqz-b" data-a="copy" data-id="' + q.id + '">🔗 Linki kopyala</button>' : "") + '</div>';
-    r.innerHTML = h;
+    r.innerHTML = h; updPrev();
   }
+  function prevTxt() {
+    var st = fromLocal(($("dqqz-f-start") || {}).value), en = fromLocal(($("dqqz-f-end") || {}).value), du = Math.max(0, parseInt(($("dqqz-f-dur") || {}).value) || 0), gr = $("dqqz-f-grace") && $("dqqz-f-grace").checked;
+    function hm(ms) { var d = new Date(ms); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+    function dl(m) { return m >= 60 && m % 60 === 0 ? (m / 60) + " saat" : m > 60 ? Math.floor(m / 60) + " saat " + (m % 60) + " dəq" : m + " dəq"; }
+    if (!st || !en || en <= st) return '<span style="color:#b91c1c">⚠ Bağlanma vaxtı açılmadan sonra olmalıdır.</span>';
+    var win = Math.round((en - st) / 6e4), t = "🟢 Link <b>" + hm(st) + " – " + hm(en) + "</b> arası açıqdır (" + dl(win) + ").";
+    if (!du) return t + "<br>⏳ Şəxsi taymer yoxdur — iştirakçı bağlanma vaxtına (" + hm(en) + ") qədər işləyir.";
+    t += "<br>⏳ Başlayan hər kəs <b>" + dl(du) + "</b> alır.";
+    if (du >= win && !gr) t += "<br>ℹ Müddət aralıqdan uzundur — hamı " + hm(en) + "-də bağlanır.";
+    var ex = en - 10 * 6e4; if (ex < st) ex = st;
+    t += "<br>Misal: " + hm(ex) + "-də başlayan " + (gr ? hm(ex + du * 6e4) + "-də" : hm(Math.min(en, ex + du * 6e4)) + "-də") + " bitirir" + (gr ? " (tam müddət)." : (ex + du * 6e4 > en ? " (bağlanma vaxtı kəsir)." : "."));
+    return t;
+  }
+  function updPrev() { var e = $("dqqz-prev"); if (e) e.innerHTML = prevTxt(); }
   function readEd() {
     var q = A.q; if (!q || A.view !== "edit") return;
     var v;
@@ -265,6 +286,7 @@
     if ((v = $("dqqz-f-dur"))) q.dur = Math.max(0, parseInt(v.value) || 0);
     if ((v = $("dqqz-f-pass"))) q.pass = Math.max(0, Math.min(100, parseInt(v.value) || 0));
     if ((v = $("dqqz-f-reg"))) q.reg = v.checked;
+    if ((v = $("dqqz-f-grace"))) q.grace = v.checked;
     if ((v = $("dqqz-f-ans"))) q.showAns = v.checked;
   }
   function onAdminChange(e) {
@@ -277,8 +299,10 @@
       var s2 = fromLocal($("dqqz-f-start").value), e2 = fromLocal(t.value);
       if (s2 && e2 > s2) $("dqqz-f-min").value = Math.round((e2 - s2) / 6e4);
     }
+    updPrev();
     if (t.getAttribute && t.getAttribute("data-pk")) { var k = t.getAttribute("data-pk"); if (t.checked) A.sel[k] = 1; else delete A.sel[k]; var c = $("dqqz-pkn"); if (c) c.textContent = Object.keys(A.sel).length; }
     if (t.getAttribute && t.getAttribute("data-img")) pickImg(t);
+    if (t.getAttribute && t.getAttribute("data-pdf") && t.files && t.files[0]) runFiles([].slice.call(t.files));
   }
   function onPaste(e) {
     var t = e.target; if (!t || !t.closest || !t.closest("[data-pimg]")) return;
@@ -315,9 +339,9 @@
   }
   function validQ(f) {
     if (!String(f.t).trim() && !f.i) return "Sualın mətni və ya şəkli olmalıdır";
-    if (f.o.filter(function (o) { return o.t.trim() || o.i; }).length < 2) return "Ən azı 2 variant yazın";
+    if (!f.oi && f.o.filter(function (o) { return o.t.trim() || o.i; }).length < 2) return "Ən azı 2 variant yazın";
     if (f.c < 0) return "Doğru cavabı seçin (variantın hərfinə toxunun)";
-    if (!(f.o[f.c].t.trim() || f.o[f.c].i)) return "Doğru cavab boş variantdır";
+    if (!(f.o[f.c].t.trim() || f.o[f.c].i || (f.oi && f.c < f.oi))) return "Doğru cavab boş variantdır";
     return "";
   }
   /* ---- toplu yapışdır */
@@ -421,14 +445,15 @@
   function drawRes() {
     var R = A.res, q = R.q, rows = rowsOf(), r = root(); A.view = "res";
     var n = rows.length, avg = n ? (rows.reduce(function (s, x) { return s + x.score; }, 0) / n) : 0, pass = rows.filter(function (x) { return x.pct >= q.pass; }).length;
-    var h = '<div class="dqqz-row" style="margin:0 0 10px"><button class="dqqz-b" data-a="back">← Siyahı</button><button class="dqqz-b" data-a="resref">↻ Yenilə</button><button class="dqqz-b g" data-a="xlsx">⬇ Excel (.xlsx)</button><button class="dqqz-b" data-a="csv">⬇ CSV</button></div>' +
-      '<div class="dqqz-card" style="padding:12px"><h4>' + esc(q.title) + '</h4><div class="dqqz-meta">' + esc(q.subject) + " · " + fmt(q.start) + " → " + fmt(q.end) + " · " + q.qs.length + ' sual</div></div>' +
+    var h = '<div class="dqqz-row" style="margin:0 0 10px"><button class="dqqz-b" data-a="back">← Siyahı</button><button class="dqqz-b" data-a="resref">↻ Yenilə</button><button class="dqqz-b p" data-a="print">🖨 Çap / PDF</button><button class="dqqz-b g" data-a="xlsx">⬇ Excel (.xlsx)</button><button class="dqqz-b" data-a="csv">⬇ CSV</button></div>' +
+      '<div class="dqqz-card" style="padding:12px"><h4>' + esc(q.title) + '</h4><div class="dqqz-meta">' + esc(q.subject) + " · " + fmt(q.start) + " → " + fmt(q.end) + " · " + q.qs.length + ' sual · keçid balı ' + q.pass + '%</div></div>' +
       '<div class="dqqz-kp"><div><b>' + n + '</b><span>İştirakçı</span></div><div><b>' + avg.toFixed(1) + '</b><span>Orta bal</span></div><div><b>' + (n ? Math.round(pass * 100 / n) : 0) + '%</b><span>Keçənlər (' + pass + ')</span></div><div><b>' + (n ? Math.max.apply(null, rows.map(function (x) { return x.score; })) : 0) + '</b><span>Ən yüksək</span></div></div>';
     if (!n) h += '<div class="dqqz-card dqqz-meta" style="text-align:center">Hələ heç kim iştirak etməyib.</div>';
     else {
-      h += '<div class="dqqz-sc"><table class="dqqz-tb"><thead><tr><th>№</th><th>Ad Soyad</th><th>Qeydiyyat №</th><th>Düz</th><th>Səhv</th><th>Boş</th><th>Bal</th><th>%</th><th>Vaxt</th><th>Başladı</th><th>Səhv yazdığı suallar</th></tr></thead><tbody>';
+      h += '<div class="dqqz-sc"><table class="dqqz-tb"><thead><tr><th>№</th><th>Ad Soyad</th><th>Qeydiyyat №</th><th>Nəticə</th><th>%</th><th>Status</th><th>Vaxt</th><th>Başladı</th></tr></thead><tbody>';
       rows.forEach(function (x, i) {
-        h += '<tr data-a="det" data-r="' + x.a.rid + '"><td class="n">' + (i + 1) + '</td><td><b>' + esc(x.a.name) + '</b></td><td>' + esc(x.a.reg || "—") + (x.a.regOk === false ? ' <span title="Qeydiyyat yoxlanılmadı">⚠</span>' : "") + '</td><td class="ok">' + x.s.c + '</td><td class="no">' + x.s.w + '</td><td class="n">' + x.s.b + '</td><td class="n"><b>' + x.score + '</b></td><td class="n">' + x.pct + '%</td><td class="n">' + hms(x.a.sec || 0) + '</td><td>' + fmt(x.a.at || 0) + '</td><td>' + (x.s.wl.length ? x.s.wl.map(function (k) { return '<span class="dqqz-wr">' + k + '</span>'; }).join("") : '<span style="color:#15803d;font-weight:700">—</span>') + '</td></tr>';
+        var ok = x.pct >= q.pass, bl = blanksOf(q, x.a.answers || []);
+        h += '<tr data-a="det" data-r="' + x.a.rid + '"><td class="n">' + (i + 1) + '</td><td><b>' + esc(x.a.name) + '</b></td><td>' + esc(x.a.reg || "—") + (x.a.regOk === false ? ' <span title="Qeydiyyat yoxlanılmadı">⚠</span>' : "") + '</td><td style="min-width:190px"><b style="font-size:15px">' + x.score + "/" + q.qs.length + '</b>' + (x.s.wl.length ? ' <span style="color:#b91c1c;font-size:12.5px">(səhv suallar: ' + x.s.wl.join(",") + ')</span>' : "") + (bl.length ? ' <span style="color:#64748b;font-size:12.5px">(boş: ' + bl.join(",") + ')</span>' : "") + '</td><td class="n">' + x.pct + '%</td><td class="n" style="font-weight:800;color:' + (ok ? "#15803d" : "#b91c1c") + '">' + (ok ? "Keçdi" : "Keçmədi") + '</td><td class="n">' + hms(x.a.sec || 0) + '</td><td>' + fmt(x.a.at || 0) + '</td></tr>';
       });
       h += '</tbody></table></div><div class="dqqz-meta" style="margin-top:6px">Sətrə toxunun — iştirakçının hər sualda seçdiyi və doğru cavab görünür.</div>';
       h += '<div class="dqqz-h">Suallar üzrə statistika</div><div class="dqqz-sc"><table class="dqqz-tb" style="min-width:480px"><thead><tr><th>№</th><th>Sual</th><th>Doğru</th><th>Düzgün cavab verənlər</th></tr></thead><tbody>';
@@ -452,8 +477,8 @@
     D.body.appendChild(m); m.addEventListener("click", function (e) { if (e.target === m) m.remove(); onAdminClick(e); });
   }
   function tableData() {
-    var q = A.res.q, rows = rowsOf(), head = ["№", "Ad Soyad", "Qeydiyyat №", "Düz", "Səhv", "Boş", "Bal", "Faiz (%)", "Müddət", "Başlama vaxtı", "Səhv yazdığı suallar"];
-    var data = [head]; rows.forEach(function (x, i) { data.push([i + 1, x.a.name, x.a.reg || "", x.s.c, x.s.w, x.s.b, x.score, x.pct, hms(x.a.sec || 0), fmt(x.a.at || 0), x.s.wl.join(", ")]); });
+    var q = A.res.q, rows = rowsOf(), head = ["№", "Ad Soyad", "Qeydiyyat №", "Nəticə", "Düz", "Səhv", "Boş", "Faiz (%)", "Status", "Müddət", "Başlama vaxtı", "Səhv suallar"];
+    var data = [head]; rows.forEach(function (x, i) { data.push([i + 1, x.a.name, x.a.reg || "", resText(x), x.s.c, x.s.w, x.s.b, x.pct, x.pct >= q.pass ? "Keçdi" : "Keçmədi", hms(x.a.sec || 0), fmt(x.a.at || 0), x.s.wl.join(", ")]); });
     return data;
   }
   function download(name, blob) { var u = URL.createObjectURL(blob), a = D.createElement("a"); a.href = u; a.download = name; D.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); URL.revokeObjectURL(u); }, 800); }
@@ -471,13 +496,290 @@
   async function exportXlsx() {
     try {
       var X = await loadXlsx(), ws = X.utils.aoa_to_sheet(tableData()), wb = X.utils.book_new();
-      ws["!cols"] = [{ wch: 5 }, { wch: 28 }, { wch: 16 }, { wch: 7 }, { wch: 7 }, { wch: 7 }, { wch: 7 }, { wch: 9 }, { wch: 10 }, { wch: 17 }, { wch: 40 }];
+      ws["!cols"] = [{ wch: 5 }, { wch: 28 }, { wch: 16 }, { wch: 34 }, { wch: 7 }, { wch: 7 }, { wch: 7 }, { wch: 9 }, { wch: 10 }, { wch: 10 }, { wch: 17 }, { wch: 30 }];
       X.utils.book_append_sheet(wb, ws, "Nəticələr");
       var q = A.res.q, ws2 = X.utils.aoa_to_sheet([["№", "Sual", "Doğru cavab"].concat(["Düzgün cavab verənlər"])].concat(q.qs.map(function (x, i) { var ok = A.res.at.filter(function (a) { return (a.answers || [])[i] === x.c; }).length; return [i + 1, strip(qBody(x)).slice(0, 200), LET[x.c], ok + " / " + A.res.at.length]; })));
       X.utils.book_append_sheet(wb, ws2, "Suallar");
       var out = X.write(wb, { bookType: "xlsx", type: "array" });
       download(fname("xlsx"), new Blob([out], { type: "application/octet-stream" }));
     } catch (e) { toast(e.message + " — CSV yüklənir", true); exportCsv(); }
+  }
+
+  /* ---- nəticə mətni + çap (yalnız admin) */
+  function blanksOf(q, a) { var b = []; q.qs.forEach(function (x, i) { var v = a[i]; if (v == null || v < 0) b.push(i + 1); }); return b; }
+  function resText(x) {
+    var n = A.res.q.qs.length, bl = blanksOf(A.res.q, x.a.answers || []), p = [];
+    if (x.s.wl.length) p.push("səhv suallar: " + x.s.wl.join(","));
+    if (bl.length) p.push("boş: " + bl.join(","));
+    return x.score + "/" + n + (p.length ? " (" + p.join("; ") + ")" : "");
+  }
+  function printHtml(html) {
+    var f = D.createElement("iframe"); f.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0";
+    D.body.appendChild(f); var d = f.contentWindow.document; d.open(); d.write(html); d.close();
+    setTimeout(function () {
+      try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { toast("Çap pəncərəsi açılmadı", true); }
+      setTimeout(function () { f.remove(); }, 90000);
+    }, 450);
+  }
+  function exportPrint() {
+    var R = A.res, q = R.q, rows = rowsOf(), n = rows.length, avg = n ? rows.reduce(function (s, x) { return s + x.score; }, 0) / n : 0, pass = rows.filter(function (x) { return x.pct >= q.pass; }).length;
+    var h = '<!doctype html><html><head><meta charset="utf-8"><title>' + esc((q.title || "Quiz") + " — nəticələr") + '</title><style>@page{size:A4 landscape;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#0f172a;font-size:12px;margin:0}.hd{border-bottom:3px solid #c9a227;padding-bottom:8px;margin-bottom:10px}.hd b{font-size:11px;letter-spacing:.12em;color:#0b1f4d}h1{font-size:19px;margin:3px 0 2px;color:#0b1f4d}.m{color:#475569;margin:0}.kp{display:flex;gap:10px;margin:10px 0}.kp div{border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px}.kp b{display:block;font-size:16px}table{border-collapse:collapse;width:100%;margin-bottom:14px}th{background:#0b1f4d;color:#fff;text-align:left}th,td{border:1px solid #94a3b8;padding:5px 7px;vertical-align:top}tr{page-break-inside:avoid}tbody tr:nth-child(even) td{background:#f1f5f9}.ok{color:#15803d;font-weight:700}.no{color:#b91c1c;font-weight:700}.c{text-align:center;white-space:nowrap}h2{font-size:14px;color:#0b1f4d;margin:12px 0 6px}</style></head><body>' +
+      '<div class="hd"><b>DQ PLATFORM</b><h1>' + esc(q.title) + '</h1><p class="m">' + esc(q.subject) + " · " + fmt(q.start) + " → " + fmt(q.end) + " · " + q.qs.length + " sual · Keçid balı: " + q.pass + '%</p></div>' +
+      '<div class="kp"><div><b>' + n + '</b>İştirakçı</div><div><b>' + avg.toFixed(1) + '</b>Orta bal</div><div><b>' + pass + ' (' + (n ? Math.round(pass * 100 / n) : 0) + '%)</b>Keçənlər</div></div>' +
+      '<table><thead><tr><th>№</th><th>Ad Soyad</th><th>Qeydiyyat №</th><th>Nəticə</th><th>%</th><th>Status</th><th>Müddət</th><th>Başlama</th></tr></thead><tbody>';
+    rows.forEach(function (x, i) {
+      var ok = x.pct >= q.pass;
+      h += '<tr><td class="c">' + (i + 1) + '</td><td><b>' + esc(x.a.name) + '</b></td><td>' + esc(x.a.reg || "—") + '</td><td><b>' + esc(resText(x)) + '</b></td><td class="c">' + x.pct + '%</td><td class="c ' + (ok ? "ok" : "no") + '">' + (ok ? "Keçdi" : "Keçmədi") + '</td><td class="c">' + hms(x.a.sec || 0) + '</td><td class="c">' + fmt(x.a.at || 0) + '</td></tr>';
+    });
+    h += '</tbody></table><h2>Suallar üzrə statistika</h2><table><thead><tr><th>№</th><th>Sual</th><th>Doğru</th><th>Düz cavab verənlər</th></tr></thead><tbody>';
+    q.qs.forEach(function (x, i) {
+      var ok = rows.filter(function (y) { return (y.a.answers || [])[i] === x.c; }).length;
+      h += '<tr><td class="c">' + (i + 1) + '</td><td>' + esc(strip(qBody(x)).slice(0, 110) || "(şəkilli sual)") + '</td><td class="c">' + LET[x.c] + '</td><td class="c">' + ok + " / " + n + (n ? " (" + Math.round(ok * 100 / n) + "%)" : "") + '</td></tr>';
+    });
+    h += '</tbody></table></body></html>';
+    if (!n) return toast("Çap üçün nəticə yoxdur", true);
+    printHtml(h);
+  }
+
+  /* ---- PDF-dən sual idxalı (ağıllı kəsmə) */
+  var PI = { doc: null, qs: [], name: "", cp: 0, cc: null, src: [] };
+  function loadPdfJs() {
+    return new Promise(function (ok, no) {
+      var V = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+      function ready() { try { if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) window.pdfjsLib.GlobalWorkerOptions.workerSrc = V + "pdf.worker.min.js"; } catch (e) { } ok(window.pdfjsLib); }
+      if (window.pdfjsLib) return ready();
+      var s = D.createElement("script"); s.src = V + "pdf.min.js"; s.onload = ready; s.onerror = function () { no(new Error("PDF kitabxanası yüklənmədi — internetə baxın")); }; D.head.appendChild(s);
+    });
+  }
+  async function pageLines(page, pno) {
+    var vp = page.getViewport({ scale: 1 }), W = vp.width, H = vp.height, tc = await page.getTextContent(), its = [];
+    tc.items.forEach(function (it) {
+      if (!it.str || !it.str.trim()) return;
+      var fh = Math.abs(it.height) || Math.hypot(it.transform[2], it.transform[3]) || 10, base = H - it.transform[5];
+      if (base < H * 0.05 || base > H * 0.955) return; /* başlıq/altlıq/səhifə nömrəsi */
+      its.push({ s: it.str, x: it.transform[4], w: it.width, fh: fh, top: base - fh, bot: base + fh * 0.3, base: base });
+    });
+    var g = 0, two = false;
+    if (its.length > 24) {
+      var best = null;
+      for (var k = Math.round(W * 0.38); k <= W * 0.62; k += 3) {
+        var cr = 0, L = 0, Rr = 0;
+        its.forEach(function (it) { if (it.x < k && it.x + it.w > k) cr++; else if (it.x + it.w / 2 < k) L++; else Rr++; });
+        if (cr <= its.length * 0.03 && L >= its.length * 0.2 && Rr >= its.length * 0.2) { var sc = cr * 1000 + Math.abs(k - W / 2); if (!best || sc < best.sc) best = { k: k, sc: sc }; }
+      }
+      if (best) { g = best.k; two = true; }
+    }
+    var out = [], nc = two ? 2 : 1;
+    for (var ci = 0; ci < nc; ci++) {
+      var arr = its.filter(function (it) { var cx = it.x + it.w / 2; return !two || (ci === 0 ? cx < g : cx >= g); });
+      arr.sort(function (a, b) { return a.base - b.base || a.x - b.x; });
+      var lines = [];
+      arr.forEach(function (it) {
+        var Ln = lines[lines.length - 1];
+        if (Ln && Math.abs(it.base - Ln.base) < Math.max(2.5, it.fh * 0.45)) Ln.its.push(it); else lines.push({ base: it.base, its: [it] });
+      });
+      lines.forEach(function (Ln) {
+        Ln.its.sort(function (a, b) { return a.x - b.x; });
+        var t = "", pe = null, top = 1e9, bot = 0;
+        Ln.its.forEach(function (it) { if (pe !== null && it.x - pe > it.fh * 0.18) t += " "; t += it.s; pe = it.x + it.w; top = Math.min(top, it.top); bot = Math.max(bot, it.bot); });
+        t = t.replace(/\s+/g, " ").trim();
+        if (t) out.push({ t: t, p: pno, y0: top, y1: bot, cx0: ci === 0 ? W * 0.03 : g, cx1: ci === nc - 1 ? W * 0.97 : g });
+      });
+    }
+    return out;
+  }
+  function dropRepeats(pages) {
+    var cnt = {}, flat = [];
+    pages.forEach(function (ls) { var seen = {}; ls.forEach(function (l) { var k = l.t.toLowerCase().replace(/\d+/g, "#"); if (!seen[k]) { seen[k] = 1; cnt[k] = (cnt[k] || 0) + 1; } }); });
+    var lim = Math.max(3, Math.ceil(pages.length * 0.6));
+    pages.forEach(function (ls) { ls.forEach(function (l) { var k = l.t.toLowerCase().replace(/\d+/g, "#"); if (pages.length >= 3 && cnt[k] >= lim && l.t.length < 90) return; flat.push(l); }); });
+    return flat;
+  }
+  function joinStem(a) {
+    var r = a[0] || "";
+    for (var i = 1; i < a.length; i++) r += (/^(\d{1,2}\s*[\.\)]\s|[-•–]\s)/.test(a[i]) || /:$/.test(a[i - 1]) ? "\n" : " ") + a[i];
+    return r.trim();
+  }
+  function parseQLines(lines) {
+    var qs = [], cur = null, lastN = 0, key = {}, keyMode = false;
+    function fin() { if (cur) { qs.push(cur); cur = null; } }
+    function marks(s, from) {
+      function scan(nx0) {
+        var re = /(^|[^A-Za-zƏəİıÖöÜüÇçŞşĞğ])\(?([A-E])[\)\.]\s*/g, r, acc = [], nx = nx0;
+        while ((r = re.exec(s))) { var L = LET.indexOf(r[2]); if (L === nx) { acc.push({ at: r.index + r[1].length, end: re.lastIndex }); nx++; } }
+        return acc;
+      }
+      var m0 = scan(from);
+      if (!m0.length && from === 0) { var m1 = scan(1); if (m1.length >= 3 && m1[0].at > 0) { m1.unshift({ at: 0, end: 0, lost: true }); return m1; } }
+      return m0;
+    }
+    lines.forEach(function (ln) {
+      var s = ln.t, m;
+      if (!keyMode && lastN > 0 && (!cur || cur.o.length >= 2) && /^((düzgün|doğru)\s+)?cavablar|^cavab\s+açarı|^açar\b|^answers\b|^answer\s+key/i.test(s)) { fin(); keyMode = true; }
+      if (keyMode) {
+        var re2 = /(\d{1,3})\s*[-–—:\.\)=]*\s*\(?([A-Ea-e])\)?(?![A-Za-zƏəİıÖöÜüÇçŞşĞğ])/g, r2;
+        while ((r2 = re2.exec(s))) key[+r2[1]] = LET.indexOf(r2[2].toUpperCase());
+        return;
+      }
+      if (cur && (m = s.match(/^(?:doğru\s*)?(?:cavab|answer)\s*[:\-–]?\s*\(?([A-Ea-e])\)?\s*$/i))) { cur.ans = LET.indexOf(m[1].toUpperCase()); return; }
+      if (cur) {
+        var mk = marks(s, cur.o.length);
+        if (mk.length && (mk[0].at === 0 || mk.length >= 2 || cur.o.length)) {
+          if (mk[0].at > 0) { var pre = s.slice(0, mk[0].at).trim(); if (cur.o.length) cur.o[cur.o.length - 1] += " " + pre; else cur.st.push(pre); }
+          for (var q = 0; q < mk.length; q++) { if (!cur.o.length) cur.fo = ln; cur.o.push(s.slice(mk[q].end, q + 1 < mk.length ? mk[q + 1].at : undefined).trim()); }
+          if (mk[0].lost) { cur.o[0] = s.slice(0, mk[1].at).replace(/^\s+|\s+$/g, ""); }
+          cur.ol = ln; return;
+        }
+      }
+      m = s.match(/^(\d{1,3})\s*[\.\)\-–]\s*(.*)$/);
+      if (m) {
+        var n = +m[1];
+        if ((!cur || cur.o.length >= 2 || cur.ans != null) && (lastN === 0 || (n > lastN && n <= lastN + 3))) { fin(); cur = { n: n, st: m[2] ? [m[2]] : [], sl: [ln], o: [], ans: null, fo: null, ol: null }; lastN = n; return; }
+      }
+      if (!cur) return;
+      if (cur.o.length) { cur.o[cur.o.length - 1] += " " + s; cur.ol = ln; } else { cur.st.push(s); cur.sl.push(ln); }
+    });
+    fin();
+    return qs.map(function (c) {
+      var f = blankQ(); f.n = c.n; f.t = joinStem(c.st);
+      for (var i = 0; i < 5; i++) f.o[i].t = (c.o[i] || "").trim();
+      f.c = c.ans != null ? c.ans : (key[c.n] != null ? key[c.n] : -1);
+      var fl = c.sl[0]; if (fl) {
+        var same = c.sl.filter(function (l) { return l.p === fl.p && l.cx0 === fl.cx0; }), y1 = Math.max.apply(null, same.map(function (l) { return l.y1; }));
+        if (c.fo && c.fo.p === fl.p && c.fo.cx0 === fl.cx0) y1 = Math.max(y1, c.fo.y0 - 1);
+        var yy0 = Math.min.apply(null, same.map(function (l) { return l.y0; })), hs = same.reduce(function (a, l) { return a + (l.y1 - l.y0); }, 0), y1v = y1;
+        if (c.ol && c.ol.p === fl.p && c.ol.cx0 === fl.cx0) y1v = Math.max(y1, c.ol.y1);
+        f._box = { p: fl.p, x0: fl.cx0, x1: fl.cx1, y0: yy0, y1: y1, y1v: y1v };
+        f._fig = (y1 - yy0) > hs * 1.9 + 24;
+      }
+      return f;
+    });
+  }
+  function drawPdf() {
+    var r = root(); A.view = "pdf"; setTitle("📄 PDF / şəkildən sual əlavə et");
+    r.innerHTML = '<div class="dqqz-row" style="margin:0 0 6px"><button class="dqqz-b" data-a="qcancel">← Quizə qayıt</button></div><div class="dqqz-card"><div class="dqqz-meta" style="line-height:1.6"><b>PDF</b> (mətn qatlı) və ya <b>şəkil</b> (foto/skrin, bir neçəsini birlikdə seçə bilərsiniz) yükləyin. Sistem 1–2 sütunu tanıyır, başlıq/altlıq/su nişanını kənarlaşdırır, sualları nömrəyə görə ayırır, A–E variantlarını tapır. Şəkillərdə mətn OCR ilə oxunur və hər sual səliqəli şəkil kimi kəsilir. Cədvəl, fiqur, düstur olan suallar üçün <b>🖼 Şəkil</b> rejimi seçilir.</div><label class="dqqz-b p" style="display:inline-block;margin-top:12px;cursor:pointer">📎 PDF / şəkil seç<input type="file" accept="application/pdf,.pdf,image/*" multiple data-pdf="1" style="display:none"></label><div id="dqqz-pgs" class="dqqz-meta" style="margin-top:10px"></div></div>';
+  }
+  function loadImgFile(file) { return new Promise(function (ok, no) { var u = URL.createObjectURL(file), i = new Image(); i.onload = function () { ok(i); }; i.onerror = function () { no(new Error("Şəkil açılmadı: " + file.name)); }; i.src = u; }); }
+  function cleanCanvas(img) {
+    var k = Math.max(0.5, Math.min(2.2, 2000 / img.naturalWidth)), c = D.createElement("canvas"); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+    var x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+    inkClean(c); return c;
+  }
+  /* su nişanı (açıq rəng) və rəngli əl yazısı/dairələr silinir, yalnız qara mətn/fiqur qalır */
+  function inkClean(c) {
+    var x = c.getContext("2d"), d = x.getImageData(0, 0, c.width, c.height), p = d.data;
+    for (var i = 0; i < p.length; i += 4) {
+      var r = p[i], g1 = p[i + 1], b = p[i + 2], g = 0.299 * r + 0.587 * g1 + 0.114 * b, sat = Math.max(r, g1, b) - Math.min(r, g1, b), v;
+      if (sat > 60 && g > 45) v = 255; else v = g >= 185 ? 255 : g <= 95 ? 0 : (g - 95) * 255 / 90;
+      p[i] = p[i + 1] = p[i + 2] = v;
+    }
+    x.putImageData(d, 0, 0);
+  }
+  function splitCols(c) {
+    var W = c.width, H = c.height, x = c.getContext("2d"), p = x.getImageData(0, 0, W, H).data, ink = new Array(W).fill(0), tot = 0;
+    for (var y = Math.round(H * 0.04); y < H * 0.97; y += 2) for (var i = 0; i < W; i++) if (p[(y * W + i) * 4] < 140) { ink[i]++; tot++; }
+    var a = Math.round(W * 0.38), b = Math.round(W * 0.62), mx = a;
+    for (var j = a; j < b; j++) if (ink[j] > ink[mx]) mx = j;
+    var g;
+    if (ink[mx] > H * 0.22) { g = mx; var w = Math.max(3, Math.round(W * 0.006)); x.fillStyle = "#fff"; x.fillRect(g - w, 0, w * 2, H); }
+    else { var best = 1e9; g = Math.round(W / 2); for (var k = a; k < b; k++) { var s = 0; for (var q = -6; q <= 6; q++) s += ink[k + q] || 0; if (s < best) { best = s; g = k; } } }
+    var L = 0, R = 0; for (var m = 0; m < W; m++) { if (m < g) L += ink[m]; else R += ink[m]; }
+    return (L > tot * 0.15 && R > tot * 0.15) ? g : 0;
+  }
+  async function ocrLib() {
+    if (!window.Tesseract) await new Promise(function (ok, no) { var s = D.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"; s.onload = ok; s.onerror = function () { no(new Error("OCR kitabxanası yüklənmədi — internetə baxın")); }; D.head.appendChild(s); });
+    try { return await window.Tesseract.createWorker("aze+eng"); } catch (e) { return await window.Tesseract.createWorker("eng"); }
+  }
+  async function imageLines(file, pno, wk, say) {
+    var img = await loadImgFile(file), c = cleanCanvas(img), g = splitCols(c), W = c.width, H = c.height, out = [], cols = g ? [[0, g], [g, W]] : [[0, W]];
+    PI.src[pno - 1] = { kind: "img", c: c };
+    for (var ci = 0; ci < cols.length; ci++) {
+      var x0 = cols[ci][0], x1 = cols[ci][1], sub = D.createElement("canvas"); sub.width = x1 - x0; sub.height = H;
+      sub.getContext("2d").drawImage(c, x0, 0, x1 - x0, H, 0, 0, x1 - x0, H);
+      say("OCR: " + file.name + " — sütun " + (ci + 1) + " / " + cols.length);
+      var r = await wk.recognize(sub), ls = (r.data && r.data.lines) || [];
+      ls.forEach(function (l) { var t = String(l.text || "").replace(/\s+/g, " ").trim(); if (t.length < 2 || !l.bbox) return; out.push({ t: t, p: pno, y0: l.bbox.y0, y1: l.bbox.y1, cx0: ci === 0 ? W * 0.02 : x0, cx1: ci === cols.length - 1 ? W * 0.98 : x1 }); });
+    }
+    return out;
+  }
+  async function runFiles(files) {
+    var st = $("dqqz-pgs"); function say(t) { if (st) st.textContent = t; }
+    try {
+      files = files.slice().sort(function (a, b) { return a.name.localeCompare(b.name, undefined, { numeric: true }); });
+      PI = { doc: null, qs: [], name: files.map(function (f) { return f.name; }).join(", "), cp: 0, cc: null, src: [] };
+      var all = [], chars = 0, wk = null, pno = 0, fromImg = false;
+      for (var fi = 0; fi < files.length; fi++) {
+        var f = files[fi];
+        if (/pdf$/i.test(f.type) || /\.pdf$/i.test(f.name)) {
+          say("PDF yüklənir: " + f.name); var lib = await loadPdfJs(), doc = await lib.getDocument({ data: await f.arrayBuffer() }).promise;
+          for (var p = 1; p <= doc.numPages; p++) { pno++; say("Oxunur: " + f.name + " — səhifə " + p + " / " + doc.numPages); PI.src[pno - 1] = { kind: "pdf", doc: doc, n: p }; var ls = await pageLines(await doc.getPage(p), pno); ls.forEach(function (l) { chars += l.t.length; }); all.push(ls); }
+        } else if (/^image\//.test(f.type) || /\.(jpe?g|png|webp)$/i.test(f.name)) {
+          fromImg = true; if (!wk) { say("OCR hazırlanır (ilk dəfə bir az çəkə bilər)…"); wk = await ocrLib(); }
+          pno++; var il = await imageLines(f, pno, wk, say); il.forEach(function (l) { chars += l.t.length; }); all.push(il);
+        }
+      }
+      if (wk) { try { await wk.terminate(); } catch (e) { } }
+      if (chars < 40) throw new Error("Mətn tapılmadı. Mətn qatı olmayan PDF-i şəkil kimi (skrin) yükləyin.");
+      PI.qs = parseQLines(dropRepeats(all));
+      if (!PI.qs.length) throw new Error("Sual tanınmadı. Suallar “1.” kimi nömrələnməli, variantlar “A)” ilə başlamalıdır.");
+      PI.qs.forEach(function (x) {
+        var no = nOpt(x), top = 0; for (var k = 4; k >= 0; k--) if (x.o[k].t) { top = k + 1; break; }
+        x.on = top >= 2 ? top : 5;
+        x.m = no < 2 ? "sv" : (fromImg || x._fig) ? "s" : "t";
+      });
+      for (var qi = 0; qi < PI.qs.length; qi++) { say("Sual şəkilləri kəsilir: " + (qi + 1) + " / " + PI.qs.length); var xq = PI.qs[qi]; if (xq._box && xq.m !== "t") await ensureCrop(xq, xq.m === "sv"); }
+      drawPdfPrev();
+    } catch (e) { say("⚠ " + (e && e.message ? e.message : "Xəta")); }
+  }
+  function nOpt(x) { return x.o.filter(function (o) { return o.t && o.t.trim(); }).length; }
+  async function ensureCrop(x, full) {
+    var k = full ? "i2" : "i1"; if (x[k] || !x._box) return;
+    var b = x._box; x[k] = await cropBox({ p: b.p, x0: b.x0, x1: b.x1, y0: b.y0, y1: full ? b.y1v : b.y1 });
+  }
+  function drawPdfPrev(keep) {
+    var r = root(), qs = PI.qs, sc = r.scrollTop; A.view = "pdfp"; setTitle("📄 Yoxlama");
+    var noAns = qs.filter(function (x) { return x.c < 0; }).length, weak = qs.filter(function (x) { return x.m !== "sv" && nOpt(x) < 2; }).length;
+    var h = '<div class="dqqz-row" style="margin:0 0 8px"><button class="dqqz-b" data-a="pdfimp">← Başqa fayl</button><button class="dqqz-b" data-a="qcancel">Ləğv et</button></div><div class="dqqz-card" style="padding:12px"><b>' + qs.length + ' sual tanındı</b> <span class="dqqz-meta">(' + esc(PI.name.slice(0, 80)) + ')</span><div class="dqqz-meta" style="margin-top:4px;line-height:1.5">' + (noAns ? "⚠ " + noAns + " sualın doğru cavabı tapılmadı — variant hərfinə toxunub seçin. " : "✓ Bütün suallarda doğru cavab var. ") + (weak ? "⚠ " + weak + " sualda variant tam oxunmadı — 🖼+A–E rejimini seçin. " : "") + 'Rejimlər: 📝 mətn · 🖼 sual şəkil kimi · 🖼+A–E sual və variantlar şəkildə. Şəkillərdə su nişanı və rəngli əl yazısı/dairələr avtomatik silinir.</div></div>';
+    qs.forEach(function (x, i) {
+      var bad = x.c < 0 || (x.m !== "sv" && nOpt(x) < 2), mb = function (v, lb) { return '<button class="dqqz-b s" data-a="pdfm" data-i="' + i + '" data-v="' + v + '" style="' + (x.m === v ? "background:#4c1d95;color:#fff" : "") + '">' + lb + '</button>'; };
+      h += '<div class="dqqz-card" style="margin-top:10px;padding:12px;' + (bad ? "border:1.5px solid #f59e0b" : "") + '"><div class="dqqz-row" style="justify-content:space-between;margin:0 0 6px"><b>Sual ' + (i + 1) + (x.n && x.n !== i + 1 ? ' <small style="color:#64748b">(' + x.n + ')</small>' : "") + '</b><span><button class="dqqz-b s" data-a="pdfup" data-i="' + i + '"' + (i ? "" : " disabled") + '>↑</button> <button class="dqqz-b s" data-a="pdfrm" data-i="' + i + '" style="color:#b91c1c">✕</button></span></div>' +
+        '<div class="dqqz-row" style="margin:0 0 8px;gap:6px">' + mb("t", "📝 Mətn") + mb("s", "🖼 Şəkil") + mb("sv", "🖼+A–E") + '</div>';
+      if (x.m === "t") h += '<textarea class="dqqz-in" data-pt="' + i + '" rows="3" style="font-size:13.5px">' + esc(x.t) + '</textarea>';
+      else { var im = x.m === "sv" ? x.i2 : x.i1; h += im ? '<img src="' + im + '" alt="" style="max-width:100%;border:1px solid #e2e8f0;border-radius:8px;background:#fff">' : '<div class="dqqz-meta">Şəkil üçün yer tapılmadı</div>'; }
+      if (x.m === "sv") {
+        h += '<div class="dqqz-meta" style="margin:8px 0 4px">Variant sayı: ' + [2, 3, 4, 5].map(function (n) { return '<button class="dqqz-b s" data-a="pdfn" data-i="' + i + '" data-v="' + n + '" style="' + (x.on === n ? "background:#4c1d95;color:#fff" : "") + '">' + n + '</button>'; }).join(" ") + '</div><div class="dqqz-row" style="gap:6px">' + [0, 1, 2, 3, 4].slice(0, x.on).map(function (k) { return '<button class="dqqz-b s" data-a="pdfc" data-i="' + i + '" data-k="' + k + '" style="min-width:44px;' + (x.c === k ? "background:#15803d;color:#fff" : "") + '">' + LET[k] + '</button>'; }).join("") + '</div>';
+      } else {
+        var shown = 4; for (var k = 4; k >= 0; k--) if (x.o[k].t) { shown = Math.max(4, k + 1); break; }
+        for (var k2 = 0; k2 < shown; k2++) h += '<div class="dqqz-row" style="margin-top:6px;flex-wrap:nowrap;gap:6px"><button class="dqqz-b s" data-a="pdfc" data-i="' + i + '" data-k="' + k2 + '" style="min-width:38px;' + (x.c === k2 ? "background:#15803d;color:#fff" : "") + '">' + LET[k2] + '</button><input class="dqqz-in" data-po="' + i + '-' + k2 + '" value="' + esc(x.o[k2].t) + '" style="padding:8px 10px;font-size:13.5px"></div>';
+      }
+      h += '</div>';
+    });
+    h += '<div class="dqqz-row" style="margin-top:14px"><button class="dqqz-b g" data-a="pdfadd">➕ ' + qs.length + ' sualı quizə əlavə et</button></div>';
+    r.innerHTML = h; if (keep) r.scrollTop = sc;
+  }
+  function readPdfPrev() {
+    PI.qs.forEach(function (x, i) {
+      var t = D.querySelector('[data-pt="' + i + '"]'); if (t) x.t = t.value;
+      for (var k = 0; k < 5; k++) { var o = D.querySelector('[data-po="' + i + "-" + k + '"]'); if (o) x.o[k].t = o.value; }
+    });
+  }
+  async function cropBox(b) {
+    var s = PI.src[b.p - 1], S = 1, c;
+    if (!s) return "";
+    if (s.kind === "img") c = s.c;
+    else {
+      S = 2.2; c = PI.cc;
+      if (!c || PI.cp !== b.p) {
+        var pg = await s.doc.getPage(s.n), vp = pg.getViewport({ scale: S }); c = D.createElement("canvas"); c.width = Math.ceil(vp.width); c.height = Math.ceil(vp.height);
+        await pg.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise; PI.cc = c; PI.cp = b.p;
+      }
+    }
+    var pad = 5 * S, x0 = Math.max(0, b.x0 * S - pad), y0 = Math.max(0, b.y0 * S - pad), x1 = Math.min(c.width, b.x1 * S + pad), y1 = Math.min(c.height, b.y1 * S + pad);
+    var w = Math.max(10, x1 - x0), h = Math.max(10, y1 - y0), k = Math.min(1, 900 / w), o = D.createElement("canvas");
+    o.width = Math.round(w * k); o.height = Math.round(h * k);
+    var cx = o.getContext("2d"); cx.fillStyle = "#fff"; cx.fillRect(0, 0, o.width, o.height); cx.drawImage(c, x0, y0, w, h, 0, 0, o.width, o.height);
+    if (s.kind !== "img") inkClean(o);
+    return o.toDataURL("image/jpeg", 0.88);
   }
 
   /* ---- klik idarəsi */
@@ -533,12 +835,40 @@
           var add = 0; DBC.rows.forEach(function (x) { if (A.sel[x.id]) { var f2 = rowToQ(x, DBC.m); if (f2.c >= 0 && f2.o.filter(function (o) { return o.t; }).length >= 2) { A.q.qs.push(f2); add++; } } });
           toast(add + " sual əlavə olundu" + (add < ids.length ? " (" + (ids.length - add) + " sualın doğru cavabı tanınmadı)" : ""), add < ids.length); return drawEdit();
         }
+        case "durp": readEd(); A.q.dur = +t.getAttribute("data-v"); return drawEdit();
+        case "print": return exportPrint();
+        case "pdfimp": readEd(); return drawPdf();
+        case "pdfc": { readPdfPrev(); var pi = +t.getAttribute("data-i"), pk = +t.getAttribute("data-k"); PI.qs[pi].c = PI.qs[pi].c === pk ? -1 : pk; return drawPdfPrev(true); }
+        case "pdfrm": readPdfPrev(); PI.qs.splice(+t.getAttribute("data-i"), 1); return drawPdfPrev(true);
+        case "pdfup": { readPdfPrev(); var ui = +t.getAttribute("data-i"), tq = PI.qs[ui]; PI.qs[ui] = PI.qs[ui - 1]; PI.qs[ui - 1] = tq; return drawPdfPrev(true); }
+        case "pdfm": {
+          readPdfPrev(); var mi = +t.getAttribute("data-i"), mv = t.getAttribute("data-v"), mq = PI.qs[mi]; mq.m = mv;
+          if (mv !== "t") { if (!mq._box) { mq.m = "t"; toast("Bu sualın yeri tapılmadı", true); } else { toast("Şəkil kəsilir…"); await ensureCrop(mq, mv === "sv"); } }
+          return drawPdfPrev(true);
+        }
+        case "pdfn": { readPdfPrev(); var nq = PI.qs[+t.getAttribute("data-i")]; nq.on = +t.getAttribute("data-v"); if (nq.c >= nq.on) nq.c = -1; return drawPdfPrev(true); }
+        case "pdfadd": {
+          readPdfPrev(); var added = 0, noA = 0;
+          for (var pj = 0; pj < PI.qs.length; pj++) {
+            var x = PI.qs[pj];
+            if (x.m !== "t") await ensureCrop(x, x.m === "sv");
+            var f3 = { t: x.m === "t" ? x.t.trim() : "", i: x.m === "sv" ? (x.i2 || "") : x.m === "s" ? (x.i1 || "") : "", h: false, o: x.o.map(function (o) { return { t: (o.t || "").trim(), i: "" }; }), c: x.c };
+            if (x.m === "sv") { f3.oi = x.on; f3.o.forEach(function (o) { o.t = ""; }); }
+            else if (f3.c >= 0 && !f3.o[f3.c].t) f3.c = -1;
+            if (!f3.t && !f3.i) continue;
+            if (f3.c < 0) noA++;
+            A.q.qs.push(f3); added++;
+          }
+          if (!added) return toast("Əlavə ediləcək sual yoxdur", true);
+          PI.qs = []; PI.cc = null; PI.src = [];
+          toast(added + " sual əlavə olundu" + (noA ? " — " + noA + " sualda doğru cavab seçilməyib" : ""), !!noA); return drawEdit();
+        }
         case "save": {
           if (A.busy) return; readEd(); var Q = A.q;
           if (!Q.title) return toast("Quizin adını yazın", true);
           if (!Q.end || Q.end <= Q.start) return toast("Bitmə vaxtı başlamadan sonra olmalıdır", true);
           if (!Q.qs.length) return toast("Ən azı bir sual əlavə edin", true);
-          for (var k = 0; k < Q.qs.length; k++) { var x = Q.qs[k], er2 = ""; if (x.c < 0) er2 = "Sual " + (k + 1) + ": doğru cavab seçilməyib"; else if (!(x.o[x.c].t || x.o[x.c].i)) er2 = "Sual " + (k + 1) + ": doğru cavab boşdur"; if (er2) return toast(er2, true); }
+          for (var k = 0; k < Q.qs.length; k++) { var x = Q.qs[k], er2 = ""; if (x.c < 0) er2 = "Sual " + (k + 1) + ": doğru cavab seçilməyib"; else if (!(x.o[x.c].t || x.o[x.c].i || (x.oi && x.c < x.oi))) er2 = "Sual " + (k + 1) + ": doğru cavab boşdur"; if (er2) return toast(er2, true); }
           busy(true); t.disabled = true;
           try { await saveQuiz(Q); toast("✅ Yadda saxlanıldı"); drawEdit(); } finally { busy(false); t.disabled = false; }
           return;
@@ -646,11 +976,11 @@
       lset("dqqz_run_" + q.id, JSON.stringify(P.run)); drawRun();
     } catch (e) { bad("Xəta: " + e.message); }
   }
-  function deadline() { var q = P.q, d = Infinity; if (q.dur > 0) d = P.run.t0 + q.dur * 6e4; if (q.manual !== "on") d = Math.min(d, q.end); return d; }
+  function deadline() { var q = P.q, d = Infinity; if (q.dur > 0) d = P.run.t0 + q.dur * 6e4; if (q.manual !== "on" && !(q.dur > 0 && q.grace)) d = Math.min(d, q.end); return d; }
   function drawRun() {
     plClear(); var q = P.q, run = P.run, i = run.i, x = q.qs[i], ans = run.answers, done = ans.filter(function (v) { return v >= 0; }).length;
     var h = '<div class="dqqz-hd"><div class="tt">' + esc(q.title) + '</div><div class="tm" id="dqqz-tm">--:--:--</div></div><div class="dqqz-wrap"><div class="dqqz-main"><div class="dqqz-pn"><div class="dqqz-qc"><div class="dqqz-qh"><span>Sual ' + (i + 1) + ' (' + esc(q.subject) + ')</span><em>' + (ans[i] >= 0 ? "✔ cavablandı" : "cavabsız") + '</em></div><div class="dqqz-qt">' + qBody(x) + imgTag(x.i) + '</div>';
-    x.o.forEach(function (o, k) { if (!(o.t || o.i)) return; h += '<button class="dqqz-o' + (ans[i] === k ? " on" : "") + '" data-p="opt" data-k="' + k + '"><b>' + LET[k] + '</b><span>' + (o.t ? esc(o.t) : "") + imgTag(o.i, "dqqz-im dqqz-oi") + '</span></button>'; });
+    x.o.forEach(function (o, k) { if (!(o.t || o.i || (x.oi && k < x.oi))) return; h += '<button class="dqqz-o' + (ans[i] === k ? " on" : "") + '" data-p="opt" data-k="' + k + '"><b>' + LET[k] + '</b><span>' + (o.t ? esc(o.t) : "") + imgTag(o.i, "dqqz-im dqqz-oi") + '</span></button>'; });
     h += '</div><div class="dqqz-nv"><button class="g" data-p="prev"' + (i ? "" : " disabled style='opacity:.45'") + '>Əvvəlki</button><button class="o" data-p="clr">Seçimi Ləğv Et</button><button class="r" data-p="fin">Testi Bitir</button><button class="n" data-p="next"' + (i < q.qs.length - 1 ? "" : " disabled style='opacity:.45'") + '>Növbəti</button></div></div>' +
       '<div class="dqqz-ca"><h5>Cavab Kartı</h5><div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:800;margin:0 0 8px"><span>' + esc(q.subject) + '</span><span>' + done + ' / ' + q.qs.length + '</span></div><div class="dqqz-gr">' + q.qs.map(function (_, k) { return '<button data-p="go" data-i="' + k + '" class="' + (ans[k] >= 0 ? "a " : "") + (k === i ? "c" : "") + '">' + (k + 1) + '</button>'; }).join("") + '</div></div></div></div>';
     var box = plBox(), sc = box.scrollTop; box.innerHTML = h; box.scrollTop = 0; void sc;
@@ -699,7 +1029,7 @@
       '<div class="tot">Doğru cavabların sayı: ' + s.c + '<br>Yanlış cavabların sayı: ' + s.w + '<br>Cavablandırılmayan test tapşırıqlarının sayı: ' + s.b + '</div>' +
       '<div class="dqqz-sc2">YEKUN BAL: ' + s.c + ' / ' + n + ' (' + pct + '%)</div><div class="dqqz-sc2 ' + (ok ? "ok" : "no") + '">' + (ok ? "Təbrik edirik! Quizdən uğurla keçdiniz." : "Test imtahanından müvəffəqiyyət əldə etməmisiniz.") + '</div>' +
       (res.saved === false ? '<div class="dqqz-err dqqz-noprint">Nəticə serverə yazılmadı (' + esc(res.err || "şəbəkə xətası") + '). İnterneti yoxlayıb yenidən göndərin.<button class="dqqz-btn b" data-p="retry" style="margin-top:8px">↻ Yenidən göndər</button></div>' : "") +
-      '<button class="dqqz-btn dqqz-noprint" data-p="home" style="background:#15803d">🏠 Əsas Səhifəyə Qayıt</button><button class="dqqz-btn l dqqz-noprint" data-p="print">🖨 Çap et / PDF</button>' + wrong + '</div>';
+      '<button class="dqqz-btn dqqz-noprint" data-p="home" style="background:#15803d">🏠 Əsas Səhifəyə Qayıt</button>' + wrong + '</div>';
     plBox().scrollTop = 0;
   }
 
