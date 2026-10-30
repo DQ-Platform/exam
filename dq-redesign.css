@@ -497,3 +497,34 @@ html body #v3-home.dqr-on #dqr #dq-types>h2,html body #v3-home.dqr-on #dqr #dq-t
 #dqr .ft .ft-bt .by{position:static;font-size:12.5px;color:#8da0cb}
 #dqr .ft .ft-bt .by .dq-imbtn{color:var(--gd2);font-weight:700}
 @media(max-width:900px){#dqr .ft .ft-top{grid-template-columns:1fr;gap:28px;padding:36px 0 26px}#dqr .ft .ft-bt{flex-direction:column;align-items:flex-start}}
+
+/* =====================================================================
+   v6 — maketə uyğunlaşdırma: yığcam statistika kartı + bir cərgəli footer
+   ===================================================================== */
+/* Statistika: «Niyə məhz» cərgəsinin sağında yığcam kart */
+#dqr .wh{grid-template-columns:repeat(5,minmax(0,1fr)) minmax(0,1.9fr)!important;align-items:stretch}
+#dqr .wh:has(#dqr-st:empty){grid-template-columns:repeat(5,minmax(0,1fr))!important}
+#dqr #dqr-st{grid-column:auto;display:flex;align-items:center;padding:10px;min-height:150px;border-radius:16px;background:linear-gradient(180deg,#0b2a66,#071a40);border:1px solid #ffffff26;overflow:hidden}
+#dqr #dqr-st #dq-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:2px 8px!important}
+#dqr #dqr-st .dqst-c{padding:12px 12px;column-gap:12px;grid-template-columns:auto minmax(0,1fr)}
+#dqr #dqr-st .dqst-c+.dqst-c{border-left:0!important}
+#dqr #dqr-st .dqst-c:nth-child(2n){border-left:1px solid #ffffff1a!important}
+#dqr #dqr-st .dqst-c:nth-child(n+3){border-top:1px solid #ffffff1a!important}
+#dqr #dqr-st .dqst-ic{width:38px;height:38px;border-radius:50%;font-size:17px;border:0!important;background:none!important}
+#dqr #dqr-st .dqst-c b{font-size:24px}
+#dqr #dqr-st .dqst-c small{font-size:12px}
+@media(max-width:1120px){#dqr .wh,#dqr .wh:has(#dqr-st:empty){grid-template-columns:repeat(3,minmax(0,1fr))!important}#dqr #dqr-st{grid-column:1/-1;min-height:0}#dqr #dqr-st #dq-stats{grid-template-columns:repeat(4,minmax(0,1fr))!important}#dqr #dqr-st .dqst-c:nth-child(n){border-top:0!important}#dqr #dqr-st .dqst-c+.dqst-c{border-left:1px solid #ffffff1a!important}}
+@media(max-width:760px){#dqr .wh,#dqr .wh:has(#dqr-st:empty){grid-template-columns:repeat(2,minmax(0,1fr))!important}#dqr #dqr-st #dq-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}#dqr #dqr-st .dqst-c:nth-child(2n+1){border-left:0!important}#dqr #dqr-st .dqst-c:nth-child(n+3){border-top:1px solid #ffffff1a!important}}
+
+/* Footer: bir cərgə — loqo (sol) · menyu (orta) · sosial (sağ); altda copyright */
+#dqr .ft{margin-top:46px;background:#020b1c;border-top:1px solid var(--ln)}
+#dqr .ft .ft-top{grid-template-columns:auto minmax(0,1fr) auto!important;gap:28px!important;align-items:center;padding:24px 0 14px!important}
+#dqr .ft .ft-br .lg{margin:0 0 4px}
+#dqr .ft .ft-br p{font-size:11.5px;max-width:none;line-height:1.4}
+#dqr .ft .ft-top>nav.ft-nv{display:flex!important;flex-wrap:wrap;justify-content:center;gap:6px 26px}
+#dqr .ft nav.ft-nv b,#dqr .ft .ft-so b{display:none}
+#dqr .ft nav.ft-nv a{font-size:13px;color:#e6edff}
+#dqr .ft .so a{width:36px;height:36px;border-radius:50%;background:#0d2a66;border:1px solid #ffffff2e;color:#8fd0ff;font-size:16px}
+#dqr .ft .ft-bt{position:relative;justify-content:center;border-top:0;padding:6px 0 22px;gap:6px 22px;font-size:12px}
+#dqr .ft .ft-bt .by{position:absolute;right:0;bottom:22px;font-size:12px}
+@media(max-width:900px){#dqr .ft .ft-top{grid-template-columns:1fr!important;justify-items:center;text-align:center}#dqr .ft .ft-bt{flex-direction:row;align-items:center}#dqr .ft .ft-bt .by{position:static}}
