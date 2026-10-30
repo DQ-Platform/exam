@@ -4536,6 +4536,9 @@ setInterval(wrap,700);wrap();
   function place() {
     var h = $("v3-home"), el = $("dq-count");
     if (!h || !el) return;
+    /* yeni ana səhifə: geri sayım həmişə «Yeniliklər» üstündəki sabit yuvada qalır */
+    var slot = $("dqr-cnt");
+    if (slot) { if (el.parentNode !== slot) slot.appendChild(el); return; }
     var banner = h.querySelector("#dq2-top, #lxp-ban");   /* sənəd sırasına görə ilk banner */
     if (banner && banner.parentNode) {
       if (el.nextElementSibling !== banner) banner.parentNode.insertBefore(el, banner);
