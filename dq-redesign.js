@@ -337,7 +337,9 @@ function mount(){
   if(S.edit){adopt();return}
   var sig=(logged()?1:0)+"|"+(window.LX&&LX.cache?LX.cache.map(function(x){return x._id+(x.title||"")}).join():"");
   if(el.__sig!==sig){var first=el.__sig==null;el.__sig=sig;if(!first){var y=window.scrollY;keep();el.innerHTML=build();theme();adopt();loadNews();DV.tick();window.scrollTo(0,y)}}
-  adopt()}
+  adopt();
+  ["dt-home","dt-grid","dq-types","yq-news"].forEach(function(i){var n=$(i);if(n&&n.style.getPropertyValue("display")!=="none")n.style.setProperty("display","none","important")});
+  var sl=$("dqr-cnt"),now=Date.now();if(sl&&!sl.firstElementChild&&!STASH.firstChild&&window.DQCD&&DQCD.mount&&now-(window.__dqrCd||0)>4000){window.__dqrCd=now;try{DQCD.mount()}catch(e){}}}
 window.DQR={S:S,build:function(){return build()},cfg:function(){return cfg},init:init};
 setInterval(function(){try{mount()}catch(e){}},500);
 setInterval(loadNews,60000);

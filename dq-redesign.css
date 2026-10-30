@@ -407,3 +407,17 @@ html{scroll-behavior:smooth}
 #dqr .w{width:min(1200px,100% - 32px)}
 @media(max-width:760px){#dqr .w{width:calc(100% - 24px)}#dqr h1{letter-spacing:-.01em}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* v5 — yüksək specifiklik (index.html-dəki !important qaydalarını üstələmək üçün) */
+html body #v3-home#v3-home #dt-home#dt-home,
+html body #v3-home#v3-home #dt-grid#dt-grid,
+html body #v3-home#v3-home #dq-types,
+html body #v3-home#v3-home #yq-news,
+html body #dqr#dqr .ft#dqr-ft{display:none!important}
+html body #v3-home#v3-home .dqn-dots,html body #v3-home#v3-home .dtn-dots,html body #v3-home#v3-home .yq-dots,html body #v3-home#v3-home .dqcr-dots{
+  display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;height:auto!important;line-height:0}
+html body #v3-home#v3-home .dqn-dots>*,html body #v3-home#v3-home .dtn-dots>*,html body #v3-home#v3-home .yq-dots>*{
+  flex:none!important;align-self:center!important;width:8px!important;height:8px!important;min-height:0!important;max-height:8px!important;
+  padding:0!important;border:0!important;border-radius:99px!important;background:#ffffff4d!important;font-size:0!important}
+html body #v3-home#v3-home .dqn-dots>.on,html body #v3-home#v3-home .dtn-dots>.on,html body #v3-home#v3-home .yq-dots>.on{
+  width:26px!important;background:#e8b94a!important}
