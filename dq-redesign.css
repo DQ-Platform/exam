@@ -388,3 +388,112 @@ html body #v3-home.dqr-on.active:not(:has(>#dt-home))>#dt-grid{flex:0 1 680px;ma
 #dqr .lgb button{border:0;border-radius:8px;padding:6px 10px;font:700 11.5px inherit;font-family:inherit;cursor:pointer;background:var(--grad);color:#2a1c00}
 #dqr .lgb button.g{background:#ffffff1f;color:#fff}
 #dqr .lgx{position:relative}
+
+/* =====================================================================
+   v5 — peşəkar yekun qat: yeniliklər, statistika, geri sayım, tək footer, təmiz üzən alətlər
+   ===================================================================== */
+:root{--dqf-r:18px}
+
+/* 0) Tək footer: köhnə (v3) footer və ehtiyat footer ana səhifədə heç vaxt görünmür */
+html body #v3-home.dqr-on>.v3-ft,html body #v3-home.dqr-on .dq-ft-fallback{display:none!important}
+
+/* 1) Üzən alətlər: aşağıdakı zəng/telefon düymələri yoxdur (zəng yuxarı başlıqda sabitdir) */
+#dqt-dock [data-dqf-x]{position:absolute!important;width:1px!important;height:1px!important;min-width:0!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important}
+#dqt-dock{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;gap:0!important;opacity:1!important}
+#dqt-grip{display:none!important}
+#dqdm,#dqdm-t{display:none!important}
+
+/* 2) Başlıqlar: heç bir halda solğun / tünd qalmasın */
+html body #v3-home.dqr-on #dqr :is(.sh h2,.nl h2,.an h2,.dtn-h,#dq-types>h2,#dq-types .tp-h,.dtn-hd h2){color:#fff!important;-webkit-text-fill-color:#fff!important;background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;opacity:1!important;filter:none!important;text-shadow:none}
+html body #v3-home.dqr-on #dqr .an h2{font-size:clamp(22px,2.4vw,28px);line-height:1.2;letter-spacing:-.01em}
+html body #v3-home.dqr-on #dqr :is(.sh p,.an p){-webkit-text-fill-color:currentColor}
+
+/* 3) Geri sayım: Yeniliklərdən yuxarı, öz bölməsində, sabit */
+#dqr #dqr-cntw{padding:40px 0 0}
+#dqr #dqr-cntw:has(#dqr-cnt:empty){display:none}
+#dqr #dqr-cnt{margin:0;min-height:0;contain:layout}
+#dqr #dqr-cnt #dq-count{margin:0!important;width:100%!important;max-width:none!important}
+#dqr #dqr-cnt .dqcd-in{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:18px 24px;border-radius:var(--dqf-r);min-height:92px;
+ background:linear-gradient(120deg,#0b2a66,#06173a 70%);border:1px solid var(--ln);box-shadow:0 18px 40px -26px #000}
+#dqr #dqr-cnt .dqcd-hd{flex:1 1 auto;min-width:0;margin:0;justify-content:flex-start;text-align:left}
+#dqr #dqr-cnt .dqcd-ic{width:46px;height:46px;border-radius:12px;font-size:20px}
+#dqr #dqr-cnt .dqcd-t{font-size:16px;font-weight:800;color:#fff;-webkit-text-fill-color:#fff}
+#dqr #dqr-cnt .dqcd-d{font-size:12.5px;color:#b4c2e4;opacity:1;-webkit-text-fill-color:#b4c2e4}
+#dqr #dqr-cnt .dqcd-cells{gap:10px;flex:0 0 auto}
+#dqr #dqr-cnt .dqcd-c{flex:0 0 78px;padding:9px 6px 8px;border-radius:12px;background:#ffffff0f;border:1px solid #ffffff1f;text-align:center}
+#dqr #dqr-cnt .dqcd-c b{font-size:26px;line-height:1.1;color:var(--gd2);-webkit-text-fill-color:var(--gd2);font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+#dqr #dqr-cnt .dqcd-c small{font-size:11px;color:#b4c2e4;opacity:1}
+#dqr #dqr-cnt .dqcd-btn{margin:0;padding:11px 20px;border-radius:11px;font-size:13px;white-space:nowrap}
+@media(max-width:820px){#dqr #dqr-cnt .dqcd-in{flex-direction:column;align-items:stretch;padding:16px}#dqr #dqr-cnt .dqcd-cells{width:100%}#dqr #dqr-cnt .dqcd-c{flex:1 1 0}#dqr #dqr-cnt .dqcd-btn{text-align:center}}
+
+/* 4) «Niyə məhz DQ Platform?» + statistika: ayrıca, tam enli, kəsilməyən ölçü */
+#dqr .wh{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:14px}
+#dqr .wy{min-height:150px;justify-content:flex-start;padding:22px 12px 18px;font-size:12.5px;font-weight:600}
+#dqr #dqr-st{grid-column:1/-1;padding:0;min-height:0;background:linear-gradient(120deg,#0b2a66,#06173a 70%);border:1px solid var(--ln);border-radius:var(--dqf-r);overflow:hidden}
+#dqr #dqr-st #dq-stats{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;margin:0!important;width:100%!important;max-width:none!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important}
+#dqr #dqr-st .dqst-c{display:grid!important;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"ic n" "ic l";column-gap:16px;row-gap:2px;align-items:center;justify-content:start;text-align:left;padding:22px 26px;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;min-width:0}
+#dqr #dqr-st .dqst-c+.dqst-c{border-left:1px solid #ffffff1a!important}
+#dqr #dqr-st .dqst-ic{grid-area:ic;width:50px;height:50px;border-radius:14px;display:grid;place-items:center;font-size:20px;color:var(--gd);background:#ffffff0d!important;border:1px solid color-mix(in srgb,var(--gd) 45%,transparent)!important}
+#dqr #dqr-st .dqst-c b{grid-area:n;font-size:32px;line-height:1.05;font-weight:800;color:#fff!important;-webkit-text-fill-color:#fff;text-align:left;text-shadow:none;font-variant-numeric:tabular-nums}
+#dqr #dqr-st .dqst-c small{grid-area:l;font-size:13px;line-height:1.3;color:#b4c2e4!important;opacity:1!important;text-align:left;white-space:normal;overflow:visible;text-overflow:clip}
+@media(max-width:1120px){#dqr .wh{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:760px){#dqr .wh{grid-template-columns:repeat(2,minmax(0,1fr))!important}#dqr #dqr-st #dq-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}#dqr #dqr-st .dqst-c{padding:16px 16px}#dqr #dqr-st .dqst-c:nth-child(3){border-left:0!important}#dqr #dqr-st .dqst-c:nth-child(n+3){border-top:1px solid #ffffff1a!important}#dqr #dqr-st .dqst-c b{font-size:26px}}
+
+/* 5) Yeniliklər / xəbərlər modulu — tünd, səliqəli, oxunaqlı */
+html body #v3-home.dqr-on #dqr #dtn{max-width:1200px;margin:56px auto 8px;padding:0;text-align:left;color:#e6edff}
+html body #v3-home.dqr-on #dqr #dtn .dtn-h{margin:0 0 6px;padding-left:18px;position:relative;font-size:clamp(22px,2.4vw,28px);font-weight:800;letter-spacing:-.01em;text-align:left;line-height:1.2}
+html body #v3-home.dqr-on #dqr #dtn .dtn-h:before{content:"";position:absolute;left:0;top:3px;bottom:3px;width:5px;border-radius:3px;background:var(--grad)}
+html body #v3-home.dqr-on #dqr #dtn :is(.dtn-ln,.dtn-ln:after){display:none!important}
+html body #v3-home.dqr-on #dqr #dtn .dtn-sub{margin:0 0 20px;padding-left:18px;text-align:left;color:#b4c2e4!important;-webkit-text-fill-color:#b4c2e4;font-size:13.5px}
+html body #v3-home.dqr-on #dqr #dtn .dtn-st{border-radius:var(--dqf-r);overflow:hidden;background:linear-gradient(120deg,#0b2a66,#06173a 72%)!important;border:1px solid var(--ln)!important;border-top:1px solid var(--ln)!important;box-shadow:0 26px 60px -30px #000}
+html body #v3-home.dqr-on #dqr #dtn .dtn-s{grid-template-columns:minmax(0,5fr) minmax(0,6fr)!important;min-height:330px;background:none!important}
+html body #v3-home.dqr-on #dqr #dtn .dtn-im{position:relative;min-height:330px;background:#06122c}
+html body #v3-home.dqr-on #dqr #dtn .dtn-im:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 55%,#0a2459cc 100%)}
+html body #v3-home.dqr-on #dqr #dtn .dtn-im img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+html body #v3-home.dqr-on #dqr #dtn .dtn-new{position:absolute;z-index:2;top:16px;left:16px;padding:5px 11px;border-radius:99px;background:var(--grad);color:#2a1c00;font-size:11px;font-weight:800;letter-spacing:.04em}
+html body #v3-home.dqr-on #dqr #dtn .dtn-bd{display:flex;flex-direction:column;justify-content:center;gap:0;padding:34px 40px;background:none!important;text-align:left}
+html body #v3-home.dqr-on #dqr #dtn .dtn-mt{display:flex;align-items:center;gap:12px;margin:0 0 14px;color:#b4c2e4!important}
+html body #v3-home.dqr-on #dqr #dtn .dtn-mt b{padding:5px 12px;border-radius:99px;font-size:12px;font-weight:700;color:var(--gd2)!important;-webkit-text-fill-color:var(--gd2);background:#e8b94a1f!important;border:1px solid color-mix(in srgb,var(--gd) 45%,transparent)}
+html body #v3-home.dqr-on #dqr #dtn .dtn-mt span{font-size:12.5px;color:#9fb0d6!important;-webkit-text-fill-color:#9fb0d6;font-variant-numeric:tabular-nums}
+html body #v3-home.dqr-on #dqr #dtn .dtn-bd h3{margin:0 0 12px;font-size:clamp(19px,1.9vw,24px);line-height:1.3;font-weight:800;letter-spacing:-.01em;color:#fff!important;-webkit-text-fill-color:#fff!important;text-align:left;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+html body #v3-home.dqr-on #dqr #dtn .dtn-bd p{margin:0 0 24px;font-size:14px;line-height:1.65;color:#c3d0ee!important;-webkit-text-fill-color:#c3d0ee!important;text-align:left;max-width:60ch;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+html body #v3-home.dqr-on #dqr #dtn .dtn-ac{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto}
+html body #v3-home.dqr-on #dqr #dtn .dtn-ac button{padding:11px 22px;border-radius:11px;font:700 13px/1 "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;cursor:pointer;border:1px solid transparent;background:var(--grad)!important;color:#2a1c00!important;-webkit-text-fill-color:#2a1c00;box-shadow:none;transition:transform .15s,filter .15s}
+html body #v3-home.dqr-on #dqr #dtn .dtn-ac button.g{background:transparent!important;color:#e6edff!important;-webkit-text-fill-color:#e6edff;border-color:#ffffff40}
+html body #v3-home.dqr-on #dqr #dtn .dtn-ac button:hover{transform:translateY(-1px);filter:brightness(1.07)}
+html body #v3-home.dqr-on #dqr #dtn .dtn-ctl{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:20px}
+html body #v3-home.dqr-on #dqr #dtn .dtn-ar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;padding:0;font-size:20px;line-height:1;cursor:pointer;background:#0b1d46!important;color:var(--gd2)!important;-webkit-text-fill-color:var(--gd2);border:1px solid color-mix(in srgb,var(--gd) 50%,transparent)!important;box-shadow:none;transition:background .15s}
+html body #v3-home.dqr-on #dqr #dtn .dtn-ar:hover{background:#12306e!important}
+html body #v3-home.dqr-on #dqr #dtn .dtn-dots{display:flex;align-items:center;gap:8px;background:none!important;padding:0!important;box-shadow:none!important}
+html body #v3-home.dqr-on #dqr #dtn .dtn-dots i{display:block;width:8px!important;height:8px!important;min-width:0;border-radius:99px;background:#ffffff40!important;border:0!important;transform:none!important;cursor:pointer;transition:width .25s,background .25s}
+html body #v3-home.dqr-on #dqr #dtn .dtn-dots i.on{width:28px!important;background:var(--grad)!important}
+@media(max-width:820px){html body #v3-home.dqr-on #dqr #dtn .dtn-s{grid-template-columns:1fr!important}html body #v3-home.dqr-on #dqr #dtn .dtn-im{min-height:210px}html body #v3-home.dqr-on #dqr #dtn .dtn-im:after{background:linear-gradient(180deg,transparent 55%,#0a2459cc 100%)}html body #v3-home.dqr-on #dqr #dtn .dtn-bd{padding:22px 20px}}
+
+/* 6) «Aktiv sınaqlar və mövzu testləri» (aktiv olduqda) eyni dillə */
+html body #v3-home.dqr-on #dqr #dq-types{max-width:1200px;margin:48px auto 8px}
+html body #v3-home.dqr-on #dqr #dq-types :is(h2,h3){-webkit-text-fill-color:currentColor}
+html body #v3-home.dqr-on #dqr #dq-types>h2,html body #v3-home.dqr-on #dqr #dq-types .tp-h{text-align:left}
+
+/* 7) Tək peşəkar footer */
+#dqr .ft{margin-top:64px;padding:0;background:linear-gradient(180deg,#030d22,#010712);border-top:1px solid var(--ln)}
+#dqr .ft .w{display:block}
+#dqr .ft .ft-top{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.3fr) minmax(0,1fr);gap:40px;padding:48px 0 36px;align-items:start}
+#dqr .ft .ft-br .lg{margin-bottom:14px}
+#dqr .ft .ft-br p{margin:0;max-width:34ch;color:#9fb0d6;font-size:13.5px;line-height:1.65}
+#dqr .ft .ft-br p span{color:inherit!important;-webkit-text-fill-color:currentColor}
+#dqr .ft b{display:block;margin:0 0 16px;color:#fff;font-size:13.5px;font-weight:800;letter-spacing:.02em}
+#dqr .ft nav.ft-nv{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 24px;margin:0;justify-content:stretch;align-content:start}
+#dqr .ft nav.ft-nv b{grid-column:1/-1;margin-bottom:6px}
+#dqr .ft nav.ft-nv a{padding:0;font-size:13.5px;font-weight:500;color:#b4c2e4;text-decoration:none;cursor:pointer;transition:color .15s}
+#dqr .ft nav.ft-nv a:hover{color:var(--gd2)}
+#dqr .ft nav.ft-nv a:after{display:none}
+#dqr .ft .so{display:flex;flex-wrap:wrap;gap:10px}
+#dqr .ft .so a{width:40px;height:40px;border-radius:12px;background:#ffffff0d;border:1px solid #ffffff26;color:#d5def5;font-size:18px;cursor:pointer;transition:background .15s,color .15s,transform .15s}
+#dqr .ft .so a:hover{background:var(--grad);color:#2a1c00;border-color:transparent;transform:translateY(-2px)}
+#dqr .ft .ft-bt{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 24px;padding:20px 0 26px;border-top:1px solid #ffffff17;color:#8da0cb;font-size:12.5px}
+#dqr .ft .ft-bt .lk{display:flex;gap:22px}
+#dqr .ft .ft-bt .lk a{margin:0;color:#b4c2e4;text-decoration:none;cursor:pointer}
+#dqr .ft .ft-bt .lk a:hover{color:var(--gd2)}
+#dqr .ft .ft-bt .by{position:static;font-size:12.5px;color:#8da0cb}
+#dqr .ft .ft-bt .by .dq-imbtn{color:var(--gd2);font-weight:700}
+@media(max-width:900px){#dqr .ft .ft-top{grid-template-columns:1fr;gap:28px;padding:36px 0 26px}#dqr .ft .ft-bt{flex-direction:column;align-items:flex-start}}

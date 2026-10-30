@@ -7,7 +7,7 @@ NL=function(s){return E(s).replace(/\n/g,"<br>")},
 CL=function(o){return JSON.parse(JSON.stringify(o))},
 S={news:[],imgs:{},edit:false,hist:[],fut:[],id:null,dirty:false,sel:null,base:"",ready:false},
 AZ=["Yan","Fev","Mar","Apr","May","İyn","İyl","Avq","Sen","Okt","Noy","Dek"],
-SN={ex:"İmtahanlar",an:"Nəticə analizi",why:"Niyə DQ Platform",news:"Yeniliklər"},
+SN={ex:"İmtahanlar",an:"Nəticə analizi",why:"Niyə DQ Platform",cnt:"Geri sayım",news:"Yeniliklər"},
 cfg=null,DEFC=null;
 try{var lk=document.createElement("link");lk.rel="stylesheet";lk.href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Caveat:wght@600&display=swap";document.head.appendChild(lk)}catch(e){}
 
@@ -47,7 +47,7 @@ function makeDef(){
   soc=gs.filter(function(k){return it[k]&&!it[k].h}).map(function(k){return{t:it[k].t,a:it[k].a||"none"}});
   if(!soc.length)soc=[{t:"Telegram",a:"none"},{t:"WhatsApp",a:"none"},{t:"YouTube",a:"none"},{t:"Instagram",a:"none"}];
   var card=function(ic,c,t,cat,ch){return{ic:ic,c:c,t:t,cat:cat,ch:ch,b:{t:"İştirak et",a:"exam"}}};
-  return{v:2,theme:{gd:"#e8b94a",bg:"#020a1a",pn:"#061330",tx:"#f1f5ff"},order:["ex","an","why","news"],hide:{},st:{},
+  return{v:2,theme:{gd:"#e8b94a",bg:"#020a1a",pn:"#061330",tx:"#f1f5ff"},order:["ex","an","why","cnt","news"],hide:{},st:{},
   nav:[{t:"Ana səhifə",a:"home"},{t:"Yeniliklər",a:"news"},{t:"Sınaqlar",a:"exam"},{t:"Testlər",a:"tests"},{t:"İmtahan",a:"exam"},{t:"Materiallar",a:"law"},{t:"Haqqımızda",a:"sc:dqr-ft"}],
   brand:"PLATFORM",logo:"logo.png",
   hero:{eb:"DÖVLƏT QULLUĞU",t1:"Hədəfiniz dövlət qulluğudur?",t2:"Biz sizinləyik!",p:"DQ Platform – dövlət qulluğu üzrə sınaq imtahanları, aktual materiallar və peşəkar hazırlıq imkanı verir. Uğur səninlədir!",btn:{t:"Sınaq imtahanına başla",a:"exam"},img:"hero.jpg",
@@ -189,7 +189,8 @@ ex:function(){var c=cfg.ex,ov=c.ov||{},all=live(),lv=(!S.edit&&c.auto)?all.filte
  return'<section id="dqr-ex" data-sec="ex" class="'+(cfg.hide.ex?"dim":"")+'">'+SB("ex")+'<div class="w"><div class="sh"><div>'+X("ex.t","h2")+X("ex.s","p")+"</div>"+LK("ex.lk","lkx")+'</div>'+(S.edit?'<div class="enote">⚙ düyməsi ilə hər kartın qiymətini, «Pulsuz» statusunu, qapaq şəklini və keçidini təyin edin. «＋ Əlavə et» ilə yeni (ödənişli və ya ödənişsiz) kart yaradın. CANLI kartlar aktiv sınaqlardan avtomatik gəlir.</div>':"")+'<div class="g4">'+h+"</div></div></section>"},
 an:function(){var a=cfg.an;
  return'<section id="dqr-an" data-sec="an" class="'+(cfg.hide.an?"dim":"")+'">'+SB("an")+'<div class="w"><div class="an"><div>'+X("an.t","h2","",1)+X("an.p","p","",1)+'</div><div class="rs"><div class="rg"><div class="ring" style="--p:'+pct(a.pct)+'%"><b>'+X("an.pct","span")+"</b></div>"+X("an.rl","span")+'</div><div class="st">'+a.st.map(function(r,i){return"<div>"+X("an.st."+i+".t","span")+X("an.st."+i+".v","b")+"</div>"}).join("")+'</div><div class="bars">'+X("an.bt","b")+a.bars.map(function(r,i){return"<div>"+X("an.bars."+i+".t","span")+'<s><i style="width:'+pct(r.v)+"%;background:"+E(r.c)+'"></i></s>'+X("an.bars."+i+".v","span")+"</div>"}).join("")+"</div></div>"+BG("an.img","gr")+"</div></div></section>"},
-why:function(){return'<section id="dqr-why" data-sec="why" class="'+(cfg.hide.why?"dim":"")+'">'+SB("why")+'<div class="w"><div class="sh pl"><div>'+X("why.t","h2")+'</div></div><div class="wh">'+cfg.why.items.map(function(x,i){return'<div class="wy" data-ix="'+i+'">'+IB("why.items",i)+'<span class="wi">'+SV(x.ic||"target")+"</span>"+X("why.items."+i+".t","span")+"</div>"}).join("")+ADD("why.items")+'<div id="dqr-st"></div></div><div id="dqr-cnt"></div></div></section>'},
+why:function(){return'<section id="dqr-why" data-sec="why" class="'+(cfg.hide.why?"dim":"")+'">'+SB("why")+'<div class="w"><div class="sh pl"><div>'+X("why.t","h2")+'</div></div><div class="wh">'+cfg.why.items.map(function(x,i){return'<div class="wy" data-ix="'+i+'">'+IB("why.items",i)+'<span class="wi">'+SV(x.ic||"target")+"</span>"+X("why.items."+i+".t","span")+"</div>"}).join("")+ADD("why.items")+'<div id="dqr-st"></div></div></div></section>'},
+cnt:function(){return'<section id="dqr-cntw" data-sec="cnt" class="'+(cfg.hide.cnt?"dim":"")+'">'+SB("cnt")+'<div class="w"><div id="dqr-cnt"></div></div></section>'},
 news:function(){var n=cfg.news,b=n.bn;
  return'<section id="dqr-news" data-sec="news" class="'+(cfg.hide.news?"dim":"")+'">'+SB("news")+'<div class="w"><div class="nb"><div class="nl"><div class="nh">'+X("news.t","h2")+LK("news.lk","lkx")+'</div><div id="dqr-nw">'+newsHtml()+(S.edit?'<div class="enote">Xəbərlər idarə panelindəki «Yeniliklər» bölməsindən gəlir.</div>':"")+'</div></div><div class="bn">'+BG("news.bn.img","bnimg")+"<small>"+X("news.bn.s","span")+"</small>"+X("news.bn.t","h2","",1)+X("news.bn.p","p")+LK("news.bn.btn","cta",'<i>→</i>')+'<div class="chp">'+b.chips.map(function(c,i){return'<span data-ix="'+i+'"'+ACT(c.a,CA[i])+'>'+IB("news.bn.chips",i)+SV(c.ic||"info")+X("news.bn.chips."+i+".t","em")+"</span>"}).join("")+ADD("news.bn.chips")+"</div></div></div></div></section>"}};
 
@@ -208,7 +209,10 @@ function build(){
   var mid=cfg.order.filter(function(s){return SEC[s]&&(S.edit||!cfg.hide[s])}).map(function(s){return SEC[s]()}).join("");
   return'<header class="hd"><div class="w">'+brand+'<nav aria-label="Əsas menyu">'+nav+'</nav><div class="au"><span class="tl"><button type="button" class="tb tl-bell" data-tl="bell" title="Bildirişlər" hidden>'+SV("bell")+'<i></i></button><button type="button" class="tb" data-tl="theme" title="Görünüş (gündüz / gecə)" hidden>'+SV("moon")+'</button><button type="button" class="tb" data-tl="eye" title="Göz rahatlığı" hidden>'+SV("eye")+'</button><button type="button" class="tb sq" data-tl="search" title="Axtar">'+SV("search")+"</button></span>"+(on?'<a class="b g" data-a="kab">Kabinet</a><a class="b" data-a="out">Çıxış</a>':'<a class="b" data-a="in">Daxil ol</a><a class="b g" data-a="reg">Qeydiyyat</a>')+"</div></div></header>"
   +'<main><div class="hero">'+DV.mk(BG("hero.img","bg"))+'<div class="w"><div class="tx">'+X("hero.eb","div","ey")+"<h1>"+X("hero.t1","span","t1",1)+" "+X("hero.t2","span","t2")+"</h1>"+X("hero.p","p","",1)+LK("hero.btn","cta",'<i>→</i>')+'<div class="feat">'+feat+"</div></div></div></div>"+mid+"</main>"
-  +'<footer class="ft" id="dqr-ft"><div class="w"><div><div class="lg" data-a="home">'+logo+"<span>"+E(cfg.brand)+"</span></div><small>"+X("ft.tag","span")+"</small></div>"+'<div class="so">'+soc+'</div><div class="cp">'+X("ft.copy","span")+"<span>"+fl+'</span><span class="by">Yş.<span class="dq-imbtn">İmanoff</span></span></div></div></footer>'}
+  +'<footer class="ft" id="dqr-ft"><div class="w"><div class="ft-top"><div class="ft-br"><div class="lg" data-a="home">'+logo+"<span>"+E(cfg.brand)+'</span></div><p>'+X("ft.tag","span")+'</p></div>'
+  +'<nav class="ft-nv" aria-label="Footer menyusu"><b>Naviqasiya</b>'+fnav+'</nav>'
+  +'<div class="ft-so"><b>Bizi izləyin</b><div class="so">'+soc+'</div></div></div>'
+  +'<div class="ft-bt"><span class="cr">'+X("ft.copy","span")+'</span><span class="lk">'+fl+'</span><span class="by">Developed by <span class="dq-imbtn">Yunis İmanov</span></span></div></div></footer>'}
 
 /* ---------- əməliyyatlar ---------- */
 var A={home:function(){try{showScreen("v3-home");scrollTo(0,0)}catch(e){}},law:function(){if(typeof LAW2!=="undefined"&&LAW2.open)LAW2.open();else V3.go("n4")},exam:function(){if(window.LXP&&typeof LXP.open==="function")LXP.open();else V3.go("n2")},
@@ -344,7 +348,7 @@ function wire(el){
 
 /* ---------- qoşulma ---------- */
 function init(){var c=null;try{c=JSON.parse(localStorage.getItem("dqr_cache2")||"null")}catch(e){}
- DEFC=makeDef();cfg=merge(CL(DEFC),c&&c.v===2?c:null);S.ready=true;ui();
+ DEFC=makeDef();cfg=merge(CL(DEFC),c&&c.v===2?c:null);if(cfg.order.indexOf("cnt")<0){var ni=cfg.order.indexOf("news");if(ni<0)cfg.order.push("cnt");else cfg.order.splice(ni,0,"cnt")}else if(cfg.order.indexOf("cnt")>cfg.order.indexOf("news")&&cfg.order.indexOf("news")>-1){cfg.order.splice(cfg.order.indexOf("cnt"),1);cfg.order.splice(cfg.order.indexOf("news"),0,"cnt")}if(cfg.ft&&cfg.ft.copy)cfg.ft.copy=cfg.ft.copy.replace(/^©\s*\d{4}\s*/,"© "+new Date().getFullYear()+" ");S.ready=true;ui();
  loadCfg().then(function(f){if(f&&!S.edit){var m=merge(CL(DEFC),f);if(JSON.stringify(m)!==JSON.stringify(cfg)){cfg=m;rebuild()}try{localStorage.setItem("dqr_cache2",JSON.stringify(f))}catch(e){}}loadImgs()})}
 function mount(){
   var h=$("v3-home");if(!h||!gV3()||!V3.D||!gV2())return;
@@ -361,4 +365,25 @@ function mount(){
 window.DQR={S:S,build:function(){return build()},cfg:function(){return cfg},init:init};
 setInterval(function(){try{mount()}catch(e){}},500);
 setInterval(loadNews,60000);
+})();
+
+/* ---------- v5: üzən zəng / telefon düymələri (admin «Gizləmə» ilə idarə olunur) + sabit geri sayım ---------- */
+(function(){"use strict";
+var RB=/\uD83D\uDD14|fa-bell|bi-bell|bell|bildiri|notif/i,RP=/\uD83D\uDCF1|\uD83D\uDCF2|fa-mobile|fa-phone|mobile|telefon|install|dqdm/i,last=null,lostAt=0;
+function mark(){
+ /* köçürülən dok: yalnız zəng və telefon işarələnir, çatbot qalır */
+ var d=document.getElementById("dqt-dock");
+ if(d){[].forEach.call(d.children,function(c){
+  if(c.id==="dqt-grip"||c.hasAttribute("data-dqf-x"))return;
+  var t=(c.id+" "+(typeof c.className==="string"?c.className:"")+" "+(c.getAttribute("aria-label")||"")+" "+(c.title||"")+" "+(c.innerHTML||"").slice(0,500));
+  if(c.id==="dq13-dock"||c.classList.contains("dqt-disp"))return;
+  if(RB.test(t)||RP.test(t))c.setAttribute("data-dqf-x","1")})}
+ /* geri sayım düyünü itərsə, bir neçə saniyə ərzində yerinə qaytar (titrəmə/itib-gəlmə olmasın) */
+ var cnt=document.getElementById("dqr-cnt"),n=document.getElementById("dq-count");
+ if(n){last=n;lostAt=0}
+ else if(last&&cnt&&!cnt.firstChild){if(!lostAt)lostAt=Date.now();if(Date.now()-lostAt<5000)cnt.appendChild(last)}}
+function clean(){
+ [].forEach.call(document.querySelectorAll("#dqr .dtn-h,#dqr #dq-types>h2,#dqr #dq-types .tp-h"),function(h){var t=h.textContent,n=t.replace(/^[\s\u2600-\u27BF\uFE0F]*(?:[\uD83C-\uD83E][\uDC00-\uDFFF]\uFE0F?\s*)+/,"");if(n!==t&&n)h.textContent=n});
+ [].forEach.call(document.querySelectorAll("#dqr .dtn-ac button.g"),function(b){var t=b.textContent,n=t.replace(/^[\s]*(?:[\uD83C-\uD83E][\uDC00-\uDFFF]\uFE0F?\s*)+/,"");if(n!==t&&n)b.textContent=n})}
+setInterval(function(){try{mark();clean()}catch(e){}},400);
 })();
