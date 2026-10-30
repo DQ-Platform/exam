@@ -344,11 +344,9 @@ body.dqr-hdr #dq13-dock>button,body.dqr-hdr #dq13-dock>.fb,body.dqr-hdr #dq13-do
 
 /* ---- 1) Gizlədilənlər (3-cü şəkildəki qırmızı xətlə işarələnmişlər) ---- */
 html body #dqr .ft,
-html body #dqr-ft,
-html body #dt-home,
-html body #dt-grid,
-html body #dq-types,
-html body #yq-news{display:none!important}
+html body #dqr-ft{display:none!important}
+/* köhnə bloklar yalnız ana səhifədə gizlidir (aşağıdakı #v3-home qaydası); Sınaqlar ekranındakı karusel görünməlidir */
+html body #exam-select-screen #dq-types{display:block!important}
 
 /* ---- 2) Geri sayım: «Yeniliklər» üstündə, yerində sabit, ölçüsü dəyişmir ---- */
 html body #dqr #dqr-cnt{width:min(1200px,100% - 32px);margin:36px auto 0;padding:0;contain:layout style}

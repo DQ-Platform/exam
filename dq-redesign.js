@@ -48,7 +48,7 @@ function makeDef(){
   if(!soc.length)soc=[{t:"Telegram",a:"none"},{t:"WhatsApp",a:"none"},{t:"YouTube",a:"none"},{t:"Instagram",a:"none"}];
   var card=function(ic,c,t,cat,ch){return{ic:ic,c:c,t:t,cat:cat,ch:ch,b:{t:"İştirak et",a:"exam"}}};
   return{v:2,theme:{gd:"#e8b94a",bg:"#020a1a",pn:"#061330",tx:"#f1f5ff"},order:["ex","an","why","news"],hide:{},st:{},
-  nav:[{t:"Ana səhifə",a:"home"},{t:"Yeniliklər",a:"news"},{t:"Sınaqlar",a:"exam"},{t:"Testlər",a:"tests"},{t:"İmtahan",a:"exam"},{t:"Materiallar",a:"law"},{t:"Haqqımızda",a:"sc:dqr-ft"}],
+  nav:[{t:"Ana səhifə",a:"home"},{t:"Yeniliklər",a:"news"},{t:"Sınaqlar",a:"sinaq"},{t:"Testlər",a:"tests"},{t:"İmtahan",a:"exam"},{t:"Materiallar",a:"law"},{t:"Məlumat",a:"infos"}],
   brand:"PLATFORM",logo:"logo.png",
   hero:{eb:"DÖVLƏT QULLUĞU",t1:"Hədəfiniz dövlət qulluğudur?",t2:"Biz sizinləyik!",p:"DQ Platform – dövlət qulluğu üzrə sınaq imtahanları, aktual materiallar və peşəkar hazırlıq imkanı verir. Uğur səninlədir!",btn:{t:"Sınaq imtahanına başla",a:"exam"},img:"hero.jpg",
    feat:[{ic:"doc",t:"DİM modelinə uyğun imtahanlar"},{ic:"chart",t:"Təhlil və nəticə analizi"},{ic:"target",t:"Hər zaman və hər yerdə"},{ic:"shield",t:"Təkmilləşdirilmiş platforma"}]},
@@ -211,10 +211,50 @@ function build(){
   +'<footer class="ft" id="dqr-ft"><div class="w"><div><div class="lg" data-a="home">'+logo+"<span>"+E(cfg.brand)+"</span></div><small>"+X("ft.tag","span")+"</small></div>"+'<div class="so">'+soc+'</div><div class="cp">'+X("ft.copy","span")+"<span>"+fl+'</span><span class="by">Yş.<span class="dq-imbtn">İmanoff</span></span></div></div></footer>'}
 
 /* ---------- əməliyyatlar ---------- */
-var A={home:function(){try{showScreen("v3-home");scrollTo(0,0)}catch(e){}},law:function(){if(typeof LAW2!=="undefined"&&LAW2.open)LAW2.open();else V3.go("n4")},exam:function(){if(window.LXP&&typeof LXP.open==="function")LXP.open();else V3.go("n2")},
- reg:function(){YQ.open("reg")},in:function(){YQ.open("in")},kab:function(){V3.go("kab")},out:function(){DQ.logout()},tests:function(){V3.showTests()},news:function(){openFeedModal("news")},
- info:function(k){V3.info(k)},sc:function(id){var e=$(id);if(e)e.scrollIntoView({behavior:"smooth"})},none:function(){}};
-function run(a){a=a||"none";if(/^https?:/i.test(a)){window.open(a,"_blank","noopener");return}var m=a.split(":"),f=A[m[0]];if(f)try{f(m.slice(1).join(":"))}catch(e){}}
+/* ---------- bildiriş + təhlükəsiz çağırış (səssiz xəta yoxdur) ---------- */
+function note(m){try{var n=$("dqr-note");if(!n){n=document.createElement("div");n.id="dqr-note";n.setAttribute("role","status");n.style.cssText="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:2147483000;max-width:min(92vw,420px);padding:11px 18px;border-radius:12px;background:#061330;color:#f1f5ff;border:1px solid #e8b94a;font:600 14px/1.4 'Plus Jakarta Sans',system-ui,sans-serif;box-shadow:0 12px 32px rgba(0,0,0,.35);opacity:0;transition:opacity .2s;pointer-events:none;text-align:center";document.body.appendChild(n)}n.textContent=m;n.style.opacity="1";clearTimeout(n.__t);n.__t=setTimeout(function(){n.style.opacity="0"},3400)}catch(e){}}
+/* list: variantlar ardıcıl yoxlanır; funksiya yoxdursa (false) və ya xəta verirsə növbətiyə keçir */
+function chain(list,name){for(var i=0;i<list.length;i++){try{if(list[i]()!==false)return true}catch(e){try{console.warn("[DQR] "+name+" · variant "+(i+1)+":",e)}catch(_){}}}note("«"+name+"» bölməsi hazırda açılmadı. Səhifəni yeniləyib yenidən cəhd edin.");return false}
+function fn(o,m){return!!o&&typeof o[m]==="function"}
+
+/* ---------- Məlumat bölməsi (admin panelində daxil edilmiş məlumatlar) ---------- */
+function infoList(){var v=gV3(),D=(v&&v.D)||{},it=D.items||{},g=D.groups||{},keys=[],out=[];
+  ["info","inf","mel","about"].forEach(function(n){if(Array.isArray(g[n]))keys=keys.concat(g[n])});
+  if(!keys.length)Object.keys(it).forEach(function(k){var a=String((it[k]&&it[k].a)||"");if(/^info:/i.test(a))keys.push(k)});
+  keys.forEach(function(k){var x=it[k];if(!x||x.h)return;var a=String(x.a||"");out.push({t:x.t||k,a:(/^info:/i.test(a)||/^https?:/i.test(a))?a:"info:"+k})});
+  if(!out.length)out=[{t:"İstifadə Şərtləri",a:"info:terms"},{t:"Məxfilik Siyasəti",a:"info:priv"}];
+  return out}
+function infoMenu(){var L=infoList();if(L.length===1){run(L[0].a);return}
+  var o=$("dqr-info");if(o)o.remove();
+  o=document.createElement("div");o.id="dqr-info";o.setAttribute("role","dialog");o.setAttribute("aria-modal","true");o.setAttribute("aria-label","Məlumat");
+  o.innerHTML='<div class="im"><button type="button" class="ix" aria-label="Bağla">×</button><h3>Məlumat</h3>'+L.map(function(x,i){return'<button type="button" class="il" data-i="'+i+'">'+E(x.t)+'<i>→</i></button>'}).join("")+"</div>";
+  if(!$("dqr-info-css")){var s=document.createElement("style");s.id="dqr-info-css";s.textContent="#dqr-info{position:fixed;inset:0;z-index:2147482000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,10,26,.72);backdrop-filter:blur(4px);font-family:'Plus Jakarta Sans',system-ui,sans-serif}#dqr-info .im{position:relative;width:min(100%,440px);max-height:86vh;overflow:auto;padding:24px 20px 20px;border-radius:20px;background:#061330;color:#f1f5ff;border:1px solid rgba(232,185,74,.45);box-shadow:0 30px 70px rgba(0,0,0,.5)}#dqr-info h3{margin:0 0 14px;font-size:20px;font-weight:800;color:#e8b94a}#dqr-info .ix{position:absolute;top:10px;right:12px;width:34px;height:34px;border:0;border-radius:10px;background:transparent;color:#f1f5ff;font-size:24px;line-height:1;cursor:pointer}#dqr-info .ix:hover{background:rgba(255,255,255,.08)}#dqr-info .il{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin:0 0 8px;padding:13px 15px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.04);color:#f1f5ff;font:600 15px/1.3 inherit;text-align:left;cursor:pointer;transition:border-color .15s,background .15s}#dqr-info .il:hover,#dqr-info .il:focus-visible{border-color:#e8b94a;background:rgba(232,185,74,.1);outline:none}#dqr-info .il i{font-style:normal;color:#e8b94a}";document.head.appendChild(s)}
+  function close(){o.remove();document.removeEventListener("keydown",esc)}
+  function esc(e){if(e.key==="Escape")close()}
+  o.addEventListener("click",function(e){if(e.target===o||e.target.closest(".ix")){close();return}var b=e.target.closest(".il");if(b){var x=L[+b.dataset.i];close();if(x)run(x.a)}});
+  document.addEventListener("keydown",esc);document.body.appendChild(o);var f=o.querySelector(".il");if(f)f.focus()}
+
+/* ---------- əməliyyatlar ---------- */
+var A={
+ home:function(){chain([function(){if(typeof showScreen!=="function")return false;showScreen("v3-home");scrollTo(0,0)},function(){if(!fn(window.DQ,"home"))return false;DQ.home()}],"Ana səhifə")},
+ /* Sınaqlar: karusel (sınaq növləri) */
+ sinaq:function(){chain([function(){var v=gV3();if(!fn(v,"go"))return false;v.go("n2")},function(){if(typeof showScreen!=="function"||!$("exam-select-screen"))return false;showScreen("exam-select-screen");scrollTo(0,0)},function(){if(!fn(window.LXP,"open"))return false;LXP.open()}],"Sınaqlar")},
+ /* İmtahan: aktiv imtahan + qeydiyyat paneli */
+ exam:function(){chain([function(){if(!fn(window.LXP,"open"))return false;LXP.open()},function(){var v=gV3();if(!fn(v,"go"))return false;v.go("n2")}],"İmtahan")},
+ /* Testlər: test karuseli */
+ tests:function(){chain([function(){var v=gV3();if(!fn(v,"showTests"))return false;v.showTests()}],"Testlər")},
+ /* Materiallar: dərs materialları */
+ law:function(){chain([function(){if(typeof LAW2==="undefined"||!fn(LAW2,"open"))return false;LAW2.open()},function(){var v=gV3();if(!fn(v,"go"))return false;v.go("n4")}],"Materiallar")},
+ /* Məlumat */
+ infos:function(){infoMenu()},
+ info:function(k){chain([function(){var v=gV3();if(!fn(v,"info"))return false;v.info(k)}],"Məlumat")},
+ reg:function(){chain([function(){if(!fn(window.YQ,"open"))return false;YQ.open("reg")}],"Qeydiyyat")},
+ in:function(){chain([function(){if(!fn(window.YQ,"open"))return false;YQ.open("in")}],"Daxil ol")},
+ kab:function(){chain([function(){var v=gV3();if(!fn(v,"go"))return false;v.go("kab")}],"Kabinet")},
+ out:function(){chain([function(){if(!fn(window.DQ,"logout"))return false;DQ.logout()}],"Çıxış")},
+ news:function(){chain([function(){if(typeof openFeedModal!=="function")return false;openFeedModal("news")}],"Yeniliklər")},
+ sc:function(id){var e=$(id);if(e)e.scrollIntoView({behavior:"smooth"})},none:function(){}};
+function run(a){a=a||"none";if(/^https?:/i.test(a)){window.open(a,"_blank","noopener");return}var m=a.split(":"),f=A[m[0]];if(f)f(m.slice(1).join(":"))}
 function theme(){var el=$("dqr"),t=cfg.theme;if(!el)return;["gd","bg","pn","tx"].forEach(function(k){el.style.setProperty("--"+k,t[k])});var h=$("v3-home");if(h)h.style.background=t.bg}
 /* Ana səhifə yenidən qurulanda #dq-count / #dq-stats silinməsin (itib-gəlmə səbəbi bu idi) */
 var STASH=document.createDocumentFragment();
@@ -246,7 +286,7 @@ function secOp(s,op){var o=cfg.order,i=o.indexOf(s),t;snap();
  dirty();rebuild()}
 function secList(){var b=$("dqe-secs");if(!b)return;b.innerHTML=cfg.order.map(function(s){return'<div class="r"><span'+(cfg.hide[s]?' style="opacity:.5"':"")+">"+SN[s]+'</span><span><b data-sx="'+s+'|u">▲</b><b data-sx="'+s+'|d">▼</b><b data-sx="'+s+'|h">'+(cfg.hide[s]?"👁":"🚫")+"</b></span></div>"}).join("");var a=$("dqe-auto");if(a)a.checked=!!cfg.ex.auto;
  [].forEach.call(document.querySelectorAll("#dqe-p [data-th]"),function(i){i.value=cfg.theme[i.dataset.th]})}
-var PRE=[["exam","Sınaq / Kabinet"],["reg","Qeydiyyat"],["in","Daxil ol"],["kab","Kabinet"],["tests","Testlər"],["law","Materiallar (Qanunvericilik)"],["news","Yeniliklər"],["home","Ana səhifə"],["sc:dqr-ex","→ İmtahanlar bölməsi"],["sc:dqr-an","→ Analiz bölməsi"],["sc:dqr-why","→ Niyə DQ bölməsi"],["sc:dqr-news","→ Yeniliklər bölməsi"],["sc:dqr-ft","→ Səhifənin altı"],["info:terms","İstifadə Şərtləri"],["info:priv","Məxfilik Siyasəti"],["none","Keçid yoxdur"]];
+var PRE=[["sinaq","Sınaqlar (karusel)"],["exam","İmtahan (aktiv imtahan və qeydiyyat)"],["infos","Məlumat"],["reg","Qeydiyyat"],["in","Daxil ol"],["kab","Kabinet"],["tests","Testlər"],["law","Materiallar (Qanunvericilik)"],["news","Yeniliklər"],["home","Ana səhifə"],["sc:dqr-ex","→ İmtahanlar bölməsi"],["sc:dqr-an","→ Analiz bölməsi"],["sc:dqr-why","→ Niyə DQ bölməsi"],["sc:dqr-news","→ Yeniliklər bölməsi"],["sc:dqr-ft","→ Səhifənin altı"],["info:terms","İstifadə Şərtləri"],["info:priv","Məxfilik Siyasəti"],["none","Keçid yoxdur"]];
 function hex(c){var m=String(c).match(/\d+/g)||[255,255,255];return"#"+m.slice(0,3).map(function(n){return(+n).toString(16).padStart(2,"0")}).join("")}
 function select(t){var tx=t.closest("[data-p]"),lkn=t.closest("[data-lp]"),im=t.closest("[data-ip]");S.sel={tx:tx,lk:lkn,im:im};tbar()}
 function tbar(){var tb=$("dqe-tb"),s=S.sel;if(!tb)return;if(!S.edit||!s||!(s.tx||s.lk||s.im)||!document.contains(s.tx||s.lk||s.im)){tb.hidden=true;return}
@@ -323,9 +363,11 @@ function wire(el){
  el.addEventListener("paste",function(e){var n=e.target.closest&&e.target.closest("[data-p]");if(!S.edit||!n)return;e.preventDefault();document.execCommand("insertText",false,(e.clipboardData||window.clipboardData).getData("text/plain"))})}
 
 /* ---------- qoşulma ---------- */
+/* Köhnə saxlanmış menyuda «Haqqımızda» (gizli footer-ə keçid) və ya iki dəfə «exam» varsa — yeni düzgün menyu ilə əvəz olunur */
+function fixNav(c){try{if(!c||!Array.isArray(c.nav)||!DEFC)return c;var bad=false,seen=0;c.nav.forEach(function(n){if(n&&n.a==="sc:dqr-ft")bad=true;if(n&&n.a==="exam"){if(seen)bad=true;seen=1}});if(bad)c.nav=CL(DEFC.nav)}catch(e){}return c}
 function init(){var c=null;try{c=JSON.parse(localStorage.getItem("dqr_cache2")||"null")}catch(e){}
- DEFC=makeDef();cfg=merge(CL(DEFC),c&&c.v===2?c:null);S.ready=true;ui();
- loadCfg().then(function(f){if(f&&!S.edit){var m=merge(CL(DEFC),f);if(JSON.stringify(m)!==JSON.stringify(cfg)){cfg=m;rebuild()}try{localStorage.setItem("dqr_cache2",JSON.stringify(f))}catch(e){}}loadImgs()})}
+ DEFC=makeDef();cfg=fixNav(merge(CL(DEFC),c&&c.v===2?c:null));S.ready=true;ui();
+ loadCfg().then(function(f){if(f&&!S.edit){var m=fixNav(merge(CL(DEFC),f));if(JSON.stringify(m)!==JSON.stringify(cfg)){cfg=m;rebuild()}try{localStorage.setItem("dqr_cache2",JSON.stringify(f))}catch(e){}}loadImgs()})}
 function mount(){
   var h=$("v3-home");if(!h||!gV3()||!V3.D||!gV2())return;
   if(!S.ready)init();
