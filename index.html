@@ -62,6 +62,7 @@ function wrap(o,f){if(o&&typeof o[f]==="function"&&!o[f].__k){var orig=o[f],w=fu
 setInterval(function(){try{wrap(window.YQ2,"logout");wrap(window.DQ,"logout");wrap(window.YQ,"logout")}catch(e){}},300);
 })();</script>
 <style>.dqx-rm{display:none!important}</style>
+<style id="dq-gz-rules">#yq-news,#dq-types,#dt-home,#dt-grid{display:none!important}</style>
 
 <script>try{var __u=new URL(location.href);(__u.searchParams.get("news")||/\/news\/?$/.test(__u.pathname))&&sessionStorage.setItem("dq_share_in","1")}catch{}</script>
 <meta charset="UTF-8">
@@ -2405,7 +2406,7 @@ html.dq-hold:not(.dq13-dark){background:#061a47}
 @media(max-width:600px){#exam-screen .exam-header{padding:10px 12px;gap:8px}#active-exam-title{font-size:13px;line-height:1.3;min-width:0}}
 </style>
 <link rel="stylesheet" href="dq-premium.css?v=2">
-<link rel="stylesheet" href="dq-redesign.css?v=1">
+<link rel="stylesheet" href="dq-redesign.css?v=3">
 <style id="dq-screens-premium">
 /* ===== Sınaqlar · İmtahanlar · Testlər · Məlumat: ana səhifənin premium dizaynına uyğunlaşdırma ===== */
 html body{--pr-ink:#06112e;--pr-ink2:#0c2260;--pr-brass:#e5a82c;--pr-brass2:#f6c453;--pr-f:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif}
@@ -6487,6 +6488,7 @@ html body.gz-editing{padding-top:84px!important}
 (function(){"use strict";
 if(window.GZL)return;
 var U="https://cpzwliqlgaplroscvduo.supabase.co",K="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF",COL="gizleme",LS="dq_gz_cfg_v1";
+var DEFH={news:1,types:1,daily:1,exam:1};function defs(){cfg.shown=cfg.shown||{};cfg.hidden=cfg.hidden||{};for(var k in DEFH)if(!cfg.hidden[k]&&!cfg.shown[k])cfg.hidden[k]=1}
 var editMode=false,prevState=null,ovT=0,eb=null,ov=null,cfg={hidden:{},names:{}},rowId=null,tab="home",q="",saveT=0,statusTxt="",statusCls="";
 function $(i){return document.getElementById(i)}
 function qa(s){try{return Array.prototype.slice.call(document.querySelectorAll(s))}catch(e){return[]}}
@@ -6544,7 +6546,7 @@ var ED={
 /* ---------- Tətbiq ---------- */
 var styleEl=null,mo=null,moT=0;
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(cfg))}catch(e){}}
-function loadLocal(){try{var d=JSON.parse(localStorage.getItem(LS)||"null");if(d&&d.hidden)cfg={hidden:d.hidden||{},names:d.names||{}}}catch(e){}}
+function loadLocal(){try{var d=JSON.parse(localStorage.getItem(LS)||"null");if(d&&d.hidden)cfg={hidden:d.hidden||{},names:d.names||{},shown:d.shown||{}}}catch(e){}defs()}
 function isOn(k){return !!cfg.hidden[k]}
 function H(){return editMode?{}:cfg.hidden}
 function hasTextHidden(){return Object.keys(H()).some(function(k){return H()[k]&&(k.indexOf("nav:")===0||(function(){for(var i=0;i<KNOWN.length;i++)if(KNOWN[i].k===k&&KNOWN[i].re)return 1})())})}
@@ -6571,7 +6573,7 @@ function apply(){
 function hdr(x){var h={apikey:K,Authorization:"Bearer "+K,"Content-Type":"application/json"};for(var k in x)h[k]=x[k];return h}
 function ft(u,o,ms){var ac=window.AbortController?new AbortController():null,t=setTimeout(function(){try{ac&&ac.abort()}catch(e){}},ms||9000);o=o||{};if(ac)o.signal=ac.signal;return fetch(u,o).then(function(r){clearTimeout(t);return r},function(e){clearTimeout(t);throw e})}
 function findRow(){return ft(U+"/rest/v1/dq_v2_store?select=id,data&collection=eq."+COL+"&order=id.desc&limit=1",{headers:hdr()}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(a){return a&&a[0]?a[0]:null})}
-function loadServer(){return findRow().then(function(row){if(row){rowId=row.id;var d=row.data||{};cfg={hidden:d.hidden||{},names:d.names||{}};saveLocal()}return true}).catch(function(){return false})}
+function loadServer(){return findRow().then(function(row){if(row){rowId=row.id;var d=row.data||{};cfg={hidden:d.hidden||{},names:d.names||{},shown:d.shown||{}};defs();saveLocal()}return true}).catch(function(){return false})}
 function saveServer(){
  var go=function(){
   if(rowId)return ft(U+"/rest/v1/dq_v2_store?id=eq."+rowId,{method:"PATCH",headers:hdr({Prefer:"return=minimal"}),body:JSON.stringify({data:cfg})}).then(function(r){return r.ok});
@@ -6639,7 +6641,7 @@ function render(){
  b.innerHTML=html;
 }
 function selOf(k){for(var i=0;i<KNOWN.length;i++)if(KNOWN[i].k===k)return KNOWN[i].sel||"";return k.indexOf("sel:")===0?k.slice(4):""}
-function toggleKey(k){var it=items().filter(function(x){return x.k===k})[0];if(isOn(k)){delete cfg.hidden[k]}else{cfg.hidden[k]=1;if(it)cfg.names[k]=it.n.replace(/^Menyu:\s*/,"")}apply();render();persist();if(editMode)drawOv()}
+function toggleKey(k){var it=items().filter(function(x){return x.k===k})[0];if(isOn(k)){delete cfg.hidden[k];cfg.shown=cfg.shown||{};if(DEFH[k])cfg.shown[k]=1}else{cfg.hidden[k]=1;if(cfg.shown)delete cfg.shown[k];if(it)cfg.names[k]=it.n.replace(/^Menyu:\s*/,"")}apply();render();persist();if(editMode)drawOv()}
 function editKey(k){var it=items().filter(function(x){return x.k===k})[0],fn=ED[it&&it.ed];try{if(!fn)throw 0;fn();toast("Redaktə bölməsi açıldı")}catch(e){toast("Bu element üçün redaktə bölməsi tapılmadı — «İdarə & Ayarlar»a baxın")}}
 function drawOv(){
  if(!editMode)return;
@@ -6729,6 +6731,6 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 <script src="dq-kitab.js?v=1"></script>
 <script src="dq-nav.js?v=1"></script>
 <script src="dq-assets.js?v=1"></script>
-<script src="dq-redesign.js?v=1"></script>
+<script src="dq-redesign.js?v=3"></script>
 </body>
 </html>
