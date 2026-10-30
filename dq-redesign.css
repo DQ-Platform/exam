@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap");
 /* DQ Platform — ana səhifə (mockup 2): tünd göy + qızılı. Yalnız #dqr daxilində. */
 #v3-home.dqr-on>:not(#dqr){display:none!important}
 html.dq13-dark #v3-home.dqr-on{filter:invert(1) hue-rotate(180deg)}
@@ -421,3 +422,30 @@ html body #v3-home#v3-home .dqn-dots>*,html body #v3-home#v3-home .dtn-dots>*,ht
   padding:0!important;border:0!important;border-radius:99px!important;background:#ffffff4d!important;font-size:0!important}
 html body #v3-home#v3-home .dqn-dots>.on,html body #v3-home#v3-home .dtn-dots>.on,html body #v3-home#v3-home .yq-dots>.on{
   width:26px!important;background:#e8b94a!important}
+
+/* ---- Başlıqlar (menyu): 2-ci şəkil üslubu — lacivərd zolaq, qızılı xətt, BÖYÜK qalın Montserrat ---- */
+#dqr .hd{border-bottom:0}
+#dqr .hd .w{padding-bottom:0}
+#dqr nav{
+  background:#1b2c52;border-bottom:2px solid #b9975b;gap:0;margin-top:4px;
+  justify-content:flex-start;align-items:stretch;min-height:52px;
+  box-shadow:0 -2px 0 100vmax #1b2c52,0 0 0 100vmax #b9975b;
+  clip-path:inset(0 -100vmax);
+}
+#dqr nav a{
+  display:flex;align-items:center;flex:none;
+  padding:0 16px;min-height:50px;
+  font-family:"Montserrat","Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;
+  font-size:13px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+  color:#fff;transition:background .18s,color .18s;
+}
+#dqr nav a:hover,#dqr nav a:focus-visible{background:#ffffff0f;color:#f3d894}
+#dqr nav a.on{color:#f3d894}
+#dqr nav a:after{
+  content:"";position:absolute;left:14px;right:14px;bottom:0;height:3px;border-radius:3px 3px 0 0;
+  background:#d9b46a;transform:scaleX(0);transform-origin:center;transition:transform .25s cubic-bezier(.2,.8,.2,1);
+}
+#dqr nav a:hover:after,#dqr nav a.on:after{transform:scaleX(1);left:14px;right:14px}
+#dqr nav .addb{align-self:center;margin:0 6px;text-transform:none;letter-spacing:0}
+@media(max-width:1380px){#dqr nav a{padding:0 12px;letter-spacing:.04em}#dqr nav a:after,#dqr nav a:hover:after,#dqr nav a.on:after{left:10px;right:10px}}
+@media(max-width:700px){#dqr nav a{padding:0 12px;font-size:12px}}
