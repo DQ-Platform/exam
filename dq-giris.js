@@ -56,7 +56,7 @@
     var t = raw.replace(/[А-ЯЁІЅЈ]/g, function (c) { return CYR[c] || c; }).match(/[A-Z0-9]{4,12}/g) || [];
     for (var i = 0; i < t.length; i++) if (t[i].length === 7 && /\d/.test(t[i]) && /[A-Z]/.test(t[i])) return t[i];
     for (var j = 0; j < t.length; j++) if (t[j].length === 7) return t[j];
-    return plain.slice(0, 12);
+    return raw.length <= 24 ? plain.slice(0, 12) : "";   /* uzun mətndə düzgün nömrə tapılmadısa təsadüfi söz götürülməsin */
   }
   /* şərti gözləyir (app.js / verilənlər bazası gec yüklənəndə) */
   function waitFor(fn, ms) {
@@ -286,7 +286,7 @@
     /* 1) giriş */
     '<div id="dqg-login" class="lg"><h1>Kabinetə giriş</h1><p class="s">İştirak üçün sizə verilən iş nömrəsini yazın</p><div id="dqg-ctx" class="ctx" style="display:none"></div>' +
     '<label for="dqg-fin">İŞ NÖMRƏSİ</label>' +
-    '<input id="dqg-fin" class="in" type="text" maxlength="80" autocomplete="off" autocorrect="off" enterkeyhint="go" autocapitalize="characters" spellcheck="false" placeholder="İş nömrəsini daxil edin">' +
+    '<input id="dqg-fin" class="in" type="text" maxlength="2000" autocomplete="off" autocorrect="off" enterkeyhint="go" autocapitalize="characters" spellcheck="false" placeholder="İş nömrəsini daxil edin">' +
     '<button type="button" id="dqg-go" class="gold">Daxil ol</button>' +
     '<div id="dqg-err" class="err"></div><a id="dqg-wa" class="wa" target="_blank" rel="noopener">💬 WhatsApp ilə yazın</a><p class="hlp">İş nömrəsini WhatsApp mesajından kopyalayıb yapışdıra bilərsiniz — sistem nömrəni özü tapacaq.</p></div>' +
     /* 2) kartlar */
