@@ -314,8 +314,8 @@
   /* Qoruyucu: başqa skript (ana səhifə dizaynı və s.) giriş pəncərəsini silsə, gizlətsə və ya üslubunu pozsa,
      dərhal əvvəlki vəziyyətinə qaytarılır. İmtahan başlayanda (root.__dqgHid) müdaxilə etmir. */
   (function () {
-    var PR = [["position", "fixed"], ["top", "0"], ["right", "0"], ["bottom", "0"], ["left", "0"], ["z-index", "2147483600"],
-      ["visibility", "visible"], ["opacity", "1"], ["pointer-events", "auto"]], busy = 0;
+    var PR = [["position", "fixed"], ["top", "0px"], ["right", "0px"], ["bottom", "0px"], ["left", "0px"], ["z-index", "2147483600"],
+      ["visibility", "visible"], ["opacity", "1"], ["pointer-events", "auto"]], busy = 0, heals = 0, hT = 0, off = 0;
     function good() {
       if (root.__dqgHid) return true;
       if (!root.isConnected || root.parentNode !== document.body) return false;
@@ -325,12 +325,16 @@
       return document.documentElement.classList.contains("dqg-on") && document.documentElement.hasAttribute("data-dqg-live");
     }
     function heal() {
-      if (busy || root.__dqgHid) return; busy = 1;
+      if (busy || off || root.__dqgHid) return;
+      var now = Date.now(); if (now - hT > 1000) { hT = now; heals = 0; }
+      if (++heals > 40) { off = 1; return; }   /* ehtiyat: dövrə yaranarsa qoruyucu özünü söndürür */
+      busy = 1;
       try {
         if (!root.isConnected || root.parentNode !== document.body) document.body.appendChild(root);
-        root.style.removeProperty("display");
-        PR.forEach(function (x) { root.style.setProperty(x[0], x[1], "important"); });
-        document.documentElement.classList.add("dqg-on"); document.documentElement.setAttribute("data-dqg-live", "1");
+        if (root.style.getPropertyValue("display")) root.style.removeProperty("display");
+        PR.forEach(function (x) { if (root.style.getPropertyValue(x[0]) !== x[1] || root.style.getPropertyPriority(x[0]) !== "important") root.style.setProperty(x[0], x[1], "important"); });
+        if (!document.documentElement.classList.contains("dqg-on")) document.documentElement.classList.add("dqg-on");
+        if (!document.documentElement.hasAttribute("data-dqg-live")) document.documentElement.setAttribute("data-dqg-live", "1");
       } finally { busy = 0; }
     }
     var MO = null;
