@@ -1,6 +1,6 @@
 /* DQ Platform — İştirakçı giriş modulu
    Link: ?giris=1&qrup=BA&sinaq=1
-   Axın: İş nömrəsi → icazə verilmiş sınaqlar (kartlar) → «İmtahanı başlat» təsdiqi → mövcud imtahan axını */
+   Axın (giris.html-dən təhvil dəstəklənir): İş nömrəsi → icazə verilmiş sınaqlar (kartlar) → «İmtahanı başlat» təsdiqi → mövcud imtahan axını */
 (function () {
   "use strict";
   var Q = new URLSearchParams(location.search);
@@ -986,6 +986,22 @@
       if (pv) $("dqg-fin").value = codeOf(pv);
       requestAnimationFrame(function () { requestAnimationFrame(function () { try { sh0.remove(); } catch (e) {} }); });
       if (window.__dqgPending) { window.__dqgPending = 0; setTimeout(login, 0); }
+    }
+  } catch (e) {}
+  /* giris.html-dən təhvil: iş nömrəsi təkrar soruşulmur — avtomatik daxil olur, seçilmiş sınaq varsa (təsdiq giris.html-də verilib) birbaşa başlayır / davam edir */
+  try {
+    var ho = JSON.parse(sessionStorage.getItem("dqg_handoff") || "null");
+    sessionStorage.removeItem("dqg_handoff");
+    if (ho && ho.fin && Date.now() - (+ho.ts || 0) < 60000 && !window.__dqgPending) {
+      $("dqg-fin").value = codeOf(ho.fin);
+      login().then(function () {
+        if (!session || !ho.exam || !ho.cat) return;
+        var idx = -1;
+        session.items.forEach(function (x, i) { if (String(x.exam) === String(ho.exam) && x.cat === String(ho.cat).toUpperCase()) idx = i; });
+        if (idx < 0) return;
+        var card = $("dqg-grid").children[idx], b = card && card.querySelector("[data-btn]");
+        if (b && !b.disabled) { pending = session.items[idx]; start(session.items[idx]); }
+      });
     }
   } catch (e) {}
   try { if (!matchMedia("(pointer:coarse)").matches) setTimeout(function () { try { $("dqg-fin").focus(); } catch (e) {} }, 300); } catch (e) {}
