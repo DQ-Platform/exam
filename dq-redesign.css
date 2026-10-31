@@ -1,6 +1,6 @@
 /* DQ Platform — ana səhifə (mockup 2): tünd göy + qızılı. Yalnız #dqr daxilində. */
-#v3-home.dqr-on>:not(#dqr){display:none!important}
-html.dq13-dark #v3-home.dqr-on{filter:invert(1) hue-rotate(180deg)}
+#v3-home.dqr-on>:not(#dqr):not(.v3-top):not(.v3-hd):not(.v3-nav){display:none!important}
+html.dq13-dark #v3-home.dqr-on>#dqr{filter:invert(1) hue-rotate(180deg)}
 #v3-home.dqr-on{background:#020a1a;padding:0}
 #dqr{--bg:#020a1a;--ln:rgba(232,185,74,.32);--gd:#e8b94a;--tx:#f1f5ff;--mt:#9fb0d6;--pn:#061330;
  --gd2:color-mix(in srgb,var(--gd) 55%,#fff);--k:1;--grad:linear-gradient(135deg,var(--gd2),var(--gd) 55%,color-mix(in srgb,var(--gd) 72%,#000));
