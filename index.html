@@ -6360,7 +6360,7 @@ function build(){
   var seen={},map={};G.concat([other]).forEach(function(g){map[g[0]]=[]});
   cards.forEach(function(c){var k=key(lab(c));c.classList.remove("dqap-hide");
    if(seen[k]){c.style.display="none";c.setAttribute("data-dqap-dup","1");return}
-   seen[k]=1;c.style.display="";c.removeAttribute("data-dqap-dup");
+   seen[k]=1;if(c.getAttribute("data-dqap-dup")){c.style.display=""}c.removeAttribute("data-dqap-dup");
    map[pick(lab(c))].push(c)});
   var old=grid.querySelector(":scope>.dqap-root");if(old)old.remove();
   var root=document.createElement("div");root.className="dqap-root";
@@ -6370,7 +6370,7 @@ function build(){
   var shut={};try{shut=JSON.parse(localStorage.getItem("dqx_shut")||"{}")}catch(e){}
   G.concat([other]).forEach(function(g){var arr=map[g[0]];if(!arr.length)return;
    var s=document.createElement("section");s.className="dqap-g"+(shut[g[0]]?" dqap-shut":"");s.style.setProperty("--ag",g[4]);s.setAttribute("data-g",g[0]);
-   s.innerHTML='<div class="dqap-h" role="button" tabindex="0"><span class="dqap-i">'+g[1]+'</span><span class="dqap-tt"><b>'+g[2]+'</b><small>'+g[3]+'</small></span><span class="dqap-n">'+arr.length+'</span><span class="dqap-ch">▼</span></div><div class="dqap-c"></div>';
+   s.innerHTML='<div class="dqap-h" role="button" tabindex="0"><span class="dqap-i">'+g[1]+'</span><span class="dqap-tt"><b>'+g[2]+'</b><small>'+g[3]+'</small></span><span class="dqap-n">'+arr.filter(function(x){return x.style.display!=="none"}).length+'</span><span class="dqap-ch">▼</span></div><div class="dqap-c"></div>';
    var c=s.querySelector(".dqap-c");arr.forEach(function(x){c.appendChild(x)});root.appendChild(s)});
   // köhnə qrup qabıqlarını və qalan kartları (dublikatlar) saxla, gizli
   var hold=document.createElement("div");hold.style.display="none";
@@ -6732,5 +6732,149 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 <script src="dq-nav.js?v=1"></script>
 <script src="dq-assets.js?v=1"></script>
 <script src="dq-redesign.js?v=8"></script>
+<style id="dq-fix-admin-dock-img">
+/* Admin xəbər panelində üzən ⋮⋮ dok gizlədilir (silmə/kopya düymələrinin üstünə düşürdü) */
+html.dq-admin-nodock #dqt-dock,
+html.dq-admin-nodock #dq13-dock{display:none!important}
+</style>
+<script id="dq-fix-admin-dock-img-js">
+(function(){
+  'use strict';
+  if (window.__dqFixAdminImg) return; window.__dqFixAdminImg = 1;
+  var ROOT_SEL = '#nwp-root';
+
+  /* ---------- 1) Admin paneldə üzən doku söndür ---------- */
+  function adminOpen(){
+    var r = document.querySelector(ROOT_SEL);
+    if (!r || getComputedStyle(r).display === 'none') r = document.querySelector('#admin-panel');
+    if (!r) return false;
+    try { return getComputedStyle(r).display !== 'none' && r.getClientRects().length > 0; } catch(e){ return false; }
+  }
+  function syncDock(){
+    var on = adminOpen();
+    if (document.documentElement.classList.contains('dq-admin-nodock') !== on)
+      document.documentElement.classList.toggle('dq-admin-nodock', on);
+  }
+  setInterval(syncDock, 400);
+  document.addEventListener('DOMContentLoaded', syncDock);
+  syncDock();
+
+  /* ---------- 2) Qapaq şəkli: yüklənəndə avtomatik 4:5 səliqəyə sal ---------- */
+  var W = 800, H = 1000;          /* 4:5 */
+  var TOL = 0.08;                 /* 4:5-ə bu qədər yaxındırsa, birbaşa tam doldur */
+
+  function blurBg(img, ctx){
+    /* Kiçildib böyütmək = yumşaq bulanıq fon (ctx.filter-dən asılı deyil, iOS-da da işləyir) */
+    var s = document.createElement('canvas'); s.width = 16; s.height = 20;
+    var sg = s.getContext('2d');
+    var k = Math.max(16 / img.naturalWidth, 20 / img.naturalHeight);
+    var dw = img.naturalWidth * k, dh = img.naturalHeight * k;
+    sg.drawImage(img, (16 - dw) / 2, (20 - dh) / 2, dw, dh);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(s, 0, 0, W, H);
+    ctx.fillStyle = 'rgba(255,255,255,.28)'; ctx.fillRect(0, 0, W, H);
+  }
+
+  function normalize(file){
+    return new Promise(function(res, rej){
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function(){
+        try {
+          var iw = img.naturalWidth, ih = img.naturalHeight, ar = iw / ih, target = W / H;
+          var c = document.createElement('canvas'); c.width = W; c.height = H;
+          var g = c.getContext('2d');
+          g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+          g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+          if (Math.abs(ar - target) / target <= TOL) {
+            /* demək olar 4:5-dir → mərkəzdən incə kəsib doldur */
+            var k = Math.max(W / iw, H / ih), dw = iw * k, dh = ih * k;
+            g.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh);
+          } else {
+            /* başqa nisbət → kəsmədən tam sığdır, ətrafı bulanıq fonla doldur */
+            blurBg(img, g);
+            var m = Math.min(W / iw, H / ih), pw = iw * m, ph = ih * m;
+            g.shadowColor = 'rgba(15,23,42,.25)'; g.shadowBlur = 18; g.shadowOffsetY = 4;
+            g.drawImage(img, (W - pw) / 2, (H - ph) / 2, pw, ph);
+            g.shadowColor = 'transparent';
+          }
+          URL.revokeObjectURL(url);
+          c.toBlob(function(b){
+            if (!b) return rej(new Error('blob'));
+            var name = (file.name || 'qapaq').replace(/\.[^.]+$/, '') + '.jpg';
+            res(new File([b], name, { type: 'image/jpeg', lastModified: Date.now() }));
+          }, 'image/jpeg', 0.88);
+        } catch (e) { URL.revokeObjectURL(url); rej(e); }
+      };
+      img.onerror = function(){ URL.revokeObjectURL(url); rej(new Error('img')); };
+      img.src = url;
+    });
+  }
+
+  document.addEventListener('change', function(e){
+    var inp = e.target;
+    if (!inp || inp.tagName !== 'INPUT' || inp.type !== 'file') return;
+    if (e.__dqNorm) return;
+    if (!inp.closest || !inp.closest(ROOT_SEL)) return;       /* yalnız xəbər paneli */
+    var f = inp.files && inp.files[0];
+    if (!f || !/^image\//.test(f.type) || /svg|gif/.test(f.type)) return;
+    e.stopImmediatePropagation(); e.preventDefault();
+    normalize(f).then(function(nf){
+      try { var dt = new DataTransfer(); dt.items.add(nf); inp.files = dt.files; } catch (x) {}
+      var ev = new Event('change', { bubbles: true }); ev.__dqNorm = true;
+      inp.dispatchEvent(ev);
+    }).catch(function(){
+      var ev = new Event('change', { bubbles: true }); ev.__dqNorm = true;   /* alınmasa orijinal davam etsin */
+      inp.dispatchEvent(ev);
+    });
+  }, true);
+})();
+</script>
+
+<script id="dq-fix-fab-stack">
+(function(){
+  'use strict';
+  if (window.__dqFabStack) return; window.__dqFabStack = 1;
+  var GAP = 10, BASE = 14;
+  var SKIP = /toast|ticker|banner|bar$|-bar|sheet|-ov$|modal|pwa|exbar|splash|^dqt-dock$|^dq13-dock$|glow|skip|^dq-push$|^dq-cs$/i;
+
+  function cands(){
+    var out = [], kids = document.body ? document.body.children : [];
+    var vw = innerWidth, vh = innerHeight;
+    for (var i = 0; i < kids.length; i++){
+      var el = kids[i];
+      if (SKIP.test(el.id || '')) continue;
+      var cs = getComputedStyle(el);
+      if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || cs.pointerEvents === 'none') continue;
+      var r = el.getBoundingClientRect();
+      if (r.width < 24 || r.height < 24 || r.height > 90 || r.width > Math.min(300, vw * .6)) continue;
+      if (r.bottom < vh - 340 || r.bottom > vh + 2) continue;
+      var side = r.left < 80 ? 'L' : (vw - r.right < 80 ? 'R' : '');
+      if (!side) continue;
+      out.push({ el: el, side: side, r: r });
+    }
+    return out;
+  }
+
+  function stack(){
+    if (document.hidden) return;
+    var list = cands();
+    ['L','R'].forEach(function(s){
+      var col = list.filter(function(c){ return c.side === s; })
+                    .sort(function(a,b){ return b.r.bottom - a.r.bottom; });
+      var off = BASE;
+      col.forEach(function(c){
+        var el = c.el;
+        el.style.setProperty('top', 'auto', 'important');
+        el.style.setProperty('bottom', 'calc(' + off + 'px + env(safe-area-inset-bottom,0px))', 'important');
+        off += c.r.height + GAP;
+      });
+    });
+  }
+  setInterval(stack, 600);
+  addEventListener('resize', stack);
+  document.addEventListener('DOMContentLoaded', stack);
+})();
+</script>
+
 </body>
 </html>
