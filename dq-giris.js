@@ -4,7 +4,78 @@
 (function () {
   "use strict";
   var Q = new URLSearchParams(location.search);
-  if (Q.get("giris") !== "1") return;
+  /* ?giris=  |  ?giris=1  |  ?giris=1&qrup  — «giris» parametri varsa (boş olsa belə) giriş rejimi açılır; ?giris=0 söndürür */
+  var _g = Q.get("giris");
+  if (_g === null || /^(0|false|no|off)$/i.test(_g)) return;
+
+  /* ---------- DİAQNOSTİKA: ?giris=1&qrup&debug=1 ----------
+     Giriş pəncərəsini, <html>-i və <body> uşaqlarını dəyişən skriptləri fayl:sətir ilə qeyd edir,
+     ekranın altında göstərir («Kopyala» düyməsi ilə göndərmək olar). Adi linklərdə işləmir. */
+  if (Q.get("debug") === "1") (function () {
+    var LOG = [], t0 = Date.now();
+    function who() {
+      var s = ((new Error()).stack || "").split("\n").slice(2).filter(function (l) { return l.indexOf("dq-giris") < 0; });
+      return s.slice(0, 3).map(function (l) { return l.trim().replace(/^at /, "").replace(/https?:\/\/[^\/]+\//, ""); }).join("  ←  ");
+    }
+    function watched(el) {
+      return !!el && (el.id === "dqg" || el === document.documentElement || el === document.body || (el.parentNode === document.body && el.nodeType === 1));
+    }
+    function nm(el) { return el === document.documentElement ? "html" : el === document.body ? "body" : (el.id ? "#" + el.id : (el.className ? "." + String(el.className).split(" ")[0] : el.tagName)); }
+    function rec(el, what) {
+      var w = who(); if (!w) return;
+      var e = ((Date.now() - t0) / 1000).toFixed(1) + "s  " + nm(el) + "  " + what + "\n     " + w;
+      LOG.push(e); if (LOG.length > 40) LOG.shift();
+      try { console.warn("[dqg-debug] " + e); } catch (x) {}
+      paint();
+    }
+    var d = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "style");
+    if (d && d.get && window.Proxy) {
+      Object.defineProperty(HTMLElement.prototype, "style", {
+        configurable: true, enumerable: d.enumerable,
+        get: function () {
+          var el = this, st = d.get.call(this);
+          if (!watched(el)) return st;
+          return new Proxy(st, {
+            get: function (t, p) {
+              var v = t[p];
+              if (typeof v !== "function") return v;
+              if (p === "setProperty" || p === "removeProperty") return function (a, b) { rec(el, p + "(" + a + (b != null ? ", " + b : "") + ")"); return v.apply(t, arguments); };
+              return v.bind(t);
+            },
+            set: function (t, p, v) { rec(el, "style." + String(p) + " = " + v); t[p] = v; return true; }
+          });
+        },
+        set: d.set
+      });
+    }
+    var sa = Element.prototype.setAttribute, ra = Element.prototype.removeAttribute;
+    Element.prototype.setAttribute = function (k, v) { if (watched(this) && /^(style|class|hidden)$/i.test(k)) rec(this, "setAttribute(" + k + ", " + String(v).slice(0, 60) + ")"); return sa.apply(this, arguments); };
+    Element.prototype.removeAttribute = function (k) { if (watched(this) && /^(style|class|hidden)$/i.test(k)) rec(this, "removeAttribute(" + k + ")"); return ra.apply(this, arguments); };
+    var rm = Element.prototype.remove, rc = Node.prototype.removeChild;
+    Element.prototype.remove = function () { if (this.id === "dqg") rec(this, "remove()"); return rm.apply(this, arguments); };
+    Node.prototype.removeChild = function (c) { if (c && c.id === "dqg") rec(c, "removeChild()"); return rc.apply(this, arguments); };
+    window.addEventListener("beforeunload", function () { try { sessionStorage.setItem("dqg_dbg_unload", (sessionStorage.getItem("dqg_dbg_unload") || "") + "x"); } catch (e) {} });
+    try { var u = (sessionStorage.getItem("dqg_dbg_unload") || "").length; if (u) LOG.push("0.0s  SƏHİFƏ " + u + " dəfə yenidən yüklənib (reload/redirect) ← bu özü səbəb ola bilər"); } catch (e) {}
+    new MutationObserver(function (ms) {
+      ms.forEach(function (m) { if (m.attributeName === "class" && m.target === document.documentElement) { LOG.push(((Date.now() - t0) / 1000).toFixed(1) + "s  html class: «" + (m.oldValue || "") + "» → «" + document.documentElement.className + "»"); if (LOG.length > 40) LOG.shift(); paint(); } });
+    }).observe(document.documentElement, { attributes: true, attributeOldValue: true, attributeFilter: ["class"] });
+    var box = null;
+    function paint() {
+      try {
+        var h = document.getElementById("dqg"), sh = h && h.shadowRoot; if (!sh) return;
+        if (!box || !box.isConnected) {
+          box = document.createElement("div");
+          box.style.cssText = "position:fixed;left:0;right:0;bottom:0;max-height:45%;overflow:auto;z-index:99;background:#000d;color:#9f9;font:10px/1.35 monospace;padding:6px 8px;white-space:pre-wrap;word-break:break-all";
+          var b = document.createElement("button"); b.textContent = "Kopyala"; b.type = "button";
+          b.style.cssText = "position:sticky;top:0;float:right;padding:4px 10px;font:12px sans-serif";
+          b.onclick = function () { var t = LOG.join("\n"); try { navigator.clipboard.writeText(t).then(function () { b.textContent = "Kopyalandı ✓"; }); } catch (e) { b.textContent = "Əl ilə seçin"; } };
+          box.appendChild(b); var pre = document.createElement("div"); pre.id = "dbgtxt"; box.appendChild(pre); sh.appendChild(box);
+        }
+        box.querySelector("#dbgtxt").textContent = "DİAQNOSTİKA\n" + LOG.join("\n");
+      } catch (e) {}
+    }
+    setInterval(paint, 1000);
+  })();
 
   var T = "allowed_students",
     WA = "994504305162",
@@ -909,4 +980,54 @@
     }
   } catch (e) {}
   setTimeout(function () { try { $("dqg-fin").focus(); } catch (e) {} }, 300);
+  /* ---------- link qoruyucusu (?giris=1&qrup ...) ----------
+     Giriş edilənə qədər: (1) ana səhifə CSS ilə gizlədilir — başqa skript nə etsə də, ana ekran görünmür;
+     (2) giriş pəncərəsi gizlədilsə / silinsə, boyanmadan ƏVVƏL (MutationObserver) dərhal geri qaytarılır —
+     yanıb-sönmə olmur. Giriş edildikdən sonra qoruyucu söndürülür və imtahan axınına qarışmır. */
+  (function () {
+    var H = document.documentElement, n = 0, off = false, mo = null;
+    var lk = document.createElement("style"); lk.id = "dqg-lock-css";
+    lk.textContent =
+      "html.dqg-lock,html.dqg-lock body{background:#071330!important;overflow:hidden!important}" +
+      "html.dqg-lock body>*:not(#dqg):not(#dqg-mh):not(#dqg-rh){visibility:hidden!important}" +
+      "html.dqg-lock #dqg{display:block!important;visibility:visible!important;opacity:1!important;" +
+      "position:fixed!important;top:0!important;right:0!important;bottom:0!important;left:0!important;" +
+      "z-index:2147483646!important;pointer-events:auto!important}";
+    document.head.appendChild(lk);
+
+    function fix() {
+      if (off) return;
+      n++;
+      try {
+        if (session) { if (H.classList.contains("dqg-lock")) H.classList.remove("dqg-lock"); return; }
+        if (!root.isConnected) document.body.appendChild(root);
+        if (!H.classList.contains("dqg-lock")) H.classList.add("dqg-lock");
+        if (!H.classList.contains("dqg-on")) H.classList.add("dqg-on");
+        if (H.classList.contains("dqg-pre")) H.classList.remove("dqg-pre");
+        var s = root.style;
+        if (s.getPropertyValue("display") === "none") s.removeProperty("display");
+        if (s.getPropertyValue("visibility") === "hidden") s.removeProperty("visibility");
+        if (s.getPropertyValue("opacity") === "0") s.removeProperty("opacity");
+        if (root.hasAttribute("hidden")) root.removeAttribute("hidden");
+        var lg = $("dqg-login"), ls = $("dqg-list");
+        if (lg && ls && lg.style.display === "none" && ls.style.display === "none") lg.style.display = "";
+      } catch (e) {}
+    }
+    function watch() {
+      if (!window.MutationObserver) return;
+      mo = new MutationObserver(fix);
+      mo.observe(root, { attributes: true, attributeFilter: ["style", "class", "hidden"] });
+      mo.observe(H, { attributes: true, attributeFilter: ["class"] });
+      mo.observe(document.body, { childList: true });
+    }
+    fix(); watch();
+    /* sonsuz döngü qoruyucusu: başqa skript də eyni anda mübarizə aparırsa, observer 1 san. dayandırılır (CSS qaydaları yenə işləyir) */
+    setInterval(function () {
+      if (n > 200 && mo) { mo.disconnect(); mo = null; setTimeout(watch, 1000); }
+      n = 0; fix();
+    }, 1000);
+    setInterval(fix, 250);
+    ["pageshow", "popstate", "hashchange", "focus", "resize", "orientationchange"].forEach(function (ev) { window.addEventListener(ev, fix); });
+    document.addEventListener("visibilitychange", fix);
+  })();
 })();
