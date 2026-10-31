@@ -1,6 +1,6 @@
 /* DQ Platform — ana səhifə (mockup 2): tünd göy + qızılı. Yalnız #dqr daxilində. */
-#v3-home.dqr-on>:not(#dqr):not(.v3-top):not(.v3-hd):not(.v3-nav){display:none!important}
-html.dq13-dark #v3-home.dqr-on>#dqr{filter:invert(1) hue-rotate(180deg)}
+#v3-home.dqr-on>:not(#dqr){display:none!important}
+html.dq13-dark #v3-home.dqr-on{filter:invert(1) hue-rotate(180deg)}
 #v3-home.dqr-on{background:#020a1a;padding:0}
 #dqr{--bg:#020a1a;--ln:rgba(232,185,74,.32);--gd:#e8b94a;--tx:#f1f5ff;--mt:#9fb0d6;--pn:#061330;
  --gd2:color-mix(in srgb,var(--gd) 55%,#fff);--k:1;--grad:linear-gradient(135deg,var(--gd2),var(--gd) 55%,color-mix(in srgb,var(--gd) 72%,#000));
@@ -573,16 +573,60 @@ html body #lxp#lxp .rp-car>.rp-sec h2{border-left:0;padding-left:0}
 html body #lxp#lxp .rp-car>.rp-sec h2:after{content:"";display:block;width:44px;height:4px;margin:10px auto 0;border-radius:4px;background:linear-gradient(90deg,var(--gd),var(--gd2))}
 html body #lxp#lxp .rp-car>.rp-sec small{margin:8px 0 0}
 
-/* ---- başlıqdakı alətlər (ağ zolaq, «Daxil ol» düyməsinin solunda) ---- */
-#v3-home .dqht{display:inline-flex;align-items:center;gap:8px;margin-left:auto;margin-right:12px;flex:none;vertical-align:middle}
-#v3-home .dqht button{width:40px;height:40px;border-radius:10px;border:1px solid #cfd9ee;background:#f4f7fd;color:#0a2f7a;font-size:19px;display:grid;place-items:center;padding:0;cursor:pointer;position:relative;transition:background .15s,transform .15s,color .15s}
-#v3-home .dqht button:hover{background:#e3ecfb;transform:translateY(-1px)}
-#v3-home .dqht button[hidden]{display:none}
-#v3-home .dqht button.on{background:#0a2f7a;color:#fff;border-color:transparent}
-#v3-home .dqht .ic{width:1em;height:1em;flex:none}
-#v3-home .dqht i{display:none}
-#v3-home .dqht .dot i{display:block;position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#ef4444;border:2px solid #fff}
-@media(max-width:700px){#v3-home .dqht{gap:5px;margin-right:6px}#v3-home .dqht button{width:34px;height:34px;font-size:16px}}
-
-/* Ana səhifədə başlıqda öz alətləri olduğu üçün üzən düymələr (dock) kartların üstünə düşməsin */
-body.dqr-home.dqr-ht-on #dq13-dock{opacity:0!important;pointer-events:none!important}
+/* ---- header v9: üç qatlı başlıq (əlaqə zolağı · ağ loqo zolağı · mavi menyu) ---- */
+#dqr header.hd{position:sticky;top:0;z-index:30;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom:0;box-shadow:0 6px 20px #020a1a59}
+#dqr header.hd .w{display:flex;align-items:center;min-height:0;gap:0;padding:0}
+#dqr .hd .h1{background:#0b2a5e;color:#fff}
+#dqr .hd .h1 .w{justify-content:space-between;height:40px;gap:14px}
+#dqr .hd .ct{display:flex;align-items:center;gap:18px;font-size:12px;font-weight:600;min-width:0}
+#dqr .hd .ct a{display:inline-flex;align-items:center;gap:7px;color:#fff;text-decoration:none;white-space:nowrap}
+#dqr .hd .ct .ic{font-size:13px;color:#b9c9ee}
+#dqr .hd .hs{display:flex;gap:8px;flex:none}
+#dqr .hd .hs a{width:28px;height:28px;border-radius:7px;background:#fff;color:#0b2a5e;display:grid;place-items:center;font-size:12px;font-weight:800;text-decoration:none;transition:transform .15s,background .15s}
+#dqr .hd .hs a:hover{transform:translateY(-1px);background:#f6c94c}
+#dqr .hd .hs .ic{font-size:15px}
+#dqr .hd .h2{background:#fff}
+#dqr .hd .h2 .w{justify-content:space-between;gap:16px;min-height:60px;padding:6px 0}
+#dqr .hd .h2 .lg{color:#0b2a5e;letter-spacing:0;font-size:20px;font-weight:800;text-transform:none;gap:12px}
+#dqr .hd .h2 .lg img{height:46px}
+#dqr .hd .h2 .au{gap:12px}
+#dqr .hd .h2 .tl{gap:10px}
+#dqr .hd .h2 .tb{width:36px;height:36px;border-radius:9px;border:0;background:linear-gradient(180deg,#f7cc50,#e6ae2a);color:#3a2a00;box-shadow:0 3px 8px #c9951f4d}
+#dqr .hd .h2 .tb:hover{background:linear-gradient(180deg,#ffd868,#ebb536);transform:translateY(-1px)}
+#dqr .hd .h2 .tb.on{background:#0b2a5e;color:#f6c94c;box-shadow:none}
+#dqr .hd .h2 .tb.dot i{border-color:#fff}
+#dqr .hd .h2 .tb .ic{font-size:15px}
+#dqr .hd .h2 .b{color:#0b2a5e;border-color:#0b2a5e4d;border-radius:9px;padding:10px 18px;font-size:14px}
+#dqr .hd .h2 .b.g{background:var(--grad);color:#2a1c00;border-color:transparent}
+#dqr .hd .h2 .b.lgn{background:#0c3a7d;border:0;color:#fff;gap:9px;padding:11px 20px;font-weight:700;white-space:nowrap}
+#dqr .hd .h2 .b.lgn .ic{font-size:16px}
+#dqr .hd .h3{background:linear-gradient(180deg,#0e418c,#0a3170);border-bottom:3px solid #c9a24a}
+#dqr .hd .h3 .w{display:block}
+#dqr .hd .h3 nav{margin:0;gap:6px;overflow-x:auto;scrollbar-width:none}
+#dqr .hd .h3 nav::-webkit-scrollbar{display:none}
+#dqr .hd .h3 nav a{padding:15px 12px;font-size:13px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:#fff}
+#dqr .hd .h3 nav a:hover,#dqr .hd .h3 nav a.on{color:#f6c94c}
+#dqr .hd .h3 nav a.on:after{left:12px;right:12px;bottom:0;height:3px}
+@media(max-width:900px){
+ #dqr header.hd .w{flex-wrap:nowrap;gap:10px}
+ #dqr .hd .h2 .w{padding:6px 0}
+ #dqr .hd .h3 nav{order:0;width:100%}
+ #dqr .hd .h3 nav a{padding:13px 10px;font-size:12px}
+}
+@media(max-width:760px){
+ #dqr header.hd{top:-40px}
+ #dqr .hd .h2 .lg{font-size:17px}
+ #dqr .hd .h2 .lg img{height:40px}
+ #dqr .hd .h2 .tb{width:34px;height:34px}
+ #dqr .hd .h2 .b.lgn{padding:9px 13px;font-size:13px}
+ #dqr .hd .ct{gap:12px;font-size:11.5px}
+}
+@media(max-width:560px){
+ #dqr .hd .h2 .lg>span{display:none}
+ #dqr .hd .h2 .tl{gap:6px}
+ #dqr .hd .h2 .au{gap:8px}
+}
+@media(max-width:400px){
+ #dqr .hd .cml span{display:none}
+ #dqr .hd .h2 .b.lgn .ic{display:none}
+}
