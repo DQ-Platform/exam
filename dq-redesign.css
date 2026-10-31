@@ -635,3 +635,8 @@ html body #lxp#lxp .rp-car>.rp-sec small{margin:8px 0 0}
 #dqr .hd .apop[hidden]{display:none}
 #dqr .hd .apop a{padding:10px 14px;border-radius:7px;color:#0b2a5e;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer}
 #dqr .hd .apop a:hover{background:#eaf1fc}
+
+/* Qeydiyyat zolağı: hero ilə «Yeniliklər» arasında, bölmələrlə eyni en */
+html body #dqr #lxp-ban{width:min(1200px,100% - 32px)!important;max-width:none!important;margin:22px auto 0!important;padding:0!important;box-sizing:border-box;contain:layout style}
+html body #dqr #lxp-ban .lxp-bi{flex-wrap:wrap}
+@media(max-width:760px){html body #dqr #lxp-ban{width:calc(100% - 24px)!important;margin-top:16px!important}}

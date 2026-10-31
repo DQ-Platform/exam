@@ -2406,7 +2406,7 @@ html.dq-hold:not(.dq13-dark){background:#061a47}
 @media(max-width:600px){#exam-screen .exam-header{padding:10px 12px;gap:8px}#active-exam-title{font-size:13px;line-height:1.3;min-width:0}}
 </style>
 <link rel="stylesheet" href="dq-premium.css?v=2">
-<link rel="stylesheet" href="dq-redesign.css?v=11">
+<link rel="stylesheet" href="dq-redesign.css?v=12">
 <style id="dq-screens-premium">
 /* ===== Sınaqlar · İmtahanlar · Testlər · Məlumat: ana səhifənin premium dizaynına uyğunlaşdırma ===== */
 html body{--pr-ink:#06112e;--pr-ink2:#0c2260;--pr-brass:#e5a82c;--pr-brass2:#f6c453;--pr-f:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif}
@@ -6733,7 +6733,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 <script src="dq-kitab.js?v=1"></script>
 <script src="dq-nav.js?v=1"></script>
 <script src="dq-assets.js?v=1"></script>
-<script src="dq-redesign.js?v=11"></script>
+<script src="dq-redesign.js?v=12"></script>
 <style id="dq-fix-admin-dock-img">
 /* Admin xəbər panelində üzən ⋮⋮ dok gizlədilir (silmə/kopya düymələrinin üstünə düşürdü) */
 html.dq-admin-nodock #dqt-dock,
@@ -7807,17 +7807,38 @@ window.DQExam={open:openX,close:closeX};
 function banFill(){var b=D.getElementById("lxp-ban");if(!b)return;var sp=b.querySelector("span");if(!sp)return;
  getList().then(function(L){if(!L)return;var n=L.filter(function(s){return s&&s.open&&(+s.cap||0)>(+s.taken||0)}).length;
   sp.textContent=n?(n+" aktiv imtahan · yerlər məhduddur"):"Hazırda aktiv imtahan yoxdur"})}
+function banPlace(el){
+ var s=D.getElementById("dqr-cnt"),a=D.getElementById("dq-count"),ref,d=D.getElementById("dqr-duo");
+ if(d&&d.parentNode){if(el.nextSibling!==d)d.parentNode.insertBefore(el,d);return true}   /* hero ilə «Yeniliklər» arasında */
+ if(s){ref=(a&&a.parentNode===s)?a.nextSibling:s.firstChild;
+  if(el.parentNode!==s||(a&&a.parentNode===s&&el.previousSibling!==a)){s.insertBefore(el,ref)}
+  return true}
+ if(D.getElementById("dqr"))return false;           /* yeni dizayn qurulur: slot hazır olana qədər gözlə */
+ var h=D.getElementById("v3-home");
+ if(a&&a.parentNode){if(el.previousSibling!==a)a.parentNode.insertBefore(el,a.nextSibling);return true}
+ if(h){if(el.parentNode!==h)h.insertBefore(el,h.firstChild);return true}
+ return false}
 function banMake(){
- if(D.getElementById("lxp-ban"))return banFill();
- var a=D.getElementById("dq-count"),h=D.getElementById("v3-home");if(!a&&!h)return;
- var el=D.createElement("div");el.id="lxp-ban";
- el.innerHTML='<div class="lxp-bi"><div><b>\ud83d\udccb İmtahan Qeydiyyatı</b><span>Aktiv imtahanlar · yerlər məhduddur</span></div><button type="button">Qeydiyyat paneli ›</button></div>';
- if(a&&a.parentNode)a.parentNode.insertBefore(el,a.nextSibling);else h.insertBefore(el,h.firstChild);
- banFill()}
-D.addEventListener("click",function(ev){var b=ev.target.closest&&ev.target.closest("#lxp-ban button");
- if(!b||b.closest("#dqx-ov"))return;ev.preventDefault();ev.stopImmediatePropagation();openX("reg")},true);
+ var el=D.getElementById("lxp-ban");
+ if(!el){
+  var a=D.getElementById("dq-count"),h=D.getElementById("v3-home");if(!a&&!h)return;
+  el=D.createElement("div");el.id="lxp-ban";
+  el.innerHTML='<div class="lxp-bi"><div><b>\ud83d\udccb İmtahan Qeydiyyatı</b><span>Aktiv imtahanlar · yerlər məhduddur</span></div><button type="button" data-dqreg="1">Qeydiyyat paneli ›</button></div>';
+  if(!banPlace(el))return;
+  banFill();return}
+ banPlace(el)}
+function isRegBtn(t){
+ var b=t&&t.closest&&t.closest("#lxp-ban button,[data-dqreg],a,button,[role=button]");
+ if(!b||b.closest("#dqx-ov,#dqa-ov,#admin-panel,#login-screen,#exam-screen"))return null;
+ if(b.matches("#lxp-ban button,[data-dqreg]"))return b;
+ return /^qeydiyyat paneli(\s*[›>→])?$/.test(norm(b.textContent))?b:null}
+function regGo(ev){var b=isRegBtn(ev.target);if(!b)return;
+ ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();
+ if(ev.type==="click")openX("reg")}
+window.addEventListener("click",regGo,true);
+["pointerdown","mousedown","touchstart","pointerup","mouseup","touchend"].forEach(function(n){window.addEventListener(n,function(ev){if(isRegBtn(ev.target)){ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation()}},true)});
 [1500,4000,8000].forEach(function(t){setTimeout(banFill,t)});
-setTimeout(banMake,5000);setTimeout(banMake,12000);
+setTimeout(banMake,600);setInterval(banMake,800);
 var HEAD=".v3-hd,.v3-top,.v3-nav,header,nav,[class*=header],[class*=navbar],[class*=topbar]";
 function navFix(){try{var q=D.querySelectorAll(HEAD+" a,"+HEAD+" button,"+HEAD+" li,"+HEAD+" span"),k,e;
  for(k=0;k<q.length;k++){e=q[k];if(e.children.length||e.closest("#dqr,#dqx-ov,#dqa-ov,#admin-panel,#login-screen,#dq-cab,#exam-screen"))continue;
@@ -7898,52 +7919,138 @@ function render(){var h='<div class="w"><div class="top"><h3>🎓 Qeydiyyat port
    '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="b s o" data-a="up" data-i="'+i+'">↑</button><button class="b s o" data-a="down" data-i="'+i+'">↓</button><button class="b s" data-a="edit" data-i="'+i+'">✏️</button><button class="b s x" data-a="del" data-i="'+i+'">🗑</button></div></div></div>'});}
  ov.innerHTML=h+'</div><div id="rga-t"></div>'}
 window.DQRegAdmin={
- open:function(){build();ov.classList.add("on");document.body.style.overflow="hidden";editing=null;ov.innerHTML='<div class="w"><div class="c">Yüklənir…</div></div>';
+ open:function(){if(!(window.DQAdminGate&&DQAdminGate.is()))return;build();ov.classList.add("on");document.body.style.overflow="hidden";editing=null;ov.innerHTML='<div class="w"><div class="c">Yüklənir…</div></div>';
   load().then(render).catch(function(){list=list.length?list:DEF.map(function(x){return Object.assign({},x)});render();toast("Bazadan oxuna bilmədi — ilkin siyahı göstərilir",1)})}
 };
 })();
 </script>
 <style id="dq-dock-css">
-/* Sol alt künc üzən düymələr: Sual papkaları / Admin / Redaktə — vahid, sabit, səliqəli dok */
-.dqdock{position:fixed!important;left:calc(12px + env(safe-area-inset-left,0px))!important;right:auto!important;top:auto!important;transform:none!important;margin:0!important;
- animation:none!important;transition:filter .15s ease,box-shadow .15s ease!important;z-index:99990!important;
- box-sizing:border-box!important;height:38px!important;min-width:142px!important;width:auto!important;padding:0 16px!important;
- line-height:36px!important;text-align:left!important;white-space:nowrap!important;font-family:inherit!important;font-size:13px!important;font-weight:700!important;letter-spacing:.2px!important;
- color:#fff!important;background:#0f2d6b!important;background-image:none!important;border:1px solid rgba(255,255,255,.16)!important;border-radius:12px!important;
- box-shadow:0 6px 16px rgba(15,23,42,.30)!important;opacity:1!important;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.dqdock:hover{filter:brightness(1.12)!important}
-.dqdock:active{filter:brightness(.94)!important}
-.dqdock[data-dqdock="1"]{bottom:calc(12px + env(safe-area-inset-bottom,0px))!important}
-.dqdock[data-dqdock="2"]{bottom:calc(58px + env(safe-area-inset-bottom,0px))!important}
-.dqdock[data-dqdock="3"]{bottom:calc(104px + env(safe-area-inset-bottom,0px))!important}
-.dqdock[data-dqdock="4"]{bottom:calc(150px + env(safe-area-inset-bottom,0px))!important}
-@media(max-width:560px){.dqdock{min-width:0!important;height:36px!important;line-height:34px!important;padding:0 13px!important;font-size:12.5px!important}
- .dqdock[data-dqdock="2"]{bottom:calc(54px + env(safe-area-inset-bottom,0px))!important}.dqdock[data-dqdock="3"]{bottom:calc(96px + env(safe-area-inset-bottom,0px))!important}.dqdock[data-dqdock="4"]{bottom:calc(138px + env(safe-area-inset-bottom,0px))!important}}
+/* ===== Admin dok (Sual papkaları / Admin / Redaktə) =====
+   Yalnız admin kimi daxil olanda yaradılır və sol aşağıda sabit dayanır.
+   Orijinal düymələr həmişə gizlidir; dok onlara klik yönləndirir. */
+[data-dqsrc],#dqe-fab{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#dq-admin-dock{position:fixed!important;left:calc(12px + env(safe-area-inset-left,0px))!important;bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;
+ z-index:99990;display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin:0;padding:0;transform:none!important;pointer-events:none}
+#dq-admin-dock[hidden]{display:none!important}
+#dq-admin-dock .dqd-b{pointer-events:auto;box-sizing:border-box;height:38px;min-width:142px;padding:0 16px;margin:0;display:inline-flex;align-items:center;justify-content:flex-start;gap:6px;
+ font:700 13px/1 inherit;font-family:inherit;letter-spacing:.2px;white-space:nowrap;color:#fff;background:#0f2d6b;border:1px solid rgba(255,255,255,.16);border-radius:12px;
+ box-shadow:0 6px 16px rgba(15,23,42,.30);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:filter .15s ease,transform .1s ease}
+#dq-admin-dock .dqd-b:hover{filter:brightness(1.12)}
+#dq-admin-dock .dqd-b:active{filter:brightness(.94);transform:scale(.97)}
+#dq-admin-dock .dqd-b:focus-visible{outline:2px solid #f6c453;outline-offset:2px}
+@media(max-width:560px){#dq-admin-dock .dqd-b{min-width:0;height:36px;padding:0 13px;font-size:12.5px}}
+@media print{#dq-admin-dock{display:none!important}}
 </style>
 <script id="dq-dock-js">
 (function(){"use strict";
 if(window.__dqDockFix)return;window.__dqDockFix=1;
-var ORDER=["redaktə","admin","sualpapkaları"];
+var ORDER=["sualpapkaları","admin","redaktə"];   /* yuxarıdan aşağıya */
+var DEFAULT_LABEL={"sualpapkaları":"📁 Sual papkaları","admin":"🛡️ Admin","redaktə":"✏️ Redaktə"};
+var D=document,H=D.documentElement,dock=null,labels={},tm=0,wasAdmin=null;
 function nz(t){return String(t||"").toLowerCase().replace(/[^a-zəıöüçşğ]/g,"")}
 function shown(e){return e.getClientRects().length>0}
-function scanDock(){
+
+/* ---------- Vahid admin yoxlaması ---------- */
+function isAdmin(){
  try{
-  var nodes=document.querySelectorAll("button,a,[role=button],div,span"),found={},i,e,k,t,r,cs;
+  if(window.__dqAuthed===true)return true;
+  if(localStorage.getItem("dq_admin_logged")==="true")return true;
+  var p=D.getElementById("admin-panel");
+  return !!(p&&p.classList.contains("active")&&p.getClientRects().length>0);
+ }catch(e){return false}}
+window.DQAdminGate={is:isAdmin,require:function(){return isAdmin()}};
+
+/* ---------- Orijinal düymələri tap, işarələ, gizlə ---------- */
+function scanSources(){
+ try{
+  var fab=D.getElementById("dqe-fab");if(fab&&!fab.hasAttribute("data-dqsrc-id")){fab.setAttribute("data-dqsrc-id","redaktə")}
+  var nodes=D.querySelectorAll("button,a,[role=button],div,span"),i,e,k,t,r,cs;
   for(i=0;i<nodes.length;i++){e=nodes[i];
-   if(e.classList.contains("dqdock")){k=e.getAttribute("data-dqk");if(k&&shown(e))found[k]=e;continue}
+   if(e.hasAttribute("data-dqsrc")||e.closest("#dq-admin-dock,#dqx-ov,#rga"))continue;
    t=e.textContent;if(!t||t.length>26)continue;
    k=nz(t);if(ORDER.indexOf(k)<0)continue;
    if(e.children.length>3||!shown(e))continue;
    cs=getComputedStyle(e);if(cs.position!=="fixed")continue;
    r=e.getBoundingClientRect();if(r.left>220||r.top<window.innerHeight*.45)continue;
-   if(e.closest("#dqx-ov,#rga"))continue;
-   e.classList.add("dqdock");e.setAttribute("data-dqk",k);found[k]=e}
-  var n=0;ORDER.forEach(function(key){var el=found[key];if(el){n++;if(el.getAttribute("data-dqdock")!==String(n))el.setAttribute("data-dqdock",String(n))}});
+   e.setAttribute("data-dqsrc",k);
+   var lb=String(t).replace(/\s+/g," ").trim();if(lb)labels[k]=lb;
+  }
  }catch(x){}}
+function source(k){
+ if(k==="redaktə"){var f=D.getElementById("dqe-fab");if(f)return f}
+ var l=D.querySelectorAll('[data-dqsrc="'+k+'"]'),i;
+ for(i=0;i<l.length;i++)if(l[i].isConnected)return l[i];
+ return null}
+function hasSource(k){return !!source(k)}
+
+/* ---------- Dok ---------- */
+function build(){
+ if(dock&&dock.isConnected)return dock;
+ dock=D.createElement("div");dock.id="dq-admin-dock";dock.setAttribute("role","toolbar");dock.setAttribute("aria-label","Admin qısayolları");
+ ORDER.forEach(function(k){
+  var b=D.createElement("button");b.type="button";b.className="dqd-b";b.setAttribute("data-k",k);b.hidden=true;dock.appendChild(b)});
+ dock.addEventListener("click",function(ev){
+  var b=ev.target.closest&&ev.target.closest(".dqd-b");if(!b)return;
+  ev.preventDefault();ev.stopPropagation();
+  if(!isAdmin()){render();return}
+  var src=source(b.getAttribute("data-k"));
+  if(src){try{src.click()}catch(e){}}
+ });
+ D.body.appendChild(dock);return dock}
+function destroy(){if(dock){try{dock.remove()}catch(e){}dock=null}}
+function render(){
+ var ok=isAdmin();
+ if(H.classList.contains("dq-admin-ok")!==ok)H.classList.toggle("dq-admin-ok",ok);
+ if(!ok){wasAdmin=false;destroy();return}
+ if(wasAdmin!==true){wasAdmin=true}
+ scanSources();
+ var d=build(),editing=D.body.classList.contains("dqe-on"),any=false;
+ [].forEach.call(d.children,function(b){
+  var k=b.getAttribute("data-k"),has=hasSource(k)&&!(k==="redaktə"&&editing);
+  var txt=labels[k]||DEFAULT_LABEL[k];
+  if(b.textContent!==txt)b.textContent=txt;
+  if(b.hidden===has)b.hidden=!has;
+  if(has)any=true});
+ d.hidden=!any}
+
+/* ---------- Admin olmayanda orijinal düymələr heç vaxt işləməsin ---------- */
+function blocker(ev){
+ if(isAdmin())return;
+ var t=ev.target;if(!t||!t.closest)return;
+ if(t.closest("[data-dqsrc],#dqe-fab,#dq-admin-dock")){ev.preventDefault();ev.stopImmediatePropagation()}}
+["click","pointerdown","touchstart","mousedown"].forEach(function(n){window.addEventListener(n,blocker,true)});
+
+/* ---------- Admin funksiyalarının daxilində yoxlama ---------- */
+function guard(obj,name){
+ try{
+  var o=obj,f=o&&o[name];
+  if(typeof f!=="function"||f.__dqGated)return true;
+  var g=function(){if(!isAdmin())return;return f.apply(this,arguments)};
+  g.__dqGated=1;o[name]=g;return true
+ }catch(e){return false}}
+var GUARDS=[[function(){return window},"dqGoAdmin"],[function(){return window.GZL},"open"],[function(){return window.DQNav},"openEditor"],[function(){return window.DQRegAdmin},"open"]];
+function guardAll(){GUARDS.forEach(function(g){try{var o=g[0]();if(o)guard(o,g[1])}catch(e){}})}
+
+function sched(){if(tm)return;tm=setTimeout(function(){tm=0;guardAll();render()},120)}
+function start(){guardAll();render();
+ try{new MutationObserver(sched).observe(D.body,{childList:true,subtree:true,attributes:true,attributeFilter:["style","class","hidden"]})}catch(e){}
+ setInterval(function(){guardAll();render()},1000);
+ window.addEventListener("storage",sched);window.addEventListener("resize",sched);window.addEventListener("orientationchange",sched);
+ D.addEventListener("visibilitychange",sched)}
+if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",start);else start();
+})();
+</script>
+<script id="dq-reg-nav-js">
+/* «Qeydiyyat imtahanları» menyu bəndi (yalnız admin panelində) */
+(function(){"use strict";
+var D=document;
+function nz(t){return String(t||"").toLowerCase().replace(/[^a-zəıöüçşğ]/g,"")}
+function shown(e){return e.getClientRects().length>0}
 function injectNav(){
  try{
-  if(document.getElementById("dq-reg-nav"))return;
-  var nodes=document.querySelectorAll("a,button,li,div,span"),base=null,ses=null,i,e,k,r;
+  if(!(window.DQAdminGate&&DQAdminGate.is()))return;
+  if(D.getElementById("dq-reg-nav"))return;
+  var nodes=D.querySelectorAll("a,button,li,div,span"),base=null,ses=null,i,e,k,r;
   for(i=0;i<nodes.length;i++){e=nodes[i];if(!e.textContent||e.textContent.length>40)continue;
    k=nz(e.textContent);if(k!=="imtahanbaşlat"&&k!=="sessiyalar")continue;
    if(!shown(e))continue;r=e.getBoundingClientRect();if(r.left>260)continue;
@@ -7952,7 +8059,7 @@ function injectNav(){
   if(!base||!ses||!ses.parentNode)return;
   var c=base.cloneNode(true),all=[c].concat([].slice.call(c.querySelectorAll("*")));
   all.forEach(function(x){x.removeAttribute("id");[].slice.call(x.attributes).forEach(function(a){if(/^(data-|on|href$)/i.test(a.name))x.removeAttribute(a.name)})});
-  var w=document.createTreeWalker(c,NodeFilter.SHOW_TEXT,null),tn,done=0;
+  var w=D.createTreeWalker(c,NodeFilter.SHOW_TEXT,null),tn,done=0;
   while((tn=w.nextNode())){if(!tn.data.trim())continue;if(!done){tn.data="Qeydiyyat imtahanları";done=1}else tn.data=""}
   if(!done)c.textContent="Qeydiyyat imtahanları";
   c.id="dq-reg-nav";c.setAttribute("role","button");c.setAttribute("tabindex","0");c.title="Qeydiyyat portalındakı imtahanları əlavə et / dəyiş / sil";
@@ -7960,16 +8067,10 @@ function injectNav(){
   c.addEventListener("click",go,true);c.addEventListener("keydown",function(ev){if(ev.key==="Enter"||ev.key===" ")go(ev)},true);
   ses.parentNode.insertBefore(c,ses.nextSibling);
  }catch(x){}}
-var tm=0;function sched(){if(tm)return;tm=setTimeout(function(){tm=0;scanDock();injectNav()},350)}
-function start(){scanDock();injectNav();
- try{new MutationObserver(sched).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["style","class"]})}catch(e){}
- setInterval(function(){scanDock();injectNav()},2500);
- window.addEventListener("resize",sched);window.addEventListener("orientationchange",sched)}
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
+function start(){injectNav();setInterval(injectNav,2500)}
+if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",start);else start();
 })();
 </script>
-
-
 
 </body>
 </html>
