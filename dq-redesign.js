@@ -183,7 +183,7 @@ function exCards(mode){var c=cfg.ex,ov=c.ov||{},all=live(),lv=(!S.edit)?all.filt
  function cvh(src){return src?'<div class="cv" data-src="'+E(src)+'" style="background-image:url(\''+E(SRC(src))+'\')"></div>':""}
  function wm(ic){return'<svg class="wm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">'+(ICO[ic]||ICO.cap)+'</svg>'}
  function liveCard(x,ed){var o=ov[x._id]||{},p=x.pay&&typeof x.pay==="object"&&x.pay.on?money(x.pay.price):"Pulsuz",cap=parseInt(x.cap)>0?x.cap+" yer":"Limitsiz",k=String(x.cat||"").toUpperCase(),ic=icon((x.subject||"")+" "+x.title),im=o.img||(typeof x.cover==="string"&&/^(data:image|https?:)/.test(x.cover)?x.cover:"");
-  return'<article class="ex '+E(k)+(im?" hc":"")+(ed&&o.hide?" off":"")+'">'+(ed?'<div class="ibar lvb"><b data-lv="'+E(x._id)+'" title="Qapaq şəkli / gizlət">⚙</b></div><em class="lvt">CANLI</em>':"")+cvh(im)+wm(ic)+'<div class="tp"><span class="ci">'+SV(ic)+'</span><span class="tag">'+E(k||"DQ")+'</span></div><h3>'+E(x.title)+'</h3><div class="ch"><span>'+E(p)+'</span><span>'+E(cap)+'</span><span>'+E(dmy(new Date(x.start)))+'</span></div><a class="b g" data-a="exam">İştirak et <i class="ar">→</i></a></article>'}
+  return'<article class="ex '+E(k)+(im?" hc":"")+(ed&&o.hide?" off":"")+'">'+(ed?'<div class="ibar lvb"><b data-lv="'+E(x._id)+'" title="Qapaq şəkli / gizlət">⚙</b></div><em class="lvt">CANLI</em>':"")+cvh(im)+wm(ic)+'<div class="tp"><span class="ci">'+SV(ic)+'</span><span class="tag">'+E(k||"DQ")+'</span></div><h3>'+E(x.title)+'</h3><div class="ch"><span>'+E(p)+'</span><span>'+E(cap)+'</span><span>'+E(dmy(new Date(x.start)))+'</span></div><a class="b g" data-a="regp">İştirak et <i class="ar">→</i></a></article>'}
  var man=c.cards.map(function(x,i){var b="ex.cards."+i,k=String(x.cat||"").toUpperCase(),im=x.img||"";
   return{pin:!!x.pin,h:'<article class="ex '+E(x.c||k)+(im?" hc":"")+'" data-ix="'+i+'">'+IB("ex.cards",i)+cvh(im)+wm(x.ic)+'<div class="tp"><span class="ci">'+SV(x.ic||"cap")+"</span>"+X(b+".cat","span","tag")+"</div>"+X(b+".t","h3")+'<div class="ch">'+(x.ch||[]).map(function(t,j){return t||S.edit?X(b+".ch."+j,"span"):""}).join("")+"</div>"+LK(b+".b","b g",' <i class="ar">→</i>')+"</article>"}});
  var jn=function(a){return a.map(function(m){return m.h}).join("")},base=man.filter(function(m){return!m.pin});
@@ -261,6 +261,12 @@ function showHome(){if(typeof showScreen==="function"){showScreen("v3-home");ret
 var A={
  home:function(){chain([function(){if(!showHome())return false;scrollTo(0,0)}],"Ana səhifə")},
  /* İmtahan: qeydiyyat portalı (solda qeydiyyat · sağda aktiv sessiyalar · aşağıda sınaqlar karuseli) */
+regp:function(){chain([
+  function(){var q=document.querySelectorAll("a,button,[onclick],[role=button],[role=link],div,span"),hit=null;
+   for(var i=0;i<q.length;i++){var e=q[i];if(e.closest("#dqr,#admin-panel,.admin-module-block,.admin-nav-grid,#dqr-ht"))continue;
+    var t=(e.textContent||"").replace(/[^\p{L}]/gu,"").toLowerCase();if(t==="qeydiyyatpaneli"&&!e.querySelector("a,button")){hit=e;break}}
+   if(!hit)return false;(hit.closest("a,button,[onclick],[role=button]")||hit).click();return true},
+  function(){A.exam();return true}],"Qeydiyyat paneli")},
  exam:function(){chain([function(){if(!fn(window.LXP,"open"))return false;LXP.open()},function(){var v=gV3();if(!fn(v,"go"))return false;v.go("n2")}],"İmtahan")},
  sinaq:function(){A.exam()},
  lxp:function(){A.exam()},
@@ -385,7 +391,7 @@ function leave(){if(S.dirty&&!confirm("Saxlanılmamış dəyişikliklər itəcə
 function findBell(){var d=$("dq13-dock"),c,rx=/bell|notif|bildiri|z[əe]ng/i;
  var direct=$("dq-bell");if(direct)return S.bell=direct;
  if(S.bell&&document.contains(S.bell))return S.bell;
- var all=[].slice.call(document.querySelectorAll("button,a,[role=button]")).filter(function(b){return!b.closest("#dqr")&&!b.closest("#dqe")});
+ var all=[].slice.call(document.querySelectorAll("button,a,[role=button]")).filter(function(b){return!b.closest("#dqr")&&!b.closest("#dqe")&&!b.closest("#dqr-ht")});
  c=all.filter(function(b){return b.textContent.indexOf("🔔")>-1||rx.test((b.id||"")+" "+(b.className&&b.className.baseVal===undefined?b.className:"")+" "+(b.getAttribute("aria-label")||""))});
  if(d)c.sort(function(a,b){return(d.contains(b)?1:0)-(d.contains(a)?1:0)});
  return S.bell=c[0]||null}
@@ -393,6 +399,24 @@ function tools(){var el=$("dqr");if(!el)return;var hb=el.querySelector(".hd"),be
  var b=q("bell");if(b){b.hidden=!bell;if(bell){b.classList.toggle("on",bell.classList.contains("on"));b.classList.toggle("dot",!!bell.querySelector("[class*=badge],[class*=dot],[class*=cnt],sup"))}}
  var t=q("theme");if(t)t.hidden=!fab;var y=q("eye");if(y){y.hidden=!eye;y.classList.toggle("on",!!(eye&&eye.classList.contains("on")))}
  if(hb)document.body.style.setProperty("--dqr-top",Math.max(0,hb.getBoundingClientRect().bottom)+"px")}
+/* ---------- başlıqdakı alətlər (axtarış, bildiriş, gecə rejimi, göz rahatlığı) — «Daxil ol» düyməsinin solunda ---------- */
+function hdrTools(){var h=$("v3-home");if(!h)return;var hd=h.querySelector(".v3-hd");if(!hd){document.body.classList.remove("dqr-ht-on");return}
+ var box=$("dqr-ht");
+ if(!box||!hd.contains(box)){if(box)box.remove();
+  var tg=hd.querySelector("[data-dq10],.v3-b,button,a.v3-b");if(!tg)return;
+  while(tg.parentNode&&tg.parentNode!==hd&&tg.parentNode.children.length===1)tg=tg.parentNode;
+  box=document.createElement("span");box.id="dqr-ht";box.className="dqht";
+  box.innerHTML='<button type="button" data-tl="search" title="Axtar" aria-label="Axtar">'+SV("search")+'</button><button type="button" data-tl="bell" title="Bildirişlər" aria-label="Bildirişlər" hidden>'+SV("bell")+'<i></i></button><button type="button" data-tl="theme" title="Görünüş (gündüz / gecə)" aria-label="Gündüz / gecə" hidden>'+SV("moon")+'</button><button type="button" data-tl="eye" title="Göz rahatlığı" aria-label="Göz rahatlığı" hidden>'+SV("eye")+'</button>';
+  box.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-tl]");if(!b)return;e.preventDefault();e.stopPropagation();toolClick(b.dataset.tl)});
+  tg.parentNode.insertBefore(box,tg)}
+ document.body.classList.add("dqr-ht-on");var bell=findBell(),fab=$("dq13-fab"),eye=$("dq13-eye"),q=function(k){return box.querySelector('[data-tl="'+k+'"]')};
+ var b=q("bell");if(b){b.hidden=!bell;if(bell){b.classList.toggle("on",bell.classList.contains("on"));b.classList.toggle("dot",!!bell.querySelector("[class*=badge],[class*=dot],[class*=cnt],sup"))}}
+ var t=q("theme");if(t)t.hidden=!fab;var y=q("eye");if(y){y.hidden=!eye;y.classList.toggle("on",!!(eye&&eye.classList.contains("on")))}}
+/* İmtahan qeydiyyat portalı: sessiya kartındakı «Qeydiyyatım» düyməsinin yazısı «Qeydiyyatdan keç» olur */
+function regLabel(){try{var q=document.querySelectorAll("button,a,[role=button]");
+ for(var i=0;i<q.length;i++){var b=q[i];if(b.closest("#dqr"))continue;var t=(b.textContent||"").replace(/\s+/g," ").trim();
+  if(!/^\S{0,3}\s?Qeydiyyatım$/i.test(t)||t.length>20)continue;
+  var w=document.createTreeWalker(b,NodeFilter.SHOW_TEXT,null),n;while(n=w.nextNode()){if(/Qeydiyyatım/.test(n.nodeValue))n.nodeValue=n.nodeValue.replace("Qeydiyyatım","Qeydiyyatdan keç")}}}catch(e){}}
 function toolClick(k){var m={bell:findBell(),theme:$("dq13-fab"),eye:$("dq13-eye")};if(k==="search"){A.news();return}var n=m[k];if(n)n.click()}
 function wire(el){
  el.addEventListener("click",function(e){var t=e.target,tl=t.closest&&t.closest("[data-tl]");
@@ -423,7 +447,7 @@ function mount(){
   var h=$("v3-home");if(!h||!gV3()||!V3.D||!gV2())return;
   if(!S.ready)init();
   var fab=$("dqe-fab");if(fab)fab.hidden=S.edit||!isAdmin();
-  var vis=h.getClientRects().length>0&&!!$("dqr");document.body.classList.toggle("dqr-home",vis);
+  var vis=h.getClientRects().length>0&&!!$("dqr");document.body.classList.toggle("dqr-home",vis);try{hdrTools()}catch(e){}
   var el=$("dqr");
   if(el&&h.contains(el)){var hn2=h.querySelector(".v3-nav");if(hn2&&el.previousElementSibling!==hn2)h.insertBefore(el,hn2.nextSibling)}
   if(!el||!h.contains(el)){if(!h.querySelector(".v3-hero")&&!el)return;
@@ -473,7 +497,7 @@ function floaters(){var p=$("admin-panel"),adm=!!p&&p.getClientRects().length>0;
  left.sort(function(a,b){return b.r.bottom-a.r.bottom});var off=14;
  left.forEach(function(f){f.el.setAttribute("data-dqr-st","1");f.el.style.setProperty("top","auto","important");f.el.style.setProperty("bottom",off+"px","important");off+=f.r.height+8});
  [].forEach.call(document.querySelectorAll("#admin-panel details"),function(d){if(d.__dqc)return;if(/Gizlədilmiş modullar/.test((d.textContent||"").slice(0,90))){d.__dqc=1;d.open=false}})}
-setInterval(function(){try{duoSync();portalCar();floaters()}catch(e){}},400);
+setInterval(function(){try{duoSync();portalCar();floaters();regLabel()}catch(e){}},400);
 window.DQR={S:S,build:function(){return build()},cfg:function(){return cfg},init:init};
 setInterval(function(){try{mount()}catch(e){}},500);
 setInterval(loadNews,60000);

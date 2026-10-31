@@ -572,3 +572,17 @@ html body #lxp#lxp .rp-car>.rp-sec{justify-content:center;text-align:center;marg
 html body #lxp#lxp .rp-car>.rp-sec h2{border-left:0;padding-left:0}
 html body #lxp#lxp .rp-car>.rp-sec h2:after{content:"";display:block;width:44px;height:4px;margin:10px auto 0;border-radius:4px;background:linear-gradient(90deg,var(--gd),var(--gd2))}
 html body #lxp#lxp .rp-car>.rp-sec small{margin:8px 0 0}
+
+/* ---- başlıqdakı alətlər (ağ zolaq, «Daxil ol» düyməsinin solunda) ---- */
+#v3-home .dqht{display:inline-flex;align-items:center;gap:8px;margin-left:auto;margin-right:12px;flex:none;vertical-align:middle}
+#v3-home .dqht button{width:40px;height:40px;border-radius:10px;border:1px solid #cfd9ee;background:#f4f7fd;color:#0a2f7a;font-size:19px;display:grid;place-items:center;padding:0;cursor:pointer;position:relative;transition:background .15s,transform .15s,color .15s}
+#v3-home .dqht button:hover{background:#e3ecfb;transform:translateY(-1px)}
+#v3-home .dqht button[hidden]{display:none}
+#v3-home .dqht button.on{background:#0a2f7a;color:#fff;border-color:transparent}
+#v3-home .dqht .ic{width:1em;height:1em;flex:none}
+#v3-home .dqht i{display:none}
+#v3-home .dqht .dot i{display:block;position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#ef4444;border:2px solid #fff}
+@media(max-width:700px){#v3-home .dqht{gap:5px;margin-right:6px}#v3-home .dqht button{width:34px;height:34px;font-size:16px}}
+
+/* Ana səhifədə başlıqda öz alətləri olduğu üçün üzən düymələr (dock) kartların üstünə düşməsin */
+body.dqr-home.dqr-ht-on #dq13-dock{opacity:0!important;pointer-events:none!important}
