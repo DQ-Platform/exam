@@ -909,4 +909,31 @@
     }
   } catch (e) {}
   setTimeout(function () { try { $("dqg-fin").focus(); } catch (e) {} }, 300);
+  /* ---------- link qoruyucusu ----------
+     ?giris=1 linki ilə açılanda (məs: ?giris=1&qrup) iş nömrəsi pəncərəsi həmişə önə çıxır.
+     Başqa skriptlər (ana ekran, naviqasiya, əvvəlki sessiyanın bərpası) onu gizlətsə, DOM-dan silsə
+     və ya üstünə çıxsa belə, giriş edilənə qədər geri qaytarılır. Giriş edildikdən sonra qarışmır. */
+  (function () {
+    function guard() {
+      try {
+        if (session) return;
+        if (!root.isConnected) document.body.appendChild(root);
+        root.style.setProperty("z-index", "2147483646", "important");
+        var cs = getComputedStyle(root);
+        if (cs.display === "none" || cs.visibility === "hidden" || cs.opacity === "0") showRoot();
+        var h = document.documentElement;
+        if (!h.classList.contains("dqg-on")) h.classList.add("dqg-on");
+        h.classList.remove("dqg-pre");
+        if (h.style.overflow !== "hidden") h.style.overflow = "hidden";
+        var lg = $("dqg-login");
+        if (lg && lg.style.display === "none" && $("dqg-list").style.display === "none") lg.style.display = "";
+      } catch (e) {}
+    }
+    guard();
+    setInterval(guard, 300);
+    window.addEventListener("pageshow", guard);
+    window.addEventListener("popstate", guard);
+    window.addEventListener("hashchange", guard);
+    document.addEventListener("visibilitychange", guard);
+  })();
 })();
