@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<script id="dqg-norm">/* ?giris, ?giris= və ?giris=1 eyni işləsin; səhifə parametrsiz yenilənərsə (≤15 san) link bərpa olunur → birbaşa «Kabinetə giriş» */try{var u=new URL(location.href),q=u.searchParams,K="dqg_link",ss=window.sessionStorage;if(q.has("giris")&&q.get("giris")!=="1"){q.set("giris","1");history.replaceState(history.state,"",u.pathname+u.search+u.hash)}
+if(q.get("giris")==="1"){ss.setItem(K,JSON.stringify({t:Date.now(),s:location.search}))}
+else if(!q.has("giris")){var o=JSON.parse(ss.getItem(K)||"null");if(o&&o.s&&Date.now()-o.t<15000&&!ss.getItem("dqg_flow")){ss.removeItem(K);history.replaceState(history.state,"",u.pathname+o.s+u.hash)}}}catch(e){}</script>
 <script id="dqg-boot">try{if(new URLSearchParams(location.search).get("giris")==="1"){var d=document.documentElement;d.classList.add("dqg-pre");var st=document.createElement("style");st.textContent="html.dqg-pre,html.dqg-pre body{background:#071330!important}html.dqg-pre body>*{visibility:hidden}html.dqg-pre body>#dqg{visibility:visible}";document.head.appendChild(st);setTimeout(function(){d.classList.remove("dqg-pre")},8000)}}catch(e){}</script>
 <script id="dq-theme-boot">
 /* DQ Theme — səhifə ilk görünməzdən ƏVVƏL cihazın (sistemin) gündüz/gecə ayarını tətbiq edir.
@@ -6490,7 +6493,7 @@ function tick(){var ex=document.querySelector("#examFolderGrid .folder-card"),sc
 setInterval(tick,700)})();</script>
 <script src="dq-resepsiya.js?v=3"></script>
 <script src="dq-resepsiya-netice.js?v=2"></script>
-<script src="dq-giris.js?v=7"></script>
+<script src="dq-giris.js?v=9"></script>
 <script src="dq-panel-patch.js?v=1"></script>
 <script src="dq-open-multi.js?v=2"></script>
 <style id="dq-gz-css">
@@ -8171,5 +8174,62 @@ if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",start);else st
 })();
 </script>
 
+<style id="dq-count-pin-css">
+/* Geri sayım (#dq-count) həmişə eyni yerdə durur: hero-dan sonra, qeydiyyat bannerinin üstündə.
+   Aşağıya yapışan / üzən / sıçrayan variantlar söndürülür. */
+html body #dq-count,html body .dqcd{position:relative!important;inset:auto!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;transform:none!important;float:none!important;z-index:auto!important;translate:none!important}
+html body [data-dqcd-dup]{display:none!important}
+</style>
+<script id="dq-count-pin">
+(function(){
+"use strict";
+if(window.__dqCountPin)return;window.__dqCountPin=1;
+var D=document,EXC=".dqcd-admin,#admin-panel,#v2-root,#dqx-ov,#dqa-ov,#dqp-ov",busy=0,scanT=0;
+function isCD(e){return !(e.closest&&e.closest(EXC))}
+function list(){var o=[],a=D.querySelectorAll("#dq-count,.dqcd"),i;
+ for(i=0;i<a.length;i++)if(o.indexOf(a[i])<0&&isCD(a[i]))o.push(a[i]);return o}
+function ban(){var b=D.getElementById("lxp-ban");return(b&&b.isConnected&&b.parentNode)?b:null}
+function target(){
+ var b=ban(),s=D.getElementById("dqr-cnt"),d=D.getElementById("dqr-duo"),h=D.getElementById("v3-home");
+ if(b)return{p:b.parentNode,ref:b};
+ if(s)return{p:s,ref:s.firstElementChild};
+ if(d&&d.parentNode)return{p:d.parentNode,ref:d};
+ if(h)return{p:h,ref:h.firstElementChild};
+ return null}
+function placed(m,t){return !t||(m.parentNode===t.p&&(t.ref===m||m.nextElementSibling===t.ref))}
+function pick(L,t){var i;
+ for(i=0;i<L.length;i++)if(placed(L[i],t)&&L[i].id==="dq-count")return L[i];
+ for(i=0;i<L.length;i++)if(L[i].id==="dq-count")return L[i];
+ return L[0]}
+function ok(){
+ var L=list();if(!L.length)return true;
+ if(L.length>1)return false;
+ return placed(L[0],target())}
+function fix(){
+ if(busy)return;busy=1;
+ try{
+  var L=list(),m,t,i;if(!L.length)return;
+  t=target();m=pick(L,t);
+  for(i=0;i<L.length;i++)if(L[i]!==m){try{L[i].parentNode.removeChild(L[i])}catch(e){}}
+  if(t&&!placed(m,t)&&t.ref!==m){try{t.p.insertBefore(m,t.ref)}catch(e){}}
+  if(m.hidden)m.hidden=false;
+ }finally{busy=0}}
+/* Aşağıda sabitlənmiş bənzər zolaq (başqa id/klasla) qalıbsa gizlət */
+function scan(){
+ var L=list(),m=L[0],c=D.querySelectorAll('body>*,[class*="count"],[class*="cnt"],[id*="count"],[id*="cnt"]'),i,e,cs,tx;
+ for(i=0;i<c.length&&i<400;i++){
+  e=c[i];if(e===m||(m&&(e.contains(m)||m.contains(e)))||!isCD(e)||/^(SCRIPT|STYLE|LINK)$/.test(e.tagName))continue;
+  cs=getComputedStyle(e);if(cs.position!=="fixed"&&cs.position!=="sticky")continue;
+  tx=e.textContent||"";
+  if(tx.length<600&&/imtahan\S*\s+qalan\s+vaxt/i.test(tx))e.setAttribute("data-dqcd-dup","1")}}
+function nativeMO(){try{var f=D.createElement("iframe");f.setAttribute("aria-hidden","true");f.tabIndex=-1;
+ f.style.cssText="position:absolute;width:0;height:0;border:0;visibility:hidden;pointer-events:none";
+ (D.body||D.documentElement).appendChild(f);return f.contentWindow&&f.contentWindow.MutationObserver||null}catch(e){return null}}
+var MO=nativeMO()||window.MutationObserver;
+try{new MO(function(){if(!ok())fix()}).observe(D.documentElement,{childList:true,subtree:true})}catch(e){}
+(function raf(){try{if(!ok())fix();if(++scanT>=45){scanT=0;scan()}}catch(e){}window.requestAnimationFrame(raf)})();
+fix();
+})();
+</script>
 </body>
 </html>
