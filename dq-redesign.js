@@ -47,8 +47,8 @@ function makeDef(){
   soc=gs.filter(function(k){return it[k]&&!it[k].h}).map(function(k){return{t:it[k].t,a:it[k].a||"none"}});
   if(!soc.length)soc=[{t:"Telegram",a:"none"},{t:"WhatsApp",a:"none"},{t:"YouTube",a:"none"},{t:"Instagram",a:"none"}];
   var card=function(ic,c,t,cat,ch){return{ic:ic,c:c,t:t,cat:cat,ch:ch,b:{t:"İştirak et",a:"exam"}}};
-  return{v:2,theme:{gd:"#e8b94a",bg:"#020a1a",pn:"#061330",tx:"#f1f5ff"},order:["duo","an","why","ex","news"],hide:{ex:true,news:true},st:{},
-  nav:[{t:"Ana səhifə",a:"home"},{t:"Yeniliklər",a:"news"},{t:"Testlər",a:"tests"},{t:"İmtahan",a:"exam"},{t:"Materiallar",a:"law"},{t:"Məlumat",a:"infos"}],
+  return{v:2,theme:{gd:"#e8b94a",bg:"#020a1a",pn:"#061330",tx:"#f1f5ff"},order:["duo","ex","an","why","news"],hide:{},unh:1,st:{},
+  nav:[{t:"Ana səhifə",a:"home"},{t:"Yeniliklər",a:"news"},{t:"Testlər",a:"tests"},{t:"İmtahan",a:"exam"},{t:"Materiallar",a:"mat"},{t:"Məlumat",a:"infos"}],
   brand:"PLATFORM",logo:"logo.png",
   hero:{eb:"DÖVLƏT QULLUĞU",t1:"Hədəfiniz dövlət qulluğudur?",t2:"Biz sizinləyik!",p:"DQ Platform – dövlət qulluğu üzrə sınaq imtahanları, aktual materiallar və peşəkar hazırlıq imkanı verir. Uğur səninlədir!",btn:{t:"Sınaq imtahanına başla",a:"exam"},img:"hero.jpg",
    feat:[{ic:"doc",t:"DİM modelinə uyğun imtahanlar"},{ic:"chart",t:"Təhlil və nəticə analizi"},{ic:"target",t:"Hər zaman və hər yerdə"},{ic:"shield",t:"Təkmilləşdirilmiş platforma"}]},
@@ -259,6 +259,10 @@ var A={
  sinaq:function(){A.exam()},
  lxp:function(){A.exam()},
  tests:function(){chain([function(){var v=gV3();if(!fn(v,"showTests"))return false;v.showTests()}],"Testlər")},
+ mat:function(){chain([
+  function(){var k=["MAT","MATS","MATERIALS","DERS","DERSLER","LESSONS","LESSON","COURSE","COURSES","DM","LXM","DQM"];for(var i=0;i<k.length;i++){var o=window[k[i]];if(fn(o,"open")){o.open();return true}}return false},
+  function(){var v=gV3(),k=["showMaterials","materials","showMat","openMaterials","showLessons"];for(var i=0;i<k.length;i++)if(fn(v,k[i])){v[k[i]]();return true}if(fn(v,"go")){var g=["materials","mat","lessons","ders"];for(var j=0;j<g.length;j++){try{if(v.go(g[j])!==false&&document.getElementById("v3-"+g[j]))return true}catch(e){}}}return false},
+  function(){if(!fn(window.LAW,"open"))return false;window.LAW.open()}],"Materiallar")},
  law:function(){chain([function(){if(!fn(window.LAW,"open"))return false;window.LAW.open()}],"Materiallar")},
  infos:function(){chain([function(){if(!fn(window.INFO,"open"))return false;window.INFO.open()},function(){infoMenu()}],"Məlumat")},
  info:function(k){chain([function(){var v=gV3();if(!fn(v,"info"))return false;v.info(k)}],"Məlumat")},
@@ -300,7 +304,7 @@ function secOp(s,op){var o=cfg.order,i=o.indexOf(s),t;snap();
  dirty();rebuild()}
 function secList(){var b=$("dqe-secs");if(!b)return;b.innerHTML=cfg.order.map(function(s){return'<div class="r"><span'+(cfg.hide[s]?' style="opacity:.5"':"")+">"+SN[s]+'</span><span><b data-sx="'+s+'|u">▲</b><b data-sx="'+s+'|d">▼</b><b data-sx="'+s+'|h">'+(cfg.hide[s]?"👁":"🚫")+"</b></span></div>"}).join("");var a=$("dqe-auto");if(a)a.checked=!!cfg.ex.auto;
  [].forEach.call(document.querySelectorAll("#dqe-p [data-th]"),function(i){i.value=cfg.theme[i.dataset.th]})}
-var PRE=[["exam","İmtahan (qeydiyyat · aktiv sessiyalar · sınaqlar)"],["infos","Məlumat"],["reg","Qeydiyyat"],["in","Daxil ol"],["kab","Kabinet"],["tests","Testlər"],["law","Materiallar (Qanunvericilik)"],["news","Yeniliklər"],["home","Ana səhifə"],["sc:dqr-ex","→ İmtahanlar bölməsi"],["sc:dqr-an","→ Analiz bölməsi"],["sc:dqr-why","→ Niyə DQ bölməsi"],["sc:dqr-news","→ Yeniliklər bölməsi"],["sc:dqr-ft","→ Səhifənin altı"],["info:terms","İstifadə Şərtləri"],["info:priv","Məxfilik Siyasəti"],["none","Keçid yoxdur"]];
+var PRE=[["exam","İmtahan (qeydiyyat · aktiv sessiyalar · sınaqlar)"],["infos","Məlumat"],["reg","Qeydiyyat"],["in","Daxil ol"],["kab","Kabinet"],["tests","Testlər"],["mat","Materiallar (Dərs materialları)"],["law","Qanunvericilik"],["news","Yeniliklər"],["home","Ana səhifə"],["sc:dqr-ex","→ İmtahanlar bölməsi"],["sc:dqr-an","→ Analiz bölməsi"],["sc:dqr-why","→ Niyə DQ bölməsi"],["sc:dqr-news","→ Yeniliklər bölməsi"],["sc:dqr-ft","→ Səhifənin altı"],["info:terms","İstifadə Şərtləri"],["info:priv","Məxfilik Siyasəti"],["none","Keçid yoxdur"]];
 function hex(c){var m=String(c).match(/\d+/g)||[255,255,255];return"#"+m.slice(0,3).map(function(n){return(+n).toString(16).padStart(2,"0")}).join("")}
 function select(t){var tx=t.closest("[data-p]"),lkn=t.closest("[data-lp]"),im=t.closest("[data-ip]");S.sel={tx:tx,lk:lkn,im:im};tbar()}
 function tbar(){var tb=$("dqe-tb"),s=S.sel;if(!tb)return;if(!S.edit||!s||!(s.tx||s.lk||s.im)||!document.contains(s.tx||s.lk||s.im)){tb.hidden=true;return}
@@ -382,7 +386,7 @@ function wire(el){
 /* ---------- qoşulma ---------- */
 /* Köhnə saxlanmış menyuda «Haqqımızda» (gizli footer-ə keçid) və ya iki dəfə «exam» varsa — yeni düzgün menyu ilə əvəz olunur */
 function mig(o){if(!o||typeof o!=="object")return;Object.keys(o).forEach(function(k){var v=o[k];if(k==="a"&&(v==="sinaq"||v==="lxp"))o[k]="exam";else mig(v)})}
-function fixNav(c){try{if(!c||!Array.isArray(c.nav)||!DEFC)return c;c.nav=c.nav.filter(function(n){return!(n&&n.a==="sinaq")});mig(c);if(Array.isArray(c.order)&&c.order.indexOf("duo")<0){c.order.unshift("duo");c.hide=c.hide||{};if(c.hide.ex==null)c.hide.ex=true;if(c.hide.news==null)c.hide.news=true}var bad=false,seen=0;c.nav.forEach(function(n){if(n&&n.a==="sc:dqr-ft")bad=true;if(n&&n.a==="exam"){if(seen)bad=true;seen=1}});if(bad)c.nav=CL(DEFC.nav)}catch(e){}return c}
+function fixNav(c){try{if(!c||!Array.isArray(c.nav)||!DEFC)return c;c.hide=c.hide||{};if(!c.unh){c.unh=1;c.hide.ex=false;c.hide.news=false;if(Array.isArray(c.order)){["ex","an","why","news"].forEach(function(k){if(c.order.indexOf(k)<0)c.order.push(k)})}}c.nav.forEach(function(n){if(n&&n.a==="law"&&/^material/i.test(String(n.t||"")))n.a="mat"});c.nav=c.nav.filter(function(n){return!(n&&n.a==="sinaq")});mig(c);if(Array.isArray(c.order)&&c.order.indexOf("duo")<0){c.order.unshift("duo");c.hide=c.hide||{};if(c.hide.ex==null)c.hide.ex=true;if(c.hide.news==null)c.hide.news=true}var bad=false,seen=0;c.nav.forEach(function(n){if(n&&n.a==="sc:dqr-ft")bad=true;if(n&&n.a==="exam"){if(seen)bad=true;seen=1}});if(bad)c.nav=CL(DEFC.nav)}catch(e){}return c}
 function init(){var c=null;try{c=JSON.parse(localStorage.getItem("dqr_cache2")||"null")}catch(e){}
  DEFC=makeDef();cfg=fixNav(merge(CL(DEFC),c&&c.v===2?c:null));S.ready=true;ui();
  loadCfg().then(function(f){if(f&&!S.edit){var m=fixNav(merge(CL(DEFC),f));if(JSON.stringify(m)!==JSON.stringify(cfg)){cfg=m;rebuild()}try{localStorage.setItem("dqr_cache2",JSON.stringify(f))}catch(e){}}loadImgs()})}
