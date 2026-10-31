@@ -6876,5 +6876,86 @@ html.dq-admin-nodock #dq13-dock{display:none!important}
 })();
 </script>
 
+<style id="dq-hidden-eye-css">
+[data-dqbin]{display:none!important}
+[data-dqbin].dq-open{display:block!important}
+#dq-eye{display:inline-flex;align-items:center;gap:3px;margin-left:8px;padding:2px 7px;border:0;border-radius:999px;background:transparent;color:#64748b;font-size:15px;line-height:1.4;cursor:pointer;opacity:.35;vertical-align:middle;transition:opacity .2s,background .2s}
+#dq-eye:hover,#dq-eye:focus-visible,#dq-eye.on{opacity:.9;background:#eef2fb}
+#dq-eye small{font-size:10.5px;font-weight:700}
+#dq-eye[hidden]{display:none}
+</style>
+<script id="dq-hidden-eye-js">
+(function(){
+  'use strict';
+  if (window.__dqEye) return; window.__dqEye = 1;
+  var TXT = 'Gizlədilmiş modullar';
+  var btn = null;
+
+  function findBin(){
+    var res;
+    try { res = document.evaluate("//*[text()[contains(.,'" + TXT + "')]]", document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; } catch(e){ return null; }
+    if (!res || res.id === 'dq-eye' || (btn && btn.contains(res))) return null;
+    var el = res;
+    for (var i = 0; i < 6 && el.parentElement; i++) {
+      if (el.tagName === 'DETAILS') break;
+      var n = el.querySelectorAll('button,.admin-nav-card,a').length;
+      if (n >= 2 && !el.querySelector('.admin-nav-grid,.admin-module-block')) break;
+      var p = el.parentElement;
+      if (p.querySelector('.admin-nav-grid,.admin-module-block') || p.id === 'admin-panel' || p === document.body) break;
+      el = p;
+    }
+    return el;
+  }
+
+  function ensureBtn(){
+    if (btn && document.contains(btn)) return btn;
+    btn = document.createElement('button');
+    btn.id = 'dq-eye'; btn.type = 'button'; btn.hidden = true;
+    btn.setAttribute('aria-label', 'Gizlədilmiş modullar');
+    btn.innerHTML = '👁<small></small>';
+    btn.addEventListener('click', function(){
+      var bin = document.querySelector('[data-dqbin]');
+      if (!bin) return;
+      var on = !bin.classList.contains('dq-open');
+      bin.classList.toggle('dq-open', on);
+      if (bin.tagName === 'DETAILS') bin.open = on;
+      btn.classList.toggle('on', on);
+      if (on) bin.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+    var h = null, hs = document.querySelectorAll('#admin-panel h3');
+    for (var i = 0; i < hs.length; i++) if (/Mərkəzi Admin/.test(hs[i].textContent)) { h = hs[i]; break; }
+    if (h && h.parentNode) {
+      /* h3 mərkəzə düzülüb → göz ayrıca, sağ küncdə */
+      var w = h.parentNode; w.style.position = w.style.position || 'relative';
+      btn.style.cssText = 'position:absolute;right:0;top:50%;transform:translateY(-50%);margin:0';
+      w.appendChild(btn);
+    } else {
+      var ap = document.getElementById('admin-panel');
+      if (!ap) return null;
+      btn.style.cssText = 'float:right;margin:0 0 4px';
+      ap.insertBefore(btn, ap.firstChild);
+    }
+    return btn;
+  }
+
+  function tick(){
+    var ap = document.getElementById('admin-panel');
+    if (!ap || !ap.getClientRects().length) return;
+    var prev = document.querySelector('[data-dqbin]');
+    var bin = prev && document.contains(prev) && prev.textContent.indexOf(TXT) > -1 ? prev : findBin();
+    var b = ensureBtn(); if (!b) return;
+    if (!bin) { b.hidden = true; return; }
+    if (prev && prev !== bin) prev.removeAttribute('data-dqbin');
+    if (!bin.hasAttribute('data-dqbin')) bin.setAttribute('data-dqbin', '1');
+    var m = bin.textContent.match(TXT + '\\s*(\\d+)');
+    b.querySelector('small').textContent = m ? m[1] : '';
+    b.title = TXT + (m ? ' (' + m[1] + ')' : '');
+    b.hidden = false;
+  }
+  setInterval(tick, 700);
+  document.addEventListener('DOMContentLoaded', tick);
+})();
+</script>
+
 </body>
 </html>
