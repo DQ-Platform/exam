@@ -948,5 +948,15 @@
       cx.style.display = "";
     }
   } catch (e) {}
+  /* tez açılan ilkin pəncərədən (dqg-shell) təhvil: yazılmış nömrə köçürülür, pəncərə sürüşmədən dəyişir */
+  try {
+    var sh0 = document.getElementById("dqg-shell");
+    if (sh0) {
+      var pv = (sh0.querySelector("input") || {}).value || "";
+      if (pv) $("dqg-fin").value = codeOf(pv);
+      requestAnimationFrame(function () { requestAnimationFrame(function () { try { sh0.remove(); } catch (e) {} }); });
+      if (window.__dqgPending) { window.__dqgPending = 0; setTimeout(login, 0); }
+    }
+  } catch (e) {}
   setTimeout(function () { try { $("dqg-fin").focus(); } catch (e) {} }, 300);
 })();
