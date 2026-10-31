@@ -74,6 +74,39 @@ h2{margin:0 0 14px;font-size:14px;letter-spacing:1.4px;text-transform:uppercase;
 .ld.on{display:flex}.sp{width:54px;height:54px;border-radius:50%;border:3px solid rgba(201,162,75,.2);border-top-color:#e0b84f;animation:s 1s linear infinite}
 @keyframes s{to{transform:rotate(360deg)}}
 @media(max-width:520px){main{padding-top:18px}.card{margin-top:14px;padding:28px 20px 22px;border-radius:20px}h1{font-size:22px}.grid{grid-template-columns:1fr}}
+
+/* ===== Yığcam görünüş (referans ekran görüntülərinə uyğun): sadə giriş kartı + 2 sütunlu sınaq kartları ===== */
+header{padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px}
+.logo{width:34px;height:34px}
+.brand b{font-size:15px}.brand small{font-size:9.5px;letter-spacing:.9px}
+.out{padding:7px 12px;font-size:12px;border-radius:9px}
+main{max-width:760px;padding:22px 16px 48px}
+#ctx,.hlp,.tp{display:none!important}
+.card{max-width:340px;margin:clamp(22px,9vh,84px) auto 0;padding:22px 20px 20px;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06)}
+h1{font-size:18px;margin-bottom:6px}
+.sub{font-size:12px;margin-bottom:16px}
+label{font-size:10.5px;letter-spacing:1.2px;margin-bottom:6px}
+input{height:44px;padding:0 14px;border-radius:11px;font-size:15px;letter-spacing:1.5px}
+input::placeholder{font-size:13px}
+.btn{height:40px;margin-top:12px;border-radius:10px;font-size:13.5px}
+.err{margin-top:10px;padding:9px 11px;font-size:12.5px}
+.wa{padding:10px;font-size:13px}
+.who{gap:11px;margin-bottom:16px}
+.av{width:42px;height:42px;font-size:17px}
+.who b{font-size:15px}.who small{font-size:11px}
+h2{font-size:11.5px;margin-bottom:11px}
+.grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.ex{border-radius:14px}
+.ex.hint{border-color:rgba(201,162,75,.4);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.bd{padding:14px 15px 10px}
+.ex h3{font-size:14px;margin-bottom:6px}
+.st{font-size:11.5px;margin-bottom:9px}
+.mt{font-size:12px;line-height:1.6}
+.nt{font-size:11.5px;margin-top:8px;padding:8px 10px}
+.ft{padding:11px 15px 14px}
+.ft .btn{height:38px;margin-top:0;font-size:13px}
+.ft .btn.lock{opacity:.9}
+@media(max-width:520px){.card{margin-top:clamp(18px,7vh,60px);padding:20px 18px 18px;border-radius:16px}h1{font-size:18px}.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -188,6 +221,8 @@ b.textContent=s.btn;b.disabled=!!s.lock;b.className="btn"+(s.lock?" lock":"");b.
 nt.hidden=!s.note;nt.textContent=s.note||""})}
 /* ---- imtahana keçid: iş nömrəsi təkrar soruşulmur ---- */
 function go(it){$("ld").classList.add("on");
+/* imtahan həmişə avtomatik masaüstü rejimdə açılsın: əvvəl əl ilə söndürülmüş ayar (dq_desktop_mode=0) varsa təmizlənir */
+try{localStorage.removeItem("dq_desktop_mode")}catch(e){}
 try{sessionStorage.setItem("dqg_handoff",JSON.stringify({fin:S.fin,exam:it?String(it.exam):"",cat:it?it.cat:"",ts:Date.now()}))}catch(e){}
 var p=new URLSearchParams();p.set("giris","1");if(it){p.set("sinaq",it.exam);p.set("qrup",it.cat)}else{if(hintExam)p.set("sinaq",hintExam);if(hintCats.length)p.set("qrup",hintCats.join(","))}
 location.assign("./?"+p.toString())}
