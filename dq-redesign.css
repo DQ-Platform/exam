@@ -535,7 +535,7 @@ html body #lxp#lxp .rp-cs #dq-types .tp-wrap{margin:0 -6px;padding:18px 0 26px}
 /* --- geniş ekran: solda qeydiyyat kartı, sağda sessiyalar --- */
 @media(min-width:1000px){
  html body #lxp#lxp .rp{grid-template-columns:minmax(340px,390px) minmax(0,1fr);grid-template-areas:"hero sec" "hero grid" "car car";column-gap:32px;grid-template-rows:auto 1fr auto}
- html body #lxp#lxp .rp-hero{position:sticky;top:78px;grid-row:1/3;margin:0}
+ html body #lxp#lxp .rp-hero{position:relative;top:auto;grid-row:1/3;align-self:start;margin:0}
  html body #lxp#lxp .rp-grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));align-content:start}
  html body #lxp#lxp .rp-grid:has(>.rp-c:only-child){grid-template-columns:minmax(300px,400px)}
 }
@@ -547,3 +547,28 @@ html body #lxp#lxp .rp-cs #dq-types .tp-wrap{margin:0 -6px;padding:18px 0 26px}
  html body #lxp#lxp .rp-car{padding:16px 6px 8px;border-radius:20px}
 }
 @media(prefers-reduced-motion:reduce){html body #lxp#lxp *{transition-duration:.01ms!important}}
+
+#dqr .ex{cursor:pointer}
+#dqr .dtrack>.nw.nem{min-height:200px}
+
+/* ===== Kartlar (aktiv sınaqlar + fənlər): vahid, səliqəli dizayn ===== */
+#dqr .ex{display:flex;flex-direction:column;gap:14px;padding:20px;border-radius:20px;min-height:216px;
+ background:linear-gradient(160deg,color-mix(in srgb,var(--c) 22%,#061330),#061330 78%);
+ border:1px solid color-mix(in srgb,var(--c) 45%,#ffffff1a);box-shadow:0 12px 30px -14px #000a,inset 0 1px 0 #ffffff12}
+#dqr .ex:hover{border-color:color-mix(in srgb,var(--c) 80%,#fff);box-shadow:0 18px 38px -14px color-mix(in srgb,var(--c) 55%,#000)}
+#dqr .ex .tp{align-items:center}
+#dqr .ex .tag{padding:5px 12px;border-radius:999px;background:#ffffff14;border:1px solid #ffffff26;color:#f1f5ff;font-size:11.5px;font-weight:800;letter-spacing:.08em}
+#dqr .ex h3{margin:2px 0 0;font-size:20px;font-weight:800;letter-spacing:-.01em}
+#dqr .ex .ch{display:flex;flex-wrap:wrap;gap:8px}
+#dqr .ex .ch span{padding:6px 12px;border-radius:999px;background:#ffffff12;border:1px solid #ffffff1f;color:#d6e0f7;font-size:12.5px;font-weight:700}
+#dqr .ex .b{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;font-weight:800;font-size:14.5px;
+ background:linear-gradient(180deg,#f4cd6a,#e0a52f);box-shadow:0 10px 20px -8px #e0a52f88}
+#dqr .ex .b .ar{font-style:normal;transition:transform .18s}
+#dqr .ex:hover .b .ar{transform:translateX(4px)}
+#dqr .ex:focus-within{outline:2px solid #e8b94a;outline-offset:2px}
+#dqr .dtrack>.ex{min-height:270px}
+#dqr .dtrack>.nw.nem{display:grid;place-items:center;min-height:270px;border:1px dashed #ffffff2e;border-radius:18px;color:#9fb0d6;font-size:14.5px;font-weight:600;background:#ffffff06}
+html body #lxp#lxp .rp-car>.rp-sec{justify-content:center;text-align:center;margin-bottom:4px}
+html body #lxp#lxp .rp-car>.rp-sec h2{border-left:0;padding-left:0}
+html body #lxp#lxp .rp-car>.rp-sec h2:after{content:"";display:block;width:44px;height:4px;margin:10px auto 0;border-radius:4px;background:linear-gradient(90deg,var(--gd),var(--gd2))}
+html body #lxp#lxp .rp-car>.rp-sec small{margin:8px 0 0}
