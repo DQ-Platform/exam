@@ -630,3 +630,8 @@ html body #lxp#lxp .rp-car>.rp-sec small{margin:8px 0 0}
  #dqr .hd .cml span{display:none}
  #dqr .hd .h2 .b.lgn .ic{display:none}
 }
+#dqr .hd .apw{position:relative;display:inline-flex}
+#dqr .hd .apop{position:absolute;right:0;top:calc(100% + 8px);min-width:170px;background:#fff;border:1px solid #d6e0f2;border-radius:10px;box-shadow:0 12px 28px #020a1a40;padding:6px;z-index:40;display:flex;flex-direction:column}
+#dqr .hd .apop[hidden]{display:none}
+#dqr .hd .apop a{padding:10px 14px;border-radius:7px;color:#0b2a5e;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer}
+#dqr .hd .apop a:hover{background:#eaf1fc}
