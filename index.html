@@ -2709,6 +2709,7 @@ window.scrollTo({top:0,behavior:"smooth"})};</script>
 <div class="admin-nav-card" onclick="PPU.open()" style="background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff"><span class="icon">📥</span> Peşəkar PDF Sınaq Yükləyici</div>
 <div class="admin-nav-card" onclick="window.DQST&&DQST.openAdmin()" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">📊</span> Ana Səhifə Statistikası</div>
 <div class="admin-nav-card" onclick="window.GZL&&GZL.open()" style="background:linear-gradient(135deg,#475569,#0f172a);color:#fff"><span class="icon">🙈</span> Gizləmə</div>
+<div class="admin-nav-card" onclick="window.PRT&&PRT.open()" style="background:linear-gradient(135deg,#0b2a6f,#2f63bd);color:#fff"><span class="icon">🧭</span> Portal idarəsi</div>
 <div class="admin-nav-card" onclick="window.DQNav&&DQNav.openEditor?DQNav.openEditor():alert('Canlı redaktə modulu yüklənməyib (dq-nav.js)')" style="background:linear-gradient(135deg,#b45309,#d9a23a);color:#fff"><span class="icon">📝</span> Canlı Redaktə</div>
 <div class="admin-nav-card" onclick="window.DQK?DQK.open():alert('Kitab modulu yüklənməyib (dq-kitab.js)')" style="background:linear-gradient(135deg,#0a2f7a,#d9a441);color:#fff"><span class="icon">📚</span> Sınaq Toplusu (Kitab)</div>
 </div>
@@ -7342,6 +7343,279 @@ html.dq-admin-nodock #dq13-dock{display:none!important}
   }
   setInterval(run, 800);
   document.addEventListener('DOMContentLoaded', run);
+})();
+</script>
+
+<style id="dqpro-polish">
+/* Peşəkar son qat: tək sütun, vahid ritm, üst-üstə düşmə yoxdur */
+#lxp{--ink:#0f1f45;--mut:#5d6a88;--ln:#e3e8f2;--navy:#0b2a6f;--navy2:#12306f;--gold:#f2b632;--grn:#16a34a;background-color:#f3f5fa!important;background-image:none!important;font-family:Manrope,"Mulish",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif!important}
+#lxp .lxp-top{background:#fff!important;border-bottom:1px solid var(--ln)!important;box-shadow:0 1px 0 #0f1f4510!important}
+#lxp .lxp-w,.dqstk{max-width:760px!important;gap:20px!important}
+#lxp .lxp-hero{background:linear-gradient(160deg,#0b1f4d,#12306f)!important;border-radius:20px!important;padding:26px 22px 40px!important;box-shadow:0 12px 30px -16px #0b1f4d99!important}
+#lxp .lxp-hero:before{display:none!important}
+#lxp .lxp-hero h1{font-size:clamp(26px,6vw,34px)!important;line-height:1.15!important;margin:14px 0 8px!important;text-align:left!important}
+#lxp .lxp-hero p{text-align:left!important;color:#cdd8f2!important;opacity:1!important;max-width:54ch!important}
+#lxp .lxp-bdg{background:#ffffff1f!important;border-color:#ffffff30!important}
+#lxp .lxp-hero>*{margin-left:0!important;margin-right:0!important}
+#lxp .lxp-chk{position:static!important;display:flex!important;width:100%!important;justify-content:center;margin-top:16px!important;background:var(--gold)!important;color:#0b1f4d!important;border-radius:12px!important;padding:14px 16px!important;min-height:48px;font-size:15px!important;box-shadow:none!important}
+#lxp .lxp-card{background:#fff!important;border:1px solid var(--ln)!important;border-radius:20px!important;padding:22px!important;box-shadow:0 6px 24px -14px #0f1f4540!important;overflow:hidden}
+#lxp .lxp-ch{align-items:flex-start!important;flex-wrap:nowrap!important;gap:12px!important}
+#lxp .lxp-ch b{font-size:clamp(19px,4.6vw,23px)!important;font-weight:800!important;color:var(--ink)!important}
+#lxp .lxp-ch small,#lxp .lxp-ch span{color:var(--mut)!important;font-size:13px!important}
+#lxp .lxp-tb button,#lxp .lxp-tb .lxp-gh{background:#eef2fb!important;color:var(--navy2)!important;border:0!important;box-shadow:none!important;border-radius:10px!important;padding:9px 14px!important;font-weight:700!important}
+#lxp .lxp-bt,#lxp button.lxp-bt{border-radius:12px!important;min-height:48px;font-weight:700!important}
+#lxp .lxp-bt:focus-visible,#lxp .lxp-chk:focus-visible,#lxp button:focus-visible{outline:3px solid #f2b63299!important;outline-offset:2px!important}
+#lxp #dq-types{padding-top:4px!important}
+#lxp #dq-types .lq-h,#lxp #dq-types h2{text-align:left!important}
+#lxp #dq-types .lq-cards,#lxp #dq-types [class*="cards"]{overflow-x:auto!important;scroll-snap-type:x mandatory;max-width:100%!important}
+@media(max-width:560px){#lxp .lxp-w,.dqstk{padding:14px 12px 52px!important;gap:16px!important}#lxp .lxp-card{padding:18px!important}#lxp .lxp-ch{flex-wrap:wrap!important}}
+@media(prefers-color-scheme:dark){#lxp{--ink:#eef2fb;--mut:#9aa7c7;--ln:#223055;background-color:#0a1226!important}#lxp .lxp-top,#lxp .lxp-card{background:#121c38!important}#lxp .lxp-tb button,#lxp .lxp-tb .lxp-gh{background:#1a2748!important;color:#f2b632!important}}
+</style>
+
+<style id="prt-css">
+#lxp .prt-reg{background:linear-gradient(135deg,#22c55e,#15803d)!important;color:#fff!important;border:0!important;box-shadow:0 10px 22px -12px #15803d!important}
+
+#mod-portal{--ink:#0f1f45;--mut:#5d6a88;--ln:#e3e8f2;--navy:#0b2a6f;--gold:#f2b632}
+#mod-portal .prt-top{display:flex;align-items:center;gap:12px;margin:0 0 14px;flex-wrap:wrap}#mod-portal .prt-top h4{margin:0;font-size:19px;text-align:left}
+#mod-portal .prt-tabs{display:flex;gap:6px;overflow-x:auto;margin:0 0 16px;padding-bottom:4px}
+#mod-portal .prt-tab{flex:none;font:700 14px inherit;font-family:inherit;border:1px solid var(--ln);background:#fff;color:var(--mut);border-radius:999px;padding:9px 18px;cursor:pointer}
+#mod-portal .prt-tab[aria-selected=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+#mod-portal .prt-card{background:#fff;border:1px solid var(--ln);border-radius:16px;padding:18px;margin-bottom:14px}
+#mod-portal .prt-card h5{margin:0 0 12px;font-size:15px;color:var(--ink);text-align:left}
+#mod-portal .prt-g{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:700px){#mod-portal .prt-g{grid-template-columns:1fr}}
+#mod-portal .prt-f{display:block;text-align:left;margin:0 0 4px}#mod-portal .prt-f span{display:block;font-size:12.5px;font-weight:700;color:var(--mut);margin-bottom:5px}
+#mod-portal .prt-f input,#mod-portal .prt-f textarea{width:100%;padding:11px 12px;border:1.5px solid #cbd5e1;border-radius:10px;font:inherit;font-size:16px;background:#fff;color:var(--ink);box-sizing:border-box}
+#mod-portal .prt-f input:focus,#mod-portal .prt-f textarea:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px #0b2a6f24}
+#mod-portal .prt-b{border:0;border-radius:10px;padding:11px 18px;font:700 14px inherit;font-family:inherit;cursor:pointer;background:var(--navy);color:#fff;min-height:44px}
+#mod-portal .prt-b.o{background:#fff;color:var(--navy);border:1.5px solid #cbd5e1}#mod-portal .prt-b.l{background:#e2e8f0;color:var(--ink)}
+#mod-portal .prt-b.g{background:#16a34a}#mod-portal .prt-b.r{background:#fff;color:#dc2626;border:1.5px solid #fecaca}#mod-portal .prt-b.s{padding:6px 12px;min-height:34px;font-size:13px}
+#mod-portal .prt-act{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 4px}
+#mod-portal .prt-sw{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #eef2f7;cursor:pointer;font-size:14.5px;font-weight:600;text-align:left}#mod-portal .prt-sw:first-of-type{border-top:0}
+#mod-portal .prt-sw input{position:absolute;opacity:0}#mod-portal .prt-sw i{flex:none;width:42px;height:24px;border-radius:99px;background:#cbd5e1;position:relative;transition:background .2s}
+#mod-portal .prt-sw i:after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px #0004;transition:transform .2s}
+#mod-portal .prt-sw input:checked+i{background:#16a34a}#mod-portal .prt-sw input:checked+i:after{transform:translateX(18px)}#mod-portal .prt-sw input:focus-visible+i{outline:3px solid #f2b63299}
+#mod-portal .prt-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}#mod-portal .prt-row h5{margin:0}
+#mod-portal .prt-li{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #eef2f7}#mod-portal .prt-li span{flex:1;min-width:0;word-break:break-all;text-align:left;font-size:14px}#mod-portal .prt-li small{color:var(--mut)}
+#mod-portal .prt-list{max-height:420px;overflow:auto}#mod-portal .prt-e{text-align:center;color:var(--mut);padding:16px 0}#mod-portal .prt-e.l{text-align:left;padding:0 0 10px}
+#mod-portal .prt-lk{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+#mod-portal .prt-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,12px);background:#0b2a6f;color:#fff;padding:12px 20px;border-radius:12px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:100050;max-width:90vw}
+#mod-portal .prt-toast.on{opacity:1;transform:translate(-50%,0)}#mod-portal .prt-toast.er{background:#b91c1c}
+.prt-sub{background:#fff;border:1px solid #e3e8f2;border-radius:20px;padding:22px;text-align:left;box-shadow:0 6px 24px -14px #0f1f4540}
+.prt-sub b{display:block;font-size:18px;color:#0f1f45}.prt-sub p{margin:6px 0 14px;color:#5d6a88;font-size:14px;line-height:1.55}
+.prt-sub form{display:flex;gap:10px;flex-wrap:wrap}.prt-sub input{flex:1 1 220px;min-width:0;padding:13px 14px;border:1.5px solid #cbd5e1;border-radius:12px;font:inherit;font-size:16px;background:#f8fafc;color:#0f1f45}
+.prt-sub input:focus{outline:none;border-color:#12306f;background:#fff;box-shadow:0 0 0 4px #12306f1f}
+.prt-sub button{flex:0 0 auto;border:0;border-radius:12px;padding:13px 22px;font:700 15px inherit;font-family:inherit;background:#f2b632;color:#0b1f4d;cursor:pointer;min-height:48px}.prt-sub button:disabled{opacity:.6}
+.prt-m{display:block;min-height:18px;margin-top:10px;font-size:13px;font-weight:600}.prt-m.ok{color:#16a34a}.prt-m.er{color:#dc2626}
+@media(max-width:560px){.prt-sub button{width:100%}}
+@media(prefers-color-scheme:dark){.prt-sub{background:#121c38;border-color:#223055}.prt-sub b{color:#eef2fb}.prt-sub p{color:#9aa7c7}.prt-sub input{background:#0a1226;color:#eef2fb;border-color:#223055}}
+</style>
+<script id="prt-js">
+(function(){
+'use strict';
+if(window.PRT)return;
+var U='https://cpzwliqlgaplroscvduo.supabase.co',K='sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF',COL='portalcfg';
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function H(x){var h={apikey:K,Authorization:'Bearer '+K,'Content-Type':'application/json'};for(var k in x||{})h[k]=x[k];return h}
+var FIELDS=[
+ ['Giriş bloku',[['badge','Aktivlik nişanı','Qeydiyyat portalı aktivdir'],['h1a','Başlıq (1-ci hissə)','İmtahana'],['h1b','Başlıq (vurğulanan hissə)','qeydiyyat'],['lead','Qısa izah','Sessiyanı seçin, məlumatlarınızı yazın və şəxsi iş nömrənizlə imtahan panelinə daxil olun.',1]]],
+ ['Addımlar',[['s1t','1-ci addım: başlıq','Sessiya seçin'],['s1d','1-ci addım: izah','Sağdakı aktiv sessiyalardan birini'],['s2t','2-ci addım: başlıq','Qeydiyyatdan keçin'],['s2d','2-ci addım: izah','Ad, Soyad və əlaqə nömrəsi — iş nömrəsi avtomatik verilir'],['s3t','3-cü addım: başlıq','İmtahana başlayın'],['s3d','3-cü addım: izah','Şəxsi iş nömrəsi ilə giriş']]],
+ ['Düymələr',[['b1','Qeydiyyatı yoxla düyməsi','Qeydiyyatımı yoxla'],['b2','İş nömrəsi ilə giriş düyməsi','İş nömrəsi ilə daxil ol']]],
+ ['Bölmə başlıqları',[['sesT','Sessiyalar başlığı','Aktiv imtahan sessiyaları'],['typT','Sınaqlar başlığı','Sınaqlar'],['typS','Sınaqlar alt başlığı','Sınaq növünü seçin və hazırlığa başlayın']]]
+];
+var DEFTXT={};FIELDS.forEach(function(g){g[1].forEach(function(f){DEFTXT[f[0]]=f[2]})});
+function defCfg(){return{txt:{},show:{hero:true,sessions:true,types:true,sub:true},notify:{enabled:true,site:location.origin+'/'}}}
+var cfg=defCfg(),rowId=null,tab='txt',subs=[],last={};
+function merge(c){var d=defCfg();c=c||{};d.txt=c.txt||{};for(var k in d.show)if(c.show&&c.show[k]===false)d.show[k]=false;if(c.notify){d.notify.enabled=c.notify.enabled!==false;if(c.notify.site)d.notify.site=c.notify.site}return d}
+try{cfg=merge(JSON.parse(localStorage.getItem('dq_portalcfg')||'null'))}catch(e){}
+function load(){return fetch(U+'/rest/v1/dq_v2_store?select=id,data&collection=eq.'+COL+'&order=id.desc&limit=1',{headers:H()}).then(function(r){return r.ok?r.json():null}).then(function(a){if(a&&a[0]){rowId=a[0].id;cfg=merge(a[0].data);try{localStorage.setItem('dq_portalcfg',JSON.stringify(cfg))}catch(e){}}return !!a}).catch(function(){return false})}
+function save(){
+ var body=JSON.stringify(rowId?{data:cfg}:{collection:COL,data:cfg});
+ var req=rowId?fetch(U+'/rest/v1/dq_v2_store?id=eq.'+rowId,{method:'PATCH',headers:H({Prefer:'return=minimal'}),body:body})
+  :fetch(U+'/rest/v1/dq_v2_store',{method:'POST',headers:H({Prefer:'return=representation'}),body:body});
+ return req.then(function(r){if(!r.ok)throw 0;return r.json?r.text():''}).then(function(t){if(!rowId&&t){try{rowId=JSON.parse(t)[0].id}catch(e){}}try{localStorage.setItem('dq_portalcfg',JSON.stringify(cfg))}catch(e){}apply();return true}).catch(function(){return false})}
+
+/* ---------- Portala tətbiq ---------- */
+function replaceIn(root){
+ var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),n,list=[];
+ while(n=w.nextNode())list.push(n);
+ Object.keys(DEFTXT).forEach(function(k){
+  var to=(cfg.txt[k]!=null&&cfg.txt[k]!=='')?cfg.txt[k]:DEFTXT[k];
+  [DEFTXT[k],last[k]].forEach(function(from){
+   if(!from||from===to)return;
+   list.forEach(function(t){var v=t.nodeValue;if(v&&v.indexOf(from)>-1&&v.indexOf(to)<0)t.nodeValue=v.replace(from,to)});
+  });
+  last[k]=to;
+ });
+}
+function blockOf(text){
+ var r=document.getElementById('lxp');if(!r)return null;var w=document.createTreeWalker(r,NodeFilter.SHOW_TEXT,null),n;
+ while(n=w.nextNode())if(n.nodeValue.indexOf(text)>-1)return n.parentElement;return null}
+function apply(){
+ var r=$('lxp');if(!r||!r.getClientRects().length)return;
+ replaceIn(r);
+ var hero=r.querySelector('.lxp-hero');if(hero)hero.style.display=cfg.show.hero?'':'none';
+ var s=blockOf(last.sesT||DEFTXT.sesT);var sc=s&&s.closest('.lxp-card');if(sc)sc.style.display=cfg.show.sessions?'':'none';
+ var t=r.querySelector('#dq-types');if(t)t.style.display=cfg.show.types?'':'none';
+ sub(r);cta(r);
+}
+/* "Qeydiyyatdan keç" düyməsi: giriş blokunda, sessiya kartındakı "Qeydiyyatım" düyməsini işə salır */
+function plain(e){return (e.textContent||'').replace(/[^\p{L}]/gu,'')}
+function findBtn(root,word){var l=root.querySelectorAll('button,a,[role=button]');for(var i=0;i<l.length;i++){if(plain(l[i])===word)return l[i]}return null}
+function cta(r){
+ if(r.querySelector('[data-prt-reg]'))return;
+ var chk=findBtn(r,'Qeydiyyatımıyoxla');if(!chk||!chk.parentNode)return;
+ var b=chk.cloneNode(true);b.setAttribute('data-prt-reg','1');b.removeAttribute('id');b.removeAttribute('onclick');
+ b.textContent='✍️ Qeydiyyatdan keç';b.setAttribute('type','button');b.classList.add('prt-reg');
+ b.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();
+  var t=findBtn(r,'Qeydiyyatım');if(t){t.click();return}
+  var s=blockOf(last.sesT||DEFTXT.sesT);if(s&&s.scrollIntoView)s.scrollIntoView({behavior:'smooth',block:'center'})});
+ chk.parentNode.insertBefore(b,chk);
+}
+
+/* ---------- Abunə kartı ---------- */
+function sub(r){
+ var ex=r.querySelector('.prt-sub'),on=cfg.show.sub&&cfg.notify.enabled;
+ if(!on){if(ex)ex.remove();return}
+ if(ex)return;
+ var host=r.querySelector('.lxp-w')||r.querySelector('.dqstk');if(!host)return;
+ var d=document.createElement('section');d.className='prt-sub';
+ d.innerHTML='<b>Yeni sınaq və testlərdən xəbərdar olun</b><p>E-poçtunuzu yazın, yeni material əlavə olunanda sayta keçid linki ilə bildiriş göndərək.</p><form novalidate><input type="email" inputmode="email" autocomplete="email" placeholder="ad@gmail.com" aria-label="E-poçt"><button type="submit">Abunə ol</button></form><small class="prt-m" role="status"></small>';
+ host.appendChild(d);
+ var f=d.querySelector('form'),m=d.querySelector('.prt-m');
+ f.addEventListener('submit',function(e){e.preventDefault();var v=f.querySelector('input').value.trim().toLowerCase();
+  if(!/^\S+@\S+\.\S+$/.test(v)){m.textContent='E-poçt ünvanını düzgün yazın.';m.className='prt-m er';return}
+  var b=f.querySelector('button');b.disabled=true;
+  fetch(U+'/rest/v1/dq_v2_store?select=id&collection=eq.subs&data->>email=eq.'+encodeURIComponent(v),{headers:H()}).then(function(x){return x.ok?x.json():[]}).then(function(a){
+   if(a&&a.length){m.textContent='Bu e-poçt artıq abunədir.';m.className='prt-m ok';b.disabled=false;return}
+   return fetch(U+'/rest/v1/dq_v2_store',{method:'POST',headers:H({Prefer:'return=minimal'}),body:JSON.stringify({collection:'subs',data:{email:v,ts:Date.now()}})}).then(function(x){
+    if(!x.ok)throw 0;m.textContent='Abunəlik təsdiqləndi. Təşəkkür edirik!';m.className='prt-m ok';f.reset();b.disabled=false})
+  }).catch(function(){m.textContent='Xəta baş verdi. Bir az sonra yenidən yoxlayın.';m.className='prt-m er';b.disabled=false})});
+}
+
+/* ---------- Admin modulu ---------- */
+function toast(t,er){var e=$('prt-toast');if(!e)return;e.textContent=t;e.className='prt-toast on'+(er?' er':'');clearTimeout(toast.t);toast.t=setTimeout(function(){e.className='prt-toast'},2600)}
+function loadSubs(){return fetch(U+'/rest/v1/dq_v2_store?select=id,data&collection=eq.subs&order=id.desc&limit=1000',{headers:H()}).then(function(r){return r.ok?r.json():[]}).then(function(a){subs=a||[]}).catch(function(){subs=[]})}
+function input(k,l,v,ml){var id='prt-f-'+k;return '<label class="prt-f" for="'+id+'"><span>'+esc(l)+'</span>'+(ml?'<textarea id="'+id+'" data-k="'+k+'" rows="3">':'<input id="'+id+'" data-k="'+k+'" type="text" value="'+esc(v)+'">')+(ml?esc(v)+'</textarea>':'')+'</label>'}
+function sw(k,l,on){return '<label class="prt-sw"><input type="checkbox" data-s="'+k+'"'+(on?' checked':'')+'><i></i><span>'+esc(l)+'</span></label>'}
+function render(){
+ var b=$('prt-body');if(!b)return;
+ document.querySelectorAll('#mod-portal .prt-tab').forEach(function(t){t.setAttribute('aria-selected',t.dataset.t===tab?'true':'false')});
+ var h='';
+ if(tab==='txt'){FIELDS.forEach(function(g){h+='<div class="prt-card"><h5>'+g[0]+'</h5><div class="prt-g">'+g[1].map(function(f){return input(f[0],f[1],cfg.txt[f[0]]!=null&&cfg.txt[f[0]]!==''?cfg.txt[f[0]]:f[2],f[3])}).join('')+'</div></div>'});
+  h+='<div class="prt-act"><button class="prt-b" data-a="save">Yadda saxla</button><button class="prt-b o" data-a="reset">Standart mətnlərə qayıt</button></div>'}
+ else if(tab==='view'){h='<div class="prt-card"><h5>Portalda görünən bölmələr</h5>'+sw('hero','Giriş bloku və addımlar',cfg.show.hero)+sw('sessions','Aktiv imtahan sessiyaları',cfg.show.sessions)+sw('types','Sınaqlar (kartlar)',cfg.show.types)+sw('sub','E-poçt abunə kartı',cfg.show.sub)+'</div><div class="prt-act"><button class="prt-b" data-a="save">Yadda saxla</button></div>'}
+ else if(tab==='mail'){
+  h='<div class="prt-card"><h5>E-poçt bildirişləri</h5><label class="prt-sw"><input type="checkbox" data-n="enabled"'+(cfg.notify.enabled?' checked':'')+'><i></i><span>Yeni sınaq/test əlavə olunanda abunəçilərə avtomatik göndər</span></label>'+
+  '<label class="prt-f"><span>Sayt linki (məktubdakı düymə)</span><input type="text" data-n="site" value="'+esc(cfg.notify.site)+'"></label><div class="prt-act"><button class="prt-b" data-a="save">Yadda saxla</button></div></div>'+
+  '<div class="prt-card"><h5>Elan göndər</h5><div class="prt-g"><label class="prt-f"><span>Mövzu / başlıq</span><input id="prt-nt" type="text" placeholder="Məs: Yeni Sınaq 5 əlavə olundu"></label><label class="prt-f"><span>Keçid linki</span><input id="prt-nu" type="text" value="'+esc(cfg.notify.site)+'"></label></div><div class="prt-act"><button class="prt-b g" data-a="send">'+subs.length+' abunəçiyə göndər</button></div></div>'+
+  '<div class="prt-card"><div class="prt-row"><h5>Abunəçilər ('+subs.length+')</h5><span><button class="prt-b o s" data-a="rf">Yenilə</button> <button class="prt-b o s" data-a="csv">CSV yüklə</button></span></div>'+
+  (subs.length?'<div class="prt-list">'+subs.map(function(s){return '<div class="prt-li"><span>'+esc(s.data&&s.data.email)+'</span><small>'+(s.data&&s.data.ts?new Date(s.data.ts).toLocaleDateString('az'):'')+'</small><button class="prt-b r s" data-a="del" data-id="'+s.id+'" aria-label="Sil">Sil</button></div>'}).join('')+'</div>':'<p class="prt-e">Hələ abunəçi yoxdur.</p>')+'</div>'}
+ else{h='<div class="prt-card"><h5>Digər idarəetmə bölmələri</h5><p class="prt-e l">Sessiyalar, sınaqlar, testlər və elanlar əvvəlki bölmələrdə idarə olunur:</p><div class="prt-lk">'+
+  [['V3.open()','İdarəçi V3 (sınaq/test əlavə et)'],['switchAdminTab(\'idare\')','İdarə və Ayarlar'],['V2.open();V2.go(\'news\')','İmtahan elanı paylaş'],['window.GZL&&GZL.open()','Gizləmə'],['switchAdminTab(\'siyahi\')','İştirakçılar və nəticələr']].map(function(x){return '<button class="prt-b o" data-go="'+esc(x[0])+'">'+x[1]+'</button>'}).join('')+'</div></div>'}
+ b.innerHTML=h;
+}
+function build(){
+ if($('mod-portal'))return;var p=$('admin-panel');if(!p)return;
+ var d=document.createElement('div');d.id='mod-portal';d.className='admin-module-block';
+ d.innerHTML='<div class="prt-top"><button class="prt-b l" data-a="close">← Panelə qayıt</button><h4>Portal idarəsi</h4></div><div class="prt-tabs" role="tablist"><button class="prt-tab" role="tab" data-t="txt">Mətnlər</button><button class="prt-tab" role="tab" data-t="view">Görünüş</button><button class="prt-tab" role="tab" data-t="mail">Bildirişlər</button><button class="prt-tab" role="tab" data-t="more">Digər</button></div><div id="prt-body"></div><div id="prt-toast" class="prt-toast" role="status"></div>';
+ p.appendChild(d);
+ d.addEventListener('click',function(e){
+  var t=e.target.closest('[data-t],[data-a],[data-go]');if(!t||!d.contains(t))return;
+  if(t.dataset.t){tab=t.dataset.t;render();if(tab==='mail')loadSubs().then(render);return}
+  if(t.dataset.go){PRT.close();try{new Function(t.dataset.go)()}catch(x){toast('Modul tapılmadı',1)}return}
+  var a=t.dataset.a;
+  if(a==='close')PRT.close();
+  else if(a==='save'){collect();save().then(function(ok){toast(ok?'Yadda saxlandı. Portalda dərhal tətbiq olundu.':'Serverə yazmaq alınmadı',!ok)})}
+  else if(a==='reset'){if(confirm('Bütün mətnlər standart dəyərlərə qaytarılsın?')){cfg.txt={};save().then(function(){render();toast('Standart mətnlər bərpa edildi')})}}
+  else if(a==='rf'){loadSubs().then(render)}
+  else if(a==='csv'){var c='email,tarix\n'+subs.map(function(s){return (s.data.email||'')+','+(s.data.ts?new Date(s.data.ts).toISOString():'')}).join('\n');var l=document.createElement('a');l.href=URL.createObjectURL(new Blob(['\ufeff'+c],{type:'text/csv'}));l.download='abuneciler.csv';l.click()}
+  else if(a==='del'){if(confirm('Bu abunəçi silinsin?'))fetch(U+'/rest/v1/dq_v2_store?id=eq.'+t.dataset.id,{method:'DELETE',headers:H()}).then(function(){loadSubs().then(render);toast('Silindi')})}
+  else if(a==='send'){var ti=($('prt-nt')||{}).value||'',ur=($('prt-nu')||{}).value||cfg.notify.site;
+   if(!ti.trim()){toast('Mövzu yazın',1);return}
+   if(!subs.length){toast('Abunəçi yoxdur',1);return}
+   if(!confirm(subs.length+' abunəçiyə e-poçt göndərilsin?'))return;
+   fetch(U+'/rest/v1/dq_v2_store',{method:'POST',headers:H({Prefer:'return=minimal'}),body:JSON.stringify({collection:'notify_queue',data:{title:ti.trim(),url:ur,ts:Date.now()}})}).then(function(r){toast(r.ok?'Göndərmə növbəyə qoyuldu':'Göndərmək alınmadı',!r.ok)})}
+ });
+ d.addEventListener('change',function(e){var t=e.target;if(t.dataset.s){cfg.show[t.dataset.s]=t.checked}else if(t.dataset.n==='enabled'){cfg.notify.enabled=t.checked}});
+}
+function collect(){var b=$('prt-body');if(!b)return;
+ b.querySelectorAll('[data-k]').forEach(function(i){var v=i.value.trim();if(v&&v!==DEFTXT[i.dataset.k])cfg.txt[i.dataset.k]=v;else delete cfg.txt[i.dataset.k]});
+ var s=b.querySelector('[data-n="site"]');if(s&&s.value.trim())cfg.notify.site=s.value.trim()}
+window.PRT={
+ open:function(){build();try{window.switchAdminTab&&switchAdminTab('portal')}catch(e){}
+  document.querySelectorAll('#admin-panel .admin-module-block').forEach(function(b){b.style.display='none'});
+  var g=document.querySelector('#admin-panel .admin-nav-grid');if(g)g.style.display='none';
+  var m=$('mod-portal');if(m)m.style.display='block';render();load().then(render);window.scrollTo({top:0,behavior:'smooth'})},
+ close:function(){var m=$('mod-portal');if(m)m.style.display='none';var g=document.querySelector('#admin-panel .admin-nav-grid');if(g)g.style.display=''},
+ apply:apply
+};
+var tmr;function tick(){if(document.hidden)return;apply()}
+function boot(){load().then(apply);setInterval(tick,1000)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+
+</script>
+<style id="prc-css">
+.prc-in{--a1:#f3d58d;--a2:#d9a441}
+.prc-hd{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.prc-hd .t{flex:1;min-width:0;text-align:left}.prc-hd b{display:block;color:#fff;font-size:18px;line-height:1.2}.prc-hd small{color:#9fb4dc;font-size:12px}
+.prc-hd .n{color:#fff;font-weight:900;font-size:20px;font-variant-numeric:tabular-nums;white-space:nowrap}.prc-hd .n small{font-size:12px;color:#9fb4dc;font-weight:700}
+.prc-stage{position:relative;height:250px;margin:6px -6px 0;perspective:900px;touch-action:pan-y;display:flex;align-items:center;justify-content:center}
+.prc-pk{position:absolute;width:128px;height:178px;border-radius:16px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:10px 8px;border:1px solid #ffffff40;box-shadow:0 14px 28px -12px #000a;transition:transform .55s cubic-bezier(.22,.9,.24,1),opacity .4s;cursor:pointer;background:#0d2560}
+.prc-pk em{font-style:normal;font-size:10px;font-weight:800;background:#ffffff2e;padding:3px 9px;border-radius:99px}
+.prc-pk b{font-size:42px;letter-spacing:1px;color:#f0c46a;line-height:1}.prc-pk small{font-size:10.5px;opacity:.9}
+.prc-ba{background:linear-gradient(160deg,#6b1239,#932050)}.prc-bb{background:linear-gradient(160deg,#1e4f8f,#3070b8)}.prc-ac{background:linear-gradient(160deg,#175a62,#2a8189)}
+.prc-pk.l{transform:translateX(-78px) rotateY(20deg) scale(.82);opacity:.85;z-index:1}
+.prc-pk.m{transform:scale(1.12);z-index:3}
+.prc-pk.r{transform:translateX(78px) rotateY(-20deg) scale(.82);opacity:.85;z-index:1}
+.prc-pk.h{transform:scale(.5);opacity:0;pointer-events:none}
+.prc-nv{position:absolute;top:50%;z-index:4;width:34px;height:34px;margin-top:-17px;border-radius:50%;border:0;background:#fff;color:#0a2f7a;font-size:18px;cursor:pointer;box-shadow:0 6px 14px -4px #0008}
+.prc-nv.p{left:0}.prc-nv.n{right:0}
+.prc-nm{text-align:center;color:#fff;font-weight:800;font-size:14px;margin-top:6px}.prc-nm span{color:#d9a441;font-weight:700;font-size:12px;margin-left:6px}
+.prc-dots{display:flex;gap:7px;justify-content:center;margin-top:10px}
+.prc-dots i{width:7px;height:7px;border-radius:99px;background:#3a5aa0;transition:width .3s,background .3s;cursor:pointer}.prc-dots i.on{width:22px;background:#d9a441}
+@media(prefers-reduced-motion:reduce){.prc-pk{transition:none}}
+</style>
+<script id="prc-js">
+(function(){
+ 'use strict';
+ var CODES=['AC','BB','BB','BA','AC','AC','BB'],N=CODES.length,cur=0,tm=null,hover=false;
+ function cls(c){return 'prc-'+c.toLowerCase()}
+ function build(grid){
+  var d=document.createElement('div');d.className='tlx-card in';d.setAttribute('data-prc','1');
+  d.innerHTML='<div class="tlx-in prc-in"><div class="prc-hd"><span class="tlx-ico">🎯</span><div class="t"><b>Sınaqlar</b><small>'+N+' sınaq • BA / BB / AC</small></div><div class="n"><span class="prc-c">01</span><small> / 0'+N+'</small></div></div>'+
+  '<div class="prc-stage" aria-roledescription="karusel"><button class="prc-nv p" type="button" aria-label="Əvvəlki sınaq">‹</button><button class="prc-nv n" type="button" aria-label="Növbəti sınaq">›</button></div>'+
+  '<div class="prc-nm"></div><div class="prc-dots"></div><button type="button" class="tlx-btn prc-go">Sınaqlara bax <span aria-hidden="true">→</span></button></div>';
+  grid.appendChild(d);
+  var st=d.querySelector('.prc-stage'),dots=d.querySelector('.prc-dots'),nm=d.querySelector('.prc-nm'),cn=d.querySelector('.prc-c');
+  var cards=CODES.map(function(c,i){var e=document.createElement('div');e.className='prc-pk '+cls(c);e.innerHTML='<em>Sınaq '+(i+1)+'</em><b>'+c+'</b><small>Toxun və çevir</small>';e.onclick=function(){cur=i;draw()};st.appendChild(e);return e});
+  CODES.forEach(function(_,i){var s=document.createElement('i');s.onclick=function(){cur=i;draw()};dots.appendChild(s)});
+  function draw(){
+   var l=(cur+N-1)%N,r=(cur+1)%N;
+   cards.forEach(function(e,i){e.className='prc-pk '+cls(CODES[i])+' '+(i===cur?'m':i===l?'l':i===r?'r':'h')});
+   [].forEach.call(dots.children,function(s,i){s.className=i===cur?'on':''});
+   nm.innerHTML='Sınaq '+(cur+1)+'<span>• '+CODES[cur]+'</span>';cn.textContent=('0'+(cur+1)).slice(-2);
+  }
+  function go(n){cur=(cur+n+N)%N;draw()}
+  d.querySelector('.prc-nv.p').onclick=function(){go(-1)};d.querySelector('.prc-nv.n').onclick=function(){go(1)};
+  d.addEventListener('mouseenter',function(){hover=true});d.addEventListener('mouseleave',function(){hover=false});
+  var x0=null;st.addEventListener('touchstart',function(e){x0=e.touches[0].clientX},{passive:true});
+  st.addEventListener('touchend',function(e){if(x0==null)return;var dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>30)go(dx<0?1:-1);x0=null});
+  d.querySelector('.prc-go').onclick=function(){
+   var els=document.querySelectorAll('a,button,div,span,li'),t=null;
+   for(var i=0;i<els.length;i++){if(els[i].children.length===0&&els[i].textContent.trim()==='İmtahan'){t=els[i];break}}
+   if(t)t.click();
+  };
+  if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches){clearInterval(tm);tm=setInterval(function(){if(!hover&&!document.hidden&&document.body.contains(d))go(1)},3600)}
+  draw();
+ }
+ function tick(){
+  if(document.hidden)return;
+  var g=document.querySelector('.tlx-grid');
+  if(g&&g.children.length&&!g.querySelector('[data-prc]'))build(g);
+ }
+ setInterval(tick,700);document.addEventListener('DOMContentLoaded',tick);
 })();
 </script>
 
