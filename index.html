@@ -2711,6 +2711,7 @@ window.scrollTo({top:0,behavior:"smooth"})};</script>
 <div class="admin-nav-card" onclick="window.GZL&&GZL.open()" style="background:linear-gradient(135deg,#475569,#0f172a);color:#fff"><span class="icon">🙈</span> Gizləmə</div>
 <div class="admin-nav-card" onclick="window.PRT&&PRT.open()" style="background:linear-gradient(135deg,#0b2a6f,#2f63bd);color:#fff"><span class="icon">🧭</span> Portal idarəsi</div>
 <div class="admin-nav-card" onclick="window.DQNav&&DQNav.openEditor?DQNav.openEditor():alert('Canlı redaktə modulu yüklənməyib (dq-nav.js)')" style="background:linear-gradient(135deg,#b45309,#d9a23a);color:#fff"><span class="icon">📝</span> Canlı Redaktə</div>
+<div class="admin-nav-card" onclick="window.DQKecid?DQKecid.open():alert('Keçid idarəsi yüklənməyib (dq-kecid.js)')" style="background:linear-gradient(135deg,#0a2f7a,#6d4cf5);color:#fff"><span class="icon">🔗</span> Keçid İdarəsi (düymə → keçid)</div>
 <div class="admin-nav-card" onclick="window.DQK?DQK.open():alert('Kitab modulu yüklənməyib (dq-kitab.js)')" style="background:linear-gradient(135deg,#0a2f7a,#d9a441);color:#fff"><span class="icon">📚</span> Sınaq Toplusu (Kitab)</div>
 <div class="admin-nav-card" onclick="window.DQRegAdmin?DQRegAdmin.open():alert('Modul yüklənməyib')" style="background:linear-gradient(135deg,#0a2f7a,#16a34a);color:#fff"><span class="icon">🎓</span> Qeydiyyat İmtahanları</div>
 <div class="admin-nav-card" onclick="window.DQResultsHub?DQResultsHub.open():alert('Nəticə Mərkəzi modulu yüklənməyib (dq-resepsiya-netice.js)')" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">📈</span> Nəticə Mərkəzi</div>
@@ -6787,6 +6788,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 <script src="dq-assets.js?v=1"></script>
 <script src="dq-redesign.js?v=12"></script>
 <script src="dq-bolmeler.js?v=1"></script>
+<script src="dq-kecid.js?v=2"></script>
 <style id="dq-fix-admin-dock-img">
 /* Admin xəbər panelində üzən ⋮⋮ dok gizlədilir (silmə/kopya düymələrinin üstünə düşürdü) */
 html.dq-admin-nodock #dqt-dock,
