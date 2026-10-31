@@ -287,7 +287,7 @@
     /* 1) giriş */
     '<div id="dqg-login" class="lg"><h1>Kabinetə giriş</h1><p class="s">İştirak üçün sizə verilən iş nömrəsini yazın</p><div id="dqg-ctx" class="ctx" style="display:none"></div>' +
     '<label for="dqg-fin">İŞ NÖMRƏSİ</label>' +
-    '<input id="dqg-fin" class="in" type="text" maxlength="2000" autocomplete="off" autocorrect="off" enterkeyhint="go" autocapitalize="characters" spellcheck="false" placeholder="İş nömrəsini daxil edin">' +
+    '<input id="dqg-fin" name="dq_work_no" aria-label="İş nömrəsi" data-lpignore="true" data-1p-ignore="true" data-form-type="other" class="in" type="text" maxlength="2000" autocomplete="off" autocorrect="off" enterkeyhint="go" autocapitalize="characters" spellcheck="false" placeholder="İş nömrəsini daxil edin">' +
     '<button type="button" id="dqg-go" class="gold">Daxil ol</button>' +
     '<div id="dqg-err" class="err"></div><a id="dqg-wa" class="wa" target="_blank" rel="noopener">💬 WhatsApp ilə yazın</a><p class="hlp">İş nömrəsini WhatsApp mesajından kopyalayıb yapışdıra bilərsiniz — sistem nömrəni özü tapacaq.</p></div>' +
     /* 2) kartlar */
