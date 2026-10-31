@@ -85,6 +85,9 @@
     var score = pick(o, /^(score|bal|total(_score)?|yekun(_bal)?|points)$/i);
     return {
       fin: up(fin),
+      name: String(pick(o, /^(name|ad_?soyad|full_?name|student(_name)?|ad)$/i) || ""),
+      ok: pick(o, /^(correct|dogru|doğru|right)$/i),
+      bad: pick(o, /^(wrong|yanlis|yanlış|incorrect)$/i),
       exam: String(pick(o, /^(exam(_id|_no)?|sinaq|sınaq)$/i) || "").replace(/\D/g, ""),
       cat: up(pick(o, /^(cat(egory)?|kateqoriya)$/i) || ""),
       at: end || start,
@@ -245,6 +248,200 @@
     timer = setTimeout(enrich, 120);
   }).observe(document.documentElement, { childList: true, subtree: true });
   enrich();
+
+
+  /* =====================================================================
+   *  NƏTİCƏ MƏRKƏZİ — admin panelində «Digər alətlər» altında yeni bölmə
+   *  İştirakçı · İş nömrəsi · Sınaq · Kateqoriya · Tarix · Müddət · Bal · Cavab kartı
+   * ===================================================================== */
+  var RC_CSS =
+    "#dqrc{position:fixed;inset:0;z-index:100010;background:#eef3fb;overflow:auto;display:none;-webkit-overflow-scrolling:touch;color:#12285e;font-family:inherit;text-align:left}" +
+    "#dqrc.on{display:block}" +
+    ".dqrc-top{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;background:linear-gradient(90deg,#0a2f7a,#2f63bd);color:#fff}" +
+    ".dqrc-top h3{margin:0;font-size:18px;color:#fff;text-align:left;flex:1;min-width:160px}" +
+    ".dqrc-bk,.dqrc-btn{border:0;border-radius:999px;padding:9px 16px;font:700 13px inherit;font-family:inherit;cursor:pointer;background:#ffffff2e;color:#fff}" +
+    ".dqrc-btn.d{background:#0a2f7a;color:#fff;border-radius:10px;padding:7px 12px}" +
+    ".dqrc-w{max-width:1180px;margin:0 auto;padding:16px 14px 60px}" +
+    ".dqrc-st{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}" +
+    ".dqrc-st div{background:#fff;border:1px solid #dbe5f6;border-left:4px solid #d9a441;border-radius:14px;padding:12px 14px}" +
+    ".dqrc-st small{display:block;color:#64748b;font-size:12px;font-weight:700}.dqrc-st b{display:block;font-size:22px;color:#0a2f7a;margin-top:2px}" +
+    ".dqrc-tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}" +
+    ".dqrc-in{padding:10px 12px;border:1.5px solid #c9d6ee;border-radius:10px;font:14px inherit;font-family:inherit;background:#fff;min-width:0}" +
+    ".dqrc-in:focus{outline:none;border-color:#2f63bd;box-shadow:0 0 0 3px #2f63bd26}" +
+    ".dqrc-s{flex:1 1 220px}" +
+    ".dqrc-chip{border:1.5px solid #c9d6ee;background:#fff;color:#0a2f7a;border-radius:999px;padding:7px 14px;font:700 12.5px inherit;font-family:inherit;cursor:pointer}" +
+    ".dqrc-chip.on{background:#0a2f7a;border-color:#0a2f7a;color:#fff}" +
+    ".dqrc-tw{background:#fff;border:1px solid #dbe5f6;border-radius:16px;overflow:auto;box-shadow:0 4px 18px #0a2f7a14}" +
+    ".dqrc-tw table{width:100%;min-width:900px;border-collapse:collapse;margin:0;font-size:13.5px}" +
+    ".dqrc-tw th{position:sticky;top:0;background:#0a2f7a;color:#fff;padding:12px 10px;font-size:12.5px;letter-spacing:.3px;white-space:nowrap;border:0}" +
+    ".dqrc-tw td{padding:11px 10px;border:0;border-bottom:1px solid #eef2f7;text-align:center;vertical-align:middle}" +
+    ".dqrc-tw tbody tr:hover{background:#f5f8fe}" +
+    ".dqrc-cat{display:inline-block;padding:3px 10px;border-radius:7px;background:#e0e7ff;color:#3730a3;font-weight:800;font-size:12px}" +
+    ".dqrc-cat.BB{background:#ccfbf1;color:#0f766e}.dqrc-cat.AC{background:#fef3c7;color:#b45309}" +
+    ".dqrc-n{color:#94a3b8;font-weight:700}" +
+    ".dqrc-empty{padding:34px 12px;text-align:center;color:#64748b}" +
+    ".dqrc-pill{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:100020;border:0;border-radius:999px;padding:11px 20px;background:#0a2f7a;color:#fff;font:800 13px inherit;font-family:inherit;box-shadow:0 8px 22px #0a2f7a66;cursor:pointer;display:none}" +
+    ".dqrc-pill.on{display:block}" +
+    ".dqrc-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:100030;background:#0f172a;color:#fff;padding:11px 18px;border-radius:12px;font-weight:600;font-size:13.5px}";
+  var rcs = document.createElement("style"); rcs.id = "dqrc-css"; rcs.textContent = RC_CSS; document.head.appendChild(rcs);
+
+  var RC = { rows: [], f: { q: "", cat: "", exam: "", sort: "new" }, root: null, pill: null };
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  function rcToast(m) {
+    var d = document.createElement("div"); d.className = "dqrc-toast"; d.textContent = m; document.body.appendChild(d);
+    setTimeout(function () { d.remove(); }, 2800);
+  }
+  function properName(s) {
+    return String(s).trim().split(/\s+/).map(function (w) { return w.charAt(0).toLocaleUpperCase("az") + w.slice(1).toLocaleLowerCase("az"); }).join(" ");
+  }
+
+  /* admin panelindəki mövcud nəticə cədvəlindən (cavab kartı düymələri ilə birlikdə) oxu */
+  function scrapeDom() {
+    var out = [];
+    [].forEach.call(document.querySelectorAll("#full-participants-list tr"), function (tr) {
+      var c = tr.children; if (c.length < 8) return;
+      var fin = up(c[1].textContent); if (fin.length < 4) return;
+      out.push({ name: c[0].textContent, fin: fin, exam: (c[2].textContent.match(/\d+/) || [""])[0], cat: up(c[3].textContent),
+        ok: parseFloat(c[4].textContent), bad: parseFloat(c[5].textContent), score: parseFloat(c[6].textContent) });
+    });
+    return out;
+  }
+  function buildRows() {
+    return load(true).then(function (db) {
+      var base = db.filter(function (r) { return r.name; });
+      if (!base.length) base = scrapeDom();
+      RC.rows = base.map(function (r) {
+        var m = r.at !== undefined ? r : (find(db, r.fin, r.exam, [r.cat]) || {});
+        var sc = r.score != null && !isNaN(r.score) ? r.score : null;
+        return {
+          name: properName(r.name || "—"), fin: r.fin, exam: r.exam, cat: r.cat,
+          ok: r.ok != null && r.ok !== "" ? +r.ok : null, bad: r.bad != null && r.bad !== "" ? +r.bad : null,
+          score: sc, at: m.at || null, dur: m.dur != null ? m.dur : null
+        };
+      });
+      render();
+    });
+  }
+
+  function visible() {
+    var f = RC.f, q = norm(f.q);
+    var list = RC.rows.filter(function (r) {
+      return (!q || norm(r.name).indexOf(q) > -1 || norm(r.fin).indexOf(q) > -1) && (!f.cat || r.cat === f.cat) && (!f.exam || r.exam === f.exam);
+    });
+    var by = {
+      new: function (a, b) { return (b.at || 0) - (a.at || 0); },
+      hi: function (a, b) { return (b.score || 0) - (a.score || 0); },
+      lo: function (a, b) { return (a.score == null) - (b.score == null) || (a.score || 0) - (b.score || 0); },
+      az: function (a, b) { return a.name.localeCompare(b.name, "az"); }
+    };
+    return list.sort(by[f.sort] || by.new);
+  }
+
+  function render() {
+    if (!RC.root) return;
+    var all = RC.rows, list = visible();
+    var sc = list.filter(function (r) { return r.score != null; }), du = list.filter(function (r) { return r.dur != null; });
+    var avg = sc.length ? (sc.reduce(function (s, r) { return s + r.score; }, 0) / sc.length) : null;
+    var avgD = du.length ? du.reduce(function (s, r) { return s + r.dur; }, 0) / du.length : null;
+    var cats = [], exams = [];
+    all.forEach(function (r) { if (r.cat && cats.indexOf(r.cat) < 0) cats.push(r.cat); if (r.exam && exams.indexOf(r.exam) < 0) exams.push(r.exam); });
+    exams.sort(function (a, b) { return a - b; });
+    var h = '<div class="dqrc-st">' +
+      '<div><small>Nəticə sayı</small><b>' + list.length + "</b></div>" +
+      '<div><small>Orta bal</small><b>' + (avg != null ? avg.toFixed(1) : "—") + "</b></div>" +
+      '<div><small>Ən yüksək bal</small><b>' + (sc.length ? Math.max.apply(null, sc.map(function (r) { return r.score; })) : "—") + "</b></div>" +
+      '<div><small>Orta müddət</small><b style="font-size:17px">' + (avgD != null ? fmtDur(avgD) : "—") + "</b></div></div>" +
+      '<div class="dqrc-tools"><input class="dqrc-in dqrc-s" id="dqrc-q" type="search" placeholder="🔎 Ad və ya iş nömrəsi ilə axtar…" value="' + esc(RC.f.q) + '">' +
+      '<select class="dqrc-in" id="dqrc-ex"><option value="">Bütün sınaqlar</option>' + exams.map(function (e) { return '<option value="' + e + '"' + (RC.f.exam === e ? " selected" : "") + ">Sınaq " + e + "</option>"; }).join("") + "</select>" +
+      '<select class="dqrc-in" id="dqrc-so">' + [["new", "Ən yeni əvvəl"], ["hi", "Bal: yüksəkdən aşağı"], ["lo", "Bal: aşağıdan yuxarı"], ["az", "Ad: A–Z"]].map(function (o) { return '<option value="' + o[0] + '"' + (RC.f.sort === o[0] ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select>" +
+      '<button class="dqrc-btn d" id="dqrc-csv" type="button">⬇ CSV</button><button class="dqrc-btn d" id="dqrc-rf" type="button">⟳ Yenilə</button></div>' +
+      '<div class="dqrc-tools"><button class="dqrc-chip' + (RC.f.cat ? "" : " on") + '" data-cat="">Hamısı</button>' +
+      cats.map(function (c) { return '<button class="dqrc-chip' + (RC.f.cat === c ? " on" : "") + '" data-cat="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + "</div>";
+    h += '<div class="dqrc-tw"><table><thead><tr><th>№</th><th>Ad Soyad</th><th>İş nömrəsi</th><th>Sınaq</th><th>Kateqoriya</th><th>İştirak tarixi</th><th>Müddət</th><th>Doğru</th><th>Yanlış</th><th>Bal</th><th>Cavab kartı</th></tr></thead><tbody>';
+    if (!list.length) h += '<tr><td colspan="11" class="dqrc-empty">' + (all.length ? "Filtrə uyğun nəticə yoxdur." : "Nəticə tapılmadı. Verilənlər bazası ilə əlaqə yoxdur və ya hələ iştirakçı yoxdur.") + "</td></tr>";
+    list.forEach(function (r, i) {
+      var f = r.at ? fmtDate(r.at) : null, none = '<span class="dqx-none">—</span>';
+      h += "<tr><td class=\"dqrc-n\">" + (i + 1) + "</td><td class=\"dqx-name\" style=\"text-align:left\">" + esc(r.name) + "</td>" +
+        '<td><span class="dqx-code">' + esc(r.fin) + "</span></td><td>" + (r.exam ? "Sınaq " + esc(r.exam) : "—") + "</td>" +
+        "<td>" + (r.cat ? '<span class="dqrc-cat ' + esc(r.cat) + '">' + esc(r.cat) + "</span>" : "—") + "</td>" +
+        "<td>" + (f ? '<div class="dqx-date"><b>' + f.d + "</b><small>" + f.t + "</small></div>" : none) + "</td>" +
+        "<td>" + (r.dur != null ? '<span class="dqx-dur">⏱ ' + fmtDur(r.dur) + "</span>" : none) + "</td>" +
+        '<td><span class="dqx-ok">' + (r.ok != null ? r.ok : "—") + '</span></td><td><span class="dqx-bad">' + (r.bad != null ? r.bad : "—") + "</span></td>" +
+        "<td>" + (r.score != null ? '<span class="dqx-score ' + scoreCls(r.score) + '">' + r.score + "</span>" : none) + "</td>" +
+        '<td><button type="button" class="dqrc-btn d" data-card="' + esc(r.fin) + "|" + esc(r.exam) + "|" + esc(r.cat) + '">📄 Cavab kartı</button></td></tr>';
+    });
+    h += "</tbody></table></div>";
+    var keep = document.activeElement && document.activeElement.id === "dqrc-q";
+    RC.root.querySelector(".dqrc-w").innerHTML = h;
+    if (keep) { var q = RC.root.querySelector("#dqrc-q"); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
+  }
+
+  function cardBtn(fin, exam, cat) {
+    var trs = document.querySelectorAll("#full-participants-list tr");
+    for (var i = 0; i < trs.length; i++) {
+      var c = trs[i].children; if (c.length < 8) continue;
+      if (up(c[1].textContent) !== fin) continue;
+      if (exam && (c[2].textContent.match(/\d+/) || [""])[0] !== exam) continue;
+      if (cat && up(c[3].textContent) !== cat) continue;
+      var b = [].filter.call(trs[i].querySelectorAll("button"), function (x) { return /cavablar/i.test(x.textContent); })[0];
+      if (b) return b;
+    }
+    return null;
+  }
+  function openCard(fin, exam, cat, tries) {
+    var b = cardBtn(fin, exam, cat);
+    if (b) {
+      RC.root.classList.remove("on"); RC.pill.classList.add("on");
+      setTimeout(function () { b.click(); }, 60);
+      return;
+    }
+    if (!tries && typeof window.switchAdminTab === "function") { try { window.switchAdminTab("siyahi"); } catch (e) {} }
+    if ((tries || 0) < 6) return setTimeout(function () { openCard(fin, exam, cat, (tries || 0) + 1); }, 450);
+    rcToast("Cavab kartı tapılmadı. «İştirakçılar & Nəticələr» bölməsini bir dəfə açın və yenidən cəhd edin.");
+  }
+
+  function csv() {
+    var rows = [["Ad Soyad", "İş nömrəsi", "Sınaq", "Kateqoriya", "İştirak tarixi", "Müddət", "Doğru", "Yanlış", "Bal"]];
+    visible().forEach(function (r) {
+      var f = r.at ? fmtDate(r.at) : null;
+      rows.push([r.name, r.fin, r.exam, r.cat, f ? f.d + " " + f.t : "", r.dur != null ? fmtDur(r.dur) : "", r.ok, r.bad, r.score].map(function (x) { return '"' + String(x == null ? "" : x).replace(/"/g, '""') + '"'; }));
+    });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob(["\ufeff" + rows.map(function (r) { return r.join(";"); }).join("\n")], { type: "text/csv;charset=utf-8" }));
+    a.download = "netice-merkezi.csv"; document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  function mount() {
+    if (RC.root) return;
+    var r = document.createElement("div"); r.id = "dqrc"; r.setAttribute("role", "dialog"); r.setAttribute("aria-label", "Nəticə Mərkəzi");
+    r.innerHTML = '<div class="dqrc-top"><button class="dqrc-bk" type="button" data-x="1">← Panelə qayıt</button><h3>📈 Nəticə Mərkəzi — iştirakçı nəticələri</h3></div><div class="dqrc-w"></div>';
+    document.body.appendChild(r); RC.root = r;
+    var p = document.createElement("button"); p.type = "button"; p.className = "dqrc-pill"; p.textContent = "← Nəticə Mərkəzinə qayıt";
+    document.body.appendChild(p); RC.pill = p;
+    p.onclick = function () { p.classList.remove("on"); r.classList.add("on"); };
+    r.addEventListener("click", function (e) {
+      var t = e.target;
+      if (t.closest("[data-x]")) { r.classList.remove("on"); document.body.style.overflow = ""; return; }
+      var ch = t.closest(".dqrc-chip"); if (ch) { RC.f.cat = ch.getAttribute("data-cat"); render(); return; }
+      var cb = t.closest("[data-card]"); if (cb) { var a = cb.getAttribute("data-card").split("|"); openCard(a[0], a[1], a[2]); return; }
+      if (t.closest("#dqrc-csv")) return csv();
+      if (t.closest("#dqrc-rf")) { rcToast("Yenilənir…"); return buildRows(); }
+    });
+    r.addEventListener("input", function (e) { if (e.target.id === "dqrc-q") { RC.f.q = e.target.value; render(); } });
+    r.addEventListener("change", function (e) {
+      if (e.target.id === "dqrc-ex") { RC.f.exam = e.target.value; render(); }
+      if (e.target.id === "dqrc-so") { RC.f.sort = e.target.value; render(); }
+    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && r.classList.contains("on")) r.classList.remove("on"); });
+  }
+  window.DQResultsHub = {
+    open: function () {
+      if (window.DQAdminGate && !DQAdminGate.is()) return;
+      mount(); RC.pill.classList.remove("on"); RC.root.classList.add("on");
+      RC.root.querySelector(".dqrc-w").innerHTML = '<div class="dqrc-empty">Yüklənir…</div>';
+      buildRows();
+    }
+  };
 
   window.DQReceptionStats = {
     refresh: function () {

@@ -2713,6 +2713,7 @@ window.scrollTo({top:0,behavior:"smooth"})};</script>
 <div class="admin-nav-card" onclick="window.DQNav&&DQNav.openEditor?DQNav.openEditor():alert('Canlı redaktə modulu yüklənməyib (dq-nav.js)')" style="background:linear-gradient(135deg,#b45309,#d9a23a);color:#fff"><span class="icon">📝</span> Canlı Redaktə</div>
 <div class="admin-nav-card" onclick="window.DQK?DQK.open():alert('Kitab modulu yüklənməyib (dq-kitab.js)')" style="background:linear-gradient(135deg,#0a2f7a,#d9a441);color:#fff"><span class="icon">📚</span> Sınaq Toplusu (Kitab)</div>
 <div class="admin-nav-card" onclick="window.DQRegAdmin?DQRegAdmin.open():alert('Modul yüklənməyib')" style="background:linear-gradient(135deg,#0a2f7a,#16a34a);color:#fff"><span class="icon">🎓</span> Qeydiyyat İmtahanları</div>
+<div class="admin-nav-card" onclick="window.DQResultsHub?DQResultsHub.open():alert('Nəticə Mərkəzi modulu yüklənməyib (dq-resepsiya-netice.js)')" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">📈</span> Nəticə Mərkəzi</div>
 </div>
 <style id="ppu-css">
 #mod-propdf .ppu-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
@@ -6392,6 +6393,7 @@ function lab(c){return (c.textContent||"").replace(/\s+/g," ").trim()}
 function key(s){return s.toLocaleLowerCase("az").replace(/[^\p{L}\p{N} ]/gu,"").replace(/\s+/g," ").trim()}
 function pick(t){var l=t.toLocaleLowerCase("az");
  if(/canlı redaktə/.test(l))return "other";
+  if(/nəticə mərkəzi/.test(l))return "other";
  if(/sınaq toplusu/.test(l))return "other";
  if(/pro add/.test(l))return "bank";
  // xüsusi sıralama: dəqiq qaydalar əvvəl
@@ -6486,7 +6488,7 @@ function tick(){var ex=document.querySelector("#examFolderGrid .folder-card"),sc
  if(sig!==lastSig){lastSig=sig;load(true).then(render)}else{render();load(false).then(render)}}
 setInterval(tick,700)})();</script>
 <script src="dq-resepsiya.js?v=2"></script>
-<script src="dq-resepsiya-netice.js?v=1"></script>
+<script src="dq-resepsiya-netice.js?v=2"></script>
 <script src="dq-giris.js?v=4"></script>
 <script src="dq-panel-patch.js?v=1"></script>
 <script src="dq-open-multi.js?v=2"></script>
@@ -8020,6 +8022,14 @@ window.DQRegAdmin={
 #dq-admin-dock .dqd-b:focus-visible{outline:2px solid #f6c453;outline-offset:2px}
 @media(max-width:560px){#dq-admin-dock .dqd-b{min-width:0;height:36px;padding:0 13px;font-size:12.5px}}
 @media print{#dq-admin-dock{display:none!important}}
+</style>
+<style id="dq-dock-stable">
+/* Sol aşağı düymələr sabit dayansın: ayrıca GPU qatına salınır, iki yığın üst-üstə düşmür */
+#dq-admin-dock,#admin-float-back{transform:translate3d(0,0,0)!important;-webkit-transform:translate3d(0,0,0)!important;will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden;contain:layout style}
+#admin-float-back{left:calc(12px + env(safe-area-inset-left,0px))!important;bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;z-index:99991!important;height:40px;line-height:40px;padding:0 18px!important;box-sizing:border-box;white-space:nowrap;width:max-content;max-width:calc(100vw - 24px)}
+/* «Əsas Admin Panelə Keç» görünəndə dok onun üstünə qalxır (üst-üstə düşmə olmasın) */
+body:has(#admin-float-back:not([style*="display:none"]):not([style*="display: none"])) #dq-admin-dock{bottom:calc(60px + env(safe-area-inset-bottom,0px))!important}
+#dq-admin-dock .dqd-b{transition:filter .15s ease}
 </style>
 <script id="dq-dock-js">
 (function(){"use strict";
