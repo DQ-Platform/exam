@@ -14,6 +14,7 @@
     hintCats = (Q.get("qrup") || "").toUpperCase().split(/[,;\s]+/).filter(Boolean);
   function isHint(it) { return String(it.exam) === hintExam && (!hintCats.length || hintCats.indexOf(it.cat) > -1); }
   var cols = null, session = null, tick = null;
+  function catRank(it) { var i = hintCats.indexOf(it.cat); return i < 0 ? 99 : i; }   /* linkdəki qrup sırası (BA, BB, AC) */
 
   /* ---------- köməkçilər ---------- */
   function esc(s) {
@@ -241,7 +242,7 @@
     "#dqg .pl.wt{color:#c8d4f0;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2)}",
     "#dqg .nt{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:rgba(185,28,28,.12);border:1px solid rgba(248,113,113,.3);color:#fecaca;font-size:12.5px;line-height:1.5}",
     "#dqg .who small{display:block;margin-top:2px}",
-    "@media(max-width:520px){#dqg .lg{margin-top:5vh;padding:24px 18px}#dqg .grid{grid-template-columns:1fr}#dqg .rs{flex-direction:column;align-items:stretch}#dqg .dn{margin:0 auto}}"
+    "@media(max-width:520px){#dqg .brand small{letter-spacing:.4px;font-size:10px}#dqg .hd{padding:12px 14px}#dqg .lg{margin-top:5vh;padding:24px 18px}#dqg .grid{grid-template-columns:1fr}#dqg .rs{flex-direction:column;align-items:stretch}#dqg .dn{margin:0 auto}}"
   ].join("").replace(/#dqg(?![-\w])/g, "[data-dqg]");
 
   var LOGO =
@@ -258,6 +259,7 @@
   st.textContent =
     "html.dqg-auto #dq-cs{opacity:0!important;pointer-events:none!important}" +
     "html.dqg-on #dq-splash{display:none!important}" +
+    "html[data-dqg-live],html[data-dqg-live] body{overflow:hidden!important;max-width:100vw!important}" +
     "html[data-dqg-live] body>*:not(#dqg):not(#dqg-mh):not(#dqg-rh):not(#dqg-fbh),html[data-dqg-live] body>*:not(#dqg):not(#dqg-mh):not(#dqg-rh):not(#dqg-fbh) *{visibility:hidden!important}" +
     "html.dq13-dark #dqg,html.dq13-dark #dqg-rh,html.dq13-dark #dqg-mh{filter:invert(1) hue-rotate(180deg)}";
   document.head.appendChild(st);
@@ -310,6 +312,7 @@
   document.documentElement.classList.add("dqg-on"); document.documentElement.setAttribute("data-dqg-live", "1");
   document.documentElement.classList.remove("dqg-pre");
   document.documentElement.style.overflow = "hidden";
+  pinVp(true);
 
   /* Qoruyucu: başqa skript (ana səhifə dizaynı və s.) giriş pəncərəsini silsə, gizlətsə və ya üslubunu pozsa,
      dərhal əvvəlki vəziyyətinə qaytarılır. İmtahan başlayanda (root.__dqgHid) müdaxilə etmir. */
@@ -427,7 +430,7 @@
       items.sort(function (a, b2) {
         var ha = isHint(a) ? 0 : 1,
             hb = isHint(b2) ? 0 : 1;
-        return ha - hb || a.exam - b2.exam || a.cat.localeCompare(b2.cat);
+        return ha - hb || a.exam - b2.exam || catRank(a) - catRank(b2) || a.cat.localeCompare(b2.cat);
       });
       /* app.js-in öz «exam_started» qeydləri (serverdə) → başlama vaxtı */
       try {
@@ -460,7 +463,7 @@
     var g = $("dqg-grid");
     session.items.sort(function (a, b) {
       function w(it) { var r = getRun(it); return (session.done[pkey(it)] || (r && DUR * 60000 - (Date.now() - r) <= 0 && !hasLocalState(it))) ? 1 : 0; }
-      return w(a) - w(b) || (isHint(a) ? 0 : 1) - (isHint(b) ? 0 : 1) || a.exam - b.exam || a.cat.localeCompare(b.cat);
+      return w(a) - w(b) || (isHint(a) ? 0 : 1) - (isHint(b) ? 0 : 1) || a.exam - b.exam || catRank(a) - catRank(b) || a.cat.localeCompare(b.cat);
     });
     g.innerHTML = session.items.map(function (it, i) {
       var hint = isHint(it) ? " hint" : "";
@@ -545,7 +548,18 @@
   }
   function ldHide() { clearInterval(ldTimer); $("dqg-ld").classList.remove("on"); }
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function pinVp(on) {   /* giriş pəncərəsində brauzer səhifəni avtomatik kiçildib sağa sürüşdürməsin */
+    try {
+      var vm = document.querySelectorAll('meta[name="viewport"]'), i;
+      if (!vm.length) { if (!on) return; var m = document.createElement("meta"); m.name = "viewport"; document.head.appendChild(m); vm = [m]; }
+      if (on && window.__dqgVp == null) window.__dqgVp = vm[vm.length - 1].getAttribute("content") || "";
+      var c = on ? "width=device-width,initial-scale=1,minimum-scale=1,viewport-fit=cover" : (window.__dqgVp || "width=device-width, initial-scale=1.0, viewport-fit=cover");
+      for (i = 0; i < vm.length; i++) vm[i].setAttribute("content", c);
+      if (!on) window.__dqgVp = null;
+    } catch (e) {}
+  }
   function showRoot() {
+    pinVp(true);
     root.__dqgHid = 0; document.documentElement.setAttribute("data-dqg-live", "1"); root.style.display = ""; M.ui.style.transition = ""; M.ui.style.opacity = "";
     document.documentElement.classList.add("dqg-on");
     document.documentElement.style.overflow = "hidden";
@@ -558,6 +572,7 @@
     root.__dqgHid = 1; document.documentElement.removeAttribute("data-dqg-live"); root.style.display = "none";
     ldHide(); M.ui.style.transition = ""; M.ui.style.opacity = "";
     document.documentElement.style.overflow = "";
+    pinVp(false);
   }
   function screenOn(id) { var e = document.getElementById(id); return !!(e && e.classList.contains("active")); }
   function examTitle(it) { return "Dövlət Qulluğu " + it.cat + " kateqoriyası üzrə sınaq " + it.exam; }
