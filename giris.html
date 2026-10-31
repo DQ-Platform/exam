@@ -204,6 +204,10 @@ $("out").addEventListener("click",function(){S=null;clearInterval(tick);$("vList
 $("f").addEventListener("submit",login);
 $("fin").addEventListener("input",function(e){if(e.isComposing)return;if(this.value.length>12)this.value=codeOf(this.value)});
 $("fin").addEventListener("blur",function(){if(this.value)this.value=codeOf(this.value)});
+/* fokus qoruyucusu: toxunuşdan sonra fokus özbaşına itərsə (klaviatura açılması zamanı) xana yenidən fokuslanır */
+(function(){var inp=$("fin"),tapAt=0,tries=0;
+["pointerdown","touchstart","mousedown"].forEach(function(t){document.addEventListener(t,function(e){tapAt=(e.target===inp)?Date.now():0;if(tapAt)tries=0},true)});
+inp.addEventListener("blur",function(){if(!tapAt||Date.now()-tapAt>3000||tries>=4)return;tries++;setTimeout(function(){if(tapAt&&document.activeElement!==inp)try{inp.focus({preventScroll:true})}catch(e){}},30)})})();
 if(hintExam){var c=$("ctx");c.textContent="Sınaq "+hintExam.replace(/[^0-9]/g,"")+(hintCats.length?" · "+hintCats.join(", ").replace(/[^A-Z, ]/g,"")+" qrupları":"");c.hidden=false}
 try{if(!matchMedia("(pointer:coarse)").matches)$("fin").focus()}catch(e){}
 window.addEventListener("pageshow",function(e){if(e.persisted)$("ld").classList.remove("on")});
