@@ -11,7 +11,8 @@
     QCOUNT = 100,       /* sual sayı (kartda göstərilir) */
     DUR = 180,          /* müddət, dəqiqə */
     hintExam = Q.get("sinaq") || "",
-    hintCat = (Q.get("qrup") || "").toUpperCase();
+    hintCats = (Q.get("qrup") || "").toUpperCase().split(/[,;\s]+/).filter(Boolean);
+  function isHint(it) { return String(it.exam) === hintExam && (!hintCats.length || hintCats.indexOf(it.cat) > -1); }
   var cols = null, session = null, tick = null;
 
   /* ---------- köməkçilər ---------- */
@@ -45,6 +46,16 @@
   var CYR = { "А":"A","В":"B","С":"C","Е":"E","Н":"H","К":"K","М":"M","О":"O","Р":"P","Т":"T","Х":"X","У":"Y","І":"I","Ѕ":"S","Ј":"J" };
   function normFin(v) {
     return String(v || "").toUpperCase().replace(/[\s\u200b-\u200f\ufeff]/g, "").replace(/[А-ЯЁІЅЈ]/g, function (c) { return CYR[c] || c; });
+  }
+  /* Yapışdırılan mətndən iş nömrəsini çıxarır: "İş nömrəniz: T26C4V2" → T26C4V2 */
+  function codeOf(v) {
+    var raw = String(v || "").toUpperCase().replace(/[\u200b-\u200f\ufeff]/g, "");
+    var plain = normFin(raw);
+    if (plain.length <= 7 && /^[A-Z0-9]*$/.test(plain)) return plain;
+    var t = raw.replace(/[А-ЯЁІЅЈ]/g, function (c) { return CYR[c] || c; }).match(/[A-Z0-9]{4,12}/g) || [];
+    for (var i = 0; i < t.length; i++) if (t[i].length === 7 && /\d/.test(t[i]) && /[A-Z]/.test(t[i])) return t[i];
+    for (var j = 0; j < t.length; j++) if (t[j].length === 7) return t[j];
+    return plain.slice(0, 12);
   }
   /* şərti gözləyir (app.js / verilənlər bazası gec yüklənəndə) */
   function waitFor(fn, ms) {
@@ -217,6 +228,19 @@
     "#dqg .sj .b i{display:block;height:100%}",
     "#dqg .mact{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}#dqg .mact button{flex:1;min-width:130px;padding:11px 14px;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer}",
     "#dqg .mact .sec{background:transparent;border:1px solid #c9a24b;color:#f3d98b}",
+    "#dqg .ctx{margin:-8px auto 16px;text-align:center;font-size:12.5px;font-weight:700;color:#f3d98b;background:rgba(201,162,75,.12);border:1px solid rgba(201,162,75,.4);border-radius:99px;padding:7px 12px}",
+    "#dqg .hlp{margin:14px 0 0;text-align:center;font-size:12px;color:#7f92bd;line-height:1.55}",
+    "#dqg .tp{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}",
+    "#dqg .cg{font-weight:800;font-size:12px;letter-spacing:1px;color:#0a1a3a;background:linear-gradient(180deg,#f3d98b,#c9a24b);border-radius:8px;padding:3px 10px}",
+    "#dqg .lk{font-size:11px;font-weight:700;color:#f3d98b;opacity:.9}",
+    "#dqg .pl{margin-left:auto;font-size:11.5px;font-weight:800;border-radius:99px;padding:4px 11px;border:1px solid transparent;white-space:nowrap}",
+    "#dqg .pl.rd{color:#bcd2f5;background:rgba(111,155,224,.15);border-color:rgba(111,155,224,.45)}",
+    "#dqg .pl.rn{color:#ffe9a8;background:rgba(201,162,75,.18);border-color:rgba(201,162,75,.6)}",
+    "#dqg .pl.ok{color:#a7f3d0;background:rgba(31,178,126,.15);border-color:rgba(31,178,126,.5)}",
+    "#dqg .pl.er{color:#fecaca;background:rgba(185,28,28,.16);border-color:rgba(248,113,113,.45)}",
+    "#dqg .pl.wt{color:#c8d4f0;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2)}",
+    "#dqg .nt{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:rgba(185,28,28,.12);border:1px solid rgba(248,113,113,.3);color:#fecaca;font-size:12.5px;line-height:1.5}",
+    "#dqg .who small{display:block;margin-top:2px}",
     "@media(max-width:520px){#dqg .lg{margin-top:5vh;padding:24px 18px}#dqg .grid{grid-template-columns:1fr}#dqg .rs{flex-direction:column;align-items:stretch}#dqg .dn{margin:0 auto}}"
   ].join("").replace(/#dqg(?![-\w])/g, "[data-dqg]");
 
@@ -257,11 +281,11 @@
     '<button type="button" class="out" id="dqg-out" style="display:none">Çıxış</button></div>' +
     '<div class="wrap">' +
     /* 1) giriş */
-    '<div id="dqg-login" class="lg"><h1>Kabinetə giriş</h1><p class="s">İştirak üçün sizə verilən iş nömrəsini yazın</p>' +
+    '<div id="dqg-login" class="lg"><h1>Kabinetə giriş</h1><p class="s">İştirak üçün sizə verilən iş nömrəsini yazın</p><div id="dqg-ctx" class="ctx" style="display:none"></div>' +
     '<label for="dqg-fin">İŞ NÖMRƏSİ</label>' +
-    '<input id="dqg-fin" class="in" type="text" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="İş nömrəsini daxil edin">' +
+    '<input id="dqg-fin" class="in" type="text" maxlength="80" autocomplete="off" autocorrect="off" enterkeyhint="go" autocapitalize="characters" spellcheck="false" placeholder="İş nömrəsini daxil edin">' +
     '<button type="button" id="dqg-go" class="gold">Daxil ol</button>' +
-    '<div id="dqg-err" class="err"></div><a id="dqg-wa" class="wa" target="_blank" rel="noopener">💬 WhatsApp ilə yazın</a></div>' +
+    '<div id="dqg-err" class="err"></div><a id="dqg-wa" class="wa" target="_blank" rel="noopener">💬 WhatsApp ilə yazın</a><p class="hlp">İş nömrəsini WhatsApp mesajından kopyalayıb yapışdıra bilərsiniz — sistem nömrəni özü tapacaq.</p></div>' +
     /* 2) kartlar */
     '<div id="dqg-list" style="display:none"><div class="who"><div class="av" id="dqg-av">?</div><div><b id="dqg-nm"></b><small id="dqg-fn"></small></div></div>' +
     '<h2>Sizə icazə verilmiş sınaqlar</h2><div id="dqg-grid" class="grid"></div></div></div>' +
@@ -327,7 +351,7 @@
 
   /* ---------- giriş ---------- */
   async function login() {
-    var fin = normFin($("dqg-fin").value);
+    var fin = codeOf($("dqg-fin").value); $("dqg-fin").value = fin;
     $("dqg-err").style.display = "none"; $("dqg-wa").style.display = "none";
     if (!fin) return showErr("İş nömrəsini yazın.");
     if (fin.length < 4) return showErr("İş nömrəsi düzgün deyil.");
@@ -338,7 +362,14 @@
       var c = await schema();
       var q = await db().from(T).select("*").eq(c.fin, fin);
       if (q.error) throw q.error;
-      var rows = q.data || [], items = [], seen = {}, name = "", prog = {};
+      var found = q.data || [];
+      if (!found.length) {   /* yazılış fərqi (kiçik hərf, boşluq) ola bilər — tolerant axtarış */
+        try {
+          var q2 = await db().from(T).select("*").ilike(c.fin, "%" + fin + "%").limit(50);
+          if (!q2.error) found = (q2.data || []).filter(function (r) { return normFin(r[c.fin]) === fin; });
+        } catch (e) {}
+      }
+      var rows = found, items = [], seen = {}, name = "", prog = {};
       rows.forEach(function (r) {
         if (!name && r[c.name]) name = r[c.name];
         if (c.prog && r[c.prog]) {
@@ -352,10 +383,10 @@
           items.push({ exam: r[c.exam], cat: k, start: c.start && r[c.start] ? new Date(r[c.start]) : null });
         });
       });
-      if (!items.length) return showErr("Bu iş nömrəsi üzrə icazə tapılmadı. İcazə almaq üçün bizimlə əlaqə saxlayın.", fin);
+      if (!items.length) return showErr("“" + fin + "” nömrəsi üzrə icazə tapılmadı. Nömrəni mesajdakı kimi dəqiq yazın (məs: T26C4V2). Düzgündürsə, aşağıdakı düymə ilə bizə yazın.", fin);
       items.sort(function (a, b2) {
-        var ha = (String(a.exam) === hintExam && a.cat === hintCat) ? 0 : 1,
-            hb = (String(b2.exam) === hintExam && b2.cat === hintCat) ? 0 : 1;
+        var ha = isHint(a) ? 0 : 1,
+            hb = isHint(b2) ? 0 : 1;
         return ha - hb || a.exam - b2.exam || a.cat.localeCompare(b2.cat);
       });
       /* app.js-in öz «exam_started» qeydləri (serverdə) → başlama vaxtı */
@@ -387,13 +418,17 @@
     $("dqg-fn").textContent = "İŞ NÖMRƏSİ: " + session.fin;
     $("dqg-av").textContent = (session.name || session.fin).trim().charAt(0).toUpperCase();
     var g = $("dqg-grid");
+    session.items.sort(function (a, b) {
+      function w(it) { var r = getRun(it); return (session.done[pkey(it)] || (r && DUR * 60000 - (Date.now() - r) <= 0 && !hasLocalState(it))) ? 1 : 0; }
+      return w(a) - w(b) || (isHint(a) ? 0 : 1) - (isHint(b) ? 0 : 1) || a.exam - b.exam || a.cat.localeCompare(b.cat);
+    });
     g.innerHTML = session.items.map(function (it, i) {
-      var hint = String(it.exam) === hintExam && it.cat === hintCat ? " hint" : "";
+      var hint = isHint(it) ? " hint" : "";
       var title = "Dövlət Qulluğu " + esc(it.cat) + " kateqoriyası üzrə sınaq " + esc(it.exam) +
         (it.start ? " - " + fmtDate(it.start) : "");
-      return '<div class="ex' + hint + '" data-i="' + i + '"><div class="bd"><h3>' + title + '</h3>' +
+      return '<div class="ex' + hint + '" data-i="' + i + '"><div class="bd"><div class="tp"><span class="cg">' + esc(it.cat) + '</span>' + (hint ? '<span class="lk">Linkdəki sınaq</span>' : '') + '<span class="pl rd" data-pl></span></div><h3>' + title + '</h3>' +
         '<div class="st" data-st></div>' +
-        '<div class="mt">Sual sayı: <b>' + QCOUNT + '</b><br>Müddət: <b>' + DUR + ' Dəqiqə</b></div></div>' +
+        '<div class="mt">Sual sayı: <b>' + QCOUNT + '</b><br>Müddət: <b>' + DUR + ' Dəqiqə</b></div><p class="nt" data-nt style="display:none"></p></div>' +
         '<div class="ft"><div class="row"><button type="button" class="gold" data-btn></button>' +
         '<button type="button" class="inf" data-info style="display:none" title="Nəticə və statistika" aria-label="Nəticə və statistika">' + INFO + '</button></div>' +
         '<button type="button" class="rv" data-rv style="display:none">🔍 Səhvləri təhlil et (1 dəfə)</button></div></div>';
@@ -407,23 +442,25 @@
     Array.prototype.forEach.call($("dqg-grid").children, function (card) {
       var it = session.items[+card.dataset.i], s = card.querySelector("[data-st]"), b = card.querySelector("[data-btn]");
       var run = getRun(it), left = run ? DUR * 60000 - (now - run) : 0, loc = hasLocalState(it);
+      var pl = card.querySelector("[data-pl]"), nt = card.querySelector("[data-nt]");
+      function P(k, t, n) { pl.className = "pl " + k; pl.textContent = t; nt.style.display = n ? "" : "none"; nt.textContent = n || ""; }
       var inf = card.querySelector("[data-info]"), rv = card.querySelector("[data-rv]"), isDone = !!session.done[pkey(it)];
       inf.style.display = isDone && session.res[pkey(it)] ? "" : "none";
       rv.style.display = isDone && reviewEligible(it) ? "" : "none";
       b.classList.remove("lock"); b.disabled = false;
       function lock(t) { b.textContent = t; b.disabled = true; b.classList.add("lock"); }
       if (session.done[pkey(it)]) {
-        s.className = "st"; s.textContent = "Tamamlanıb"; lock("Tamamlanıb");
+        s.className = "st"; s.textContent = "Tamamlanıb"; lock("Tamamlanıb"); P("ok", "Tamamlanıb");
       } else if (it.start && it.start.getTime() > now && !run) {
-        s.className = "st"; s.textContent = "Başlama vaxtı: " + fmtDT(it.start); lock("Hələ açılmayıb");
+        s.className = "st"; s.textContent = "Başlama vaxtı: " + fmtDT(it.start); lock("Hələ açılmayıb"); P("wt", "Gözləyir");
       } else if (run && left <= 0) {
         s.className = "st"; s.textContent = "Vaxt bitib";
-        if (loc) { b.textContent = "Nəticəni göndər"; } else lock("Vaxt bitib");
+        if (loc) { b.textContent = "Nəticəni göndər"; P("er", "Vaxt bitib"); } else { lock("Vaxt bitib"); P("er", "Vaxt bitib", "Bu sınaq üçün ayrılan " + DUR + " dəqiqə bitib. Yenidən iştirak üçün administrasiya ilə əlaqə saxlayın."); }
       } else if (run) {
         s.className = "st run"; s.innerHTML = "Davam edir: <span>" + fmtLeft(left) + "</span>";
-        if (loc) b.textContent = "Davam et"; else lock("Başladığınız cihazdan davam edin");
+        if (loc) b.textContent = "Davam et"; else lock("Başladığınız cihazdan davam edin"); P("rn", "Davam edir");
       } else {
-        s.className = "st"; s.textContent = "Başlanmayıb"; b.textContent = "Başla";
+        s.className = "st"; s.textContent = "Başlanmayıb"; b.textContent = "Başla"; P("rd", "Hazırdır");
       }
     });
   }
@@ -754,10 +791,35 @@
     ng.__dqg = 1; window.goHome = ng;
   })();
 
+  /* ---------- imtahan başlığı: istifadəçinin kateqoriyası, sınaq nömrəsi, adı və iş nömrəsi ---------- */
+  (function () {
+    function paint() {
+      if (!session || !flowOn()) return;
+      var scr = document.getElementById("exam-screen");
+      if (!scr || !scr.classList.contains("active")) return;
+      var t = document.getElementById("active-exam-title");
+      if (!t) return;
+      var ex, cat;
+      try { ex = String(selectedExamId); cat = String(userGroup).toUpperCase(); } catch (e) { return; }
+      if (!ex || !cat || ex === "undefined") return;
+      var want = "Dövlət Qulluğu " + cat + " kateqoriyası üzrə sınaq " + ex;
+      var who = (session.name ? session.name + " · " : "") + "İş nömrəsi: " + session.fin;
+      var b = t.firstElementChild;
+      if (b && b.getAttribute("data-dqg") === want + "|" + who) return;
+      t.textContent = "";
+      b = document.createElement("b"); b.setAttribute("data-dqg", want + "|" + who);
+      b.textContent = want; b.style.cssText = "display:block;font-weight:800";
+      var sm = document.createElement("small");
+      sm.textContent = who; sm.style.cssText = "display:block;font-weight:500;opacity:.85;font-size:12px;margin-top:2px;text-transform:none";
+      t.appendChild(b); t.appendChild(sm);
+    }
+    setInterval(paint, 500);
+  })();
+
   /* ---------- hadisələr ---------- */
   $("dqg-go").addEventListener("click", login);
   $("dqg-fin").addEventListener("keydown", function (e) { if (e.key === "Enter") login(); });
-  $("dqg-fin").addEventListener("input", function () { this.value = normFin(this.value); });
+  $("dqg-fin").addEventListener("input", function () { this.value = codeOf(this.value); });
   $("dqg-grid").addEventListener("click", function (e) {
     var t = e.target; if (!t || !t.closest) return;
     var card = t.closest(".ex"); if (!card || !session) return;
@@ -839,5 +901,12 @@
       if (!on) { shown = false; if (!chartBusy && chartSeen) { chartMode = false; chartSeen = false; } if (box) { rmBox(); document.documentElement.style.overflow = ""; } }
     }, 600);
   })();
+  try {
+    if (hintExam) {
+      var cx = $("dqg-ctx");
+      cx.textContent = "Sınaq " + hintExam + (hintCats.length ? " · " + hintCats.join(", ") + " qrupları" : "");
+      cx.style.display = "";
+    }
+  } catch (e) {}
   setTimeout(function () { try { $("dqg-fin").focus(); } catch (e) {} }, 300);
 })();

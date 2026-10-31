@@ -25,12 +25,24 @@ async function uniqueCode(c){
  throw new Error("Unikal nömrə tapılmadı, yenidən cəhd edin")}
 function msg(t,err){var m=$("rsp-msg");m.style.color=err?"#b91c1c":"#047857";m.textContent=t}
 function chosen(){return Array.prototype.map.call(document.querySelectorAll("#rsp-cats .cat-btn.active"),function(b){return b.dataset.cat})}
+var BASE="https://exam.dqplatform.workers.dev/";
 function linkOf(p){
- var u=new URL(location.href);u.search="";u.hash="";
+ var u=new URL(BASE);
  u.searchParams.set("giris","1");u.searchParams.set("qrup",p.cats.join(","));u.searchParams.set("sinaq",p.exam);
  return u.toString()}
 function link(){return linkOf(cur)}
-function textOf(p){return "Salam, "+p.name+"!\n\nSizə sınaq "+p.exam+" ("+p.cats.join(", ")+" qrupları) üçün iştirak icazəsi verildi ✅\n\nDaxil olmaq üçün linkə keçin:\n"+linkOf(p)+"\n\nİş nömrəniz: "+p.fin+"\n\n⚠️ Xatırlatma: sualları qruplara və başqalarına göndərmək qadağandır. Sınaq zəhmətlə hazırlanıb və hər kəs ödəniş edib qoşulub. Linki də başqasına göndərməyin zəhmət olmasa.\nGöndərildikdə hesabınız bloklanır."}
+function textOf(p){
+ var g=p.cats.join(", ");
+ return "Salam, "+p.name+"! 👋\n\n"+
+ "DQ Platform · Sınaq "+p.exam+" ("+g+" qrupları) üçün iştirak icazəniz təsdiqləndi ✅\n\n"+
+ "🔑 İş nömrəniz: *"+p.fin+"*\n"+
+ "🔗 Giriş linki:\n"+linkOf(p)+"\n\n"+
+ "Necə daxil olmalı:\n"+
+ "1️⃣ Linkə keçin\n"+
+ "2️⃣ İş nömrənizi yazın (və ya mesajı yapışdırın — sistem nömrəni özü tapır)\n"+
+ "3️⃣ Sınaq kartında «Başla» düyməsini basın\n\n"+
+ "⚠️ Vacib: İş nömrəsi və link yalnız sizə məxsusdur. Onu, eləcə də sualları qruplara və ya başqalarına göndərmək qadağandır; belə hal aşkarlandıqda hesab bloklanır.\n\n"+
+ "Uğurlar! 🍀 DQ Platform"}
 function text(){return textOf(cur)}
 window.DQResep={
  async gen(){
