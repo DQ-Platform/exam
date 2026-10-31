@@ -16,10 +16,14 @@ var css=D.createElement("style");css.textContent=
 ".dqb-row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #dfe3f1;border-radius:16px;padding:14px;margin-bottom:10px}.dqb-row b{flex:1;word-break:break-word}.dqb-row a,.dqb-row button{background:#0c2260;color:#fff;border:0;border-radius:10px;padding:9px 14px;font-weight:700;text-decoration:none;cursor:pointer;font-size:14px}"+
 ".dqb-empty{text-align:center;color:#64748b;padding:34px 10px;background:#fff;border-radius:16px}"+
 ".dqb-tabs{display:flex;gap:4px;overflow-x:auto;background:#fff;border:1px solid #dfe3f1;border-radius:999px;padding:6px;margin:0 auto 18px;max-width:100%;width:max-content;scrollbar-width:none}.dqb-tabs button{border:0;background:none;border-radius:999px;padding:9px 16px;font-weight:600;cursor:pointer;white-space:nowrap;font:inherit;font-size:14px}.dqb-tabs button.on{background:#0c2260;color:#f6c453}"+
-".dqb-car{position:relative;height:370px;perspective:1100px;touch-action:pan-y;user-select:none}.dqb-card{position:absolute;left:50%;top:0;width:200px;height:340px;margin-left:-100px;border-radius:24px;transition:transform .5s,opacity .5s;cursor:pointer;transform-style:preserve-3d}"+
-".dqb-face{position:absolute;inset:0;border-radius:24px;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:18px 12px;color:#fff;box-shadow:0 18px 34px -16px rgba(6,17,46,.7)}.dqb-face.bk{transform:rotateY(180deg)}"+
-".dqb-pill{background:rgba(255,255,255,.2);border-radius:99px;padding:4px 14px;font-size:13px;font-weight:700}.dqb-big{font-size:76px;font-weight:900;color:#d9b45c;letter-spacing:-2px}.dqb-card.fl .dqb-f{transform:rotateY(180deg)}.dqb-f{position:absolute;inset:0;transition:transform .5s;transform-style:preserve-3d}"+
-".dqb-ar{position:absolute;top:45%;width:44px;height:44px;border-radius:50%;border:0;background:#fff;box-shadow:0 6px 16px rgba(0,0,0,.15);font-size:20px;cursor:pointer;z-index:5}.dqb-dots{display:flex;gap:9px;justify-content:center;margin:6px 0 20px}.dqb-dots i{width:10px;height:10px;border-radius:9px;background:#cbd5e1;transition:.25s}.dqb-dots i.on{width:38px;background:#0c2260}"+
+".dqb-car{position:relative;height:350px;perspective:1200px;touch-action:pan-y;user-select:none;-webkit-user-select:none;overflow:visible}"+
+".dqb-card{position:absolute;left:50%;top:6px;width:var(--w,180px);height:300px;margin-left:calc(var(--w,180px)/-2);transform-style:preserve-3d;will-change:transform;transition:transform .65s cubic-bezier(.22,.9,.3,1),opacity .45s ease;cursor:pointer;-webkit-tap-highlight-color:transparent}"+
+".dqb-card.fl{z-index:30!important}"+
+".dqb-f{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.34,1.2,.5,1)}.dqb-card.fl .dqb-f{transform:rotateY(180deg)}"+
+".dqb-face{position:absolute;inset:0;border-radius:24px;-webkit-backface-visibility:hidden;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:18px 12px;color:#fff;box-shadow:0 18px 34px -16px rgba(6,17,46,.7);overflow:hidden}"+
+".dqb-face:before{content:'';position:absolute;inset:0;background:radial-gradient(120% 60% at 50% 0,rgba(255,255,255,.22),transparent 60%);pointer-events:none}.dqb-face.bk{transform:rotateY(180deg)}"+
+".dqb-pill{background:rgba(255,255,255,.2);border-radius:99px;padding:4px 14px;font-size:13px;font-weight:700;position:relative}.dqb-big{font-size:72px;font-weight:900;color:#d9b45c;letter-spacing:-2px;position:relative}.dqb-hint{font-size:13px;opacity:.9;position:relative}"+
+".dqb-ar{position:absolute;top:45%;width:44px;height:44px;border-radius:50%;border:0;background:#fff;box-shadow:0 6px 16px rgba(0,0,0,.15);font-size:20px;cursor:pointer;z-index:40}.dqb-dots{display:flex;gap:9px;justify-content:center;margin:6px 0 20px}.dqb-dots i{width:10px;height:10px;border-radius:9px;background:#cbd5e1;transition:.25s}.dqb-dots i.on{width:38px;background:#0c2260}"+
 ".dqb-box{background:#fff;border-left:5px solid #e5a82c;border-radius:16px;padding:18px;box-shadow:0 10px 26px -18px rgba(6,17,46,.6);margin-top:8px}.dqb-box form{display:flex;gap:10px}.dqb-box input{flex:1;padding:13px;border:2px solid #e5a82c;border-radius:12px;font-size:15px;min-width:0}.dqb-box button.go{background:#0c2260;color:#fff;border:0;border-radius:12px;padding:0 22px;font-weight:800;cursor:pointer}.dqb-msg{margin-top:10px;font-weight:600;font-size:14px}"+
 "@media(max-width:560px){.dqb-h{font-size:22px}.dqb-c{padding:20px 6px}.dqb-n{font-size:16px}}";
 D.head.appendChild(css);
@@ -71,21 +75,31 @@ function openSinaq(){
    '<div style="text-align:center;margin-top:22px"><button class="dqb-b" id="dqb-home" style="font-size:13px;background:#eef2ff">← Ana səhifəyə qayıt</button></div>');
   function cats(){return EX[cur]||[]}
   function drawTabs(){root.querySelector("#dqb-t").innerHTML=nums.map(function(n){return'<button type="button" data-n="'+n+'"'+(n===cur?' class="on"':"")+'>Sınaq '+n+'</button>'}).join("");
-   bind("#dqb-t button",function(b){cur=b.dataset.n;idx=0;drawTabs();drawCar()})}
-  function drawCar(){var c=cats(),n=c.length,car=root.querySelector("#dqb-car");if(!n){car.innerHTML='<div class="dqb-empty">Bu sınaqda sual yoxdur.</div>';root.querySelector("#dqb-d").innerHTML="";return}
-   car.innerHTML=c.map(function(k,i){var off=((i-idx)%n+n)%n;if(off>n/2)off-=n;var abs=Math.abs(off),vis=abs<=1;
-    return'<div class="dqb-card" data-i="'+i+'" style="z-index:'+(10-abs)+';opacity:'+(vis?1:0)+';pointer-events:'+(vis?"auto":"none")+';transform:translateX('+off*150+'px) translateZ('+(-abs*120)+'px) rotateY('+(-off*28)+'deg) scale('+(1-abs*.08)+')"><div class="dqb-f">'+
-    '<div class="dqb-face" style="background:'+COL[k]+'"><span class="dqb-pill">Sınaq '+cur+'</span><span class="dqb-big">'+k+'</span><span style="font-size:14px">'+TXT[k]+'</span></div>'+
-    '<div class="dqb-face bk" style="background:'+COL[k]+'"><span class="dqb-pill">Sınaq '+cur+' · '+k+'</span><span style="font-size:15px;text-align:center;line-height:1.6">100 sual<br>Balını sınaqdan sonra gör</span><button class="dqb-b" data-st="'+k+'" style="color:#0c2260">Başla</button></div></div></div>'}).join("")+
-    '<button class="dqb-ar" style="left:0" data-d="-1">‹</button><button class="dqb-ar" style="right:0" data-d="1">›</button>';
-   root.querySelector("#dqb-d").innerHTML=c.map(function(_,i){return'<i'+(i===idx?' class="on"':"")+'></i>'}).join("");
-   bind(".dqb-card",function(el,ev){if(ev.target.dataset&&ev.target.dataset.st){start(cur,ev.target.dataset.st);return}var i=+el.dataset.i;if(i!==idx){idx=i;drawCar()}else el.classList.toggle("fl")});
-   bind(".dqb-ar",function(b,ev){ev.stopPropagation();go(+b.dataset.d)})}
-  function go(d){var n=cats().length;if(!n)return;idx=(idx+d+n)%n;drawCar()}
+   bind("#dqb-t button",function(b){cur=b.dataset.n;idx=0;built="";drawTabs();drawCar()})}
+  var built="",W=180;
+  function build(){var c=cats(),car=root.querySelector("#dqb-car");built=cur;
+   if(!c.length){car.innerHTML='<div class="dqb-empty">Bu sınaqda sual yoxdur.</div>';root.querySelector("#dqb-d").innerHTML="";return}
+   car.innerHTML=c.map(function(k,i){return'<div class="dqb-card" data-i="'+i+'"><div class="dqb-f">'+
+    '<div class="dqb-face" style="background:'+COL[k]+'"><span class="dqb-pill">Sınaq '+cur+'</span><span class="dqb-big">'+k+'</span><span class="dqb-hint">'+TXT[k]+'</span></div>'+
+    '<div class="dqb-face bk" style="background:'+COL[k]+'"><span class="dqb-pill">Sınaq '+cur+' · '+k+'</span><span style="font-size:15px;text-align:center;line-height:1.7;position:relative">100 sual<br>Balını sınaqdan sonra gör</span><button type="button" class="dqb-b" data-st="'+k+'" style="color:#0c2260;position:relative">Başla</button></div></div></div>'}).join("")+
+    '<button type="button" class="dqb-ar" style="left:0" data-d="-1" aria-label="Əvvəlki">‹</button><button type="button" class="dqb-ar" style="right:0" data-d="1" aria-label="Növbəti">›</button>';
+   root.querySelector("#dqb-d").innerHTML=c.map(function(){return"<i></i>"}).join("")}
+  function layout(){var c=cats(),n=c.length;if(!n)return;var car=root.querySelector("#dqb-car");W=Math.max(140,Math.min(190,car.clientWidth*.42));car.style.setProperty("--w",W+"px");
+   Array.prototype.forEach.call(car.querySelectorAll(".dqb-card"),function(el,i){var off=((i-idx)%n+n)%n;if(off>n/2)off-=n;var ab=Math.abs(off),vis=ab<=1;
+    if(!vis||i!==idx)el.classList.remove("fl");
+    el.style.zIndex=10-ab;el.style.opacity=vis?1:0;el.style.pointerEvents=vis?"auto":"none";
+    el.style.transform="translateX("+(off*W*.62)+"px) translateZ("+(-ab*90)+"px) rotateY("+(-off*20)+"deg) scale("+(ab?.93:1.04)+")"});
+   Array.prototype.forEach.call(root.querySelectorAll("#dqb-d i"),function(d,i){d.className=i===idx?"on":""})}
+  function drawCar(){if(built!==cur)build();layout()}
+  function go(d){var n=cats().length;if(!n)return;idx=(idx+d+n)%n;layout()}
+  root.querySelector("#dqb-car").addEventListener("click",function(ev){
+   var ar=ev.target.closest(".dqb-ar");if(ar){ev.stopPropagation();return go(+ar.dataset.d)}
+   var st=ev.target.closest("[data-st]");if(st){return start(cur,st.dataset.st)}
+   var el=ev.target.closest(".dqb-card");if(!el)return;var i=+el.dataset.i;if(i!==idx){idx=i;layout()}else el.classList.toggle("fl")});
   var sx=null;root.querySelector("#dqb-car").addEventListener("touchstart",function(e){sx=e.touches[0].clientX},{passive:true});
   root.querySelector("#dqb-car").addEventListener("touchend",function(e){if(sx==null)return;var dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>40)go(dx<0?1:-1);sx=null});
   stopAuto();timer=setInterval(function(){if(!root.querySelector(".dqb-card.fl")&&D.activeElement!==root.querySelector("#dqb-no"))go(1)},4000);
-  drawTabs();drawCar();
+  drawTabs();drawCar();window.addEventListener("resize",function(){if(root&&root.classList.contains("on")&&root.querySelector("#dqb-car"))layout()});
   bind("#dqb-bk",close);bind("#dqb-home",close);
   bind("#dqb-chk",function(){if(window.DQExam&&DQExam.open)DQExam.open("sinaq");else root.querySelector("#dqb-no").focus()});
   root.querySelector("#dqb-f").addEventListener("submit",function(e){e.preventDefault();check(root.querySelector("#dqb-no").value.trim())});
