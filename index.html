@@ -7818,15 +7818,45 @@ function banPlace(el){
  if(a&&a.parentNode){if(el.previousSibling!==a)a.parentNode.insertBefore(el,a.nextSibling);return true}
  if(h){if(el.parentNode!==h)h.insertBefore(el,h.firstChild);return true}
  return false}
+var BAN=null,banBusy=0;
+function banUnhide(el){
+ try{
+  if(el.hidden)el.hidden=false;
+  var st=el.style;
+  if(st&&st.length){["display","visibility","opacity","height","max-height","min-height","transform","position","width","max-width","margin","clip","clip-path","overflow"].forEach(function(p){if(st.getPropertyValue(p))st.removeProperty(p)})}
+  if(el.getAttribute("data-dqr-fh"))el.removeAttribute("data-dqr-fh");
+ }catch(e){}}
 function banMake(){
- var el=D.getElementById("lxp-ban");
- if(!el){
-  var a=D.getElementById("dq-count"),h=D.getElementById("v3-home");if(!a&&!h)return;
-  el=D.createElement("div");el.id="lxp-ban";
-  el.innerHTML='<div class="lxp-bi"><div><b>\ud83d\udccb İmtahan Qeydiyyatı</b><span>Aktiv imtahanlar · yerlər məhduddur</span></div><button type="button" data-dqreg="1">Qeydiyyat paneli ›</button></div>';
-  if(!banPlace(el))return;
-  banFill();return}
- banPlace(el)}
+ if(banBusy)return;banBusy=1;
+ try{
+  var all=D.querySelectorAll("#lxp-ban"),i;
+  if(all.length){BAN=all[0];for(i=1;i<all.length;i++){try{all[i].parentNode.removeChild(all[i])}catch(e){}}}
+  var el=BAN;
+  if(!el){
+   var a=D.getElementById("dq-count"),h=D.getElementById("v3-home");if(!a&&!h)return;
+   el=D.createElement("div");el.id="lxp-ban";
+   el.innerHTML='<div class="lxp-bi"><div><b>\ud83d\udccb İmtahan Qeydiyyatı</b><span>Aktiv imtahanlar · yerlər məhduddur</span></div><button type="button" data-dqreg="1">Qeydiyyat paneli ›</button></div>';
+   BAN=el;
+   if(banPlace(el))banFill();
+   return}
+  banUnhide(el);
+  banPlace(el);
+ }finally{banBusy=0}}
+/* Banner heç vaxt itməsin: (1) yerli (səhifənin gecikdirən sarğısız) MutationObserver — microtask, çəkilişdən əvvəl;
+   (2) hər kadrdan əvvəl rAF yoxlaması — ehtiyat. Başqa skript banneri silsə / gizlətsə / ana ekranı yenidən qursa dərhal yerinə qayıdır. */
+function banOK(){
+ var el=BAN,d=D.getElementById("dqr-duo");
+ if(!el||!el.isConnected)return false;
+ if(el.hidden||(el.style&&el.style.length))return false;
+ if(d&&el.nextSibling!==d)return false;
+ if(!d&&D.getElementById("dqr"))return false;
+ return true}
+function nativeMO(){
+ try{var f=D.createElement("iframe");f.setAttribute("aria-hidden","true");f.tabIndex=-1;f.style.cssText="position:absolute;width:0;height:0;border:0;visibility:hidden;pointer-events:none";
+  (D.body||D.documentElement).appendChild(f);var N=f.contentWindow&&f.contentWindow.MutationObserver;return N||null}catch(e){return null}}
+var NMO2=nativeMO()||window.MutationObserver;
+try{new NMO2(function(){if(!banOK())banMake()}).observe(D.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["style","class","hidden","data-dqr-fh"]})}catch(e){}
+(function raf(){try{if(!banOK())banMake()}catch(e){}window.requestAnimationFrame(raf)})();
 function isRegBtn(t){
  var b=t&&t.closest&&t.closest("#lxp-ban button,[data-dqreg],a,button,[role=button]");
  if(!b||b.closest("#dqx-ov,#dqa-ov,#admin-panel,#login-screen,#exam-screen"))return null;
@@ -7838,7 +7868,7 @@ function regGo(ev){var b=isRegBtn(ev.target);if(!b)return;
 window.addEventListener("click",regGo,true);
 ["pointerdown","mousedown","touchstart","pointerup","mouseup","touchend"].forEach(function(n){window.addEventListener(n,function(ev){if(isRegBtn(ev.target)){ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation()}},true)});
 [1500,4000,8000].forEach(function(t){setTimeout(banFill,t)});
-setTimeout(banMake,600);setInterval(banMake,800);
+setTimeout(banMake,300);setInterval(banMake,1500);
 var HEAD=".v3-hd,.v3-top,.v3-nav,header,nav,[class*=header],[class*=navbar],[class*=topbar]";
 function navFix(){try{var q=D.querySelectorAll(HEAD+" a,"+HEAD+" button,"+HEAD+" li,"+HEAD+" span"),k,e;
  for(k=0;k<q.length;k++){e=q[k];if(e.children.length||e.closest("#dqr,#dqx-ov,#dqa-ov,#admin-panel,#login-screen,#dq-cab,#exam-screen"))continue;
