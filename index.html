@@ -8000,10 +8000,10 @@ function build(){
 function destroy(){if(dock){try{dock.remove()}catch(e){}dock=null}}
 function render(){
  var ok=isAdmin();
+ scanSources();                                   /* admin olmasa da orijinal düymələr tapılıb gizlədilir */
  if(H.classList.contains("dq-admin-ok")!==ok)H.classList.toggle("dq-admin-ok",ok);
  if(!ok){wasAdmin=false;destroy();return}
- if(wasAdmin!==true){wasAdmin=true}
- scanSources();
+ wasAdmin=true;
  var d=build(),editing=D.body.classList.contains("dqe-on"),any=false;
  [].forEach.call(d.children,function(b){
   var k=b.getAttribute("data-k"),has=hasSource(k)&&!(k==="redaktə"&&editing);
