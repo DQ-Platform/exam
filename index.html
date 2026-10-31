@@ -7619,5 +7619,176 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+<!-- ===== DQ Auth Patch: «Qeydiyyat» düyməsi gizlədilir, «Daxil ol» → Qeydiyyat/Giriş pəncərəsi ===== -->
+<style id="dqa-css">
+.dqa-hide{display:none!important}
+#dqa-ov{position:fixed;inset:0;z-index:2147483600;background:rgba(3,8,24,.72);display:none;align-items:flex-end;justify-content:center;overflow:auto;font-family:Roboto,Manrope,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+#dqa-ov.on{display:flex}
+@media(min-width:560px){#dqa-ov{align-items:center;padding:20px}}
+#dqa-ov .bx{background:#fff;color:#0b1f4d;width:100%;max-width:440px;border-radius:24px 24px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:100%;overflow:auto;animation:dqaUp .25s ease;box-sizing:border-box;text-align:left}
+@media(min-width:560px){#dqa-ov .bx{border-radius:22px}}
+@keyframes dqaUp{from{transform:translateY(24px);opacity:0}}
+#dqa-ov *{box-sizing:border-box}
+#dqa-ov .tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+#dqa-ov .tab{border:0;border-radius:10px;padding:13px;font:800 16px inherit;font-family:inherit;background:#0a2f7a;color:#fff;cursor:pointer;opacity:.85}
+#dqa-ov .tab[aria-selected=true]{background:#1f63d6;opacity:1;box-shadow:0 4px 12px rgba(31,99,214,.35)}
+#dqa-ov label{display:block;font-size:17px;font-weight:700;margin:14px 0 6px}
+#dqa-ov input{width:100%;border:1.5px solid #d9e0ee;background:#f7f9fd;color:#0b1f4d;border-radius:12px;padding:14px;font-size:16px;font-family:inherit;margin:0}
+#dqa-ov input:focus{outline:none;border-color:#1f63d6;box-shadow:0 0 0 3px rgba(31,99,214,.2)}
+#dqa-ov input.err{border-color:#d92d20}
+#dqa-ov .hint{font-size:13px;color:#6b7691;margin:5px 2px 0;min-height:18px}
+#dqa-ov .hint.e{color:#d92d20;font-weight:600}
+#dqa-ov .act{width:100%;margin-top:14px;border:0;border-radius:10px;padding:15px;font:800 16px inherit;font-family:inherit;color:#fff;background:#1f63d6;cursor:pointer}
+#dqa-ov .act:disabled{opacity:.6;cursor:wait}
+#dqa-ov .or{display:flex;align-items:center;gap:12px;color:#6b7691;font-size:14px;margin:14px 0}
+#dqa-ov .or::before,#dqa-ov .or::after{content:"";flex:1;height:1px;background:#d9e0ee}
+#dqa-ov .gg{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;border:1.5px solid #d9e0ee;background:#fff;color:#0b1f4d;border-radius:14px;padding:13px;font:700 16px inherit;font-family:inherit;cursor:pointer}
+#dqa-ov .sw{text-align:center;color:#6b7691;margin:14px 0 4px;font-size:16px}
+#dqa-ov .sw button,#dqa-ov .lk{border:0;background:none;color:#0a2f7a;font:800 inherit;font-family:inherit;text-decoration:underline;cursor:pointer;padding:0}
+#dqa-ov .cl{width:100%;margin-top:10px;border:0;border-radius:10px;padding:15px;font:800 16px inherit;font-family:inherit;color:#fff;background:#0a2f7a;cursor:pointer}
+#dqa-ov .cd{letter-spacing:10px;text-align:center;font-size:26px;font-weight:800}
+#dqa-ov [hidden]{display:none!important}
+#dqa-t{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:#0b1f4d;color:#fff;padding:12px 18px;border-radius:999px;font:700 14px Roboto,system-ui,sans-serif;opacity:0;transition:.3s;z-index:2147483650;pointer-events:none;max-width:92vw;text-align:center}
+#dqa-t.on{opacity:1;transform:translate(-50%,0)}
+</style>
+<div id="dqa-ov" role="dialog" aria-modal="true" aria-label="Giriş və qeydiyyat">
+ <div class="bx">
+  <div class="tabs" role="tablist"><button class="tab" role="tab" id="dqa-tr" aria-selected="true" type="button">Qeydiyyat</button><button class="tab" role="tab" id="dqa-tl" aria-selected="false" type="button">Giriş</button></div>
+  <form id="dqa-fr" novalidate>
+   <label for="dqa-rn">Ad Soyad</label><input id="dqa-rn" autocomplete="name" placeholder="Ad Soyad"><p class="hint" id="dqa-rnE"></p>
+   <label for="dqa-rp">Telefon nömrəsi</label><input id="dqa-rp" type="tel" inputmode="tel" autocomplete="tel" placeholder="050 123 45 67"><p class="hint" id="dqa-rpE">Əlaqə üçün (məs: 050 123 45 67)</p>
+   <label for="dqa-re">Gmail</label><input id="dqa-re" type="email" autocomplete="email" placeholder="ad@gmail.com"><p class="hint" id="dqa-reE">Giriş və təsdiq kodu bu Gmail-ə göndərilir</p>
+   <button class="act" id="dqa-br" type="submit">Qeydiyyatdan keç</button>
+   <div class="or">və ya</div>
+   <button class="gg" type="button" data-g><svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.6-4-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>Google ilə daxil ol</button>
+   <p class="sw">Hesabınız var? <button type="button" data-go="l">Daxil ol</button></p>
+  </form>
+  <form id="dqa-fl" novalidate hidden>
+   <div id="dqa-s1"><label for="dqa-le">Gmail</label><input id="dqa-le" type="email" autocomplete="email" placeholder="ad@gmail.com"><p class="hint" id="dqa-leE">Təsdiq kodu bu Gmail-ə göndəriləcək</p><button class="act" id="dqa-bs" type="submit">Kodu göndər</button></div>
+   <div id="dqa-s2" hidden><label for="dqa-lc">Təsdiq kodu</label><input class="cd" id="dqa-lc" inputmode="numeric" maxlength="8" autocomplete="one-time-code" placeholder="••••••"><p class="hint" id="dqa-lcE"></p><button class="act" id="dqa-bv" type="submit">Daxil ol</button><p class="sw"><button type="button" id="dqa-rs">Kodu yenidən göndər</button></p></div>
+   <div class="or">və ya</div>
+   <button class="gg" type="button" data-g><svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.6-4-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>Google ilə daxil ol</button>
+   <p class="sw">Hesabınız yoxdur? <button type="button" data-go="r">Qeydiyyatdan keç</button></p>
+  </form>
+  <button class="cl" type="button" id="dqa-x">Bağla</button>
+ </div>
+</div>
+<div id="dqa-t" role="status"></div>
+<script id="dqa-js">
+(function(){"use strict";
+if(window.__dqaAuth)return;window.__dqaAuth=1;
+var D=document;function $(i){return D.getElementById(i)}
+function norm(t){return String(t||"").replace(/\s+/g," ").trim().toLowerCase()}
+function digits(s){return String(s).replace(/\D/g,"")}
+function toast(m){var t=$("dqa-t");t.textContent=m;t.classList.add("on");clearTimeout(toast.k);toast.k=setTimeout(function(){t.classList.remove("on")},3500)}
+function sb(){try{var c=window._supabase||window.sb||window.supabaseClient;if(!c&&typeof _supabase!=="undefined")c=_supabase;return c&&c.auth?c:null}catch(e){return null}}
+
+/* 1) «Qeydiyyat» düyməsini gizlət (yalnız dəqiq mətn; modal və admin paneldən kənarda) */
+var HEAD=".v3-hd,.v3-top,header,nav,[class*=header],[class*=navbar],[class*=topbar]";
+function hideReg(root){
+ var list=(root||D).querySelectorAll("a,button,[role=button]");
+ for(var i=0;i<list.length;i++){var e=list[i];
+  if(e.classList.contains("dqa-hide")||e.closest("#dqa-ov,#admin-panel,#login-screen,#dq-cab,#exam-screen"))continue;
+  if(norm(e.textContent)==="qeydiyyat"&&e.closest(HEAD))e.classList.add("dqa-hide")}
+}
+var pend=0;function sched(){if(pend)return;pend=1;(window.requestAnimationFrame||setTimeout)(function(){pend=0;hideReg()})}
+try{new MutationObserver(sched).observe(D.documentElement,{childList:true,subtree:true})}catch(e){}
+hideReg();
+
+/* 2) «Daxil ol» (yalnız başlıqdakı) → pəncərə */
+function loggedIn(){return D.body.classList.contains("dq-authed")||!!D.querySelector('[data-dqauth="user"]')}
+D.addEventListener("click",function(ev){
+ var a=ev.target.closest&&ev.target.closest("a,button,[role=button]");
+ if(!a||a.closest("#dqa-ov,#admin-panel,#login-screen,#dq-cab,#exam-screen"))return;
+ var guest=a.matches('[data-dqauth="guest"]');
+ if(!guest&&!(norm(a.textContent)==="daxil ol"&&a.closest(HEAD)))return;
+ if(loggedIn())return;
+ ev.preventDefault();ev.stopImmediatePropagation();openM("r");
+},true);
+
+/* 3) pəncərə */
+var ov=$("dqa-ov"),back=null,mail="";
+function tab(w){var r=w==="r";$("dqa-tr").setAttribute("aria-selected",r);$("dqa-tl").setAttribute("aria-selected",!r);$("dqa-fr").hidden=!r;$("dqa-fl").hidden=r;setTimeout(function(){$(r?"dqa-rn":($("dqa-s2").hidden?"dqa-le":"dqa-lc")).focus()},40)}
+function openM(w){back=D.activeElement;ov.classList.add("on");D.body.style.overflow="hidden";tab(w)}
+function closeM(){ov.classList.remove("on");D.body.style.overflow="";if(back&&back.focus)try{back.focus()}catch(e){}}
+window.DQAuth={open:openM,close:closeM};
+$("dqa-x").onclick=closeM;
+ov.addEventListener("click",function(e){if(e.target===ov)closeM()});
+D.addEventListener("keydown",function(e){if(e.key==="Escape"&&ov.classList.contains("on"))closeM()});
+$("dqa-tr").onclick=function(){tab("r")};$("dqa-tl").onclick=function(){tab("l")};
+[].forEach.call(ov.querySelectorAll("[data-go]"),function(b){b.onclick=function(){tab(b.dataset.go)}});
+
+function bad(i,e,m){$(i).classList.add("err");var h=$(e);h.textContent=m;h.classList.add("e");return false}
+function clr(a){a.forEach(function(p){$(p[0]).classList.remove("err");var h=$(p[1]);h.classList.remove("e");h.textContent=p[2]||""})}
+function busy(b,on,t){b.disabled=on;if(t)b.textContent=t}
+function step(n){$("dqa-s1").hidden=n!==1;$("dqa-s2").hidden=n!==2;if(n===2)setTimeout(function(){$("dqa-lc").focus()},60)}
+function nomsg(){toast("Verilənlər bazası ilə əlaqə qurulmadı. Səhifəni yeniləyib yenidən cəhd edin.")}
+function human(e){var m=String(e&&e.message||e||"");
+ if(/rate|too many|seconds/i.test(m))return"Çox tez-tez cəhd edildi. Bir az gözləyib yenidən yoxlayın.";
+ if(/expired|invalid|token/i.test(m))return"Kod yanlışdır və ya vaxtı bitib.";
+ if(/network|fetch/i.test(m))return"İnternet bağlantısını yoxlayın.";return"Əməliyyat alınmadı. Bir az sonra yenidən cəhd edin."}
+function sendCode(email,meta){var c=sb();if(!c)return Promise.reject({message:"nodb"});
+ return c.auth.signInWithOtp({email:email,options:{shouldCreateUser:true,data:meta||undefined}}).then(function(r){if(r.error)throw r.error})}
+
+$("dqa-fr").addEventListener("submit",function(e){e.preventDefault();
+ clr([["dqa-rn","dqa-rnE"],["dqa-rp","dqa-rpE","Əlaqə üçün (məs: 050 123 45 67)"],["dqa-re","dqa-reE","Giriş və təsdiq kodu bu Gmail-ə göndərilir"]]);
+ var n=$("dqa-rn").value.trim().replace(/\s+/g," "),p=digits($("dqa-rp").value),m=$("dqa-re").value.trim().toLowerCase(),ok=true;
+ if(n.split(" ").length<2||n.length<5)ok=bad("dqa-rn","dqa-rnE","Ad və soyadı tam yazın");
+ if(!/^0(50|51|55|99|10|70|77|60)\d{7}$/.test(p))ok=bad("dqa-rp","dqa-rpE","Nömrəni 050 123 45 67 formatında yazın");
+ if(!/^[a-z0-9._%+-]+@gmail\.com$/.test(m))ok=bad("dqa-re","dqa-reE","Yalnız Gmail ünvanı yazın: ad@gmail.com");
+ if(!ok)return;var b=$("dqa-br");busy(b,true,"Göndərilir…");
+ try{localStorage.setItem("dqa_profile",JSON.stringify({name:n,phone:p,email:m}))}catch(x){}
+ sendCode(m,{full_name:n,name:n,phone:p}).then(function(){busy(b,false,"Qeydiyyatdan keç");mail=m;$("dqa-le").value=m;step(2);tab("l");toast("Kod "+m+" ünvanına göndərildi")},
+  function(x){busy(b,false,"Qeydiyyatdan keç");if(x&&x.message==="nodb")return nomsg();bad("dqa-re","dqa-reE",human(x))});
+});
+$("dqa-fl").addEventListener("submit",function(e){e.preventDefault();var m=$("dqa-le").value.trim().toLowerCase();
+ if(!$("dqa-s2").hidden){
+  var c=digits($("dqa-lc").value);clr([["dqa-lc","dqa-lcE"]]);if(c.length<6)return bad("dqa-lc","dqa-lcE","Gmail-ə gələn kodu yazın");
+  var v=$("dqa-bv"),cl=sb();if(!cl)return nomsg();busy(v,true,"Yoxlanılır…");
+  cl.auth.verifyOtp({email:mail||m,token:c,type:"email"}).then(function(r){if(r.error)throw r.error;return r}).then(function(){
+   try{var pr=JSON.parse(localStorage.getItem("dqa_profile")||"null");if(pr&&pr.email===(mail||m)&&cl.auth.updateUser)cl.auth.updateUser({data:{full_name:pr.name,name:pr.name,phone:pr.phone}})}catch(x){}
+   closeM();toast("Giriş uğurlu oldu");setTimeout(function(){location.reload()},700)},
+   function(x){busy(v,false,"Daxil ol");bad("dqa-lc","dqa-lcE",human(x))});return}
+ clr([["dqa-le","dqa-leE","Təsdiq kodu bu Gmail-ə göndəriləcək"]]);
+ if(!/^[a-z0-9._%+-]+@gmail\.com$/.test(m))return bad("dqa-le","dqa-leE","Yalnız Gmail ünvanı yazın: ad@gmail.com");
+ var b=$("dqa-bs");busy(b,true,"Göndərilir…");
+ sendCode(m).then(function(){busy(b,false,"Kodu göndər");mail=m;step(2)},function(x){busy(b,false,"Kodu göndər");if(x&&x.message==="nodb")return nomsg();bad("dqa-le","dqa-leE",human(x))});
+});
+$("dqa-rs").onclick=function(){var m=mail||$("dqa-le").value.trim().toLowerCase();sendCode(m).then(function(){toast("Yeni kod göndərildi")},function(x){toast(human(x))})};
+[].forEach.call(ov.querySelectorAll("[data-g]"),function(b){b.onclick=function(){var c=sb();if(!c)return nomsg();
+ try{sessionStorage.setItem("dq_g","1");localStorage.setItem("dq_g_ts",String(Date.now()))}catch(e){}
+ c.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}}).then(function(r){if(r&&r.error)toast(human(r.error))})}});
+})();
+</script>
+
+<!-- ===== DQ Exam Portal: «İmtahan» bölməsi – karuselsiz yeni dizayn ===== -->
+<style id="dqx-css">
+#dqx-ov{position:fixed;inset:0;z-index:2147483300;background:#e9ecf3;display:none}
+#dqx-ov.on{display:block}
+#dqx-ov iframe{width:100%;height:100%;border:0;display:block}
+</style>
+<div id="dqx-ov" role="dialog" aria-modal="true" aria-label="İmtahan qeydiyyat portalı"></div>
+<script id="dqx-js">
+(function(){"use strict";
+if(window.__dqxExam)return;window.__dqxExam=1;
+var HTML="<!DOCTYPE html>\n<html lang=\"az\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n<title>İmtahan Qeydiyyat Portalı – DQ Platform<\/title>\n<link rel=\"icon\" href=\"data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝<\/text><\/svg>\">\n<link href=\"https://fonts.googleapis.com/css2?family=Mulish:wght@400;600;700;800&display=swap\" rel=\"stylesheet\">\n<style>\n:root{--bg:#e9ecf3;--card:#fff;--ink:#0b1f4d;--mut:#6b7691;--line:#e3e7f0;--soft:#f3f5fa;--navy:#0a2a72;--navy2:#061a4a;--gold:#f0b429;--gold2:#e09f12;--green:#16a34a;--green2:#0f8a3c;--warn:#fff6e0;--okbg:#dcf7e6;--okfg:#0f7a3a;--bad:#d92d20;--sh:0 10px 30px rgba(10,42,114,.12)}\n@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#070d1f;--card:#101a35;--ink:#eef2ff;--mut:#9aa7c7;--line:#233053;--soft:#16224522;--warn:#2a2410;--okbg:#0f3322;--okfg:#6ee7a0;--sh:0 10px 30px rgba(0,0,0,.4)}}\n:root[data-theme=dark]{--bg:#070d1f;--card:#101a35;--ink:#eef2ff;--mut:#9aa7c7;--line:#233053;--soft:#162245;--warn:#2a2410;--okbg:#0f3322;--okfg:#6ee7a0;--sh:0 10px 30px rgba(0,0,0,.4)}\n:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}\nhtml{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}\n*,*::before,*::after{box-sizing:inherit}\nbody{margin:0;background:var(--bg);color:var(--ink);font:600 15px/1.5 Mulish,system-ui,sans-serif;-webkit-text-size-adjust:100%}\nbutton,input{font:inherit;color:inherit}\n:focus-visible{outline:3px solid var(--gold);outline-offset:2px}\n.top{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--navy2);color:#fff;position:sticky;top:env(safe-area-inset-top,0px);z-index:20}\n.logo{width:46px;height:46px;border-radius:12px;background:#fff;color:var(--navy);display:grid;place-items:center;font-weight:800;font-size:18px;line-height:1;text-align:center}\n.logo small{display:block;font-size:6px;letter-spacing:.3px}\n.top p{margin:0;flex:1;font-size:13px;color:#b8c4e6}\n.btn{border:0;border-radius:14px;padding:13px 20px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,filter .15s}\n.btn:active{transform:scale(.97)}.btn:hover{filter:brightness(1.06)}\n.gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#2a1c00}\n.green{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff}\n.ghost{background:rgba(255,255,255,.08);color:#fff;border:1.5px solid rgba(255,255,255,.28)}\n.btn[disabled]{opacity:.55;cursor:not-allowed}\n.wrap{max-width:1100px;margin:0 auto;padding:16px}\n.hero{background:radial-gradient(120% 140% at 100% 0,#14408f,var(--navy) 45%,var(--navy2));color:#fff;border-radius:26px;padding:26px 22px;display:grid;gap:22px;box-shadow:var(--sh)}\n@media(min-width:820px){.hero{grid-template-columns:1.25fr 1fr;padding:34px;align-items:center}}\n.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:700}\n.dot{width:9px;height:9px;border-radius:50%;background:#34d399;box-shadow:0 0 0 4px rgba(52,211,153,.25)}\nh1{margin:14px 0 10px;font-size:clamp(28px,6vw,44px);line-height:1.1;font-weight:800}\nh1 b{color:var(--gold)}\n.lead{margin:0 0 20px;color:#cdd7f2;font-weight:600;max-width:52ch}\n.acts{display:flex;flex-wrap:wrap;gap:10px}\n.acts .btn{flex:1 1 200px}\n.steps{display:grid;gap:12px}\n.step{display:flex;gap:14px;align-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:14px}\n.step i{flex:none;width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#2a1c00;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:18px}\n.step b{display:block}.step span{font-size:13px;color:#b8c4e6;font-weight:600}\n.sec{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:28px 0 14px;border-left:4px solid var(--gold);padding-left:12px}\n.sec h2{margin:0;font-size:24px;font-weight:800}.sec small{color:var(--mut);font-weight:600}\n.ref{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-weight:800;color:var(--ink);cursor:pointer}\n.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}\n.card{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--gold);border-radius:22px;padding:18px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:12px}\n.chips{display:flex;flex-wrap:wrap;gap:8px}\n.chip{border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:800;background:var(--soft);color:var(--ink)}\n.chip.cat{background:var(--navy);color:#fff;border-radius:10px}.chip.t{background:var(--warn);color:#8a5a00}.chip.ok{background:var(--okbg);color:var(--okfg)}.chip.no{background:#fde8e6;color:var(--bad)}\n.card h3{margin:0;font-size:21px;font-weight:800}\n.loc{margin:0;color:var(--mut);font-size:13.5px}\n.key{background:#e8eefc;color:#0a2a72;border-radius:10px;padding:7px 12px;font-size:13px;font-weight:700;align-self:flex-start}\n:root[data-theme=dark] .key{background:#1b2c5c;color:#cfe0ff}\n@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .key{background:#1b2c5c;color:#cfe0ff}}\n.info{display:grid;grid-template-columns:1fr 1fr;gap:10px}\n.info div{background:var(--soft);border-radius:14px;padding:10px 12px}\n.info small{display:block;color:var(--mut);font-size:11.5px;font-weight:700;letter-spacing:.3px}\n.info b{font-size:15px}\n.bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--gold);width:0;transition:width .6s}\n.seat{margin:0;color:var(--mut);font-size:13px}\n.card .btn{width:100%}\n.empty{background:var(--card);border:1px dashed var(--line);border-radius:18px;padding:28px;text-align:center;color:var(--mut)}\n.ov{position:fixed;inset:0;z-index:50;background:rgba(4,10,30,.6);display:none;align-items:flex-end;justify-content:center;padding:0}\n@media(min-width:600px){.ov{align-items:center;padding:20px}}\n.ov.on{display:flex}\n.box{background:var(--card);width:100%;max-width:460px;max-height:92vh;overflow:auto;border-radius:24px 24px 0 0;padding:22px 20px calc(20px + env(safe-area-inset-bottom,0px));animation:up .25s ease}\n@media(min-width:600px){.box{border-radius:24px}}\n@keyframes up{from{transform:translateY(24px);opacity:0}}\n.box h3{margin:0 0 4px;font-size:22px;font-weight:800}.box>p{margin:0 0 14px;color:var(--mut);font-size:14px}\nlabel{display:block;font-weight:800;font-size:13.5px;margin:12px 0 6px}\ninput{width:100%;border:1.5px solid var(--line);background:var(--soft);border-radius:12px;padding:13px 14px;font-size:16px}\ninput:focus{border-color:var(--navy);outline:none;box-shadow:0 0 0 3px rgba(240,180,41,.35)}\ninput.err{border-color:var(--bad)}.fe{color:var(--bad);font-size:12.5px;min-height:16px;margin:4px 0 0}\n.row{display:flex;gap:10px;margin-top:16px}.row .btn{flex:1}\n.cancel{background:var(--soft);color:var(--ink)}\n.res{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px;background:var(--soft)}\n.res b{display:block}.res span{color:var(--mut);font-size:13px}\n.code{font-size:28px;font-weight:800;letter-spacing:2px;text-align:center;background:var(--warn);border-radius:14px;padding:14px;margin:12px 0}\n.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--navy2);color:#fff;padding:12px 18px;border-radius:999px;font-weight:700;opacity:0;transition:.3s;z-index:90;pointer-events:none;max-width:92vw;text-align:center}\n.toast.on{opacity:1;transform:translate(-50%,0)}\n@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}\n<\/style>\n<\/head>\n<body>\n<header class=\"top\">\n  <div class=\"logo\"><span>DQ<small>PLATFORM<\/small><\/span><\/div>\n  <p>İmtahan Qeydiyyat Portalı<\/p>\n  <button class=\"btn gold\" type=\"button\" id=\"home\">‹ Əsas sayt<\/button>\n<\/header>\n\n<main class=\"wrap\">\n  <section class=\"hero\" aria-labelledby=\"h1\">\n    <div>\n      <span class=\"badge\"><i class=\"dot\"><\/i>Qeydiyyat portalı aktivdir<\/span>\n      <h1 id=\"h1\">İmtahana <b>qeydiyyat<\/b> bir neçə saniyəyə<\/h1>\n      <p class=\"lead\">Sessiyanı seçin, məlumatlarınızı yazın və şəxsi iş nömrənizlə imtahan panelinə daxil olun. Müddətsiz sessiyalarda istənilən vaxt qeydiyyatdan keçib dərhal başlaya bilərsiniz.<\/p>\n      <div class=\"acts\">\n        <button class=\"btn gold\" type=\"button\" id=\"goSes\">Sessiyalara bax ↓<\/button>\n        <button class=\"btn ghost\" type=\"button\" id=\"goChk\">🔎 Qeydiyyatımı yoxla<\/button>\n        <button class=\"btn green\" type=\"button\" id=\"goReg\">✍️ Qeydiyyatdan keç<\/button>\n      <\/div>\n    <\/div>\n    <ol class=\"steps\" style=\"list-style:none;margin:0;padding:0\">\n      <li class=\"step\"><i>1<\/i><div><b>Sessiya seçin<\/b><span>Aktiv sessiyalardan birini<\/span><\/div><\/li>\n      <li class=\"step\"><i>2<\/i><div><b>Qeydiyyatdan keçin<\/b><span>Ad Soyad və əlaqə nömrəsi — iş nömrəsi avtomatik verilir<\/span><\/div><\/li>\n      <li class=\"step\"><i>3<\/i><div><b>İmtahana başlayın<\/b><span>Ana səhifədə şəxsi iş nömrəsi ilə giriş<\/span><\/div><\/li>\n    <\/ol>\n  <\/section>\n\n  <div class=\"sec\" id=\"sessions\">\n    <div><h2>Aktiv sessiyalar<\/h2><small id=\"meta\"><\/small><\/div>\n    <button class=\"ref\" type=\"button\" id=\"refresh\">⟳ Yenilə<\/button>\n  <\/div>\n  <div class=\"grid\" id=\"grid\" aria-live=\"polite\"><\/div>\n<\/main>\n\n<div class=\"ov\" id=\"ovReg\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"rt\">\n  <div class=\"box\">\n    <div id=\"regForm\">\n      <h3 id=\"rt\">Qeydiyyatdan keç<\/h3>\n      <p id=\"rs\">Sessiya seçilməyib<\/p>\n      <label for=\"fn\">Ad Soyad<\/label><input id=\"fn\" autocomplete=\"name\" placeholder=\"Ad Soyad\"><p class=\"fe\" id=\"e1\"><\/p>\n      <label for=\"ph\">Telefon nömrəsi<\/label><input id=\"ph\" type=\"tel\" inputmode=\"tel\" autocomplete=\"tel\" placeholder=\"050 123 45 67\"><p class=\"fe\" id=\"e2\"><\/p>\n      <label for=\"em\">Gmail<\/label><input id=\"em\" type=\"email\" autocomplete=\"email\" placeholder=\"ad@gmail.com\"><p class=\"fe\" id=\"e3\"><\/p>\n      <div class=\"row\"><button class=\"btn cancel\" type=\"button\" data-close>Bağla<\/button><button class=\"btn green\" type=\"button\" id=\"submit\">Qeydiyyatdan keç<\/button><\/div>\n    <\/div>\n    <div id=\"regDone\" hidden>\n      <h3>Qeydiyyat tamamlandı ✅<\/h3>\n      <p id=\"doneTxt\"><\/p>\n      <div class=\"code\" id=\"doneCode\"><\/div>\n      <p>İş nömrənizi saxlayın: imtahana ana səhifədə bu nömrə ilə daxil olacaqsınız.<\/p>\n      <div class=\"row\"><button class=\"btn cancel\" type=\"button\" id=\"copy\">Nömrəni kopyala<\/button><button class=\"btn gold\" type=\"button\" data-close>Hazırdır<\/button><\/div>\n    <\/div>\n  <\/div>\n<\/div>\n\n<div class=\"ov\" id=\"ovChk\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"ct\">\n  <div class=\"box\">\n    <h3 id=\"ct\">Qeydiyyatımı yoxla<\/h3>\n    <p>Qeydiyyat zamanı yazdığınız telefon nömrəsini və ya Gmail ünvanını daxil edin.<\/p>\n    <label for=\"q\">Telefon və ya Gmail<\/label><input id=\"q\" placeholder=\"050 123 45 67 və ya ad@gmail.com\"><p class=\"fe\" id=\"e4\"><\/p>\n    <div id=\"results\"><\/div>\n    <div class=\"row\"><button class=\"btn cancel\" type=\"button\" data-close>Bağla<\/button><button class=\"btn gold\" type=\"button\" id=\"find\">Yoxla<\/button><\/div>\n  <\/div>\n<\/div>\n<div class=\"toast\" id=\"toast\" role=\"status\"><\/div>\n\n<script>\n(function(){\n\"use strict\";\n/* ===== Sessiyalar: real saytda bu massiv verilənlər bazasından gəlir ===== */\nvar SESSIONS=[\n {id:\"s1\",cat:\"BB\",name:\"Sınaq 1\",place:\"Rəsmi internet saytında\",time:\"Hər zaman açıq\",exam:\"İstənilən vaxt\",hours:\"Müddətsiz giriş\",deadline:\"Müddətsiz\",price:0,cap:50,taken:1,open:true},\n {id:\"s2\",cat:\"BA\",name:\"Sınaq 2\",place:\"Rəsmi internet saytında\",time:\"14 okt\",exam:\"14 okt, 18:53\",hours:\"18:53 – 23:59\",deadline:\"13 okt\",price:10,cap:80,taken:34,open:true},\n {id:\"s3\",cat:\"AC\",name:\"Sınaq 3\",place:\"Rəsmi internet saytında\",time:\"Tezliklə\",exam:\"Tarix elan olunacaq\",hours:\"—\",deadline:\"—\",price:10,cap:60,taken:0,open:false}\n];\nvar KEY=\"dq_exam_regs\",regs=[],cur=null;\nfunction $(i){return document.getElementById(i)}\nfunction load(){try{regs=JSON.parse(localStorage.getItem(KEY)||\"[]\")||[]}catch(e){regs=[]}}\nfunction save(){try{localStorage.setItem(KEY,JSON.stringify(regs))}catch(e){}}\nfunction el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}\nfunction toast(m){var t=$(\"toast\");t.textContent=m;t.classList.add(\"on\");clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove(\"on\")},2600)}\nfunction digits(s){return String(s).replace(/\\D/g,\"\")}\nfunction myReg(id){return regs.filter(function(r){return r.sid===id})[0]}\n\nfunction render(){\n  var g=$(\"grid\");g.textContent=\"\";\n  var d=new Date();$(\"meta\").textContent=SESSIONS.length+\" sessiya · \"+(\"0\"+d.getHours()).slice(-2)+\":\"+(\"0\"+d.getMinutes()).slice(-2);\n  if(!SESSIONS.length){g.appendChild(el(\"div\",\"empty\",\"Hazırda aktiv sessiya yoxdur. Bir az sonra yenidən yoxlayın.\"));return}\n  SESSIONS.forEach(function(s){\n    var c=el(\"article\",\"card\"),chips=el(\"div\",\"chips\");\n    chips.appendChild(el(\"span\",\"chip cat\",s.cat));\n    chips.appendChild(el(\"span\",\"chip t\",\"⏲ \"+s.time));\n    var left=s.cap-s.taken,mine=myReg(s.id);\n    chips.appendChild(el(\"span\",\"chip \"+(s.open&&left>0?\"ok\":\"no\"),s.open?(left>0?\"● Açıqdır\":\"● Yer qalmayıb\"):\"● Tezliklə\"));\n    c.appendChild(chips);c.appendChild(el(\"h3\",\"\",s.name));c.appendChild(el(\"p\",\"loc\",\"📍 \"+s.place));\n    c.appendChild(el(\"span\",\"key\",\"🔑 Şəxsi iş nömrəsi ilə daxil olma\"));\n    var info=el(\"div\",\"info\");\n    [[\"İMTAHAN\",s.exam],[\"SAAT\",s.hours],[\"QEYDİYYAT BİTMƏ\",s.deadline],[\"QİYMƏT\",s.price?s.price+\" ₼\":\"Pulsuz\"]].forEach(function(p){var b=el(\"div\");b.appendChild(el(\"small\",\"\",p[0]));b.appendChild(el(\"b\",\"\",p[1]));info.appendChild(b)});\n    c.appendChild(info);\n    var bar=el(\"div\",\"bar\"),i=el(\"i\");i.style.width=Math.round(s.taken/s.cap*100)+\"%\";bar.appendChild(i);c.appendChild(bar);\n    c.appendChild(el(\"p\",\"seat\",left+\" boş yer · \"+s.taken+\" / \"+s.cap+\" qeydiyyat\"));\n    var b=el(\"button\",\"btn \"+(mine?\"gold\":\"green\"),mine?\"✔ Qeydiyyatım\":\"✍️ Qeydiyyatdan keç\");b.type=\"button\";\n    if(!mine&&(!s.open||left<=0)){b.disabled=true;b.textContent=s.open?\"Yer qalmayıb\":\"Tezliklə açılır\"}\n    b.onclick=function(){mine?openChk(mine.phone):openReg(s)};\n    c.appendChild(b);g.appendChild(c);\n  });\n}\n\nfunction show(o){$(o).classList.add(\"on\");document.body.style.overflow=\"hidden\"}\nfunction hide(){[].forEach.call(document.querySelectorAll(\".ov\"),function(o){o.classList.remove(\"on\")});document.body.style.overflow=\"\"}\nfunction openReg(s){\n  cur=s||SESSIONS.filter(function(x){return x.open&&x.cap>x.taken&&!myReg(x.id)})[0];\n  if(!cur){toast(\"Qeydiyyat üçün açıq sessiya yoxdur\");return}\n  $(\"rs\").textContent=cur.name+\" · \"+cur.cat+\" · \"+(cur.price?cur.price+\" ₼\":\"Pulsuz\");\n  $(\"regForm\").hidden=false;$(\"regDone\").hidden=true;\n  [\"fn\",\"ph\",\"em\"].forEach(function(i){$(i).value=\"\";$(i).classList.remove(\"err\")});[\"e1\",\"e2\",\"e3\"].forEach(function(i){$(i).textContent=\"\"});\n  show(\"ovReg\");setTimeout(function(){$(\"fn\").focus()},50);\n}\nfunction openChk(v){$(\"q\").value=v||\"\";$(\"results\").textContent=\"\";$(\"e4\").textContent=\"\";show(\"ovChk\");if(v)find();else setTimeout(function(){$(\"q\").focus()},50)}\nfunction bad(i,e,m){$(i).classList.add(\"err\");$(e).textContent=m;return false}\nfunction submit(){\n  var n=$(\"fn\").value.trim().replace(/\\s+/g,\" \"),p=digits($(\"ph\").value),m=$(\"em\").value.trim().toLowerCase(),ok=true;\n  [\"fn\",\"ph\",\"em\"].forEach(function(i){$(i).classList.remove(\"err\")});[\"e1\",\"e2\",\"e3\"].forEach(function(i){$(i).textContent=\"\"});\n  if(n.split(\" \").length<2||n.length<5)ok=bad(\"fn\",\"e1\",\"Ad və soyadı tam yazın\");\n  if(!/^0(50|51|55|99|10|70|77|60)\\d{7}$/.test(p))ok=bad(\"ph\",\"e2\",\"Nömrə 050 123 45 67 formatında olmalıdır\");\n  if(!/^[a-z0-9._%+-]+@gmail\\.com$/.test(m))ok=bad(\"em\",\"e3\",\"Yalnız Gmail ünvanı yazın: ad@gmail.com\");\n  if(!ok)return;\n  if(regs.some(function(r){return r.sid===cur.id&&(r.phone===p||r.email===m)})){bad(\"ph\",\"e2\",\"Bu nömrə və ya Gmail ilə artıq qeydiyyat var\");return}\n  var btn=$(\"submit\");btn.disabled=true;btn.textContent=\"Göndərilir…\";\n  /* Real saytda: burada Supabase insert və iş nömrəsinin serverdə yaradılması olacaq */\n  setTimeout(function(){\n    var code=\"DQ-\"+Math.floor(100000+Math.random()*900000);\n    regs.push({sid:cur.id,name:n,phone:p,email:m,code:code,at:Date.now()});save();cur.taken++;\n    $(\"doneTxt\").textContent=n+\", \"+cur.name+\" üçün qeydiyyatınız qəbul olundu.\";$(\"doneCode\").textContent=code;\n    $(\"regForm\").hidden=true;$(\"regDone\").hidden=false;btn.disabled=false;btn.textContent=\"Qeydiyyatdan keç\";render();\n  },650);\n}\nfunction find(){\n  var v=$(\"q\").value.trim().toLowerCase(),r=$(\"results\");r.textContent=\"\";$(\"e4\").textContent=\"\";\n  if(!v){$(\"e4\").textContent=\"Telefon və ya Gmail yazın\";return}\n  var p=digits(v),list=regs.filter(function(x){return x.email===v||(p.length>=9&&x.phone===p)});\n  if(!list.length){r.appendChild(el(\"div\",\"empty\",\"Bu məlumatla qeydiyyat tapılmadı. “Qeydiyyatdan keç” düyməsi ilə qeydiyyat edə bilərsiniz.\"));return}\n  list.forEach(function(x){\n    var s=SESSIONS.filter(function(z){return z.id===x.sid})[0]||{name:\"Sessiya\",cat:\"\"},b=el(\"div\",\"res\");\n    b.appendChild(el(\"b\",\"\",x.name));b.appendChild(el(\"span\",\"\",s.name+\" · \"+s.cat+\" · İş nömrəsi: \"+x.code));r.appendChild(b);\n  });\n}\nfunction scrollTo(id){$(id).scrollIntoView({behavior:\"smooth\",block:\"start\"})}\n\n$(\"goSes\").onclick=function(){scrollTo(\"sessions\")};\n$(\"goReg\").onclick=function(){openReg()};\n$(\"goChk\").onclick=function(){openChk()};\n$(\"refresh\").onclick=function(){load();render();toast(\"Sessiyalar yeniləndi\")};\n$(\"submit\").onclick=submit;$(\"find\").onclick=find;\n$(\"q\").addEventListener(\"keydown\",function(e){if(e.key===\"Enter\")find()});\n$(\"copy\").onclick=function(){var t=$(\"doneCode\").textContent;try{navigator.clipboard.writeText(t).then(function(){toast(\"Kopyalandı\")},function(){toast(t)})}catch(e){toast(t)}};\n$(\"home\").onclick=function(){try{if(parent!==window){parent.postMessage(\"dqx-close\",\"*\");return}}catch(e){}toast(\"Əsas sayta qayıdın\")};\n[].forEach.call(document.querySelectorAll(\"[data-close]\"),function(b){b.onclick=hide});\n[].forEach.call(document.querySelectorAll(\".ov\"),function(o){o.addEventListener(\"click\",function(e){if(e.target===o)hide()})});\ndocument.addEventListener(\"keydown\",function(e){if(e.key===\"Escape\")hide()});\nload();render();\n})();\n<\/script>\n<\/body>\n<\/html>\n";
+var D=document,ov=D.getElementById("dqx-ov"),fr=null,back=null;
+function norm(t){return String(t||"").replace(/\s+/g," ").trim().toLowerCase().replace(/\u0307/g,"")}
+function openX(){back=D.activeElement;if(!fr){fr=D.createElement("iframe");fr.title="İmtahan qeydiyyat portalı";fr.srcdoc=HTML;ov.appendChild(fr)}
+ ov.classList.add("on");D.body.style.overflow="hidden"}
+function closeX(){ov.classList.remove("on");D.body.style.overflow="";if(back&&back.focus)try{back.focus()}catch(e){}}
+window.DQExam={open:openX,close:closeX};
+var HEAD=".v3-hd,.v3-top,.v3-nav,header,nav,[class*=header],[class*=navbar],[class*=topbar]";
+D.addEventListener("click",function(ev){
+ var a=ev.target.closest&&ev.target.closest("a,button,[role=button]");
+ if(!a||a.closest("#dqx-ov,#dqa-ov,#admin-panel,#login-screen,#dq-cab,#exam-screen"))return;
+ if(norm(a.textContent)!=="imtahan"||!a.closest(HEAD))return;
+ ev.preventDefault();ev.stopImmediatePropagation();openX();
+},true);
+window.addEventListener("message",function(e){if(e.data==="dqx-close")closeX()});
+D.addEventListener("keydown",function(e){if(e.key==="Escape"&&ov.classList.contains("on"))closeX()});
+})();
+</script>
+
 </body>
 </html>
