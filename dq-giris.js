@@ -988,6 +988,24 @@
       if (window.__dqgPending) { window.__dqgPending = 0; setTimeout(login, 0); }
     }
   } catch (e) {}
+  /* Fokus qoruyucusu: index.html-dəki digər skriptlər telefonda klaviatura açılanda fokusu götürə bilər (klaviatura bir anlıq açılıb bağlanır).
+     İstifadəçi xanaya toxunubsa və fokus 3 san ərzində özbaşına itibsə, xana yenidən fokuslanır; başqa yerə toxunuşda qoruyucu söndürülür. */
+  (function () {
+    var inp = $("dqg-fin"), tapAt = 0, tries = 0;
+    function mark(e) {
+      var p = e.composedPath ? e.composedPath() : [e.target];
+      if (p.indexOf(inp) > -1) { tapAt = Date.now(); tries = 0; } else tapAt = 0;
+    }
+    ["pointerdown", "touchstart", "mousedown"].forEach(function (t) { document.addEventListener(t, mark, true); });
+    inp.addEventListener("blur", function () {
+      if (!tapAt || Date.now() - tapAt > 3000 || tries >= 4) return;
+      tries++;
+      setTimeout(function () {
+        if (!tapAt || session) return;
+        try { if (SH.activeElement !== inp) inp.focus({ preventScroll: true }); } catch (e) {}
+      }, 30);
+    });
+  })();
   /* giris.html-dən təhvil: iş nömrəsi təkrar soruşulmur — avtomatik daxil olur, seçilmiş sınaq varsa (təsdiq giris.html-də verilib) birbaşa başlayır / davam edir */
   try {
     var ho = JSON.parse(sessionStorage.getItem("dqg_handoff") || "null");
