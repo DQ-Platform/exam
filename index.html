@@ -6957,5 +6957,393 @@ html.dq-admin-nodock #dq13-dock{display:none!important}
 })();
 </script>
 
+<script id="dq-fix-img2">
+(function(){
+  'use strict';
+  if (window.__dqImg2) return; window.__dqImg2 = 1;
+
+  function shown(sel){ var e = document.querySelector(sel); return !!(e && e.getClientRects().length && getComputedStyle(e).display !== 'none'); }
+  function newsOpen(){ return shown('#nwp-root') || shown('.nw-adm'); }
+
+  /* ---------- ortaq: şəkli 4:5 çərçivəyə səliqəli yerləşdir ---------- */
+  function drawFit(img, W, H){
+    var iw = img.naturalWidth, ih = img.naturalHeight, ar = iw / ih, t = W / H;
+    var c = document.createElement('canvas'); c.width = W; c.height = H;
+    var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    if (Math.abs(ar - t) / t <= .08) {
+      var k = Math.max(W / iw, H / ih); g.drawImage(img, (W - iw * k) / 2, (H - ih * k) / 2, iw * k, ih * k);
+    } else {
+      var s = document.createElement('canvas'); s.width = 16; s.height = 20;
+      var sg = s.getContext('2d'), kk = Math.max(16 / iw, 20 / ih);
+      sg.drawImage(img, (16 - iw * kk) / 2, (20 - ih * kk) / 2, iw * kk, ih * kk);
+      g.drawImage(s, 0, 0, W, H); g.fillStyle = 'rgba(255,255,255,.28)'; g.fillRect(0, 0, W, H);
+      var m = Math.min(W / iw, H / ih), pw = iw * m, ph = ih * m;
+      g.shadowColor = 'rgba(15,23,42,.25)'; g.shadowBlur = W * .022; g.shadowOffsetY = W * .005;
+      g.drawImage(img, (W - pw) / 2, (H - ph) / 2, pw, ph);
+    }
+    return c;
+  }
+
+  /* ---------- A) Yükləmə: bütün fayl-input yollarını tut (DOM-da olmayanlar da) ---------- */
+  function normFile(file){
+    return new Promise(function(res, rej){
+      var url = URL.createObjectURL(file), im = new Image();
+      im.onload = function(){ try { var c = drawFit(im, 800, 1000); URL.revokeObjectURL(url);
+        c.toBlob(function(b){ b ? res(new File([b], (file.name || 'qapaq').replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg', lastModified: Date.now() })) : rej(); }, 'image/jpeg', .88);
+      } catch (e) { rej(e); } };
+      im.onerror = rej; im.src = url;
+    });
+  }
+  var wmap = new WeakMap(), origAdd = EventTarget.prototype.addEventListener, origRem = EventTarget.prototype.removeEventListener;
+
+  function wrap(fn){
+    if (wmap.has(fn)) return wmap.get(fn);
+    var w = function(ev){
+      var inp = this;
+      if (ev.__dqN || ev.__dqNorm || !inp || inp.type !== 'file' || !newsOpen()) return fn.apply(this, arguments);
+      var f = inp.files && inp.files[0];
+      if (!f || !/^image\/(jpe?g|png|webp|heic|heif|bmp)/i.test(f.type)) return fn.apply(this, arguments);
+      if (!inp.__dqP) {
+        inp.__dqP = 1;
+        var done = false, go = function(){ if (done) return; done = true; inp.__dqP = 0;
+          var e2 = new Event('change', { bubbles: true }); e2.__dqN = true; inp.dispatchEvent(e2); };
+        var to = setTimeout(go, 8000);
+        normFile(f).then(function(nf){ try { var dt = new DataTransfer(); dt.items.add(nf); inp.files = dt.files; } catch (x) {} clearTimeout(to); go(); })
+                   .catch(function(){ clearTimeout(to); go(); });
+      }
+    };
+    wmap.set(fn, w); return w;
+  }
+  EventTarget.prototype.addEventListener = function(t, fn, o){
+    if (t === 'change' && typeof fn === 'function' && this instanceof HTMLInputElement) fn = wrap(fn);
+    return origAdd.call(this, t, fn, o);
+  };
+  EventTarget.prototype.removeEventListener = function(t, fn, o){
+    if (t === 'change' && typeof fn === 'function' && wmap.has(fn)) fn = wmap.get(fn);
+    return origRem.call(this, t, fn, o);
+  };
+  try {
+    var d = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'onchange');
+    Object.defineProperty(HTMLInputElement.prototype, 'onchange', {
+      configurable: true,
+      get: function(){ return this.__dqoc || d.get.call(this); },
+      set: function(fn){
+        if (this.type === 'file' && typeof fn === 'function') {
+          if (this.__dqocw) this.removeEventListener('change', this.__dqocw);
+          this.__dqoc = fn; this.__dqocw = function(e){ return fn.call(this, e); };
+          this.addEventListener('change', this.__dqocw);
+        } else { this.__dqoc = null; d.set.call(this, fn); }
+      }
+    });
+  } catch (e) {}
+
+  /* ---------- B) Artıq yüklənmiş şəkillər: 4:5 qutularda kəsilmə əvəzinə səliqəli sığdır ---------- */
+  var cache = {}, outs = {}, busy = 0;
+  var IMG_SEL = '#nw-pub img,#nwp-root img,.dq2n img,.dqn img,.nw-card img,.nw-li img,.nwp-li img,.nwp-pv .im,.nwp-cv';
+  function toRes(src, W, H){
+    if (cache[src]) return cache[src];
+    return cache[src] = new Promise(function(res, rej){
+      var im = new Image(); im.crossOrigin = 'anonymous';
+      im.onload = function(){ try { var c = drawFit(im, W, H); var u = c.toDataURL('image/jpeg', .85); outs[u] = 1; res(u); } catch (e) { rej(e); } };
+      im.onerror = rej; im.src = src;
+    });
+  }
+  function boxOk(r){ var q = r.width / r.height; return r.width >= 40 && q > .7 && q < .9; }
+
+  function scan(){
+    if (document.hidden || busy > 4) return;
+    var list = document.querySelectorAll(IMG_SEL);
+    for (var i = 0; i < list.length && busy < 5; i++) {
+      var el = list[i], r = el.getBoundingClientRect();
+      if (!r.width || !boxOk(r)) continue;
+      var cs = getComputedStyle(el);
+      if (el.tagName === 'IMG') {
+        var src = el.currentSrc || el.src;
+        if (!src || outs[src] || cache[src] === 'x' || !el.naturalWidth) continue;
+        if (cs.objectFit !== 'cover') continue;
+        if (Math.abs(el.naturalWidth / el.naturalHeight - .8) < .06) continue;
+        (function(el, src){ busy++;
+          toRes(src, 480, 600).then(function(u){ el.src = u; }).catch(function(){ cache[src] = 'x'; }).then(function(){ busy--; }); })(el, src);
+      } else {
+        var m = /url\(["']?([^"')]+)["']?\)/.exec(el.style.backgroundImage || '');
+        if (!m || outs[m[1]] || cache[m[1]] === 'x' || m[1].indexOf('data:') === 0) continue;
+        (function(el, src){ busy++;
+          toRes(src, 480, 600).then(function(u){ el.style.backgroundImage = 'url("' + u + '")'; }).catch(function(){ cache[src] = 'x'; }).then(function(){ busy--; }); })(el, m[1]);
+      }
+    }
+  }
+  setInterval(scan, 1000);
+})();
+</script>
+
+<style id="dqnf-css">
+#dqnf-card{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 10px);transform:translate(-50%,-150%);width:min(94vw,420px);z-index:2147483000;box-sizing:border-box;padding:14px 34px 14px 14px;border-radius:20px;background:#0f2042f2;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;border:1px solid rgba(217,178,95,.5);box-shadow:0 18px 40px -12px #050f28a6;transition:transform .55s cubic-bezier(.2,1.2,.3,1);font-family:inherit;text-align:left}
+#dqnf-card.on{transform:translate(-50%,0)}
+#dqnf-card .r{display:flex;gap:12px;align-items:flex-start}
+#dqnf-card .ic{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:23px;background:linear-gradient(135deg,#d9b25f,#f3dc9a)}
+#dqnf-card .tx{min-width:0;flex:1}
+#dqnf-card .tp{font-size:11px;font-weight:800;letter-spacing:.6px;color:#d9b25f;text-transform:uppercase}
+#dqnf-card b{display:block;font-size:15px;line-height:1.3;margin:2px 0 3px}
+#dqnf-card p{margin:0;font-size:13px;line-height:1.45;opacity:.88;white-space:pre-line;word-break:break-word}
+#dqnf-card .lk{display:block;margin-top:9px;padding:9px 12px;border-radius:12px;background:#ffffff14;border:1px solid #ffffff26;color:#9ec1ff;font-size:12.5px;font-weight:700;text-decoration:none;word-break:break-all}
+#dqnf-card .go{display:block;margin-top:8px;text-align:center;padding:11px;border-radius:12px;background:#d9b25f;color:#1b1405;font-weight:800;font-size:14px;text-decoration:none}
+#dqnf-card .more{margin-top:8px;font-size:12px;opacity:.7}
+#dqnf-card .perm{margin-top:8px;border:0;background:none;color:#d9b25f;font:700 12px inherit;font-family:inherit;padding:0;cursor:pointer;text-decoration:underline}
+#dqnf-card .x{position:absolute;top:6px;right:10px;border:0;background:none;color:#9fb2d4;font-size:22px;line-height:1;cursor:pointer}
+#dqnf-ask{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);transform:translate(-50%,160%);width:min(94vw,440px);z-index:2147483000;box-sizing:border-box;padding:14px;border-radius:16px;background:#fff;color:#0f172a;border:1px solid #d6e0f2;box-shadow:0 16px 40px -10px #0f172a59;transition:transform .5s cubic-bezier(.2,1.1,.3,1);font-family:inherit;text-align:left;font-size:14px;line-height:1.45}
+#dqnf-ask.on{transform:translate(-50%,0)}
+#dqnf-ask .b{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.dqnf-bt{border:0;border-radius:10px;padding:10px 14px;font:700 13px inherit;font-family:inherit;cursor:pointer;background:#0a2f7a;color:#fff}
+.dqnf-bt.o{background:#eef2fb;color:#0a2f7a}.dqnf-bt.r{background:#fee2e2;color:#b91c1c}.dqnf-bt.s{padding:6px 10px;font-size:12px}
+#dqnf-md{position:fixed;inset:0;z-index:2147483001;background:#0f172a99;display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:16px 12px;font-family:inherit}
+#dqnf-md.on{display:flex}
+#dqnf-md .bx{background:#fff;color:#0f172a;border-radius:20px;width:100%;max-width:480px;margin:auto;padding:18px;text-align:left}
+#dqnf-md h3{margin:0 0 12px;font-size:18px;text-align:left;color:#0a2f7a}
+#dqnf-md label{display:block;font-size:12.5px;font-weight:700;color:#475569;margin:10px 0 4px}
+#dqnf-md input,#dqnf-md select,#dqnf-md textarea{width:100%;box-sizing:border-box;padding:11px 12px;border:1.5px solid #cbd5e1;border-radius:10px;font:inherit;font-size:15px;background:#fff;color:#0f172a;user-select:text}
+#dqnf-md textarea{min-height:84px;resize:vertical}
+#dqnf-md .row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+#dqnf-md .msg{font-size:13px;font-weight:600;margin-top:10px;min-height:18px}
+#dqnf-md .msg.e{color:#b91c1c}#dqnf-md .msg.k{color:#15803d}
+#dqnf-md .hs{margin-top:16px;border-top:1px solid #e2e8f0;padding-top:10px}
+#dqnf-md .hi{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+#dqnf-md .hi span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style>
+<script id="dqnf-js">
+(function(){
+  'use strict';
+  if (window.__dqnf) return; window.__dqnf = 1;
+  var U = 'https://cpzwliqlgaplroscvduo.supabase.co', K = 'sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF';
+  var COL = 'notif', SEEN = 'dq_notif_seen', MAXAGE = 7 * 864e5;
+  var ICON = { quiz: '🧩', sinaq: '📝', test: '✅', xeber: '📰' };
+  var LBL = { quiz: 'Yeni quiz', sinaq: 'Yeni sınaq', test: 'Yeni test', xeber: 'Yeni xəbər' };
+
+  function H(x){ var h = { apikey: K, Authorization: 'Bearer ' + K, 'Content-Type': 'application/json' }; for (var k in x) h[k] = x[k]; return h; }
+  function $(t, c, h){ var e = document.createElement(t); if (c) e.className = c; if (h != null) e.textContent = h; return e; }
+  function shown(sel){ var e = document.querySelector(sel); return !!(e && e.getClientRects().length && getComputedStyle(e).display !== 'none'); }
+  function siteUrl(){ return location.origin + location.pathname; }
+  function authed(){ return document.body && (document.body.classList.contains('dq-authed') || !!document.querySelector('[data-dqauth="user"]')); }
+  function adminUI(){ return shown('#admin-panel') || shown('#nwp-root') || shown('#v2-root') || shown('#v3-root') || shown('#v4-root') || shown('#v5-root'); }
+  function inExam(){ return !!document.querySelector('#exam-screen.active,#tlx-run.open,.tv2-ov.on'); }
+
+  /* ================= İSTİFADƏÇİ TƏRƏFİ ================= */
+  function fetchList(){
+    return fetch(U + '/rest/v1/dq_v2_store?select=*&collection=eq.' + COL + '&order=id.desc&limit=20&_t=' + Date.now(), { headers: H() })
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(a){ return Array.isArray(a) ? a : []; }).catch(function(){ return []; });
+  }
+  var card = null, hideT = null;
+  function closeCard(){ if (card) card.classList.remove('on'); clearTimeout(hideT); }
+  function showCard(row, extra){
+    var d = row.data || {}, t = ICON[d.type] ? d.type : 'xeber';
+    if (card) card.remove();
+    card = $('div'); card.id = 'dqnf-card'; card.setAttribute('role', 'alert');
+    var r = $('div', 'r'); r.appendChild($('div', 'ic', ICON[t]));
+    var tx = $('div', 'tx'); tx.appendChild($('div', 'tp', LBL[t]));
+    tx.appendChild($('b', '', d.title || LBL[t]));
+    if (d.body) tx.appendChild($('p', '', d.body));
+    var url = d.url || siteUrl();
+    var lk = $('a', 'lk', '🔗 ' + url.replace(/^https?:\/\//, '')); lk.href = url; tx.appendChild(lk);
+    var go = $('a', 'go', 'Sayta keç →'); go.href = url; tx.appendChild(go);
+    if (extra > 0) tx.appendChild($('div', 'more', 'və daha ' + extra + ' yeni bildiriş'));
+    if ('Notification' in window && Notification.permission === 'default') {
+      var pm = $('button', 'perm', 'Bildirişlər telefona da gəlsin'); pm.type = 'button';
+      pm.onclick = function(){ try { Notification.requestPermission().then(function(){ pm.remove(); }); } catch (e) { pm.remove(); } };
+      tx.appendChild(pm);
+    }
+    r.appendChild(tx); card.appendChild(r);
+    var x = $('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Bağla'); x.onclick = closeCard; card.appendChild(x);
+    document.body.appendChild(card);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ card.classList.add('on'); }); });
+    clearTimeout(hideT); hideT = setTimeout(closeCard, 30000);
+  }
+  function sysNotify(row){
+    try {
+      var d = row.data || {}, url = d.url || siteUrl();
+      var n = new Notification((ICON[d.type] || '🔔') + ' ' + (d.title || 'Yeni bildiriş'), { body: (d.body || '') + '\n' + url, tag: 'dqnf' + row.id });
+      n.onclick = function(){ window.focus(); location.href = url; n.close(); };
+    } catch (e) {}
+  }
+  function check(){
+    if (!authed() || inExam()) return;
+    fetchList().then(function(rows){
+      if (!rows.length) { if (localStorage.getItem(SEEN) == null) localStorage.setItem(SEEN, '0'); return; }
+      var latest = Math.max.apply(null, rows.map(function(r){ return +r.id || 0; }));
+      var seen = localStorage.getItem(SEEN);
+      if (seen == null) { localStorage.setItem(SEEN, String(latest)); return; }   /* ilk dəfə: köhnələr göstərilməsin */
+      var un = rows.filter(function(r){ return +r.id > +seen && Date.now() - ((r.data || {}).ts || 0) < MAXAGE; });
+      if (!un.length) { if (latest > +seen) localStorage.setItem(SEEN, String(latest)); return; }
+      var newest = un[0];
+      if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+        un.slice(0, 3).forEach(sysNotify);
+      } else if (!document.hidden) {
+        showCard(newest, un.length - 1);
+      } else return;                                  /* tab gizlidir, icazə yoxdur → görünəndə göstəriləcək */
+      localStorage.setItem(SEEN, String(latest));
+    });
+  }
+  setTimeout(check, 4000);
+  setInterval(check, 60000);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) setTimeout(check, 600); });
+
+  /* ================= ADMİN TƏRƏFİ ================= */
+  var md = null;
+  function msg(t, k){ var m = md.querySelector('.msg'); m.textContent = t || ''; m.className = 'msg' + (k ? ' ' + k : ''); }
+  function send(d){
+    d.ts = Date.now();
+    return fetch(U + '/rest/v1/dq_v2_store', { method: 'POST', headers: H({ Prefer: 'return=representation' }), body: JSON.stringify({ collection: COL, data: d }) })
+      .then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  function renderHist(){
+    var box = md.querySelector('.hs'); box.textContent = '';
+    box.appendChild($('label', '', 'Son göndərilənlər'));
+    fetchList().then(function(rows){
+      if (!rows.length) { box.appendChild($('div', '', 'Hələ yoxdur')); return; }
+      rows.slice(0, 8).forEach(function(r){
+        var d = r.data || {}, i = $('div', 'hi');
+        i.appendChild($('span', '', (ICON[d.type] || '🔔') + ' ' + (d.title || '—')));
+        var b = $('button', 'dqnf-bt r s', 'Sil'); b.type = 'button';
+        b.onclick = function(){ fetch(U + '/rest/v1/dq_v2_store?id=eq.' + r.id, { method: 'DELETE', headers: H() }).then(function(){ renderHist(); }); };
+        i.appendChild(b); box.appendChild(i);
+      });
+    });
+  }
+  function openComposer(pre){
+    pre = pre || {};
+    if (!md) {
+      md = $('div'); md.id = 'dqnf-md';
+      md.innerHTML = '<div class="bx"><h3>🔔 İstifadəçilərə bildiriş göndər</h3>' +
+        '<label>Növ</label><select id="dqnf-t"><option value="quiz">🧩 Quiz</option><option value="sinaq">📝 Sınaq</option><option value="test">✅ Test</option><option value="xeber">📰 Xəbər / Elan</option></select>' +
+        '<label>Başlıq</label><input id="dqnf-h" type="text" maxlength="120" placeholder="Məs: Yeni sınaq əlavə olundu">' +
+        '<label>Mətn (istəyə bağlı)</label><textarea id="dqnf-b" maxlength="400" placeholder="Qısa izah…"></textarea>' +
+        '<label>Sayta keçid linki</label><input id="dqnf-u" type="text" inputmode="url">' +
+        '<div class="msg"></div><div class="row"><button type="button" class="dqnf-bt" id="dqnf-s">Göndər</button><button type="button" class="dqnf-bt o" id="dqnf-c">Bağla</button></div><div class="hs"></div></div>';
+      document.body.appendChild(md);
+      md.addEventListener('click', function(e){ if (e.target === md) md.classList.remove('on'); });
+      md.querySelector('#dqnf-c').onclick = function(){ md.classList.remove('on'); };
+      md.querySelector('#dqnf-s').onclick = function(){
+        var d = { type: md.querySelector('#dqnf-t').value, title: md.querySelector('#dqnf-h').value.trim(), body: md.querySelector('#dqnf-b').value.trim(), url: md.querySelector('#dqnf-u').value.trim() || siteUrl() };
+        if (!d.title) return msg('Başlıq yazın', 'e');
+        if (!/^https?:\/\//i.test(d.url)) d.url = 'https://' + d.url;
+        var btn = this; btn.disabled = true; msg('Göndərilir…');
+        send(d).then(function(){ msg('Göndərildi ✓ Qeydiyyatlı istifadəçilər saytı açanda görəcək', 'k'); md.querySelector('#dqnf-h').value = ''; md.querySelector('#dqnf-b').value = ''; renderHist(); })
+          .catch(function(e){ msg('Göndərilmədi (' + (e && e.message || 'xəta') + '). Supabase-də dq_v2_store üçün yazma icazəsini yoxlayın.', 'e'); })
+          .then(function(){ btn.disabled = false; });
+      };
+    }
+    md.querySelector('#dqnf-t').value = pre.type || 'sinaq';
+    md.querySelector('#dqnf-h').value = pre.title || '';
+    md.querySelector('#dqnf-b').value = pre.body || '';
+    md.querySelector('#dqnf-u').value = pre.url || siteUrl();
+    msg(''); md.classList.add('on'); renderHist();
+  }
+  window.DQNotify = { open: openComposer };
+
+  /* admin şəbəkəsinə kart */
+  function injectCard(){
+    var g = document.querySelector('#admin-panel .admin-nav-grid');
+    if (!g || document.getElementById('dqnf-nav')) return;
+    var c = $('div', 'admin-nav-card'); c.id = 'dqnf-nav';
+    var ic = $('span', 'icon', '🔔'); c.appendChild(ic); c.appendChild(document.createTextNode(' Bildiriş göndər'));
+    c.onclick = function(){ openComposer(); };
+    g.appendChild(c);
+  }
+  setInterval(injectCard, 1500);
+
+  /* yeni quiz/sınaq/test əlavə olunanda adminə soruş */
+  var ask = null, lastKey = {};
+  function askSend(pre){
+    var key = pre.type + '|' + pre.title, now = Date.now();
+    if (lastKey[key] && now - lastKey[key] < 6e5) return; lastKey[key] = now;
+    if (ask) ask.remove();
+    ask = $('div'); ask.id = 'dqnf-ask';
+    ask.appendChild($('div', '', (ICON[pre.type] || '🔔') + ' «' + (pre.title || LBL[pre.type]) + '» əlavə olundu. Qeydiyyatlı istifadəçilərə bildiriş göndərilsin?'));
+    var b = $('div', 'b');
+    var ok = $('button', 'dqnf-bt', 'Göndər'); ok.type = 'button';
+    ok.onclick = function(){ ok.disabled = true; send({ type: pre.type, title: pre.title || LBL[pre.type], body: pre.body || '', url: siteUrl() }).then(function(){ ask.classList.remove('on'); }).catch(function(){ ok.textContent = 'Alınmadı'; }); };
+    var ed = $('button', 'dqnf-bt o', 'Redaktə et'); ed.type = 'button'; ed.onclick = function(){ ask.classList.remove('on'); openComposer(pre); };
+    var no = $('button', 'dqnf-bt o', 'İndi yox'); no.type = 'button'; no.onclick = function(){ ask.classList.remove('on'); };
+    b.appendChild(ok); b.appendChild(ed); b.appendChild(no); ask.appendChild(b);
+    document.body.appendChild(ask);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ ask.classList.add('on'); }); });
+  }
+  var NAME = /quiz|test|sinaq|sınaq|imtahan|exam/i, NOT = /question|sual|student|result|netice|nəticə|attempt|answer|log|notif|user|member|pay|price|stat|setting|cfg|config|session|ticket|reg/i;
+  function typeOf(s){ s = String(s || ''); return /quiz/i.test(s) ? 'quiz' : /s[ıi]naq/i.test(s) ? 'sinaq' : /test/i.test(s) ? 'test' : 'sinaq'; }
+  function detect(url, body){
+    var t = (url.split('/rest/v1/')[1] || '').split('?')[0], j; try { j = JSON.parse(body); } catch (e) { return; }
+    (Array.isArray(j) ? j : [j]).slice(0, 1).forEach(function(row){
+      if (!row || typeof row !== 'object') return;
+      var name = t, d = row;
+      if (t === 'dq_v2_store') { name = row.collection || ''; d = row.data || {}; }
+      var title = d.title || d.name || d.ad || d.exam_name || d.label || '';
+      var cat = String(d.category || d.cat || d.kateqoriya || '');
+      if (name === 'news') { if (!/quiz|test|s[ıi]naq/i.test(cat)) return; name = cat; }
+      else if (!NAME.test(name) || NOT.test(name)) return;
+      askSend({ type: typeOf(name + ' ' + title), title: String(title).slice(0, 120), body: '' });
+    });
+  }
+  var of = window.fetch;
+  window.fetch = function(inp, init){
+    var p = of.apply(this, arguments);
+    try {
+      var url = typeof inp === 'string' ? inp : (inp && inp.url) || '';
+      var m = ((init && init.method) || (inp && inp.method) || 'GET').toUpperCase();
+      if (m === 'POST' && url.indexOf(U + '/rest/v1/') === 0 && init && typeof init.body === 'string' && adminUI() && url.indexOf('collection') < 0 && init.body.indexOf('"' + COL + '"') < 0)
+        p.then(function(r){ if (r && r.ok) detect(url, init.body); }).catch(function(){});
+    } catch (e) {}
+    return p;
+  };
+})();
+</script>
+
+<style id="dqstk-css">
+/* İmtahan qeydiyyat portalı: bütün bölmələr tək sütunda, alt-alta, üst-üstə düşmədən */
+#lxp .lxp-w,.dqstk{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:26px!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;max-width:780px!important;margin:0 auto!important;padding:26px 16px 64px!important;box-sizing:border-box!important}
+#lxp .lxp-w>*,.dqstk>*{position:relative!important;inset:auto!important;float:none!important;grid-area:auto!important;grid-column:auto!important;grid-row:auto!important;width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;transform:none!important;flex:none!important;box-sizing:border-box!important}
+#lxp .lxp-hero{border-radius:26px!important;padding:34px 26px 48px!important;box-shadow:0 18px 40px -18px #1e1b4b80!important}
+#lxp .lxp-hero>*{max-width:none!important}
+#lxp .lxp-card{border-radius:26px!important;padding:24px!important;box-shadow:0 16px 40px -20px #1e1b4b4d!important;border:1px solid #e8e6f3}
+#lxp .lxp-ch{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px 16px!important;flex-wrap:wrap!important;margin:0 0 18px!important;position:static!important}
+#lxp .lxp-ch>*{position:static!important;margin:0!important;min-width:0}
+#lxp .lxp-ch b{font-size:clamp(20px,4.6vw,26px)!important;line-height:1.25!important;letter-spacing:-.2px}
+#lxp .lxp-tb{flex:none!important;display:flex!important;gap:8px!important}
+#lxp .lxp-tb button,#lxp .lxp-tb .lxp-gh{width:auto!important;height:auto!important;aspect-ratio:auto!important;border-radius:999px!important;padding:10px 18px!important;white-space:nowrap!important;display:inline-flex!important;align-items:center;gap:6px;line-height:1.2!important}
+#lxp #dq-types{margin:0!important;padding:0!important;max-width:none!important}
+.dqstk-off{display:none!important}
+@media(max-width:560px){#lxp .lxp-w,.dqstk{padding:18px 12px 56px!important;gap:20px!important}#lxp .lxp-hero{padding:28px 18px 42px!important}#lxp .lxp-card{padding:18px!important}}
+</style>
+<script id="dqstk-js">
+(function(){
+  'use strict';
+  if (window.__dqStk) return; window.__dqStk = 1;
+  function one(t){ try { return document.evaluate("//*[text()[contains(.,'" + t + "')]]", document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; } catch (e) { return null; } }
+  function many(t){ var out = [], r; try { r = document.evaluate("//*[normalize-space(text())='" + t + "']", document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null); for (var i = 0; i < r.snapshotLength; i++) out.push(r.snapshotItem(i)); } catch (e) {} return out; }
+  function common(a, b){ for (var n = a; n; n = n.parentElement) if (n.contains(b)) return n; return null; }
+  function vis(e){ return e && e.getClientRects().length > 0; }
+
+  function run(){
+    if (document.hidden) return;
+    var a = one('Qeydiyyat portalı aktivdir'), b = one('Aktiv imtahan sessiyaları');
+    if (!a || !b || !vis(a)) return;
+    var hero = a.closest('.lxp-hero') || a, card = b.closest('.lxp-card') || b;
+    var anc = common(hero, card);
+    if (anc && anc.id !== 'lxp' && anc !== document.body && anc !== document.documentElement && getComputedStyle(anc).position !== 'fixed' && !anc.classList.contains('dqstk')) anc.classList.add('dqstk');
+
+    /* başlıq təkrarı: «Sınaqlar / Sınaq növünü seçin…» iki dəfə çıxırsa, üst-üstə düşəni gizlət */
+    var hs = many('Sınaqlar').filter(function(h){
+      var p = h.closest('.lq-h') || h.parentElement;
+      return p && p.textContent.indexOf('Sınaq növünü seçin') > -1 && p.textContent.length < 140 && vis(p);
+    });
+    if (hs.length > 1) {
+      var keep = hs.filter(function(h){ return h.closest('#dq-types'); })[0] || hs[hs.length - 1];
+      hs.forEach(function(h){ if (h !== keep && !h.closest('#dq-types')) (h.closest('.lq-h') || h.parentElement).classList.add('dqstk-off'); });
+    }
+  }
+  setInterval(run, 800);
+  document.addEventListener('DOMContentLoaded', run);
+})();
+</script>
+
 </body>
 </html>
