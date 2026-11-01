@@ -4611,7 +4611,7 @@ setInterval(wrap,700);wrap();
     if (!fresh) {
       try {
         var c = JSON.parse(localStorage.getItem(CK) || "null");
-        if (c && c.v) {
+        if (c && c.v && (c.v.qs > 0 || c.v.users > 0)) {
           if (Date.now() - c.t >= TTL && !computeAuto.bg) {          /* köhnədirsə: dərhal göstər, arxa fonda yenilə */
             computeAuto.bg = 1;
             setTimeout(function () { computeAuto(true).catch(function () { }).then(function () { computeAuto.bg = 0; }); }, 4000);
@@ -4632,7 +4632,7 @@ setInterval(wrap,700);wrap();
       v.exams = Object.keys(ex).length;
       v.mocks = Object.keys(sn).length;
     } catch (e) { }
-    try { localStorage.setItem(CK, JSON.stringify({ t: Date.now(), v: v })); } catch (e) { }
+    if (v.qs > 0 || v.users > 0) { try { localStorage.setItem(CK, JSON.stringify({ t: Date.now(), v: v })); } catch (e) { } }
     return v;
   }
 
