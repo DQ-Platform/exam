@@ -8301,7 +8301,7 @@ html.dqx-exam [id*="chatbot"],html.dqx-exam [class*="chatbot"]{display:none!impo
 #exam-screen .dqx-empty{display:none!important}
 
 /* 4) Köhnə şəxsi-məlumat su nişanı tam ləğv (başqa skript yenidən yaratsa belə görünməz) */
-#dqsec-wm,.dqsec-wm,[id^="dqsec-wm"]{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;background:none!important}
+#dqsec-wm,.dqsec-wm{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;background:none!important}
 
 /* 5) Nəticə ekranı: kabinet/giriş qabığı və üzən elementlər görünməsin, səhifə səliqəli qalsın */
 html.dqx-res #dqg,html.dqx-res #dqg-shell,html.dqx-res #dq-install,html.dqx-res #dq-pwa-wrap,html.dqx-res .dq-fab{display:none!important}
@@ -8612,6 +8612,132 @@ function boot(){
  setInterval(guard,400);
  sync();
 }
+if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
+})();
+</script>
+
+<style id="dqx-pad-css">
+/* Yazı lövhəsi: sual kartının altındakı boş sahədə sərbəst yazı/çəkmə (qaralama). Susmaya görə qələm rəngi göy. */
+#dqx-pad{position:relative;flex:1 1 auto;min-height:420px;margin:12px 0 0;border:1.5px dashed #94a3b8;border-radius:12px;background:#fff;overflow:hidden;color-scheme:only light}
+#dqx-pad canvas{position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none;cursor:crosshair;display:block}
+#dqx-pad .dqx-hint{position:absolute;left:14px;top:10px;font:600 12px system-ui,-apple-system,"Segoe UI",sans-serif;color:#94a3b8;pointer-events:none}
+#dqx-tb{position:absolute;right:10px;top:10px;z-index:6;width:46px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 6px 18px -8px rgba(15,23,42,.35);max-height:calc(100% - 20px);overflow-y:auto;touch-action:manipulation}
+#dqx-tb .gp{width:100%;height:14px;display:grid;place-items:center;cursor:grab;color:#cbd5e1;font-size:11px;letter-spacing:-2px;touch-action:none}
+#dqx-tb button{width:36px;height:34px;flex:none;border:1px solid #e5e7eb;border-radius:9px;background:#fff;color:#1f2937;display:grid;place-items:center;cursor:pointer;padding:0}
+#dqx-tb button.on{background:#eff6ff;border-color:#2563eb;color:#1d4ed8}
+#dqx-tb button:disabled{opacity:.35;cursor:default}
+#dqx-tb select{width:42px;height:30px;font:600 10px system-ui,sans-serif;-webkit-appearance:none;appearance:none;text-align-last:center;border:1px solid #e5e7eb;border-radius:8px;background:#fff;color:#1f2937;padding:0;text-align:center}
+#dqx-tb .sw{width:20px;height:20px;border-radius:6px;border:1px solid #0002}
+#dqx-pal{position:absolute;right:62px;z-index:7;display:none;grid-template-columns:repeat(3,26px);gap:6px;padding:8px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 6px 18px -8px rgba(15,23,42,.35)}
+#dqx-pal.o{display:grid}
+#dqx-pal b{width:26px;height:26px;border-radius:7px;border:2px solid #fff;box-shadow:0 0 0 1px #0003;cursor:pointer}
+#dqx-ti{position:absolute;z-index:8;min-width:120px;border:1.5px solid #2563eb;border-radius:6px;padding:2px 6px;background:#fff;outline:none;font-family:Arial,sans-serif}
+</style>
+<script id="dqx-pad-js">
+(function(){"use strict";
+if(window.__dqxPad)return;window.__dqxPad=1;
+var D=document,COL=["#1d4ed8","#dc2626","#16a34a","#111827","#d97706","#7c3aed"],
+ tool="pen",color=COL[0],size=3,ops=[],redo=[],cur=null,store={},key="",pad,cv,cx,tb,pal,hint,dpr=1;
+var P={pen:"M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z",
+ marker:"M9 11l-6 6v3h9l3-3M15 5l4 4-8 8-4-4 8-8zM22 12l-3 3",
+ eraser:"M7 21h13M5 13l7-7 6 6-7 7H8l-3-3a1.4 1.4 0 010-2z",
+ line:"M5 19L19 5",rect:"M4 6h16v12H4z",ellipse:"M12 4a8 8 0 100 16 8 8 0 000-16z",
+ text:"M5 6V4h14v2M12 4v16M9 20h6",
+ undo:"M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3",redo:"M15 14l5-5-5-5M20 9H10a6 6 0 000 12h3",
+ trash:"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"};
+function ic(k){return'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="'+P[k]+'"/></svg>'}
+function examOn(){var e=D.getElementById("exam-screen");return!!(e&&e.classList.contains("active"))}
+function qKey(){var c=D.getElementById("single-question-container"),m=c&&/Sual\s+(\d+)/.exec(c.textContent||"");return m?m[1]:"0"}
+
+/* --- çəkmə --- */
+function stroke(o){
+ var c=cx,i,p=o.pts;c.save();c.lineCap="round";c.lineJoin="round";c.lineWidth=o.w;c.strokeStyle=o.c;c.fillStyle=o.c;
+ if(o.t==="marker"){c.globalAlpha=.35;c.lineWidth=o.w*4}
+ if(o.t==="eraser"){c.globalCompositeOperation="destination-out";c.lineWidth=o.w*5}
+ if(o.t==="pen"||o.t==="marker"||o.t==="eraser"){c.beginPath();c.moveTo(p[0].x,p[0].y);
+  if(p.length===1)c.lineTo(p[0].x+.01,p[0].y);for(i=1;i<p.length;i++)c.lineTo(p[i].x,p[i].y);c.stroke()}
+ else if(o.t==="line"){c.beginPath();c.moveTo(o.a.x,o.a.y);c.lineTo(o.b.x,o.b.y);c.stroke()}
+ else if(o.t==="rect"){c.strokeRect(o.a.x,o.a.y,o.b.x-o.a.x,o.b.y-o.a.y)}
+ else if(o.t==="ellipse"){c.beginPath();c.ellipse((o.a.x+o.b.x)/2,(o.a.y+o.b.y)/2,Math.abs(o.b.x-o.a.x)/2,Math.abs(o.b.y-o.a.y)/2,0,0,7);c.stroke()}
+ else if(o.t==="text"){c.font="600 "+(12+o.w*3)+"px Arial,sans-serif";c.textBaseline="top";c.fillText(o.s,o.x,o.y)}
+ c.restore()}
+function paint(extra){
+ if(!cx)return;cx.setTransform(dpr,0,0,dpr,0,0);cx.clearRect(0,0,cv.width,cv.height);
+ for(var i=0;i<ops.length;i++)stroke(ops[i]);if(extra)stroke(extra);
+ if(hint)hint.style.display=ops.length||extra?"none":"block";
+ var u=tb&&tb.querySelector('[data-a="undo"]'),r=tb&&tb.querySelector('[data-a="redo"]');
+ if(u)u.disabled=!ops.length;if(r)r.disabled=!redo.length}
+function fit(){if(!pad||!cv)return;dpr=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+ var w=pad.clientWidth,h=pad.clientHeight;if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);paint()}}
+function pt(e){var r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+
+/* --- mətn --- */
+function textAt(e){
+ var p=pt(e),i=D.createElement("input");i.id="dqx-ti";i.type="text";i.maxLength=120;i.style.left=p.x+"px";i.style.top=p.y+"px";
+ i.style.fontSize=(12+size*3)+"px";i.style.color=color;pad.appendChild(i);
+ var done=false;function fin(ok){if(done)return;done=true;var v=i.value.trim();if(i.parentNode)i.parentNode.removeChild(i);
+  if(ok&&v){ops.push({t:"text",c:color,w:size,x:p.x,y:p.y,s:v});redo=[];save();paint()}}
+ i.addEventListener("keydown",function(k){if(k.key==="Enter")fin(true);else if(k.key==="Escape")fin(false)});
+ i.addEventListener("blur",function(){fin(true)});setTimeout(function(){i.focus()},0)}
+
+/* --- yaddaş (sual başına) --- */
+function save(){store[key]={o:ops,r:redo}}
+function swap(k){save();key=k;var s=store[k]||{o:[],r:[]};ops=s.o;redo=s.r;store[k]=s;paint()}
+
+/* --- alət paneli --- */
+function setTool(t){tool=t;[].forEach.call(tb.querySelectorAll("[data-t]"),function(b){b.classList.toggle("on",b.getAttribute("data-t")===t)})}
+function build(){
+ var a=D.querySelector("#exam-screen .questions-area"),nav=D.getElementById("exam-nav-btns");if(!a)return;
+ pad=D.createElement("div");pad.id="dqx-pad";
+ cv=D.createElement("canvas");cx=cv.getContext("2d");pad.appendChild(cv);
+ hint=D.createElement("div");hint.className="dqx-hint";hint.textContent="✍️ Qaralama sahəsi — burada yaza və çəkə bilərsiniz";pad.appendChild(hint);
+ tb=D.createElement("div");tb.id="dqx-tb";
+ var order=[["pen","Qələm"],["marker","Marker"],["eraser","Pozan"],["line","Xətt"],["rect","Kvadrat"],["ellipse","Dairə"],["text","Mətn"]],h='<div class="gp" title="Sürüşdür">⋮⋮</div>';
+ order.forEach(function(o){h+='<button type="button" data-t="'+o[0]+'" title="'+o[1]+'">'+ic(o[0])+'</button>'});
+ h+='<button type="button" data-a="color" title="Rəng"><span class="sw" style="background:'+color+'"></span></button>'+
+  '<select data-a="size" title="Qalınlıq">'+[1,2,3,5,8].map(function(n){return'<option value="'+n+'"'+(n===size?" selected":"")+'>'+n+' pt</option>'}).join("")+'</select>'+
+  '<button type="button" data-a="undo" title="Geri">'+ic("undo")+'</button><button type="button" data-a="redo" title="İrəli">'+ic("redo")+'</button>'+
+  '<button type="button" data-a="clear" title="Hamısını sil">'+ic("trash")+'</button>';
+ tb.innerHTML=h;pad.appendChild(tb);
+ pal=D.createElement("div");pal.id="dqx-pal";pal.innerHTML=COL.map(function(c){return'<b data-c="'+c+'" style="background:'+c+'"></b>'}).join("");pad.appendChild(pal);
+ a.insertBefore(pad,nav&&nav.parentNode===a?nav:null);
+ setTool("pen");
+ /* çəkmə hadisələri */
+ cv.addEventListener("pointerdown",function(e){
+  pal.classList.remove("o");if(tool==="text"){e.preventDefault();textAt(e);return}
+  try{cv.setPointerCapture(e.pointerId)}catch(x){}
+  var p=pt(e);cur={t:tool,c:color,w:size,pts:[p],a:p,b:p};redo=[];e.preventDefault();paint(cur)});
+ cv.addEventListener("pointermove",function(e){if(!cur)return;var p=pt(e);
+  if(cur.t==="pen"||cur.t==="marker"||cur.t==="eraser")cur.pts.push(p);else cur.b=p;paint(cur);e.preventDefault()});
+ function up(){if(!cur)return;var c=cur;cur=null;if(c.t==="line"||c.t==="rect"||c.t==="ellipse"){if(Math.abs(c.b.x-c.a.x)+Math.abs(c.b.y-c.a.y)<3){paint();return}}ops.push(c);save();paint()}
+ cv.addEventListener("pointerup",up);cv.addEventListener("pointercancel",up);
+ /* düymələr */
+ tb.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;
+  var t=b.getAttribute("data-t"),ac=b.getAttribute("data-a");
+  if(t){setTool(t);pal.classList.remove("o");return}
+  if(ac==="color"){pal.style.top=(b.offsetTop+tb.offsetTop-tb.scrollTop)+"px";pal.classList.toggle("o");return}
+  if(ac==="undo"&&ops.length){redo.push(ops.pop());save();paint()}
+  else if(ac==="redo"&&redo.length){ops.push(redo.pop());save();paint()}
+  else if(ac==="clear"&&ops.length){if(confirm("Qaralama sahəsindəki bütün yazılar silinsin?")){ops.length=0;redo.length=0;save();paint()}}});
+ tb.querySelector('[data-a="size"]').addEventListener("change",function(e){size=+e.target.value});
+ pal.addEventListener("click",function(e){var c=e.target.getAttribute&&e.target.getAttribute("data-c");if(!c)return;color=c;
+  tb.querySelector(".sw").style.background=c;pal.classList.remove("o");if(tool==="eraser")setTool("pen")});
+ /* alət panelini sürüşdürmək */
+ var g=tb.querySelector(".gp"),dx=0,dy=0,mv=false;
+ g.addEventListener("pointerdown",function(e){mv=true;var r=tb.getBoundingClientRect();dx=e.clientX-r.left;dy=e.clientY-r.top;try{g.setPointerCapture(e.pointerId)}catch(x){}e.preventDefault()});
+ g.addEventListener("pointermove",function(e){if(!mv)return;var pr=pad.getBoundingClientRect(),x=e.clientX-pr.left-dx,y=e.clientY-pr.top-dy;
+  x=Math.max(0,Math.min(pad.clientWidth-tb.offsetWidth,x));y=Math.max(0,Math.min(pad.clientHeight-Math.min(tb.offsetHeight,pad.clientHeight),y));
+  tb.style.left=x+"px";tb.style.top=y+"px";tb.style.right="auto";pal.classList.remove("o")});
+ g.addEventListener("pointerup",function(){mv=false});
+ try{new ResizeObserver(fit).observe(pad)}catch(x){addEventListener("resize",fit)}
+ key=qKey();var s=store[key]||(store[key]={o:[],r:[]});ops=s.o;redo=s.r;
+ fit();paint()}
+function tick(){
+ if(!examOn()){if(pad&&pad.parentNode){pad.parentNode.removeChild(pad);pad=null;cv=cx=tb=pal=hint=null;store={};ops=[];redo=[];key=""}return}
+ if(!pad||!pad.isConnected){pad=null;build()}
+ var k=qKey();if(k!==key&&pad)swap(k)}
+setInterval(tick,500);
+function boot(){var c=D.getElementById("single-question-container");try{c&&new MutationObserver(function(){setTimeout(tick,60)}).observe(c,{childList:true,subtree:true})}catch(x){}tick()}
 if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
 })();
 </script>
