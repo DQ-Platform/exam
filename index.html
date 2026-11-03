@@ -2661,11 +2661,6 @@ window.scrollTo({top:0,behavior:"smooth"})};</script>
 </div>
 <div class="exam-layout">
 <div class="questions-area">
-<div class="question-contact-bar">
-<a href="https://wa.me/994504305162" target="_blank" title="WhatsApp vasitəsilə əlaqə saxlayın">
-<i class="fa-brands fa-whatsapp"></i> +994504305162
-</a>
-</div>
 <div id="single-question-container"></div>
 <div class="exam-navigation-buttons" id="exam-nav-btns">
 <button class="btn btn-secondary" onclick="prevQuestionExam()">Əvvəlki</button>
@@ -8278,79 +8273,193 @@ fix();
 })();
 </script>
 <style id="dqx-exam-pro-css">
-/* ===== DQ Exam Pro: imtahan ekranı (suallar həmişə ağ fonda, qara mətnlə) ===== */
+/* ===== DQ Exam Pro v2 =====
+   Sınaq və nəticə ekranları: telefon qaranlıq rejimdə olsa belə HƏMİŞƏ ağ/açıq görünür (kök "invert" filtri söndürülür),
+   diqqəti yayındıran elementlər gizlədilir, ekran görüntüsünə qarşı maneə qatları aktivdir. */
 
-/* 1) Sual kartı HƏMİŞƏ ağ: telefon/sayt qaranlıq rejimdə olsa da (kök filtri bu bloka ikiqat tətbiq olunub ləğv edilir) */
+/* 1) Açıq rejim kilidi — sınaq və nəticə ekranı */
+html.dqx-lock{filter:none!important;-webkit-filter:none!important;color-scheme:only light;background:#eef2f7!important}
+html.dqx-lock body{background:#eef2f7!important;color:#0b1220;filter:none!important}
+html.dqx-lock .container{background:#fff!important;color:#0b1220}
+html.dqx-lock #exam-screen,html.dqx-lock #result-screen{color-scheme:only light}
+html.dqx-lock #exam-screen *,html.dqx-lock #result-screen *{-webkit-font-smoothing:antialiased}
+
+/* 2) Sual kartı: saf ağ fon, tünd mətn, iri şrift (köhnə ikiqat-invert qaydaları ləğv edildi) */
 #exam-screen .questions-area{
- background:#fff!important;color:#0b1220;border:1px solid #cbd5e1!important;
+ background:#fff!important;color:#0b1220!important;border:1px solid #cbd5e1!important;
  box-shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -14px rgba(15,23,42,.28);
- -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-html.dq13-dark #exam-screen .questions-area{filter:invert(1) hue-rotate(180deg)}
-/* şəkil/canvas/fon-şəkli artıq kök filtri ilə bir dəfə çevrilir; kartın içində üçüncü çevrilmə olmasın */
-html.dq13-dark #exam-screen .questions-area img,
-html.dq13-dark #exam-screen .questions-area video,
-html.dq13-dark #exam-screen .questions-area canvas,
-html.dq13-dark #exam-screen .questions-area iframe,
-html.dq13-dark #exam-screen .questions-area .dq13-cv,
-html.dq13-dark #exam-screen .questions-area .dq13-fc,
-html.dq13-dark #exam-screen .questions-area [style*="background-image"]{filter:none!important}
-/* oxunaqlılıq: tünd mətn, yetərincə iri şrift */
-#exam-screen .questions-area .question-title{color:#0b1220;font-size:clamp(16px,4.3vw,18px);line-height:1.65;font-weight:600}
-#exam-screen .questions-area .options label{color:#0b1220;font-size:clamp(15px,4.1vw,17px);line-height:1.5}
+ text-rendering:optimizeLegibility;filter:none!important}
+#exam-screen .questions-area img,#exam-screen .questions-area canvas,#exam-screen .questions-area video{filter:none!important}
+#exam-screen .questions-area .question-title{color:#0b1220!important;font-size:clamp(16px,4.3vw,18px);line-height:1.65;font-weight:600}
+#exam-screen .questions-area .options label{color:#0b1220!important;font-size:clamp(15px,4.1vw,17px);line-height:1.5}
 
-/* 2) "Ekranına Quraşdır" pəncərəsi sınaq zamanı görünməsin */
-html.dqx-exam #dq-install,html.dqx-exam #dq-pwa-wrap,
-body:has(#exam-screen.active) #dq-install,body:has(#exam-screen.active) #dq-pwa-wrap{display:none!important}
+/* 3) Sınaq zamanı diqqəti yayındıran/artıq hissələr gizlədilir */
+#exam-screen .question-contact-bar,#exam-screen a[href*="wa.me"],
+html.dqx-exam #dq-install,html.dqx-exam #dq-pwa-wrap,html.dqx-exam .dq-exwrap,html.dqx-exam #feed-news-btn,
+html.dqx-exam .dq-fab,html.dqx-exam #dqt-dock,html.dqx-exam #dq-count,
+html.dqx-exam [id*="chatbot"],html.dqx-exam [class*="chatbot"]{display:none!important}
+#exam-screen .dqx-empty{display:none!important}
 
-/* 3) Su nişanı: bütün ekranı/cavab kartını TUTMUR, yalnız sual hissəsinin daxilində (JS ora köçürür) */
-body>#dqsec-wm{display:none!important}
-#exam-screen .questions-area>#dqsec-wm{
- position:absolute!important;inset:auto!important;z-index:5!important;
- pointer-events:none!important;opacity:.42;mix-blend-mode:multiply;border-radius:inherit}
+/* 4) Köhnə şəxsi-məlumat su nişanı tam ləğv (başqa skript yenidən yaratsa belə görünməz) */
+#dqsec-wm,.dqsec-wm,[id^="dqsec-wm"]{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;background:none!important}
 
-/* 4) Ekran görüntüsünə qarşı maneə qatları */
-#exam-screen .questions-area,#exam-screen .questions-area *{
- -webkit-touch-callout:none!important;-webkit-user-select:none;user-select:none}
+/* 5) Nəticə ekranı: kabinet/giriş qabığı və üzən elementlər görünməsin, səhifə səliqəli qalsın */
+html.dqx-res #dqg,html.dqx-res #dqg-shell,html.dqx-res #dq-install,html.dqx-res #dq-pwa-wrap,html.dqx-res .dq-fab{display:none!important}
+html.dqx-res #result-screen{max-width:820px;margin:0 auto;padding:6px 4px 28px;zoom:1!important}
+html.dqx-res #result-screen .result-summary-lines{max-width:520px;margin-left:auto;margin-right:auto}
+html.dqx-res #result-screen .final-score-box{max-width:520px;margin-left:auto;margin-right:auto;border-radius:14px;box-shadow:0 8px 22px -14px rgba(15,23,42,.35)}
+html.dqx-res #result-screen .dq3-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+html.dqx-res #result-screen>.mt-4:last-child{max-width:520px;margin:22px auto 0}
+html.dqx-res #result-screen>.mt-4:last-child .btn{min-height:46px;border-radius:12px;font-weight:700}
+
+/* 6) Ekran görüntüsünə / kopyalamaya qarşı maneə qatları (veb brauzer üçün mümkün olan maksimum) */
+#exam-screen .questions-area,#exam-screen .questions-area *{-webkit-touch-callout:none!important;-webkit-user-select:none;user-select:none}
 #exam-screen .questions-area img{-webkit-user-drag:none;user-drag:none;pointer-events:auto}
 #dqx-shield{position:absolute;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
  flex-direction:column;gap:10px;background:#fff;color:#0f172a;text-align:center;padding:24px;
  font:700 16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;pointer-events:none}
 #dqx-shield small{font-weight:500;font-size:13px;color:#475569;max-width:320px}
 html.dqx-shield #dqx-shield{display:flex}
-@media print{#dqx-shield{display:none!important}}
+@media print{html.dqx-exam body *{visibility:hidden!important}html.dqx-exam body{background:#fff!important}}
+
+/* 7) "Ys.imanoff" fon yazısı: yalnız sual kartının üzərində, çox yüngül (oxunaqlılığı pozmur), mətnlə qarışmır */
+#exam-screen .questions-area{position:relative}
+#dqx-wm{position:absolute;inset:0;z-index:4;pointer-events:none;user-select:none;-webkit-user-select:none;overflow:hidden;border-radius:inherit;
+ mix-blend-mode:multiply;background-repeat:repeat;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='160'><text x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle' transform='rotate(-24 125 80)' font-family='Arial,Helvetica,sans-serif' font-size='21' font-weight='700' letter-spacing='1' fill='%230f172a' fill-opacity='.085'>Ys.imanoff</text></svg>")}
+@media print{#dqx-wm{display:none!important}}
+
+/* 8) Sınaq zamanı gizlədilən artıq elementlər: elan/təəssürat düymələri, yuvarlaq telefon (quraşdırma) düyməsi və s. */
+html.dqx-exam .feed-btn,html.dqx-exam .login-topbar,html.dqx-exam #btn-open-news,html.dqx-exam #btn-open-fb,
+.dqx-hide{display:none!important}
+
+/* 9) Kalkulyator: cavab kartının (sağ panel) altında, işarələnmiş yerdə sabit dayanır */
+#sidebar-container #calculator-widget{position:static!important;inset:auto!important;transform:none!important;animation:none!important;
+ width:100%!important;max-width:360px!important;margin:14px auto 0!important;z-index:1!important;
+ box-shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -14px rgba(15,23,42,.28)!important;border:1px solid #cbd5e1!important}
 </style>
+
 <script id="dqx-exam-pro-js">
-/* DQ Exam Pro — (1) imtahan zamanı quraşdırma pəncərəsi gizlənir, (2) su nişanı yalnız sual hissəsinin içindədir,
-   (3) ekran görüntüsü/yazı/çap cəhdlərində suallar dərhal örtülür. Mövcud skriptlərə toxunmur. */
+/* DQ Exam Pro v2 — (1) sınaq/nəticə ekranı həmişə açıq rejimdə, (2) su nişanı ləğv, boş sahə və artıq elementlər təmizlənir,
+   (3) ekran görüntüsü/çap/fokus itkisi cəhdlərində suallar dərhal örtülür, (4) nəticə ekranına keçid səliqəli olur. */
 (function(){"use strict";
-if(window.__dqxPro)return;window.__dqxPro=1;
-var D=document,H=D.documentElement,shT=0,ro=null;
+if(window.__dqxPro2)return;window.__dqxPro2=1;
+var D=document,H=D.documentElement,shT=0,csMeta=null,csCreated=false,csOld=null,cT=0;
 function $(s,r){return(r||D).querySelector(s)}
-function examOn(){var e=D.getElementById("exam-screen");return!!(e&&e.classList.contains("active"))}
+function act(id){var e=D.getElementById(id);return!!(e&&e.classList.contains("active"))}
+function examOn(){return act("exam-screen")}
+function resOn(){return act("result-screen")}
 function area(){return $("#exam-screen .questions-area")}
 
-/* --- vəziyyət: imtahan açıqdır? --- */
-function sync(){var on=examOn();H.classList.toggle("dqx-exam",on);if(on){mount();fit()}else unshield(true)}
+/* --- brauzerin "force dark" rejiminə qarşı: color-scheme meta --- */
+function meta(on){
+ if(on){
+  csMeta=$('meta[name="color-scheme"]');
+  if(!csMeta){csMeta=D.createElement("meta");csMeta.name="color-scheme";D.head.appendChild(csMeta);csCreated=true;csOld=null}
+  else if(csOld===null)csOld=csMeta.getAttribute("content")||"";
+  csMeta.setAttribute("content","only light");
+ }else if(csMeta){
+  if(csCreated){csMeta.parentNode&&csMeta.parentNode.removeChild(csMeta);csCreated=false}
+  else if(csOld!==null){csMeta.setAttribute("content",csOld);csOld=null}
+  csMeta=null;
+ }
+}
 
-/* --- su nişanını sual hissəsinə sığdır --- */
+/* --- masaüstü rejim: sınaq və nəticə ekranında telefon/planşetdə də həmişə 1280px masaüstü görünüş --- */
+var vpOld=null,DESK="width=1280, user-scalable=yes, maximum-scale=5, viewport-fit=cover";
+function touch(){try{return matchMedia("(pointer:coarse)").matches||"ontouchstart" in window||(navigator.maxTouchPoints||0)>0}catch(e){return false}}
+function desk(on){
+ var m=D.querySelector('meta[name="viewport"]');
+ if(on){
+  if(!touch()||Math.max(screen.width,screen.height)>=1280&&Math.min(screen.width,screen.height)>=800)return;
+  if(!m){m=D.createElement("meta");m.name="viewport";D.head.appendChild(m);vpOld=""}
+  if(vpOld===null)vpOld=m.getAttribute("content")||"";
+  if(m.getAttribute("content")!==DESK)m.setAttribute("content",DESK);
+ }else if(vpOld!==null&&m){
+  m.setAttribute("content",vpOld||"width=device-width, initial-scale=1.0, viewport-fit=cover");vpOld=null;
+ }
+}
+
+/* --- vəziyyət sinxronu --- */
+function sync(){
+ var ex=examOn(),rs=resOn(),on=ex||rs,was=H.classList.contains("dqx-res");
+ H.classList.toggle("dqx-exam",ex);H.classList.toggle("dqx-res",rs);H.classList.toggle("dqx-lock",on);
+ if(on){
+  /* giriş linkindən qalan "gizlət" qatı sınaq/nəticəni örtməsin */
+  H.classList.remove("dqg-pre");var st=D.getElementById("dqg-pre-css");if(st&&st.parentNode)st.parentNode.removeChild(st);
+ }
+ meta(on);desk(on);
+ dockCalc(ex);
+ if(ex){mount();compact();sweep()}else{unshield(true);sweep()}
+ if(rs&&!was){try{window.scrollTo(0,0)}catch(e){}}
+}
+
+/* --- örtük (shield) qatını sual hissəsinə bağla --- */
 function mount(){
  var a=area();if(!a)return;
  if(!D.getElementById("dqx-shield")){var s=D.createElement("div");s.id="dqx-shield";
   s.innerHTML='🔒 Ekran qorunur<small>Suallar yalnız imtahan səhifəsi aktiv olduqda göstərilir. İmtahana qayıdın.</small>';a.appendChild(s)}
- var w=D.getElementById("dqsec-wm");if(w&&w.parentNode!==a)a.appendChild(w);
-}
-function fit(){
- var a=area(),c=D.getElementById("single-question-container"),w=D.getElementById("dqsec-wm");
- if(!a||!c||!w||w.parentNode!==a)return;
- var ar=a.getBoundingClientRect(),cr=c.getBoundingClientRect(),st=w.style;
- st.setProperty("top",Math.round(cr.top-ar.top-a.clientTop)+"px","important");
- st.setProperty("left",Math.round(cr.left-ar.left-a.clientLeft)+"px","important");
- st.setProperty("width",Math.round(cr.width)+"px","important");
- st.setProperty("height",Math.round(cr.height)+"px","important");
- st.setProperty("right","auto","important");st.setProperty("bottom","auto","important");
+ if(!D.getElementById("dqx-wm")){var w=D.createElement("div");w.id="dqx-wm";w.setAttribute("aria-hidden","true");a.appendChild(w)}
 }
 
-/* --- örtük (shield) --- */
+/* --- kalkulyator: sınaq zamanı cavab kartının altına yerləşir, sonra öz yerinə qayıdır --- */
+var calcHome=null;
+function dockCalc(on){
+ var w=D.getElementById("calculator-widget"),sb=D.getElementById("sidebar-container");
+ if(!w||!sb)return;
+ if(on){if(w.parentNode!==sb){if(!calcHome)calcHome={p:w.parentNode,n:w.nextSibling};sb.appendChild(w)}}
+ else if(calcHome&&w.parentNode===sb){
+  var n=calcHome.n&&calcHome.n.parentNode===calcHome.p?calcHome.n:null;calcHome.p.insertBefore(w,n);calcHome=null}
+}
+
+/* --- sınaq zamanı yuvarlaq üzən düymələr (telefon/quraşdırma və s.) və elan düymələri gizlədilir --- */
+var KEEP=/(^|[-_ ])(ov|modal|toast|shield|calc|exam|sheet|dialog|confirm|alert|swal|dqx)/i;
+function sweep(){
+ var on=examOn(),i,k=D.body?D.body.children:[],el,r,cs,q;
+ if(!on){q=D.querySelectorAll(".dqx-hide");for(i=0;i<q.length;i++)q[i].classList.remove("dqx-hide");return}
+ var vw=innerWidth;
+ for(i=0;i<k.length;i++){el=k[i];
+  if(el.classList.contains("dqx-hide")||KEEP.test((el.id||"")+" "+(el.className&&el.className.baseVal===undefined?el.className:"")))continue;
+  if(el.tagName==="SCRIPT"||el.tagName==="STYLE")continue;
+  cs=getComputedStyle(el);if(cs.position!=="fixed"||cs.display==="none")continue;
+  r=el.getBoundingClientRect();
+  if(r.width<28||r.height<28||r.width>220||r.height>220)continue;
+  var ratio=r.width/r.height;if(ratio<.8||ratio>1.25)continue;
+  if(r.left>110&&vw-r.right>110)continue;
+  el.classList.add("dqx-hide");
+ }
+ /* mətnlə tapılan elan/təəssürat düymələri */
+ if((sweep.n=(sweep.n||0)+1)%4!==1)return;
+ q=D.querySelectorAll("button,a");
+ for(i=0;i<q.length;i++){var t=(q[i].textContent||"").replace(/\s+/g," ").trim();
+  if(/^(📢\s*)?İmtahan elanları|^Təəssüratlar/i.test(t)&&!q[i].closest("#exam-screen .exam-navigation-buttons"))q[i].classList.add("dqx-hide")}
+}
+
+/* --- sual kartındakı boş sahələr (məzmunsuz bloklar, yüklənməyən şəkillər) yığışdırılır --- */
+function hollow(n){
+ if(n.textContent.replace(/\s+/g,"")!=="")return false;
+ return!n.querySelector("img,canvas,svg,video,iframe,input,button,select,textarea,label,table,i,.fa-solid,.fa-regular,.fa-brands");
+}
+function compact(){
+ var c=D.getElementById("single-question-container");if(!c)return;
+ var i,n,list;
+ list=c.querySelectorAll("img");
+ for(i=0;i<list.length;i++){n=list[i];
+  var src=n.getAttribute("src");
+  if(!src||(n.complete&&n.naturalWidth===0&&n.getAttribute("data-dqx-try")==="1"))n.classList.add("dqx-empty");
+  else if(!n.complete&&n.getAttribute("data-dqx-try")!=="1"){n.setAttribute("data-dqx-try","1");(function(m){m.addEventListener("load",function(){m.classList.remove("dqx-empty")},{once:true});m.addEventListener("error",function(){m.classList.add("dqx-empty")},{once:true})})(n)}
+ }
+ list=c.querySelectorAll("div,section,figure,p");
+ for(i=0;i<list.length;i++){n=list[i];
+  if(n.classList.contains("dqx-empty")){if(!hollow(n))n.classList.remove("dqx-empty");continue}
+  if(!hollow(n))continue;
+  var cs=getComputedStyle(n);
+  if((cs.position==="static"||cs.position==="relative")&&n.offsetHeight>=48)n.classList.add("dqx-empty");
+ }
+}
+function compactSoon(){clearTimeout(cT);cT=setTimeout(compact,60)}
+
+/* --- örtük --- */
 function shield(ms){if(!examOn())return;mount();H.classList.add("dqx-shield");clearTimeout(shT);if(ms)shT=setTimeout(function(){unshield()},ms)}
 function unshield(force){
  if(!force&&(D.hidden||(D.hasFocus&&!D.hasFocus())))return;
@@ -8364,11 +8473,12 @@ D.addEventListener("keydown",function(e){
  if(k==="printscreen"||e.keyCode===44)hit=true;
  else if(e.shiftKey&&e.metaKey&&(k==="s"||k==="3"||k==="4"||k==="5"||k==="#"||k==="$"||k==="%"))hit=true;
  else if(mod&&(k==="p"||k==="s"||k==="u"))hit=true;
+ else if(k==="f12"||(mod&&e.shiftKey&&(k==="i"||k==="j"||k==="c")))hit=true;
  if(hit){e.preventDefault();shield(2500);wipeClip()}
 },true);
 D.addEventListener("keyup",function(e){if(examOn()&&((e.key||"")==="PrintScreen"||e.keyCode===44)){shield(2500);wipeClip()}},true);
 
-/* pəncərə fokusu itəndə / tab gizlənəndə / paylaş-çap menyusunda — dərhal örtülür */
+/* pəncərə fokusu itəndə / tab gizlənəndə / çap-paylaş menyusunda — dərhal örtülür */
 function hide(){shield()}
 function show(){setTimeout(function(){unshield()},350)}
 addEventListener("blur",hide);addEventListener("pagehide",hide);addEventListener("beforeprint",hide);
@@ -8382,13 +8492,16 @@ D.addEventListener("visibilitychange",function(){D.hidden?hide():show()});
 
 /* --- izləyicilər --- */
 function boot(){
- var ex=D.getElementById("exam-screen");if(!ex)return;
- try{new MutationObserver(sync).observe(ex,{attributes:true,attributeFilter:["class"]})}catch(e){}
+ ["exam-screen","result-screen"].forEach(function(id){
+  var el=D.getElementById(id);if(!el)return;
+  try{new MutationObserver(sync).observe(el,{attributes:true,attributeFilter:["class"]})}catch(e){}
+ });
  var c=D.getElementById("single-question-container");
- try{if(c){new MutationObserver(function(){mount();fit()}).observe(c,{childList:true,subtree:true});
-  if(window.ResizeObserver){ro=new ResizeObserver(fit);ro.observe(c);var a=area();a&&ro.observe(a)}}}catch(e){}
- try{new MutationObserver(function(){var w=D.getElementById("dqsec-wm");if(w&&examOn()&&w.parentNode!==area()){mount();fit()}}).observe(D.body,{childList:true})}catch(e){}
- addEventListener("resize",fit);addEventListener("orientationchange",function(){setTimeout(fit,250)});
+ try{if(c)new MutationObserver(function(){if(examOn()){mount();compactSoon()}}).observe(c,{childList:true,subtree:true,characterData:true})}catch(e){}
+ try{new MutationObserver(function(){if(H.classList.contains("dqx-lock")&&H.classList.contains("dqg-pre"))sync()}).observe(H,{attributes:true,attributeFilter:["class"]})}catch(e){}
+ addEventListener("resize",compactSoon);
+ try{new MutationObserver(function(){if(examOn())sweep()}).observe(D.body,{childList:true})}catch(e){}
+ setInterval(function(){if(examOn()){sweep();desk(true)}else if(resOn())desk(true)},800);
  sync();
 }
 if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
