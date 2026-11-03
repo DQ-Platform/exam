@@ -8405,7 +8405,7 @@ function mount(){
 
 /* ===== Şəxsi su nişanı: ad + iş nömrəsi + tarix. Silinməsi çətin: qapalı shadow DOM, 2 qat (ekran + sual kartı),
    dəyişdirilsə/silinsə avtomatik bərpa olunur, təkrarən pozulsa suallar gizlədilir ===== */
-var guardQ=0,WM={a:null,f:null,key:"",tamper:0,stamp:""};
+var guardQ=0,WM={u:null,adm:undefined,brand:null,a:null,f:null,key:"",tamper:0,stamp:""};
 function who(){
  var n="",id="",h=$("#exam-screen .exam-header"),t="",m,i,all,el,ok;
  if(h){all=h.querySelectorAll("*");
@@ -8415,6 +8415,14 @@ function who(){
     if(ok){t=(el.textContent||"").replace(/\s+/g," ").trim();break}}}}
  m=/^(.*?)\s*[·|\-–]\s*iş nömrəsi\s*:\s*([A-Za-z0-9]{3,24})/i.exec(t)||/iş nömrəsi\s*:\s*([A-Za-z0-9]{3,24})/i.exec(t);
  if(m){if(m.length>2){n=m[1];id=m[2]}else id=m[1]}
+ if(!id||!n){ /* köhnə su nişanı elementindən (gizlədilib, DOM-da qalır) və ya bütün imtahan ekranından oxu */
+  var srcs=[],wmo=D.getElementById("dqsec-wm"),ex=D.getElementById("exam-screen");
+  if(wmo){srcs.push(wmo.textContent||"");try{srcs.push(decodeURIComponent(getComputedStyle(wmo).backgroundImage||""))}catch(e){}
+   var imgs=wmo.querySelectorAll("*");for(i=0;i<imgs.length&&i<40;i++)srcs.push((imgs[i].textContent||"")+" "+(imgs[i].getAttribute("style")||""))}
+  if(ex)srcs.push(ex.textContent||"");
+  for(i=0;i<srcs.length&&(!id||!n);i++){var tx=String(srcs[i]).replace(/<[^>]*>/g," ").replace(/\s+/g," ");
+   var mm=/([A-Za-zƏəİıÖöÜüĞğŞşÇç][A-Za-zƏəİıÖöÜüĞğŞşÇç.\- ]{1,38}?)\s*[·|]\s*(?:iş nömrəsi\s*:?\s*)?([A-Z0-9]{6,8})\b/.exec(tx)||/iş nömrəsi\s*:?\s*([A-Z0-9]{6,8})\b/i.exec(tx);
+   if(mm){if(mm.length>2){if(!n&&!/sınaq|kateqoriya/i.test(mm[1]))n=mm[1].trim();if(!id)id=mm[2]}else if(!id)id=mm[1]}}}
  try{var u=window.EXAM_USER||{};if(!n)n=u.name||"";if(!id)id=u.jobId||""}catch(e){}
  return{n:(n||"İştirakçı").slice(0,40),id:id||"-"}
 }
@@ -8437,35 +8445,46 @@ function wmStyle(fixed){
   "transform:none","filter:none","margin:0","padding:0","border:0","width:auto","height:auto","clip-path:none","-webkit-user-select:none","user-select:none"];
  return p.join("!important;")+"!important"
 }
+/* admin redaktə rejimi (Canlı Sual Redaktoru açıq): şəxsi məlumat (ad, iş nömrəsi) yazılmır */
+function adminEdit(){var e=D.getElementById("live-edit-panel");if(!e)return false;var d=e.style.display;return d!=="none"&&d!==""?true:(d===""&&getComputedStyle(e).display!=="none")}
 function buildWM(fixed){
  var host=D.createElement("div"),sr,box,k=WM.key;
  host.className="dqx-wmh";host.setAttribute("aria-hidden","true");host.setAttribute("style",wmStyle(fixed));
  try{sr=host.attachShadow({mode:"closed"})}catch(e){sr=host}
  box=D.createElement("div");
- box.setAttribute("style","position:absolute;inset:0;background-repeat:repeat;background-image:url("+WM.t1+"),url("+WM.t2+");background-size:250px 120px,170px 110px;pointer-events:none");
+ box.setAttribute("style","position:absolute;inset:0;"+(WM.adm?"":"background-repeat:repeat;background-image:url("+WM.t1+"),url("+WM.t2+");background-size:250px 120px,170px 110px;")+"pointer-events:none");
  sr.appendChild(box);
  if(!fixed){var br=D.createElement("div");br.textContent="Ys.imanoff";
   br.setAttribute("style","position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-24deg);white-space:nowrap;font:800 clamp(42px,9vw,84px)/1 Arial,sans-serif;letter-spacing:2px;color:rgba(15,23,42,.07);pointer-events:none");
-  sr.appendChild(br)}
+  sr.appendChild(br);WM.brand=br}
  return{host:host,fixed:fixed}
 }
 function ensureWM(){
  if(!examOn())return;
  var a=area();if(!a)return;
- var u=who(),key=u.n+"|"+u.id;
+ var adm=adminEdit();
+ if(adm!==WM.adm){WM.adm=adm;killWM(true)}
+ var u=(WM.u&&WM.u.id!=="-")?WM.u:(WM.u=who()),key=u.n+"|"+u.id;
  if(!WM.stamp){var d=new Date();WM.stamp=two(d.getDate())+"."+two(d.getMonth()+1)+"."+d.getFullYear()+" "+two(d.getHours())+":"+two(d.getMinutes())}
  if(key!==WM.key||!WM.t1){WM.key=key;
   WM.t1=tileURL(u.n+" · "+u.id);
   WM.t2=microURL("Ys.imanoff · "+u.id+" · "+u.n);
   killWM(true)}
  if(!WM.a||!WM.a.host.isConnected||WM.a.host.parentNode!==a){if(WM.a&&WM.a.host.parentNode)WM.a.host.parentNode.removeChild(WM.a.host);WM.a=buildWM(false);a.appendChild(WM.a.host)}
- if(!WM.f||!WM.f.host.isConnected||WM.f.host.parentNode!==D.body){if(WM.f&&WM.f.host.parentNode)WM.f.host.parentNode.removeChild(WM.f.host);WM.f=buildWM(true);D.body.appendChild(WM.f.host)}
+ if(adm){if(WM.f){if(WM.f.host.parentNode)WM.f.host.parentNode.removeChild(WM.f.host);WM.f=null}}
+ else if(!WM.f||!WM.f.host.isConnected||WM.f.host.parentNode!==D.body){if(WM.f&&WM.f.host.parentNode)WM.f.host.parentNode.removeChild(WM.f.host);WM.f=buildWM(true);D.body.appendChild(WM.f.host)}
 }
 function killWM(keep){
  [WM.a,WM.f].forEach(function(w){if(w&&w.host.parentNode)w.host.parentNode.removeChild(w.host)});WM.a=WM.f=null;
- if(!keep){WM.key="";WM.stamp="";WM.t1=WM.t2=null;WM.tamper=0;H.classList.remove("dqx-tamper")}
+ if(!keep){WM.u=null;WM.adm=undefined;WM.key="";WM.stamp="";WM.t1=WM.t2=null;WM.tamper=0;H.classList.remove("dqx-tamper")}
 }
+function placeBrand(){
+ var b=WM.brand,a=area(),c=D.getElementById("single-question-container");if(!b||!a||!c)return;
+ var ar=a.getBoundingClientRect(),cr=c.getBoundingClientRect(),y=Math.round(cr.top-ar.top+cr.height/2),x=Math.round(cr.left-ar.left+cr.width/2);
+ if(cr.height<80)y=Math.round(ar.height/2);
+ b.style.top=y+"px";b.style.left=x+"px"}
 function guard(){
+ placeBrand();
  if(!examOn())return;
  var bad=false;
  [WM.a,WM.f].forEach(function(w){
@@ -8477,7 +8496,8 @@ function guard(){
  });
  var st=H.getAttribute("style")||"";
  if(bad){WM.tamper++;ensureWM();if(WM.tamper>=4)H.classList.add("dqx-tamper")}
- else if(!WM.a||!WM.f)ensureWM()
+ else if(!WM.a||(!WM.f&&!WM.adm))ensureWM();
+ if(adminEdit()!==!!WM.adm)ensureWM()
 }
 
 /* --- kalkulyator: sınaq zamanı cavab kartının altına yerləşir, sonra öz yerinə qayıdır --- */
