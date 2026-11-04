@@ -3,6 +3,18 @@
 <head>
 <script id="dq-admin-mode-loader">/* İdarə modu: yalnız /proysl ilə daxil olmuş admin cihazında dq-admin-mode.js yüklənir */
 try{if(localStorage.dqa){var s=document.createElement("script");s.src="dq-admin-mode.js?v=2";s.defer=true;document.head.appendChild(s)}}catch(e){}</script>
+<script id="dq-gate-admin">/* Mərkəzi admin panel yalnız /proysl giriş məlumatları ilə daxil olmuş cihazda görünür */
+(function(){var OK=["99686c0544e9a36931c945b4197068c88f4db34d74d9de5504e60d756bc30d7e","74894384393f0ed1f63e9a3b58a82a7483b25b7c3f46d6e44301e87a52321c8d"];
+var a="";try{a=localStorage.dqa||""}catch(e){}
+var ok=OK.indexOf(a)>=0;window.__dqaOK=ok;var h=document.documentElement;
+h.classList.add("dq-dockoff");if(!ok){h.classList.add("dq-noadmin");try{localStorage.removeItem("dq_admin_logged")}catch(e){}}
+var st=document.createElement("style");st.id="dq-gate-css";
+st.textContent="html.dq-dockoff #dq-admin-dock{display:none!important}html.dq-noadmin #admin-panel,html.dq-noadmin #admin-float-back,html.dq-noadmin #dq-admin-dock,html.dq-noadmin #dqs-fab,html.dq-noadmin #spro-fab,html.dq-noadmin #spro-card,html.dq-noadmin #dqe-fab,html.dq-noadmin [data-dqsrc]{display:none!important}";
+h.appendChild(st);
+if(!ok){function guard(){var p=document.getElementById("admin-panel");if(!p)return;
+function chk(){if(p.classList.contains("active")){p.classList.remove("active");try{if(typeof window.goHome==="function")window.goHome()}catch(e){}}}
+chk();new MutationObserver(chk).observe(p,{attributes:true,attributeFilter:["class"]})}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",guard);else guard()}})();</script>
 <script id="dq-proysl">/* /proysl, ?proysl və #proysl: ayrıca admin səhifəsi (proysl.html) eyni ünvanda açılır; fayl tapılmasa sayt normal yüklənir */
 try{var P=location.pathname;if(/\/proysl\/?$/i.test(P)||/[?&]proysl(&|=|$)/i.test(location.search)||/^#proysl/i.test(location.hash)){var B=P.replace(/proysl\/?$/i,"");if(B===P)B=P.replace(/[^\/]*$/,"");var x=new XMLHttpRequest();x.open("GET",B+"proysl.html",false);x.send();if(x.status===200&&x.responseText.indexOf("DQ Platform \u00b7 Admin")>-1){document.open();document.write(x.responseText);document.close()}}}catch(e){}</script>
 <script src="dq-firebase.js?v=20261102"></script>
@@ -8101,6 +8113,7 @@ function shown(e){return e.getClientRects().length>0}
 /* ---------- Vahid admin yoxlaması ---------- */
 function isAdmin(){
  try{
+  if(!window.__dqaOK)return false;
   if(window.__dqAuthed===true)return true;
   if(localStorage.getItem("dq_admin_logged")==="true")return true;
   var p=D.getElementById("admin-panel");

@@ -22,7 +22,13 @@ function toast(t){var e=q("#dqm-t");if(!e){e=D.createElement("div");e.id="dqm-t"
 /* Hazırda açıq olan ekranı başlıqdan tanı */
 function ctx(){var t=[].slice.call(D.querySelectorAll("h1,h2,h3,header *,[class*=title],[class*=head]")).filter(function(e){return e.getClientRects().length&&e.textContent.length<90}).map(function(e){return e.textContent}).join("|");
  if(/Xəbərlər və Elanlar|Yeniliklər/.test(t))return"news";if(/Qeydiyyat Portal|Aktiv sessiyalar/.test(t))return"sess";if(/Sınaq İmtahanları|Sınaqlar/.test(t))return"sinaq";if(/Fənlər üzrə testlər|Testlər/.test(t))return"test";return""}
-var ACT={news:["📰","Xəbər əlavə et",news],sinaq:["🎯","Yeni sınaq əlavə et (suallarla)",function(){quest("sinaq")}],test:["📝","Yeni test / sual əlavə et",function(){quest("test")}],sess:["🎓","İmtahan sessiyası aktivləşdir / qeydiyyat əlavə et",sess]};
+var ACT={news:["📰","Xəbər əlavə et",news],sinaq:["🎯","Yeni sınaq əlavə et (suallarla)",function(){quest("sinaq")}],test:["📝","Yeni test / sual əlavə et",function(){quest("test")}],sess:["🎓","İmtahan sessiyası aktivləşdir / qeydiyyat əlavə et",sess],mat:["📚","Material əlavə et",function(){openMod(/D[əe]rs\s*Materia/i,"Dərs materialları modulu tapılmadı")}],info:["ℹ️","Məlumat əlavə et",function(){openMod(/M[əe]lumat/i,"Məlumat modulu tapılmadı")}]};
+
+/* Mövcud admin modulunu (Dərs materialları, Məlumat bölməsi) kartın mətnindən tapıb açır */
+function openMod(re,msg){var p=D.getElementById("admin-panel"),cards=p?[].slice.call(p.querySelectorAll(".admin-nav-card")):[],c=cards.filter(function(e){return re.test(e.textContent)})[0];
+ if(!c)return toast(msg);closeS();
+ try{if(typeof window.dqGoAdmin==="function")window.dqGoAdmin();else{[].forEach.call(D.querySelectorAll(".screen.active"),function(x){x.classList.remove("active")});p.classList.add("active")}}catch(e){}
+ setTimeout(function(){c.click()},150)}
 var ED=[["✏️","Əsas səhifəni canlı redaktə et",function(){return window.DQNav&&DQNav.openEditor},function(){DQNav.openEditor()}],["🔗","Keçid idarəsi (düymə → keçid)",function(){return window.DQKecid&&DQKecid.open},function(){DQKecid.open()}],["🧭","Portal idarəsi",function(){return window.PRT&&PRT.open},function(){PRT.open()}],["🙈","Gizləmə (bölmələri gizlət)",function(){return window.GZL&&GZL.open},function(){GZL.open()}]];
 function menu(){var c=ctx(),keys=Object.keys(ACT);if(c){keys.splice(keys.indexOf(c),1);keys.unshift(c)}
  B().innerHTML="<h3>⚙️ İdarə modu</h3>"+(c?'<div class="dqm-m" style="margin-bottom:8px">Açıq ekrana uyğun əməliyyat birinci göstərilir</div>':"")+keys.map(function(k){return'<button class="dqm-a '+(k==c?"":"s")+'" data-k="'+k+'">'+ACT[k][0]+" "+ACT[k][1]+"</button>"}).join("")+ED.filter(function(e){return e[2]()}).map(function(e,i){return'<button class="dqm-a s" data-e="'+i+'">'+e[0]+" "+e[1]+"</button>"}).join("")+'<button class="dqm-a s" id="dqm-p">🔐 Admin panelinə qayıt</button><button class="s dqm-a" id="dqm-x">Bağla</button>';
