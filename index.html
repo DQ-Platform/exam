@@ -8795,31 +8795,34 @@ if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boo
 </script>
 
 <style id="dq-final-ui">
-/* ===== Ana səhifə statistikası: vahid, tarazlı kart ===== */
-html body #v3-home #dq-stats.dqst{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;
- width:calc(100% - 28px)!important;max-width:1100px!important;margin:24px auto 36px!important;padding:6px 0!important;box-sizing:border-box!important;
- height:auto!important;min-height:0!important;align-self:center!important;position:relative!important;overflow:hidden!important;
- background:linear-gradient(165deg,#0c2c6a 0%,#08224f 55%,#061839 100%)!important;border:1px solid rgba(217,164,65,.30)!important;border-radius:22px!important;
- box-shadow:0 18px 44px -16px rgba(4,14,40,.65),inset 0 1px 0 rgba(255,255,255,.09)!important}
-html body #v3-home #dq-stats.dqst:before{content:""!important;position:absolute;left:12%;right:12%;top:0;height:2px;background:linear-gradient(90deg,transparent,#d9a441,transparent);opacity:.85;pointer-events:none}
-html body #v3-home #dq-stats.dqst .dqst-c{position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;
- width:auto!important;min-width:0!important;height:auto!important;min-height:0!important;margin:0!important;padding:24px 10px 22px!important;
- background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;text-align:center!important;overflow:visible!important}
-html body #v3-home #dq-stats.dqst .dqst-c:before{content:""!important;position:absolute!important;inset:auto!important;left:0;top:24%;bottom:24%;width:1px;height:auto;background:linear-gradient(180deg,transparent,rgba(255,255,255,.16),transparent)!important}
-html body #v3-home #dq-stats.dqst .dqst-c:first-child:before{display:none!important}
-html body #v3-home #dq-stats.dqst .dqst-ic{width:46px!important;height:46px!important;border-radius:50%!important;display:grid!important;place-items:center!important;font-size:18px!important;color:#f3c565!important;
- background:radial-gradient(circle at 30% 25%,rgba(243,197,101,.28),rgba(243,197,101,.07))!important;border:1px solid rgba(243,197,101,.38)!important;box-shadow:0 0 18px rgba(243,197,101,.14)!important}
-html body #v3-home #dq-stats.dqst .dqst-c b{display:block!important;font-size:clamp(26px,4.2vw,40px)!important;line-height:1.05!important;font-weight:800!important;color:#fff!important;
- letter-spacing:-.02em!important;font-variant-numeric:tabular-nums!important;text-shadow:0 2px 14px rgba(120,160,235,.35)!important;white-space:nowrap}
-html body #v3-home #dq-stats.dqst .dqst-c small{display:block!important;font-size:12.5px!important;font-weight:600!important;line-height:1.35!important;letter-spacing:.3px!important;color:#a9bde0!important;opacity:1!important;text-align:center!important;max-width:11ch}
-@media(max-width:560px){
- html body #v3-home #dq-stats.dqst{grid-template-columns:repeat(2,minmax(0,1fr))!important;width:calc(100% - 24px)!important;margin:18px auto 28px!important;padding:0!important;border-radius:20px!important}
- html body #v3-home #dq-stats.dqst .dqst-c{padding:20px 8px 18px!important}
- html body #v3-home #dq-stats.dqst .dqst-c:nth-child(n+3){border-top:1px solid rgba(255,255,255,.08)!important}
- html body #v3-home #dq-stats.dqst .dqst-c:nth-child(3):before{display:none!important}
- html body #v3-home #dq-stats.dqst .dqst-c b{font-size:30px!important}
- html body #v3-home #dq-stats.dqst .dqst-c small{font-size:12px!important;max-width:none}
-}
+/* ===== Ana səhifə statistikası: ekskluziv "canlı rəqəmlər" paneli ===== */
+html body #v3-home #dq-stats.dqst{container-type:inline-size;container-name:dqs;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;
+ width:100%!important;max-width:none!important;height:auto!important;min-height:100%!important;margin:0!important;padding:16px 14px 14px!important;box-sizing:border-box!important;
+ align-content:center!important;position:relative!important;overflow:hidden!important;background:none!important;border:0!important;border-radius:inherit!important;box-shadow:none!important}
+html body #v3-home #dq-stats.dqst:before{content:"CANLI STATİSTİKA"!important;grid-column:1/-1;display:block;position:static!important;height:auto!important;background:none!important;opacity:1!important;
+ padding:0 0 0 16px;margin:0 0 2px;font:800 10.5px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.2em;color:#e8c06a}
+html body #v3-home #dq-stats.dqst:after{content:"";position:absolute;left:15px;top:19px;width:7px;height:7px;border-radius:50%;background:#34d399;animation:dqsLive 2.2s ease-out infinite}
+@keyframes dqsLive{0%{box-shadow:0 0 0 0 rgba(52,211,153,.55)}70%,100%{box-shadow:0 0 0 9px rgba(52,211,153,0)}}
+html body #v3-home #dq-stats.dqst .dqst-c{position:relative!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:5px!important;
+ width:auto!important;min-width:0!important;height:auto!important;min-height:0!important;margin:0!important;padding:13px 13px 12px!important;overflow:hidden!important;text-align:left!important;
+ background:linear-gradient(160deg,rgba(255,255,255,.085),rgba(255,255,255,.015))!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:14px!important;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.07)!important;transition:transform .25s ease,border-color .25s ease}
+html body #v3-home #dq-stats.dqst .dqst-c:before{display:none!important}
+html body #v3-home #dq-stats.dqst .dqst-c:after{content:"";position:absolute;right:-22px;top:-22px;width:78px;height:78px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(243,197,101,.24),transparent 68%)}
+html body #v3-home #dq-stats.dqst .dqst-c:hover{transform:translateY(-2px);border-color:rgba(243,197,101,.45)!important}
+html body #v3-home #dq-stats.dqst .dqst-ic{width:30px!important;height:30px!important;border-radius:9px!important;display:grid!important;place-items:center!important;font-size:13px!important;color:#f6d27c!important;
+ background:linear-gradient(145deg,rgba(243,197,101,.30),rgba(243,197,101,.06))!important;border:1px solid rgba(243,197,101,.42)!important;box-shadow:none!important}
+html body #v3-home #dq-stats.dqst .dqst-c b{display:block!important;font-size:clamp(23px,9.5cqw,38px)!important;line-height:1.05!important;font-weight:800!important;letter-spacing:-.025em!important;
+ font-variant-numeric:tabular-nums!important;white-space:nowrap;margin-top:4px;background:linear-gradient(180deg,#fff 35%,#f1cf84)!important;-webkit-background-clip:text!important;background-clip:text!important;
+ -webkit-text-fill-color:transparent!important;color:transparent!important;text-shadow:none!important}
+html body #v3-home #dq-stats.dqst .dqst-c small{display:block!important;font-size:11.5px!important;font-weight:600!important;line-height:1.3!important;letter-spacing:.2px!important;color:#9fb4dc!important;opacity:1!important;text-align:left!important;max-width:none!important}
+/* ana səhifədə ayrıca dayananda: çərçivəli geniş panel, 4 sütun */
+html body #v3-home>#dq-stats.dqst{width:calc(100% - 28px)!important;max-width:1100px!important;margin:24px auto 36px!important;padding:20px 18px 18px!important;border-radius:22px!important;
+ background:linear-gradient(165deg,#0c2c6a 0%,#08224f 55%,#061839 100%)!important;border:1px solid rgba(217,164,65,.30)!important;box-shadow:0 18px 44px -16px rgba(4,14,40,.65),inset 0 1px 0 rgba(255,255,255,.09)!important}
+html body #v3-home>#dq-stats.dqst:before{padding-left:18px}
+html body #v3-home>#dq-stats.dqst:after{left:17px;top:25px}
+@media(min-width:561px){html body #v3-home>#dq-stats.dqst{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:14px!important}}
+@media(prefers-reduced-motion:reduce){html body #v3-home #dq-stats.dqst:after{animation:none}}
 html.dq13-dark #v3-home #dq-stats.dqst{filter:invert(1) hue-rotate(180deg)}
 /* Üzən zəng düyməsi və ⋮⋮ dok silinib (bildiriş düyməsi yuxarıda var) */
 #dqt-dock,.dq-bell-off{display:none!important}
@@ -8838,6 +8841,25 @@ if(!RX.test(k)||/toast|ticker|dqnf|card/i.test(id))continue;
 if(r.top>innerHeight*.3)e.classList.add("dq-bell-off")}}catch(x){}}
 function go(){scan();setInterval(scan,1200)}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",go);else go()})();
+</script>
+<script id="dq-stats-count-js">
+/* Statistika rəqəmləri görünəndə 0-dan sayır (hərəkət azaldılıbsa, birbaşa göstərir) */
+(function(){"use strict";if(window.__dqCount)return;window.__dqCount=1;
+var rm=false;try{rm=matchMedia("(prefers-reduced-motion:reduce)").matches}catch(e){}
+var io=null;try{io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){io.unobserve(en.target);run(en.target)}})},{threshold:.35})}catch(e){}
+function fin(b){b.__anim=0;b.textContent=b.__f}
+function run(b){if(b.__anim===2)return;if(rm){fin(b);return}
+ b.__anim=1;var t=b.__t,p=b.__p,t0=performance.now();
+ (function f(n){var k=Math.min(1,(n-t0)/1400),e=1-Math.pow(1-k,3);b.textContent=Math.round(t*e)+p;if(k<1)requestAnimationFrame(f);else{b.__anim=2;b.textContent=b.__f}})(t0)}
+function prep(){var l=document.querySelectorAll("#dq-stats .dqst-c b");
+ for(var i=0;i<l.length;i++){var b=l[i];if(b.__anim===1)continue;
+  if(b.__f!==undefined&&b.textContent===b.__f)continue;
+  var m=(b.textContent||"").trim().match(/^(\d+)(\+?)$/);if(!m)continue;
+  b.__t=+m[1];b.__p=m[2];b.__f=b.textContent.trim();b.__anim=0;
+  if(!io||!b.__t){continue}
+  b.textContent="0"+b.__p;io.observe(b);
+  (function(x){setTimeout(function(){if(x.__anim===0&&x.textContent!==x.__f)fin(x)},7000)})(b)}}
+setInterval(prep,400);prep()})();
 </script>
 </body>
 </html>
