@@ -13,8 +13,8 @@ var st=D.createElement("style");st.textContent="#dqm-f{position:fixed;left:14px;
 D.head.appendChild(st);
 var f=D.createElement("button");f.id="dqm-f";f.textContent="⚙️";f.title="İdarə modu";
 var sh=D.createElement("div");sh.id="dqm-s";sh.innerHTML='<div id="dqm-b"></div>';
-function add(){if(!D.body)return setTimeout(add,200);D.body.appendChild(f);D.body.appendChild(sh)}add();
-var B=function(){return q("#dqm-b")};
+function add(){if(window.DQ_EMBED)return;if(!D.body)return setTimeout(add,200);D.body.appendChild(f);D.body.appendChild(sh)}add();
+var T=null,B=function(){return T||q("#dqm-b")};
 function openS(){sh.className="on";menu()}function closeS(){sh.className=""}
 f.onclick=openS;sh.onclick=function(e){if(e.target===sh)closeS()};
 function toast(t){var e=q("#dqm-t");if(!e){e=D.createElement("div");e.id="dqm-t";e.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:12px;z-index:2147483002;font:14px system-ui";D.body.appendChild(e)}e.textContent=t;e.style.display="block";clearTimeout(e._t);e._t=setTimeout(function(){e.style.display="none"},2400)}
@@ -23,11 +23,12 @@ function toast(t){var e=q("#dqm-t");if(!e){e=D.createElement("div");e.id="dqm-t"
 function ctx(){var t=[].slice.call(D.querySelectorAll("h1,h2,h3,header *,[class*=title],[class*=head]")).filter(function(e){return e.getClientRects().length&&e.textContent.length<90}).map(function(e){return e.textContent}).join("|");
  if(/Xəbərlər və Elanlar|Yeniliklər/.test(t))return"news";if(/Qeydiyyat Portal|Aktiv sessiyalar/.test(t))return"sess";if(/Sınaq İmtahanları|Sınaqlar/.test(t))return"sinaq";if(/Fənlər üzrə testlər|Testlər/.test(t))return"test";return""}
 var ACT={news:["📰","Xəbər əlavə et",news],sinaq:["🎯","Yeni sınaq əlavə et (suallarla)",function(){quest("sinaq")}],test:["📝","Yeni test / sual əlavə et",function(){quest("test")}],sess:["🎓","İmtahan sessiyası aktivləşdir / qeydiyyat əlavə et",sess]};
+var ED=[["✏️","Əsas səhifəni canlı redaktə et",function(){return window.DQNav&&DQNav.openEditor},function(){DQNav.openEditor()}],["🔗","Keçid idarəsi (düymə → keçid)",function(){return window.DQKecid&&DQKecid.open},function(){DQKecid.open()}],["🧭","Portal idarəsi",function(){return window.PRT&&PRT.open},function(){PRT.open()}],["🙈","Gizləmə (bölmələri gizlət)",function(){return window.GZL&&GZL.open},function(){GZL.open()}]];
 function menu(){var c=ctx(),keys=Object.keys(ACT);if(c){keys.splice(keys.indexOf(c),1);keys.unshift(c)}
- B().innerHTML="<h3>⚙️ İdarə modu</h3>"+(c?'<div class="dqm-m" style="margin-bottom:8px">Açıq ekrana uyğun əməliyyat birinci göstərilir</div>':"")+keys.map(function(k){return'<button class="dqm-a '+(k==c?"":"s")+'" data-k="'+k+'">'+ACT[k][0]+" "+ACT[k][1]+"</button>"}).join("")+'<button class="s dqm-a" id="dqm-x">Bağla</button>';
- [].forEach.call(B().querySelectorAll("[data-k]"),function(b){b.onclick=ACT[b.dataset.k][2]});q("#dqm-x").onclick=closeS}
-function head(t){return'<h3>'+t+'</h3><button class="s" id="dqm-bk" style="margin-bottom:10px">← Geri</button>'}
-function wire(){q("#dqm-bk").onclick=menu}
+ B().innerHTML="<h3>⚙️ İdarə modu</h3>"+(c?'<div class="dqm-m" style="margin-bottom:8px">Açıq ekrana uyğun əməliyyat birinci göstərilir</div>':"")+keys.map(function(k){return'<button class="dqm-a '+(k==c?"":"s")+'" data-k="'+k+'">'+ACT[k][0]+" "+ACT[k][1]+"</button>"}).join("")+ED.filter(function(e){return e[2]()}).map(function(e,i){return'<button class="dqm-a s" data-e="'+i+'">'+e[0]+" "+e[1]+"</button>"}).join("")+'<button class="dqm-a s" id="dqm-p">🔐 Admin panelinə qayıt</button><button class="s dqm-a" id="dqm-x">Bağla</button>';
+ [].forEach.call(B().querySelectorAll("[data-k]"),function(b){b.onclick=ACT[b.dataset.k][2]});var EL=ED.filter(function(e){return e[2]()});[].forEach.call(B().querySelectorAll("[data-e]"),function(b){b.onclick=function(){closeS();EL[b.dataset.e][3]()}});q("#dqm-p").onclick=function(){location.href=location.pathname.replace(/[^\/]*$/,"")+"proysl"};q("#dqm-x").onclick=closeS}
+function head(t){return'<h3>'+t+'</h3>'+(T?"":'<button class="s" id="dqm-bk" style="margin-bottom:10px">← Geri</button>')}
+function wire(){var b=q("#dqm-bk");if(b)b.onclick=menu}
 
 /* ---- 1. Xəbər ---- */
 function news(){B().innerHTML=head("📰 Xəbər əlavə et")+'<label>Başlıq</label><input id="n1" maxlength="150"><div class="dqm-r"><div><label>Kateqoriya</label><select id="n2"><option>Xəbər</option><option>Elan</option><option>İmtahan</option></select></div><div><label>Tarix</label><input id="n3" type="date"></div></div><label>Qapaq şəkli (4:5, avtomatik sıxılır)</label><input id="n4" type="file" accept="image/*"><label>Qısa xülasə</label><input id="n5" maxlength="200"><label>Tam mətn</label><textarea id="n6" rows="5"></textarea><label>Əlavə link (könüllü)</label><input id="n7" placeholder="https://..."><input id="n8" placeholder="Düymənin yazısı"><button id="n9" style="width:100%">+ Paylaş</button>';wire();
@@ -49,15 +50,28 @@ function sess(){B().innerHTML=head("🎓 İmtahan sessiyaları")+'<div id="sl" c
   list.push({id:"s"+Date.now(),kind:"Ümumi sınaq",duration:180,cat:c,name:n,place:"DQplatform",time:q("#s3").value||"Hər zaman açıq",exam:q("#s4").value||"İstənilən vaxt",hours:q("#s5").value||"Müddətsiz giriş",deadline:q("#s6").value||"Müddətsiz",price:+q("#s7").value||0,cap:+q("#s8").value||50,taken:0,open:q("#s9").checked});
   saveReg(row,list).then(function(){return getReg()}).then(function(r){row=r;toast("Əlavə olundu ✓");draw()}).catch(function(e){toast("Xəta: "+e.message)})}}
 
-/* ---- 3. Sual / sınaq / test yükləmə (exam_questions) ---- */
-var QC=null;function qcols(){if(QC)return Promise.resolve(QC);return api("exam_questions?select=*&limit=1").then(function(r){var k=r[0]?Object.keys(r[0]):[];function g(re){return k.filter(function(x){return re.test(x)})[0]}
- return QC={all:k,exam:g(/^exam_id$/)||"exam_id",cat:g(/^category$/)||"category",num:g(/^(q_?num|question_(num|no|number|index)|num|q_?no|order|position|idx|index)/i),q:g(/^(question(_text)?|q_?text|text|title|sual)$/i)||"question",ans:g(/correct|answer|duzgun|düzgün/i)}})}
-function opt(c,k){return c.all.filter(function(x){return new RegExp("^(option_|variant_|opt_)?"+k+"$","i").test(x)})[0]}
+/* ---- 3. Sual / sınaq / test yükləmə (exam_questions) — saytın Pro Add modulunun eyni sütun xəritəsi ilə ---- */
+var L5=["A","B","C","D","E"];
+function sample(){return api("exam_questions?select=*&limit=1").then(function(r){return r&&r[0]})}
+function mapper(sm){var K=Object.keys(sm),f=function(re){return K.filter(function(k){return re.test(k)})[0]},m={};
+ m.cat=f(/^category$/);m.exam=f(/^exam_id$/);m.num=f(/^(q_?num(ber)?|question_(num|no|number|index)|num(ber)?|q_?no|order(_?index)?|position|idx|index|sira)$/i);
+ m.q=f(/^(question(_text)?|q_?text|text|title|sual)$/i);m.opts=f(/^(options?|variants?|choices|answers)$/i);m.corr=f(/^(correct(_?(answer|option|index|idx))?|answer|right_?answer|dogru)$/i);
+ if(!m.opts){m.each=L5.map(function(L){return f(new RegExp("^(opt(ion)?_?"+L+"|variant_?"+L+"|"+L+")$","i"))});if(m.each.filter(Boolean).length<4)m.each=null}return m}
+function toRow(r,i,m,sm,exam,cat,start){var o={};if(m.exam)o[m.exam]=typeof sm[m.exam]==="number"?+exam:String(exam);o[m.cat]=cat;if(m.num)o[m.num]=start+i;o[m.q]=r.q;
+ var op=r.o.filter(function(x,k){return k<4||x});if(m.opts){o[m.opts]=op}else m.each.forEach(function(k,j){if(k)o[k]=r.o[j]||""});
+ var cv=sm[m.corr];o[m.corr]=typeof cv==="number"?r.c:(typeof cv==="string"&&/^[A-E]$/i.test(cv)?L5[r.c]:(op[r.c]||""));return o}
 function quest(mode){var isS=mode=="sinaq";
- B().innerHTML=head(isS?"🎯 Yeni sınaq əlavə et":"📝 Yeni test / sual əlavə et")+'<p class="dqm-m">Hər sətir bir sual: <b>sual | A | B | C | D | düzgün (A-D)</b></p><div class="dqm-r"><div><label>'+(isS?"Sınaq nömrəsi (exam_id)":"İmtahan / mövzu (exam_id)")+'</label><input id="q1"></div><div><label>'+(isS?"Kateqoriya (BB/BA/AC)":"Fənn (kateqoriya)")+'</label><input id="q2"></div></div><textarea id="q3" rows="8"></textarea><label><input id="q4" type="checkbox" '+(isS?"checked":"")+' style="width:auto"> Köhnə sualları silib yenisi ilə əvəz et</label><br><br><button id="q5" style="width:100%">Yüklə</button><p class="dqm-m" id="q6"></p>';wire();
- q("#q5").onclick=function(){var ex=q("#q1").value.trim(),ct=q("#q2").value.trim(),L=q("#q3").value.split("\n").map(function(x){return x.trim()}).filter(Boolean),rep=q("#q4").checked;if(!ex||!ct||!L.length)return toast("Sahələri doldurun");
-  qcols().then(function(c){var f="?"+c.exam+"=eq."+encodeURIComponent(ex)+"&"+c.cat+"=eq."+encodeURIComponent(ct);
-   var pre=rep?(confirm(L.length+" sual yüklənəcək, köhnələr silinəcək. Davam?")?api("exam_questions"+f,{method:"DELETE"}).then(function(){return 0}):Promise.reject(new Error("Ləğv edildi"))):api("exam_questions"+f+"&select="+c.exam,{h:{Prefer:"count=exact"}}).then(function(a){return a.length});
-   return pre.then(function(off){var rows=L.map(function(l,i){var p=l.split("|").map(function(x){return x.trim()}),o={};o[c.exam]=ex;o[c.cat]=ct;o[c.q]=p[0];if(c.num)o[c.num]=off+i+1;["a","b","c","d"].forEach(function(k,j){var n=opt(c,k);if(n)o[n]=p[j+1]||""});if(c.ans)o[c.ans]=p[5]||"";return o});
-    var ch=Promise.resolve();for(var i=0;i<rows.length;i+=50)(function(i){ch=ch.then(function(){return api("exam_questions",{method:"POST",h:{Prefer:"return=minimal"},body:JSON.stringify(rows.slice(i,i+50))}).then(function(){q("#q6").textContent=Math.min(i+50,rows.length)+"/"+rows.length})})})(i);return ch})}).then(function(){toast("Yükləndi ✓")}).catch(function(e){toast("Xəta: "+e.message)})}}
+ B().innerHTML=head(isS?"🎯 Yeni sınaq əlavə et":"📝 Yeni test / sual əlavə et")+'<p class="dqm-m">Hər sətir bir sual: <b>sual | A | B | C | D | düzgün cavab (hərf)</b> — 5 variant üçün E də yazın.</p><div class="dqm-r"><div><label>'+(isS?"Sınaq nömrəsi (exam_id)":"Sınaq nömrəsi")+'</label><input id="q1"></div><div><label>Kateqoriya (BB / BA / AC)</label><input id="q2"></div></div><textarea id="q3" rows="8"></textarea><label><input id="q4" type="checkbox" '+(isS?"checked":"")+' style="width:auto"> Köhnə sualları silib yenisi ilə əvəz et</label><br><br><button id="q5" style="width:100%">Yüklə</button><p class="dqm-m" id="q6"></p>';wire();
+ q("#q5").onclick=function(){var ex=q("#q1").value.trim(),ct=q("#q2").value.trim().toUpperCase(),L=q("#q3").value.split("\n").map(function(x){return x.trim()}).filter(Boolean),rep=q("#q4").checked;if(!ex||!ct||!L.length)return toast("Sahələri doldurun");
+  var sm,m,rows;
+  sample().then(function(s){if(!s)throw new Error("Bazada nümunə sual yoxdur — sütun strukturu təyin edilə bilmədi");sm=s;m=mapper(s);
+   if(!m.exam||!m.cat||!m.q||!m.corr||!(m.opts||m.each))throw new Error("Sütunlar tanınmadı: "+Object.keys(s).join(", "));
+   rows=L.map(function(l,i){var p=l.split("|").map(function(x){return x.trim()}),c=L5.indexOf((p[p.length-1]||"").toUpperCase()),o=p.slice(1,-1);if(p.length<4||c<0||c>=o.length)throw new Error((i+1)+"-ci sətir: format səhvdir (sual | A | B | C | D | düzgün hərf)");return{q:p[0],o:o,c:c}});
+   var f="?"+m.exam+"=eq."+encodeURIComponent(ex)+"&"+m.cat+"=eq."+encodeURIComponent(ct);
+   if(rep){if(!confirm(rows.length+" sual yüklənəcək, bu sınaq/kateqoriyadakı köhnələr silinəcək. Davam?"))throw new Error("Ləğv edildi");return api("exam_questions"+f,{method:"DELETE"}).then(function(){return 0})}
+   return api("exam_questions"+f+"&select=id"+(m.num?","+m.num:"")).then(function(a){return m.num?a.reduce(function(x,r){return Math.max(x,+r[m.num]||0)},0):a.length})})
+  .then(function(off){var data=rows.map(function(r,i){return toRow(r,i,m,sm,ex,ct,off+1)}),ch=Promise.resolve();
+   for(var i=0;i<data.length;i+=50)(function(i){ch=ch.then(function(){return api("exam_questions",{method:"POST",h:{Prefer:"return=minimal"},body:JSON.stringify(data.slice(i,i+50))}).then(function(){q("#q6").textContent=Math.min(i+50,data.length)+"/"+data.length})})})(i);return ch})
+  .then(function(){toast("Yükləndi ✓")}).catch(function(e){toast("Xəta: "+e.message);q("#q6").textContent=e.message})}}
+window.DQMode={sess:function(el){T=el;sess()},quest:function(md,el){T=el;quest(md)}};
 })();

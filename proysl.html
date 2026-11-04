@@ -3,6 +3,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>DQ Platform · Admin</title>
+<script>document.write('<script src="'+location.pathname.replace(/proysl(\.html)?\/?$/i,"")+'dq-firebase.js?v=20261102"><\/script>')</script>
 <style>
 :root{--bg:#eef2fb;--card:#fff;--ink:#0f1f45;--mut:#6b7794;--pri:#1e3a8a;--acc:#2f63bd;--line:#e2e8f5;--bad:#dc2626;--ok:#16a34a}
 @media(prefers-color-scheme:dark){:root{--bg:#0b1226;--card:#131d3a;--ink:#e8eefc;--mut:#8fa0c8;--line:#233058}}
@@ -42,6 +43,12 @@ const store={list:(c,l=100)=>api(`dq_v2_store?select=*&collection=eq.${c}&order=
  add:(c,d)=>api("dq_v2_store",{method:"POST",h:{Prefer:"return=representation"},body:JSON.stringify({collection:c,data:d})}),
  del:id=>api("dq_v2_store?id=eq."+id,{method:"DELETE"})};
 
+async function dbcheck(){const e=$("#dbs");if(!e)return;
+ if(!window.DQFB){e.innerHTML="🟠 dq-firebase.js yüklənməyib — birbaşa Supabase işlədilir";return}
+ try{const t0=Date.now();await DQFB.ready;const ok=await DQFB.ping();e.innerHTML=ok?`🟢 Firebase (Firestore) bağlıdır · oxuma/yazma işləyir (${Date.now()-t0} ms)`:"🔴 Firebase cavab verdi, amma yoxlama yazısı oxunmadı"}
+ catch(x){const s=String(x&&x.message||x);e.innerHTML="🔴 Firebase xətası: "+esc(s)+(/permission|insufficient/i.test(s)?" — Firebase Console → Firestore → Rules bölməsində oxuma/yazmaya icazə verin":"")}}
+addEventListener("unhandledrejection",e=>toast("Xəta: "+((e.reason&&e.reason.message)||e.reason)));
+addEventListener("error",e=>toast("Xəta: "+e.message));
 function login(){app.innerHTML=`<div class="card" style="max-width:380px;margin:12vh auto"><h1>🔐 Admin girişi</h1>
 <label>E-poçt</label><input id="em" type="email" autocomplete="username"><label>Kod</label><input id="cd" type="password" autocomplete="current-password">
 <button id="go" style="width:100%">Daxil ol</button><p class="mut" id="er"></p></div>`;
@@ -52,8 +59,8 @@ function login(){app.innerHTML=`<div class="card" style="max-width:380px;margin:
 const MODS=[["news","📰","Xəbər paylaşımı"],["res","📈","Nəticə Mərkəzi"],["rec","🛎️","Resepşn"],
  ["padd","➕","Pro Add"],["stud","🎓","Sual Studiyası"],["qpro","❓","Sual idarəsi PRO"]];
 function home(){if(!OK.includes(sessionStorage.dqa))return login();
- app.innerHTML=`<div class="top"><h1>DQ Platform · Admin</h1><button class="s" id="out">Çıxış</button></div><div class="grid">${MODS.map(m=>`<div class="tile" data-m="${m[0]}"><i>${m[1]}</i>${m[2]}</div>`).join("")}</div>`;
- $("#out").onclick=()=>{delete sessionStorage.dqa;try{localStorage.removeItem("dqa")}catch(e){}login()};
+ app.innerHTML=`<div class="top"><h1>DQ Platform · Admin</h1><button class="s" id="out">Çıxış</button></div><div class="row" style="margin-bottom:10px"><button id="main">🏠 Əsas səhifəyə keç (redaktə modu)</button></div><div class="mut" id="dbs" style="margin-bottom:12px">Baza yoxlanılır…</div><div class="grid">${MODS.map(m=>`<div class="tile" data-m="${m[0]}"><i>${m[1]}</i>${m[2]}</div>`).join("")}</div>`;
+ $("#main").onclick=()=>{location.href=location.pathname.replace(/proysl(\.html)?\/?$/i,"")||"/"};dbcheck();$("#out").onclick=()=>{delete sessionStorage.dqa;try{localStorage.removeItem("dqa")}catch(e){}login()};
  document.querySelectorAll(".tile").forEach(t=>t.onclick=()=>open(t.dataset.m))}
 function open(m){const t=MODS.find(x=>x[0]==m);app.innerHTML=`<div class="top"><h1>${t[1]} ${t[2]}</h1><button class="s" id="bk">← Geri</button></div><div id="mod"></div>`;
  $("#bk").onclick=home;V[m]($("#mod"))}
@@ -87,31 +94,20 @@ async news(el){el.innerHTML=`<div class="card"><h2>Yeni xəbər paylaş</h2>
   ["t","s","b","l","lt"].forEach(i=>$("#"+i).value="");img="";up();load()}catch(e){toast("Xəta: "+e.message)}};
  $("#pub").onclick=pub;el.onkeydown=e=>{if((e.ctrlKey||e.metaKey)&&e.key=="s"){e.preventDefault();pub()}};load()},
 
-async res(el){coll(el,"results","Nəticələr")},
-async rec(el){coll(el,"regsessions","Qeydiyyat / Resepşn")},
-
-async padd(el){const c=await qcols();el.innerHTML=`<div class="card"><h2>Pro Add — toplu əlavə</h2><p class="mut">Hər sətir bir sual. Format: <code>sual | A | B | C | D | düzgün (A-D)</code>. Bu imtahan/kateqoriyadakı köhnə suallar silinib yenisi ilə əvəz olunur.</p>
-<div class="row"><input id="e" placeholder="Imtahan nömrəsi"><input id="g" placeholder="Kateqoriya"></div><textarea id="t" rows="10"></textarea><button id="go" style="width:100%">Köhnələri sil və yenisini yüklə</button><p class="mut" id="st"></p></div>`;
- $("#go").onclick=async()=>{const ex=$("#e").value.trim(),ct=$("#g").value.trim(),L=$("#t").value.split("\n").map(x=>x.trim()).filter(Boolean);if(!ex||!ct||!L.length)return toast("Sahələri doldurun");
-  const has=n=>c.all.includes(n),rows=L.map((l,i)=>{const p=l.split("|").map(x=>x.trim()),o={[c.exam]:ex,[c.cat]:ct,[c.q]:p[0]};if(c.num)o[c.num]=i+1;
-   ["a","b","c","d"].forEach((k,j)=>{const n=c.all.find(x=>new RegExp("^(option_|variant_|opt_)?"+k+"$","i").test(x));if(n)o[n]=p[j+1]||""});
-   const ca=c.all.find(x=>/correct|answer|duzgun|düzgün/i.test(x));if(ca)o[ca]=p[5]||"";return o});
-  if(!confirm(rows.length+" sual yüklənəcək, köhnələr silinəcək. Davam?"))return;
-  try{await api(`exam_questions?${c.exam}=eq.${encodeURIComponent(ex)}&${c.cat}=eq.${encodeURIComponent(ct)}`,{method:"DELETE"});
-   for(let i=0;i<rows.length;i+=50){await api("exam_questions",{method:"POST",body:JSON.stringify(rows.slice(i,i+50))});$("#st").textContent=Math.min(i+50,rows.length)+"/"+rows.length}
-   toast("Yükləndi ✓")}catch(e){toast("Xəta: "+e.message)}}},
-
-async stud(el){const c=await qcols();el.innerHTML=`<div class="card"><h2>Tək sual əlavə et</h2><div class="row"><input id="e" placeholder="Imtahan nömrəsi"><input id="g" placeholder="Kateqoriya"></div><textarea id="q" rows="3" placeholder="Sual"></textarea>
-<div class="row"><input id="a" placeholder="A"><input id="b" placeholder="B"></div><div class="row"><input id="cc" placeholder="C"><input id="dd" placeholder="D"></div><select id="r"><option>A</option><option>B</option><option>C</option><option>D</option></select><button id="go" style="width:100%">Əlavə et</button></div>`;
- $("#go").onclick=async()=>{const o={[c.exam]:$("#e").value,[c.cat]:$("#g").value,[c.q]:$("#q").value};
-  [["a","a"],["b","b"],["c","cc"],["d","dd"]].forEach(([k,i])=>{const n=c.all.find(x=>new RegExp("^(option_|variant_|opt_)?"+k+"$","i").test(x));if(n)o[n]=$("#"+i).value});
-  const ca=c.all.find(x=>/correct|answer|duzgun|düzgün/i.test(x));if(ca)o[ca]=$("#r").value;
-  try{await api("exam_questions",{method:"POST",body:JSON.stringify(o)});toast("Əlavə olundu ✓");$("#q").value=""}catch(e){toast("Xəta: "+e.message)}}},
-
+async res(el){crud(el,"exam_results","Nəticələr",false)},
+async rec(el){el.innerHTML='<div id="r1"></div><div class="card" id="r2" style="margin-top:12px"></div><div id="r3" style="margin-top:12px"></div>';await loadMode();DQMode.sess($("#r1"));crud($("#r2"),"allowed_students","İcazə verilmiş iş nömrələri",true);coll($("#r3"),"notify_queue","Bildiriş növbəsi")},
+async padd(el){await loadMode();DQMode.quest("sinaq",el)},
+async stud(el){await loadMode();DQMode.quest("test",el)},
 async qpro(el){const c=await qcols();const r=await api(`exam_questions?select=${c.exam},${c.cat}&limit=5000`),m={};r.forEach(x=>{const k=x[c.exam]+"||"+x[c.cat];m[k]=(m[k]||0)+1});
  el.innerHTML=`<div class="card"><h2>Sual idarəsi PRO</h2><p class="mut">Cəmi: ${r.length} sual</p>${table(Object.entries(m).map(([k,v])=>{const[a,b]=k.split("||");return{Imtahan:a,Kateqoriya:b,Say:v}}),["Imtahan","Kateqoriya","Say"],x=>`<button class="d" data-e="${esc(x.Imtahan)}" data-g="${esc(x.Kateqoriya)}">Hamısını sil</button>`)}</div>`;
  document.querySelectorAll(".d").forEach(b=>b.onclick=async()=>{if(!confirm("Bu qrupun bütün sualları silinsin?"))return;await api(`exam_questions?${c.exam}=eq.${encodeURIComponent(b.dataset.e)}&${c.cat}=eq.${encodeURIComponent(b.dataset.g)}`,{method:"DELETE"});toast("Silindi");V.qpro(el)})}
 };
+function loadMode(){if(window.DQMode)return Promise.resolve();return new Promise(ok=>{window.DQ_EMBED=1;const s=document.createElement("script");s.src=location.pathname.replace(/proysl(\.html)?\/?$/i,"")+"dq-admin-mode.js?v=2";s.onload=s.onerror=()=>ok();document.head.appendChild(s)})}
+async function crud(el,tb,title,add){const draw=async()=>{let r;try{r=await api(`${tb}?select=*&order=id.desc&limit=200`)}catch(e){el.innerHTML=`<h2>${title}</h2>🔴 ${esc(e.message)}`;return}
+ const keys=[...new Set(r.slice(0,10).flatMap(Object.keys))].filter(k=>k!="id"&&k!="created_at").slice(0,6),fk=keys.length?keys:["exam_no","fin"];
+ el.innerHTML=`<h2>${title} <span class="mut">(${r.length})</span></h2>`+(add?`<div class="row">${fk.map(k=>`<input data-k="${k}" placeholder="${k}">`).join("")}<button class="ad">+ Əlavə et</button></div>`:"")+(r.length?table(r,["id",...keys],x=>`<button class="d" data-i="${x.id}">Sil</button>`):"<span class=mut>Qeyd yoxdur</span>");
+ el.querySelectorAll(".d").forEach(b=>b.onclick=async()=>{if(confirm("Silinsin?")){try{await api(`${tb}?id=eq.${b.dataset.i}`,{method:"DELETE"});draw()}catch(e){toast("Xəta: "+e.message)}}});
+ const ad=el.querySelector(".ad");if(ad)ad.onclick=async()=>{const o={};el.querySelectorAll("input[data-k]").forEach(i=>{if(i.value.trim())o[i.dataset.k]=i.value.trim()});if(!Object.keys(o).length)return toast("Sahələri doldurun");try{await api(tb,{method:"POST",h:{Prefer:"return=minimal"},body:JSON.stringify(o)});toast("Əlavə olundu ✓");draw()}catch(e){toast("Xəta: "+e.message)}}};draw()}
 async function coll(el,def,title){el.innerHTML=`<div class="card"><h2>${title}</h2><button id="r" class="s">Yenilə</button><div id="o"></div></div>`;
  const load=async()=>{try{const r=await store.list(def,200);$("#o").innerHTML=r.length?table(r.map(x=>({id:x.id,data:x.data})),["id","data"],x=>`<button class="d" data-i="${x.id}">Sil</button>`):"<span class=mut>Qeyd yoxdur</span>";
   document.querySelectorAll("#o .d").forEach(b=>b.onclick=async()=>{if(confirm("Silinsin?")){await store.del(b.dataset.i);load()}})}catch(e){$("#o").textContent=e.message}};
