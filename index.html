@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<script id="dq-admin-mode-loader">/* İdarə modu: yalnız /proysl ilə daxil olmuş admin cihazında dq-admin-mode.js yüklənir */
+try{if(localStorage.dqa){var s=document.createElement("script");s.src="dq-admin-mode.js?v=1";s.defer=true;document.head.appendChild(s)}}catch(e){}</script>
+<script id="dq-proysl">/* /proysl, ?proysl və #proysl: ayrıca admin səhifəsi (proysl.html) eyni ünvanda açılır; fayl tapılmasa sayt normal yüklənir */
+try{var P=location.pathname;if(/\/proysl\/?$/i.test(P)||/[?&]proysl(&|=|$)/i.test(location.search)||/^#proysl/i.test(location.hash)){var B=P.replace(/proysl\/?$/i,"");if(B===P)B=P.replace(/[^\/]*$/,"");var x=new XMLHttpRequest();x.open("GET",B+"proysl.html",false);x.send();if(x.status===200&&x.responseText.indexOf("DQ Platform \u00b7 Admin")>-1){document.open();document.write(x.responseText);document.close()}}}catch(e){}</script>
 <script src="dq-firebase.js?v=20261102"></script>
 <script id="dqg-norm">/* DQ giriş linki: ?giris, ?giris= və ?giris=1 eyni işləsin; səhv yazılmış linklər (məs. ?giris=(https://…?giris=1&qrup=BA&sinaq=1)) avtomatik düzəlsin; səhifə parametrsiz yenilənərsə (≤15 san) link bərpa olunur → birbaşa «Kabinetə giriş» */
 try{var u=new URL(location.href),q=u.searchParams,K="dqg_link",ss=window.sessionStorage;
@@ -2759,6 +2763,7 @@ window.scrollTo({top:0,behavior:"smooth"})};</script>
 <div class="admin-nav-card" onclick="window.DQK?DQK.open():alert('Kitab modulu yüklənməyib (dq-kitab.js)')" style="background:linear-gradient(135deg,#0a2f7a,#d9a441);color:#fff"><span class="icon">📚</span> Sınaq Toplusu (Kitab)</div>
 <div class="admin-nav-card" onclick="window.DQRegAdmin?DQRegAdmin.open():alert('Modul yüklənməyib')" style="background:linear-gradient(135deg,#0a2f7a,#16a34a);color:#fff"><span class="icon">🎓</span> Aktiv İmtahanlar</div>
 <div class="admin-nav-card" onclick="window.DQResultsHub?DQResultsHub.open():alert('Nəticə Mərkəzi modulu yüklənməyib (dq-resepsiya-netice.js)')" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">📈</span> Nəticə Mərkəzi</div>
+<div class="admin-nav-card" onclick="location.href=location.pathname+'?proysl'" style="background:linear-gradient(135deg,#0a2f7a,#1e3a8a);color:#fff"><span class="icon">🔐</span> Admin Pro (proysl)</div>
 </div>
 <style id="ppu-css">
 #mod-propdf .ppu-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="az"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>DQ Platform · Admin</title>
+<style>
+:root{--bg:#eef2fb;--card:#fff;--ink:#0f1f45;--mut:#6b7794;--pri:#1e3a8a;--acc:#2f63bd;--line:#e2e8f5;--bad:#dc2626;--ok:#16a34a}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1226;--card:#131d3a;--ink:#e8eefc;--mut:#8fa0c8;--line:#233058}}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.wrap{max-width:900px;margin:0 auto;padding:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 4px 18px #1e3a8a14}
+h1{font-size:20px;margin:0 0 12px}h2{font-size:16px;margin:0 0 10px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;margin:4px 0 10px}
+label{font-size:13px;font-weight:600}
+button{border:0;border-radius:12px;padding:11px 16px;font:inherit;font-weight:600;cursor:pointer;background:var(--pri);color:#fff}
+button.s{background:#e8eefc;color:var(--pri)}button.d{background:#fee2e2;color:var(--bad)}button:disabled{opacity:.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tile{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--pri);border-radius:14px;padding:16px 8px;text-align:center;cursor:pointer;font-weight:600;font-size:13px;transition:.15s}
+.tile:hover{transform:translateY(-2px)}.tile i{display:block;font-style:normal;font-size:26px;margin-bottom:6px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:7px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl{overflow-x:auto}.mut{color:var(--mut);font-size:12px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;z-index:9}
+#toast.on{opacity:1}
+.prev{display:flex;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px}
+.prev img,.prev .ph{width:54px;height:68px;border-radius:8px;object-fit:cover;background:#dbe5f7}
+.tag{background:#dbeafe;color:var(--pri);border-radius:8px;padding:1px 8px;font-size:11px;font-weight:700}
+</style></head><body>
+<div class="wrap" id="app"></div><div id="toast"></div>
+<script>
+const U="https://cpzwliqlgaplroscvduo.supabase.co",K="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF";
+// Giriş məlumatları açıq mətnlə saxlanmır, yalnız SHA-256 heşi saxlanır
+const OK=["99686c0544e9a36931c945b4197068c88f4db34d74d9de5504e60d756bc30d7e","74894384393f0ed1f63e9a3b58a82a7483b25b7c3f46d6e44301e87a52321c8d"];
+const H=x=>Object.assign({apikey:K,Authorization:"Bearer "+K,"Content-Type":"application/json"},x||{});
+const $=s=>document.querySelector(s),app=$("#app");
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(t){const e=$("#toast");e.textContent=t;e.className="on";setTimeout(()=>e.className="",2400)}
+async function api(p,o){const r=await fetch(U+"/rest/v1/"+p,Object.assign({headers:H(o&&o.h)},o));if(!r.ok)throw new Error(r.status+" "+(await r.text()).slice(0,160));const t=await r.text();return t?JSON.parse(t):null}
+const sha=async s=>[...new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)))].map(b=>b.toString(16).padStart(2,"0")).join("");
+const store={list:(c,l=100)=>api(`dq_v2_store?select=*&collection=eq.${c}&order=id.desc&limit=${l}`),
+ add:(c,d)=>api("dq_v2_store",{method:"POST",h:{Prefer:"return=representation"},body:JSON.stringify({collection:c,data:d})}),
+ del:id=>api("dq_v2_store?id=eq."+id,{method:"DELETE"})};
+
+function login(){app.innerHTML=`<div class="card" style="max-width:380px;margin:12vh auto"><h1>🔐 Admin girişi</h1>
+<label>E-poçt</label><input id="em" type="email" autocomplete="username"><label>Kod</label><input id="cd" type="password" autocomplete="current-password">
+<button id="go" style="width:100%">Daxil ol</button><p class="mut" id="er"></p></div>`;
+ const go=async()=>{const h=await sha($("#em").value.trim().toLowerCase()+":"+$("#cd").value.trim());
+  if(OK.includes(h)){sessionStorage.dqa=h;try{localStorage.dqa=h}catch(e){}home()}else $("#er").textContent="E-poçt və ya kod səhv və ya yanlışdır."};
+ $("#go").onclick=go;$("#cd").onkeydown=e=>e.key=="Enter"&&go()}
+
+const MODS=[["news","📰","Xəbər paylaşımı"],["res","📈","Nəticə Mərkəzi"],["rec","🛎️","Resepşn"],
+ ["padd","➕","Pro Add"],["stud","🎓","Sual Studiyası"],["qpro","❓","Sual idarəsi PRO"]];
+function home(){if(!OK.includes(sessionStorage.dqa))return login();
+ app.innerHTML=`<div class="top"><h1>DQ Platform · Admin</h1><button class="s" id="out">Çıxış</button></div><div class="grid">${MODS.map(m=>`<div class="tile" data-m="${m[0]}"><i>${m[1]}</i>${m[2]}</div>`).join("")}</div>`;
+ $("#out").onclick=()=>{delete sessionStorage.dqa;try{localStorage.removeItem("dqa")}catch(e){}login()};
+ document.querySelectorAll(".tile").forEach(t=>t.onclick=()=>open(t.dataset.m))}
+function open(m){const t=MODS.find(x=>x[0]==m);app.innerHTML=`<div class="top"><h1>${t[1]} ${t[2]}</h1><button class="s" id="bk">← Geri</button></div><div id="mod"></div>`;
+ $("#bk").onclick=home;V[m]($("#mod"))}
+
+// ---- cədvəl köməkçisi
+function table(rows,cols,act){return `<div class="tbl"><table><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join("")}<th></th></tr>${rows.map((r,i)=>`<tr>${cols.map(c=>`<td>${esc(typeof r[c]=="object"?JSON.stringify(r[c]):r[c]).slice(0,120)}</td>`).join("")}<td>${act(r,i)}</td></tr>`).join("")}</table></div>`}
+let QC=null;
+async function qcols(){if(QC)return QC;const r=await api("exam_questions?select=*&limit=1");const k=r[0]?Object.keys(r[0]):[];
+ const f=re=>k.find(x=>re.test(x));return QC={all:k,exam:f(/^exam_id$/)||"exam_id",cat:f(/^category$/)||"category",id:f(/^id$/)||"id",num:f(/^(q_?num|question_(num|no|number|index)|num|q_?no|order|position|idx|index)/i),q:f(/^(question(_text)?|q_?text|text|title|sual)$/i)||"question"}}
+
+const V={
+async news(el){el.innerHTML=`<div class="card"><h2>Yeni xəbər paylaş</h2>
+<label>Başlıq <span class="mut" id="c1">0/150</span></label><input id="t" maxlength="150" placeholder="Məsələn: Dövlət qulluğu imtahan tarixi elan olundu">
+<div class="row"><div><label>Kateqoriya</label><select id="k"><option>Xəbər</option><option>Elan</option><option>İmtahan</option></select></div><div><label>Tarix</label><input id="d" type="date"></div></div>
+<label>Qapaq şəkli <span class="mut">4:5 · avtomatik sıxılır</span></label><input id="f" type="file" accept="image/*"><div class="row"><button class="s" id="rm">Şəkli sil</button></div><div id="ip"></div>
+<label>Qısa xülasə <span class="mut" id="c2">0/200</span></label><input id="s" maxlength="200">
+<label>Tam mətn</label><textarea id="b" rows="6"></textarea>
+<label>🔗 Əlavə link (könüllü)</label><input id="l" placeholder="https://..."><input id="lt" placeholder="Düymənin yazısı (məs: Qeydiyyat formasına keç)">
+<label>Canlı önizləmə</label><div class="prev"><div class="ph" id="pi"></div><div><span class="tag" id="pk">XƏBƏR</span><br><b id="pt">Başlıq burada görünəcək</b><br><span class="mut" id="ps">Xülasə burada görünəcək</span></div></div><br>
+<button id="pub" style="width:100%">+ Paylaş</button><p class="mut" style="text-align:center">Ctrl + S ilə sürətli yadda saxla</p></div>
+<div class="card" style="margin-top:12px"><h2>Paylaşılmış xəbərlər</h2><div id="ls"></div></div>`;
+ let img="";$("#d").valueAsDate=new Date();
+ const up=()=>{$("#c1").textContent=$("#t").value.length+"/150";$("#c2").textContent=$("#s").value.length+"/200";$("#pt").textContent=$("#t").value||"Başlıq burada görünəcək";$("#ps").textContent=$("#s").value||"Xülasə burada görünəcək";$("#pk").textContent=$("#k").value.toUpperCase();$("#pi").style.background=img?`url(${img}) center/cover`:"";$("#ip").innerHTML=img?`<img src="${img}" style="width:120px;border-radius:10px">`:""};
+ el.oninput=up;
+ $("#f").onchange=e=>{const fl=e.target.files[0];if(!fl)return;const im=new Image();im.onload=()=>{const W=640,Hh=800,c=document.createElement("canvas");c.width=W;c.height=Hh;const x=c.getContext("2d"),r=Math.max(W/im.width,Hh/im.height),w=im.width*r,h=im.height*r;x.drawImage(im,(W-w)/2,(Hh-h)/2,w,h);img=c.toDataURL("image/jpeg",.78);up()};im.src=URL.createObjectURL(fl)};
+ $("#rm").onclick=()=>{img="";$("#f").value="";up()};
+ const load=async()=>{const r=await store.list("news",30);$("#ls").innerHTML=r.length?table(r.map(x=>Object.assign({_id:x.id},x.data)),["title","cat","date"],x=>`<button class="d" data-i="${x._id}">Sil</button>`):"<span class=mut>Xəbər yoxdur</span>";
+  document.querySelectorAll("#ls .d").forEach(b=>b.onclick=async()=>{if(confirm("Silinsin?")){await store.del(b.dataset.i);toast("Silindi");load()}})};
+ const pub=async()=>{const t=$("#t").value.trim();if(!t)return toast("Başlıq yazın");
+  try{await store.add("news",{title:t,cat:$("#k").value,date:$("#d").value,img,summary:$("#s").value,body:$("#b").value,link:$("#l").value,linkText:$("#lt").value,ts:Date.now()});toast("Paylaşıldı ✓");
+  ["t","s","b","l","lt"].forEach(i=>$("#"+i).value="");img="";up();load()}catch(e){toast("Xəta: "+e.message)}};
+ $("#pub").onclick=pub;el.onkeydown=e=>{if((e.ctrlKey||e.metaKey)&&e.key=="s"){e.preventDefault();pub()}};load()},
+
+async res(el){coll(el,"results","Nəticələr")},
+async rec(el){coll(el,"regsessions","Qeydiyyat / Resepşn")},
+
+async padd(el){const c=await qcols();el.innerHTML=`<div class="card"><h2>Pro Add — toplu əlavə</h2><p class="mut">Hər sətir bir sual. Format: <code>sual | A | B | C | D | düzgün (A-D)</code>. Bu imtahan/kateqoriyadakı köhnə suallar silinib yenisi ilə əvəz olunur.</p>
+<div class="row"><input id="e" placeholder="Imtahan nömrəsi"><input id="g" placeholder="Kateqoriya"></div><textarea id="t" rows="10"></textarea><button id="go" style="width:100%">Köhnələri sil və yenisini yüklə</button><p class="mut" id="st"></p></div>`;
+ $("#go").onclick=async()=>{const ex=$("#e").value.trim(),ct=$("#g").value.trim(),L=$("#t").value.split("\n").map(x=>x.trim()).filter(Boolean);if(!ex||!ct||!L.length)return toast("Sahələri doldurun");
+  const has=n=>c.all.includes(n),rows=L.map((l,i)=>{const p=l.split("|").map(x=>x.trim()),o={[c.exam]:ex,[c.cat]:ct,[c.q]:p[0]};if(c.num)o[c.num]=i+1;
+   ["a","b","c","d"].forEach((k,j)=>{const n=c.all.find(x=>new RegExp("^(option_|variant_|opt_)?"+k+"$","i").test(x));if(n)o[n]=p[j+1]||""});
+   const ca=c.all.find(x=>/correct|answer|duzgun|düzgün/i.test(x));if(ca)o[ca]=p[5]||"";return o});
+  if(!confirm(rows.length+" sual yüklənəcək, köhnələr silinəcək. Davam?"))return;
+  try{await api(`exam_questions?${c.exam}=eq.${encodeURIComponent(ex)}&${c.cat}=eq.${encodeURIComponent(ct)}`,{method:"DELETE"});
+   for(let i=0;i<rows.length;i+=50){await api("exam_questions",{method:"POST",body:JSON.stringify(rows.slice(i,i+50))});$("#st").textContent=Math.min(i+50,rows.length)+"/"+rows.length}
+   toast("Yükləndi ✓")}catch(e){toast("Xəta: "+e.message)}}},
+
+async stud(el){const c=await qcols();el.innerHTML=`<div class="card"><h2>Tək sual əlavə et</h2><div class="row"><input id="e" placeholder="Imtahan nömrəsi"><input id="g" placeholder="Kateqoriya"></div><textarea id="q" rows="3" placeholder="Sual"></textarea>
+<div class="row"><input id="a" placeholder="A"><input id="b" placeholder="B"></div><div class="row"><input id="cc" placeholder="C"><input id="dd" placeholder="D"></div><select id="r"><option>A</option><option>B</option><option>C</option><option>D</option></select><button id="go" style="width:100%">Əlavə et</button></div>`;
+ $("#go").onclick=async()=>{const o={[c.exam]:$("#e").value,[c.cat]:$("#g").value,[c.q]:$("#q").value};
+  [["a","a"],["b","b"],["c","cc"],["d","dd"]].forEach(([k,i])=>{const n=c.all.find(x=>new RegExp("^(option_|variant_|opt_)?"+k+"$","i").test(x));if(n)o[n]=$("#"+i).value});
+  const ca=c.all.find(x=>/correct|answer|duzgun|düzgün/i.test(x));if(ca)o[ca]=$("#r").value;
+  try{await api("exam_questions",{method:"POST",body:JSON.stringify(o)});toast("Əlavə olundu ✓");$("#q").value=""}catch(e){toast("Xəta: "+e.message)}}},
+
+async qpro(el){const c=await qcols();const r=await api(`exam_questions?select=${c.exam},${c.cat}&limit=5000`),m={};r.forEach(x=>{const k=x[c.exam]+"||"+x[c.cat];m[k]=(m[k]||0)+1});
+ el.innerHTML=`<div class="card"><h2>Sual idarəsi PRO</h2><p class="mut">Cəmi: ${r.length} sual</p>${table(Object.entries(m).map(([k,v])=>{const[a,b]=k.split("||");return{Imtahan:a,Kateqoriya:b,Say:v}}),["Imtahan","Kateqoriya","Say"],x=>`<button class="d" data-e="${esc(x.Imtahan)}" data-g="${esc(x.Kateqoriya)}">Hamısını sil</button>`)}</div>`;
+ document.querySelectorAll(".d").forEach(b=>b.onclick=async()=>{if(!confirm("Bu qrupun bütün sualları silinsin?"))return;await api(`exam_questions?${c.exam}=eq.${encodeURIComponent(b.dataset.e)}&${c.cat}=eq.${encodeURIComponent(b.dataset.g)}`,{method:"DELETE"});toast("Silindi");V.qpro(el)})}
+};
+async function coll(el,def,title){el.innerHTML=`<div class="card"><h2>${title}</h2><button id="r" class="s">Yenilə</button><div id="o"></div></div>`;
+ const load=async()=>{try{const r=await store.list(def,200);$("#o").innerHTML=r.length?table(r.map(x=>({id:x.id,data:x.data})),["id","data"],x=>`<button class="d" data-i="${x.id}">Sil</button>`):"<span class=mut>Qeyd yoxdur</span>";
+  document.querySelectorAll("#o .d").forEach(b=>b.onclick=async()=>{if(confirm("Silinsin?")){await store.del(b.dataset.i);load()}})}catch(e){$("#o").textContent=e.message}};
+ $("#r").onclick=load;load()}
+home();
+</script></body></html>
