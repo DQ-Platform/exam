@@ -8794,5 +8794,50 @@ if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boo
 })();
 </script>
 
+<style id="dq-final-ui">
+/* ===== Ana səhifə statistikası: vahid, tarazlı kart ===== */
+html body #v3-home #dq-stats.dqst{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;
+ width:calc(100% - 28px)!important;max-width:1100px!important;margin:24px auto 36px!important;padding:6px 0!important;box-sizing:border-box!important;
+ height:auto!important;min-height:0!important;align-self:center!important;position:relative!important;overflow:hidden!important;
+ background:linear-gradient(165deg,#0c2c6a 0%,#08224f 55%,#061839 100%)!important;border:1px solid rgba(217,164,65,.30)!important;border-radius:22px!important;
+ box-shadow:0 18px 44px -16px rgba(4,14,40,.65),inset 0 1px 0 rgba(255,255,255,.09)!important}
+html body #v3-home #dq-stats.dqst:before{content:""!important;position:absolute;left:12%;right:12%;top:0;height:2px;background:linear-gradient(90deg,transparent,#d9a441,transparent);opacity:.85;pointer-events:none}
+html body #v3-home #dq-stats.dqst .dqst-c{position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;
+ width:auto!important;min-width:0!important;height:auto!important;min-height:0!important;margin:0!important;padding:24px 10px 22px!important;
+ background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;text-align:center!important;overflow:visible!important}
+html body #v3-home #dq-stats.dqst .dqst-c:before{content:""!important;position:absolute!important;inset:auto!important;left:0;top:24%;bottom:24%;width:1px;height:auto;background:linear-gradient(180deg,transparent,rgba(255,255,255,.16),transparent)!important}
+html body #v3-home #dq-stats.dqst .dqst-c:first-child:before{display:none!important}
+html body #v3-home #dq-stats.dqst .dqst-ic{width:46px!important;height:46px!important;border-radius:50%!important;display:grid!important;place-items:center!important;font-size:18px!important;color:#f3c565!important;
+ background:radial-gradient(circle at 30% 25%,rgba(243,197,101,.28),rgba(243,197,101,.07))!important;border:1px solid rgba(243,197,101,.38)!important;box-shadow:0 0 18px rgba(243,197,101,.14)!important}
+html body #v3-home #dq-stats.dqst .dqst-c b{display:block!important;font-size:clamp(26px,4.2vw,40px)!important;line-height:1.05!important;font-weight:800!important;color:#fff!important;
+ letter-spacing:-.02em!important;font-variant-numeric:tabular-nums!important;text-shadow:0 2px 14px rgba(120,160,235,.35)!important;white-space:nowrap}
+html body #v3-home #dq-stats.dqst .dqst-c small{display:block!important;font-size:12.5px!important;font-weight:600!important;line-height:1.35!important;letter-spacing:.3px!important;color:#a9bde0!important;opacity:1!important;text-align:center!important;max-width:11ch}
+@media(max-width:560px){
+ html body #v3-home #dq-stats.dqst{grid-template-columns:repeat(2,minmax(0,1fr))!important;width:calc(100% - 24px)!important;margin:18px auto 28px!important;padding:0!important;border-radius:20px!important}
+ html body #v3-home #dq-stats.dqst .dqst-c{padding:20px 8px 18px!important}
+ html body #v3-home #dq-stats.dqst .dqst-c:nth-child(n+3){border-top:1px solid rgba(255,255,255,.08)!important}
+ html body #v3-home #dq-stats.dqst .dqst-c:nth-child(3):before{display:none!important}
+ html body #v3-home #dq-stats.dqst .dqst-c b{font-size:30px!important}
+ html body #v3-home #dq-stats.dqst .dqst-c small{font-size:12px!important;max-width:none}
+}
+html.dq13-dark #v3-home #dq-stats.dqst{filter:invert(1) hue-rotate(180deg)}
+/* Üzən zəng düyməsi və ⋮⋮ dok silinib (bildiriş düyməsi yuxarıda var) */
+#dqt-dock,.dq-bell-off{display:none!important}
+</style>
+<script id="dq-final-ui-js">
+/* Ekranın aşağı/ortasında üzən zəng düyməsini gizlədir; yuxarıdakı bildiriş düyməsinə toxunmur */
+(function(){"use strict";var RX=/bell|bildiri|notif|\uD83D\uDD14|fa-bell|bi-bell/i;
+function scan(){try{var l=document.body.querySelectorAll(":scope > *, :scope > * > *");
+for(var i=0;i<l.length;i++){var e=l[i];if(e.classList.contains("dq-bell-off")||/^(SCRIPT|STYLE|LINK)$/.test(e.tagName))continue;
+if(e.closest("#dqt-dock"))continue;
+if(getComputedStyle(e).position!=="fixed")continue;
+var r=e.getBoundingClientRect();if(!r.width||r.width>90||r.height>90)continue;
+var id=e.id+" "+(typeof e.className==="string"?e.className:"");
+var k=id+" "+(e.getAttribute("aria-label")||"")+" "+(e.title||"")+" "+e.innerHTML.slice(0,300);
+if(!RX.test(k)||/toast|ticker|dqnf|card/i.test(id))continue;
+if(r.top>innerHeight*.3)e.classList.add("dq-bell-off")}}catch(x){}}
+function go(){scan();setInterval(scan,1200)}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",go);else go()})();
+</script>
 </body>
 </html>
