@@ -8729,11 +8729,15 @@ function build(){
  cv=D.createElement("canvas");cv.id="dqx-cv";cx=cv.getContext("2d");area.appendChild(cv);
  if(!tb)buildTB();
  cv.addEventListener("pointerdown",function(e){
-  pal.classList.remove("o");
   /* qeyd rejimi açıq olanda altındakı düymələr (✏️, Növbəti, Əvvəlki və s.) və yazı sahələri işləməyə davam edir */
   var els=D.elementsFromPoint(e.clientX,e.clientY),ui=null,q;
   for(q=0;q<els.length;q++){if(els[q]===cv||els[q].classList&&els[q].classList.contains("dqx-wmh"))continue;ui=els[q].closest&&els[q].closest("button,a,select,textarea,input");break}
-  if(ui&&!ui.closest("#dqx-tb")&&ui.id!=="dqx-ti"){e.preventDefault();if(/^(TEXTAREA|INPUT)$/.test(ui.tagName))ui.focus();else ui.click();return}
+  /* alət paneli (və rəng/qalınlıq seçimləri) çəkmə qatının altında qalsa belə klikləri qəbul edir */
+  var top=null;for(q=0;q<els.length;q++){if(els[q]===cv||(els[q].classList&&els[q].classList.contains("dqx-wmh")))continue;top=els[q];break}
+  if(top&&top.closest&&top.closest("#dqx-tb")){e.preventDefault();var sel=top.closest("select");
+   if(sel){sel.focus();try{sel.showPicker&&sel.showPicker()}catch(x){}}else{var tg=top.closest("button,b")||top;if(tg.click)tg.click();else tg.dispatchEvent(new MouseEvent("click",{bubbles:true}))}return}
+  if(ui&&ui.id!=="dqx-ti"){e.preventDefault();if(/^(TEXTAREA|INPUT)$/.test(ui.tagName))ui.focus();else ui.click();return}
+  pal.classList.remove("o");
   if(tool==="text"){e.preventDefault();textAt(e);return}
   try{cv.setPointerCapture(e.pointerId)}catch(x){}
   var p=pt(e);cur={t:tool,c:color,w:size,pts:[p],a:p,b:p};redo=[];e.preventDefault();paint(cur)});
