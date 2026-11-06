@@ -7239,37 +7239,51 @@ html:not(.dq-bin-open) [data-dqbin2]{display:none!important}
 <script id="dq-hidden-eye-js">
 (function(){
   'use strict';
-  if (window.__dqEye2) return; window.__dqEye2 = 1;
-  var RX = /gizl[əe]dilmi[şs]\s*modullar/i, STOP = /imtahan\s*elanları/i;
-  var html = document.documentElement, btn = null, members = [], open = false;
+  if (window.__dqEye3) return; window.__dqEye3 = 1;
+  var RX = /gizl[əe]dilmi[şs]\s*modullar/i, STOP = /imtahan\s*elanları/i, CHIP = /\u21b5/;
+  var html = document.documentElement, btn = null, members = [], open = false, raf = 0;
 
   function ap(){ return document.getElementById('admin-panel'); }
-
+  function nf(t){ return String(t || '').normalize('NFC'); }
+  function heavy(p){
+    return !!p.querySelector('.dqap-root,.admin-nav-grid,.admin-module-block,.dqap-g,#dq-eye') || STOP.test(nf(p.textContent));
+  }
   function findHeadingEl(root){
     var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n;
     while ((n = w.nextNode())) {
       var p = n.parentElement;
-      if (!p || /^(SCRIPT|STYLE|TEXTAREA|OPTION)$/.test(p.tagName) || p.closest('#dq-eye')) continue;
-      if (RX.test((n.data || '').normalize('NFC'))) return p;
+      if (!p || /^(SCRIPT|STYLE|TEXTAREA|OPTION|TITLE)$/.test(p.tagName) || p.closest('#dq-eye')) continue;
+      if (RX.test(nf(n.data))) return p;
     }
     return null;
   }
-  function blocksOther(p){
-    return !!p.querySelector('.dqap-root,.admin-nav-grid,.admin-module-block,.dqap-g') || STOP.test(p.textContent || '');
-  }
   function collect(h){
     var el = h, a = ap();
-    for (var i = 0; i < 7; i++) {
+    for (var i = 0; i < 10; i++) {
       if (el.tagName === 'DETAILS') break;
       var p = el.parentElement;
-      if (!p || p === a || p === document.body || blocksOther(p)) break;
+      if (!p || p === a || p === document.body || heavy(p)) break;
       el = p;
     }
     var list = [el];
-    /* başlıq ayrıca blokdursa, onun ardınca gələn çiplər bloku də (təsvirli “İmtahan elanları” düyməsinə qədər) daxil et */
-    if ((el.textContent || '').replace(/\s+/g, ' ').trim().length < 40) {
+    /* başlıq ayrıca blokdursa, ardınca gələn çiplər blokunu da (“İmtahan elanları” düyməsinə qədər) daxil et */
+    if (nf(el.textContent).replace(/\s+/g, ' ').trim().length < 40) {
       var s = el.nextElementSibling, c = 0;
-      while (s && c < 3 && !/^(HR|BUTTON)$/.test(s.tagName) && !blocksOther(s)) { list.push(s); s = s.nextElementSibling; c++; }
+      while (s && c < 4 && !/^(HR|BUTTON)$/.test(s.tagName) && !heavy(s)) { list.push(s); s = s.nextElementSibling; c++; }
+    }
+    /* ehtiyat: ↵ işarəli çip düymələri başqa yerdədirsə, onların qabını da tap */
+    var a2 = ap();
+    if (a2) {
+      var cands = a2.querySelectorAll('div,section,details,p,span,ul');
+      for (var k = 0; k < cands.length; k++) {
+        var d = cands[k];
+        if (list.some(function(m){ return m === d || m.contains(d) || d.contains(m); })) continue;
+        if (heavy(d)) continue;
+        var kids = d.children, n = 0;
+        if (kids.length < 3) continue;
+        for (var j = 0; j < kids.length; j++) if (CHIP.test(kids[j].textContent || '')) n++;
+        if (n >= 3 && n >= kids.length - 1) list.push(d);
+      }
     }
     return list;
   }
@@ -7305,24 +7319,34 @@ html:not(.dq-bin-open) [data-dqbin2]{display:none!important}
   }
 
   function tick(){
+    raf = 0;
     var a = ap();
-    if (!a || !a.getClientRects().length) return;
-    var alive = members.length && members.every(function(m){ return document.contains(m); }) && RX.test(((members[0].textContent || '') + ((members[1] && members[1].textContent) || '')).normalize('NFC'));
+    if (!a) return;
+    /* bölmə hər dəfə yenidən çəkilibsə, yeni elementləri dərhal tap və gizlət */
+    var alive = members.length && members.every(function(m){ return document.contains(m); }) && RX.test(nf((members[0].textContent || '') + ((members[1] && members[1].textContent) || '')));
     if (!alive) {
       members = [];
-      var h = findHeadingEl(a) || findHeadingEl(document.body);
+      var h = findHeadingEl(a);
       if (h) members = collect(h);
     }
+    apply();
+    if (!a.getClientRects().length) return;
     var b = ensureBtn(); if (!b) return;
     if (!members.length) { b.hidden = true; return; }
-    var m = (members[0].textContent || '').normalize('NFC').match(/gizl[əe]dilmi[şs]\s*modullar\s*(\d+)/i);
+    var m = nf(members[0].textContent).match(/gizl[əe]dilmi[şs]\s*modullar\s*(\d+)/i);
     b.querySelector('.dq-eye-n').textContent = m ? m[1] : '';
     b.title = 'Gizlədilmiş modullar' + (m ? ' (' + m[1] + ')' : '') + ' — göstər / gizlət';
     b.hidden = false;
-    apply();
   }
-  setInterval(tick, 600);
-  document.addEventListener('DOMContentLoaded', tick);
+  function sched(){ if (!raf) raf = requestAnimationFrame(tick); }
+
+  /* hər dəyişiklikdə dərhal işə düş (göz-qırpımı belə görünməsin) + ehtiyat intervalı */
+  function watch(){
+    var a = ap();
+    if (a && !watch.o && window.MutationObserver) { watch.o = new MutationObserver(sched); watch.o.observe(a, { childList: true, subtree: true, characterData: true }); }
+  }
+  setInterval(function(){ watch(); tick(); }, 500);
+  document.addEventListener('DOMContentLoaded', function(){ watch(); tick(); });
 })();
 </script>
 
