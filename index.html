@@ -3064,6 +3064,8 @@ img,canvas{max-width:100%}
    <input type="file" id="fPdf" accept="application/pdf,image/*" multiple hidden>
    <div class="pa-row" style="margin-top:10px"><button class="btn pri" id="autoQ" type="button" title="Sual şəklini seçin: yazı, sual fiquru və A–E variantları avtomatik ayrılıb kartlara düşür">⚡ Şəkildən avto-sual (1 toxunuş)</button><span style="font-size:12.5px;color:var(--mute)">Sual şəklini atın — mətn, fiqur və variantlar özü ayrılsın</span></div>
    <input type="file" id="fAuto" accept="image/*" multiple hidden>
+   <div class="pa-row" style="margin:10px 0 4px"><button class="btn pri" id="bookQ" type="button" title="Çoxlu səhifə şəklini birlikdə atın: filiqran, loqo, tarix nişanı silinir; səhifələr sıralanır; şəkil/cədvəl/sxemlər suala bağlanır">📚 Kitab rejimi — çoxlu səhifə şəkli</button><span style="font-size:12.5px;color:var(--mute)">Bütün səhifələri birlikdə atın — təmiz suallar və variantlar ardıcıl düzülsün</span></div>
+   <input type="file" id="fBook" accept="image/*" multiple hidden>
    <div id="viewer" hidden>
     <div class="sbn" id="scBn"><span><b>🔎 Avtomatik skan</b> — bütün səhifələr oxunsun, suallar ardıcıl ayrılsın, sonda cavab açarı varsa tətbiq edilsin.</span><span class="pa-row"><button class="btn pri sm" id="scBnGo" type="button">Skan et</button><button class="btn sm" id="scBnNo" type="button">Əl ilə kəsəcəyəm</button></span></div>
     <div class="bar">
@@ -3145,6 +3147,7 @@ img,canvas{max-width:100%}
 </main>
 </div>
 <div class="sxo" id="sxo" hidden><div class="sxc" role="dialog" aria-modal="true" aria-labelledby="sxT"><div class="sxh"><b id="sxT">Tapılan suallar</b><span style="display:flex;gap:6px"><button class="btn sm" id="sxKey" type="button">🔑 Açarı tətbiq et</button><button class="btn sm" id="sxX" type="button">Bağla</button></span></div><div class="sxb" id="sxB"></div><div class="sxf"><input class="f" id="sxK" style="flex:1;min-width:180px" placeholder="Cavab açarı (sıra ilə): məs. ACBDE" aria-label="Cavab açarı"><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><select class="f" id="sxN" aria-label="Sınaq" style="width:auto;min-height:40px"></select><select class="f" id="sxC" aria-label="Kateqoriya" style="width:auto;min-height:40px"><option>BA</option><option>BB</option><option>AC</option></select><select class="f" id="sxS" aria-label="Fənn" style="width:auto;min-height:40px;max-width:150px"></select></div><button class="btn pri" id="sxAdd" type="button">Seçilənləri sual bankına əlavə et</button></div></div></div>
+<div class="sxo" id="bkO" hidden><div class="sxc" role="dialog" aria-modal="true" aria-labelledby="bkT" style="width:min(520px,100%)"><div class="sxh"><b id="bkT">📚 Kitab rejimi</b><button class="btn sm" id="bkX" type="button">Bağla</button></div><div class="sxb"><p class="hint" id="bkLog" aria-live="polite">Hazırlanır…</p><div style="height:8px;background:var(--line);border-radius:99px;overflow:hidden"><div id="bkBar" style="height:100%;width:0;background:var(--navy);transition:width .25s"></div></div><div class="pa-row"><button class="btn sm" id="bkStop" type="button">Dayandır</button></div></div></div></div>
 <div class="sxo" id="scO" hidden><div class="sxc" role="dialog" aria-modal="true" aria-labelledby="scT" style="width:min(560px,100%)"><div class="sxh"><b id="scT">🔎 PDF-i skan et</b><button class="btn sm" id="scX" type="button">Bağla</button></div>
 <div class="sxb"><div class="two"><div><label class="l" for="scFrom">Səhifə: başlanğıc</label><input class="f" id="scFrom" type="number" min="1" value="1"></div><div><label class="l" for="scTo">Səhifə: son</label><input class="f" id="scTo" type="number" min="1" value="1"></div></div>
 <div><label class="l" for="scLay">Səhifə düzülüşü</label><select class="f" id="scLay"><option value="auto">Avtomatik (1 və ya 2 sütun)</option><option value="1">Həmişə 1 sütun</option><option value="2">Həmişə 2 sütun</option></select></div>
@@ -3718,7 +3721,7 @@ $("bDb").addEventListener("click",async function(){var out=$("dbmsg"),btn=this;o
   h.textContent=f?"Boş nömrələrə yazılır: bazada artıq dolu olan nömrələrə toxunulmur, heç nə silinmir. Yeni suallar fənnin aralığındakı (məs. Məntiq 71–100) ilk boş nömrələrə düzülür.":"Aralığı əvəz edir: fənnin bütün nömrə aralığı (məs. Məntiq 71–100) yenilənir — əlavə etdiyin suallar yazılır, qalan köhnə suallar silinir."}
  sel.addEventListener("change",function(){try{localStorage.setItem("proadd_dbmode",sel.value)}catch(e){}lab()});lab()})();
 /*PURE-START*/
-var DATE_RE=/^\d{1,2}[\.\/]\d{1,2}[\.\/]\d{2,4}/;
+var DATE_RE=/^\d{1,2}[\.\/]\d{1,2}[\.\/]\d{2,4}/,PD_GAP=false;function pdGap(v){PD_GAP=!!v}
 function isStart(ln){if(DATE_RE.test(ln))return null;return/^(\d{1,3})\s*[\.\)]\s*(\S.*)$/.exec(ln)}
 /* OCR düzəlişi: variantın qarşısındakı dairəcik (○ / O / © / 0) simvolunu sil, itmiş A–E hərfini ardıcıllığa görə bərpa et */
 function radioFix(L){
@@ -3728,7 +3731,7 @@ function radioFix(L){
   reO=/^[oO0Q]\s+(?=\S)/,
   next=-1,out=[];
  L.forEach(function(ln){
-  var t=ln;
+  var t=ln.replace(/(^|\s)\d(?=[A-E]\)\s)/g,"$1");
   if(isStart(t)&&!/^\d{1,3}\s*[\.\)]\s*[A-E]\)/.test(t)){next=-1;out.push(t);return}
   if(reLab.test(t)){t=t.replace(reLab,"")}
   var lm=/^\(?([A-Ea-e])\s*[\)\.]\s*\S/.exec(t);
@@ -3758,11 +3761,12 @@ function parseDoc(txt){
   if(idx<first)return;
   var rawLn=ln,m=isStart(ln),isNew=false,n=m?+m[1]:0;
   if(m){if(!cur)isNew=true;
+   else if(cur.o.length<2&&n===cur.n+1&&n!==(cur.sub||0)+1&&m[2].length>=18&&cur.raw.length>=1)isNew=true;
    else if(cur.o.length>=4)isNew=(n>cur.n&&n<=cur.n+15)||(n===1&&cur.n>1);
    else if(cur.o.length>=2)isNew=(n===cur.n+1)}
-  if(isNew){if(cur&&n<=cur.n)blk++;cur={n:n,b:blk,stem:[],o:[],p0:pg,p1:pg,c:"",raw:[]};qs.push(cur);ln=m[2]}
+  if(isNew){if(cur&&n<=cur.n)blk++;cur={n:n,b:blk,stem:[],o:[],p0:pg,p1:pg,c:"",raw:[],sub:0};qs.push(cur);ln=m[2]}
   if(!cur)return;
-  cur.raw.push(rawLn);
+  cur.raw.push(rawLn);if(!isNew&&m&&n===(cur.sub||0)+1)cur.sub=n;
   ln=ln.replace(/^\(([A-Ea-e])\)\s*/,"$1) ").replace(/^([A-Ea-e])\s+\)\s*/,"$1) ").replace(/^([a-e])\)/,function(_,c){return c.toUpperCase()+")"});
   var nx=LET[cur.o.length];
   ln=ln.replace(/^([A-E])\.\s*(?=\S)/,function(a,c){return(nx&&c===nx&&(cur.stem.length||cur.o.length))?c+") ":a});
@@ -3770,7 +3774,9 @@ function parseDoc(txt){
   while((mm=re.exec(ln))){var at=mm.index+mm[1].length,lt=mm[2];
    /* nömrəsiz bənd səhvən «A)» yazılıbsa, əvvəlki «variantlar» sual mətninə keçir */
    if(at===0&&lt==="A"&&cur.o.length>=1&&cur.o.length<4&&!hits.length){cur.o.forEach(function(o){cur.stem.push(o.t)});cur.o=[]}
-   if(cur.o.length+hits.length<5&&lt===LET[cur.o.length+hits.length])hits.push({s:at,e:re.lastIndex,l:lt})}
+   var ex=cur.o.length+hits.length;
+   if(ex<5&&lt===LET[ex])hits.push({s:at,e:re.lastIndex,l:lt});
+   else if(PD_GAP&&ex>=1&&ex<4&&lt===LET[ex+1]){hits.push({s:at,e:at,l:LET[ex]});hits.push({s:at,e:re.lastIndex,l:lt})}}
   var head=(hits.length?ln.slice(0,hits[0].s):ln).trim();
   if(head){if(cur.o.length){var lo=cur.o[cur.o.length-1];lo.t+=(/^\d{1,3}\s*[\.\)]/.test(head)?"\n":" ")+head}else cur.stem.push(head)}
   hits.forEach(function(h,j){var tx=ln.slice(h.e,j+1<hits.length?hits[j+1].s:ln.length).trim();if(j+1<hits.length)tx=tx.replace(/\s+[○◯●©®•·◦oO0]\s*$/,"");cur.o.push({l:h.l,t:tx})});
@@ -3785,8 +3791,8 @@ function splitOpen(q){var R=q.raw,out=[],cur=null,i,
  mk=function(n,t){cur={n:n,b:q.b,p0:q.p0,p1:q.p1,c:"",open:true,stem:t?[t]:[],o:[]};out.push(cur)};
  for(i=0;i<R.length;i++){var ln=R[i],m=isStart(ln),n=m?+m[1]:0;
   if(i===0){mk(q.n,m?m[2]:ln);continue}
-  if(m){var ns=cur.o.length+1,st=n===ns&&n<=5,nq=n===cur.n+1&&cur.o.length>=2;
-   if(st&&nq)st=cur.o.length<4;
+  if(m){var ns=cur.o.length+1,st=n===ns&&n<=8,nq=n===cur.n+1&&cur.o.length>=2;
+   if(st&&nq)st=cur.o.length<4||n>5;
    if(st){cur.o.push({l:String(n),t:m[2]});continue}
    if(nq){mk(n,m[2]);continue}}
   if(cur.o.length)cur.o[cur.o.length-1].t+=" "+ln;else cur.stem.push(ln)}
@@ -3914,6 +3920,201 @@ $("scanT").addEventListener("click",scOpen);$("scBnGo").addEventListener("click"
 $("scBnNo").addEventListener("click",function(){$("scBn").hidden=true});
 $("scX").addEventListener("click",scClose);$("scStop").addEventListener("click",function(){SC.stop=true});$("scGo").addEventListener("click",scanRun);
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("scO").hidden)scClose()});
+
+/*BOOK-START*/
+/* ===== Kitab rejimi: çoxlu səhifə şəkli → təmiz sual/variant axını (saf funksiyalar) ===== */
+var BK={};
+BK.integ=function(m,w,h){var W=w+1,I=new Int32Array(W*(h+1)),x,y,s;for(y=0;y<h;y++){s=0;for(x=0;x<w;x++){s+=m[y*w+x];I[(y+1)*W+x+1]=I[y*W+x+1]+s}}return I};
+BK.erode=function(m,w,h,k){var I=BK.integ(m,w,h),W=w+1,o=new Uint8Array(w*h),r=k>>1,need=k*k,x,y,x0,y0,x1,y1;
+ for(y=0;y<h;y++){y0=y-r;y1=y0+k;if(y0<0||y1>h)continue;for(x=0;x<w;x++){x0=x-r;x1=x0+k;if(x0<0||x1>w)continue;
+  if(I[y1*W+x1]-I[y0*W+x1]-I[y1*W+x0]+I[y0*W+x0]===need)o[y*w+x]=1}}return o};
+BK.dilate=function(m,w,h,k){var I=BK.integ(m,w,h),W=w+1,o=new Uint8Array(w*h),r=k>>1,x,y,x0,y0,x1,y1;
+ for(y=0;y<h;y++){y0=Math.max(0,y-r);y1=Math.min(h,y-r+k);for(x=0;x<w;x++){x0=Math.max(0,x-r);x1=Math.min(w,x-r+k);
+  if(I[y1*W+x1]-I[y0*W+x1]-I[y1*W+x0]+I[y0*W+x0]>0)o[y*w+x]=1}}return o};
+BK.open=function(m,w,h,k){return BK.dilate(BK.erode(m,w,h,k),w,h,k)};
+
+/* Filigran (qırmızı/çəhrayı) və çərçivə: mətn üçün aqressiv təmizlənmiş boz şəkil */
+BK.cleanGray=function(d,w,h){var g=new Uint8Array(w*h),i,p,r,gg,b;
+ for(i=0,p=0;i<w*h;i++,p+=4){r=d[p];gg=d[p+1];b=d[p+2];
+  if(r>150&&r-gg>35&&r-b>25){g[i]=255;continue}
+  g[i]=(r*299+gg*587+b*114)/1000|0}
+ return g};
+/* Şəkil kəsimləri üçün yumşaq təmizləmə: yalnız açıq çəhrayı filigran silinir, doymuş qırmızı (ox, işarə) qalır */
+BK.pinkOut=function(d,w,h){var i,p,r,g,b;for(i=0,p=0;i<w*h;i++,p+=4){r=d[p];g=d[p+1];b=d[p+2];
+  if(r>=185&&g>=120&&b>=120&&r-g>=28&&r-b>=28&&Math.abs(g-b)<=28){d[p]=d[p+1]=d[p+2]=255}}return d};
+/* Yuxarı kənara yapışan qalın qara ləkə (tarix nişanı və s.) */
+BK.killBadge=function(g,w,h){var dk=new Uint8Array(w*h),i,n=0;for(i=0;i<w*h;i++)dk[i]=g[i]<70?1:0;
+ var er=BK.erode(dk,w,h,13),st=[],lim=Math.floor(h*.12),x,y,seen=new Uint8Array(w*h);
+ for(y=0;y<lim;y++)for(x=0;x<w;x++)if(er[y*w+x]){st.push(y*w+x);seen[y*w+x]=1}
+ if(!st.length)return 0;
+ while(st.length){var p=st.pop();g[p]=255;n++;var px=p%w,py=(p-px)/w,q;
+  if(px>0&&!seen[q=p-1]&&dk[q]){seen[q]=1;st.push(q)}if(px<w-1&&!seen[q=p+1]&&dk[q]){seen[q]=1;st.push(q)}
+  if(py>0&&!seen[q=p-w]&&dk[q]){seen[q]=1;st.push(q)}if(py<h-1&&!seen[q=p+w]&&dk[q]){seen[q]=1;st.push(q)}}
+ /* kənar piksellər üçün bir qat genişlət */
+ return n};
+/* Şaquli sütun ayırıcı xətt */
+BK.divider=function(g,w,h){var x0=Math.floor(w*.38),x1=Math.floor(w*.62),L=[],best=0,x,y;
+ for(x=x0;x<x1;x++){var bl=0,cur=-1,gap=0,bs=-1,run=0,b0=-1;
+  for(y=0;y<h;y++){if(g[y*w+x]<130){if(cur<0)cur=y;run=y-cur+1;gap=0}else{gap++;if(gap>10){if(cur>=0&&run>bl){bl=run;b0=cur}cur=-1;run=0;gap=0}}}
+  if(cur>=0&&run>bl){bl=run;b0=cur}
+  L.push({x:x,len:bl,y0:b0});if(bl>best)best=bl}
+ if(best<h*.3)return null;
+ var sx=0,n=0,ya=1e9,yb=0;L.forEach(function(o){if(o.len>=best*.85){sx+=o.x;n++;ya=Math.min(ya,o.y0);yb=Math.max(yb,o.y0+o.len)}});
+ return{x:Math.round(sx/n),y0:ya,y1:yb}};
+/* Səhifə sütun qutuları */
+BK.columns=function(g,w,h){var dv=BK.divider(g,w,h),m=12;
+ if(dv)return{div:dv,cols:[{x0:m,y0:Math.max(0,dv.y0-30),x1:dv.x-5,y1:Math.min(h,dv.y1+4)},{x0:dv.x+5,y0:Math.max(0,dv.y0-30),x1:w-m,y1:Math.min(h,dv.y1+4)}]};
+ return{div:null,cols:[{x0:m,y0:Math.floor(h*.03),x1:w-m,y1:Math.floor(h*.93)}]}};
+
+/* Şəkil / cədvəl / sxem bölgələri: qalın dolu sahələr + uzun xətlər */
+BK.figures=function(g,w,h,box,divX){
+ var nw=new Uint8Array(w*h),dk=new Uint8Array(w*h),x,y,i,v;
+ for(y=box.y0;y<box.y1;y++)for(x=box.x0;x<box.x1;x++){i=y*w+x;v=g[i];if(v<252)nw[i]=1;if(v<175)dk[i]=1}
+ var fill=BK.open(nw,w,h,11),ln=new Uint8Array(w*h),minH=Math.round(w*.07),minV=Math.round(h*.04),run,gap,st;
+ for(y=box.y0;y<box.y1;y++){run=0;gap=0;st=-1;for(x=box.x0;x<=box.x1;x++){var on=x<box.x1&&dk[y*w+x];
+   if(on){if(st<0)st=x;run=x-st+1;gap=0}else{gap++;if(gap>2||x>=box.x1){if(run>=minH)for(var t=st;t<st+run;t++)ln[y*w+t]=1;st=-1;run=0;gap=0}}}}
+ for(x=box.x0;x<box.x1;x++){if(divX!=null&&Math.abs(x-divX)<=6)continue;run=0;gap=0;st=-1;for(y=box.y0;y<=box.y1;y++){var on2=y<box.y1&&dk[y*w+x];
+   if(on2){if(st<0)st=y;run=y-st+1;gap=0}else{gap++;if(gap>2||y>=box.y1){if(run>=minV)for(var t2=st;t2<st+run;t2++)ln[t2*w+x]=1;st=-1;run=0;gap=0}}}}
+ var seed=new Uint8Array(w*h),fcnt=0;for(i=0;i<w*h;i++){if(fill[i]||ln[i])seed[i]=1}
+ var D=BK.dilate(seed,w,h,35),F=4,gw=Math.ceil(w/F),gh=Math.ceil(h/F),cell=new Uint8Array(gw*gh),lab=new Int32Array(gw*gh);
+ for(y=box.y0;y<box.y1;y++)for(x=box.x0;x<box.x1;x++)if(D[y*w+x])cell[((y/F)|0)*gw+((x/F)|0)]=1;
+ var boxes=[],id=0;
+ for(i=0;i<gw*gh;i++){if(!cell[i]||lab[i])continue;id++;var stack=[i];lab[i]=id;var bb={x0:1e9,y0:1e9,x1:-1,y1:-1,fill:0},cs=[];
+  while(stack.length){var c=stack.pop();cs.push(c);var cx=c%gw,cy=(c-cx)/gw,n2;
+   if(cx>0&&cell[n2=c-1]&&!lab[n2]){lab[n2]=id;stack.push(n2)}if(cx<gw-1&&cell[n2=c+1]&&!lab[n2]){lab[n2]=id;stack.push(n2)}
+   if(cy>0&&cell[n2=c-gw]&&!lab[n2]){lab[n2]=id;stack.push(n2)}if(cy<gh-1&&cell[n2=c+gw]&&!lab[n2]){lab[n2]=id;stack.push(n2)}}
+  cs.forEach(function(c){var cx=c%gw,cy=(c-cx)/gw;for(var yy=cy*F;yy<Math.min(h,cy*F+F);yy++)for(var xx=cx*F;xx<Math.min(w,cx*F+F);xx++){if(seed[yy*w+xx]){if(xx<bb.x0)bb.x0=xx;if(xx>bb.x1)bb.x1=xx;if(yy<bb.y0)bb.y0=yy;if(yy>bb.y1)bb.y1=yy;if(fill[yy*w+xx])bb.fill++}}});
+  if(bb.x1>=0)boxes.push(bb)}
+ boxes.forEach(function(b){var P=((b.x1-b.x0)<110&&(b.y1-b.y0)<90)?2:8;b.x0=Math.max(box.x0,b.x0-P);b.y0=Math.max(box.y0,b.y0-P);b.x1=Math.min(box.x1,b.x1+P+1);b.y1=Math.min(box.y1,b.y1+P+1)});
+ var res=[],ans=[];
+ boxes.forEach(function(b){var bw=b.x1-b.x0,bh=b.y1-b.y0;
+  if(bw*bh<1400||bw<26||bh<18)return;
+  if(b.fill===0&&bh<110&&bw/bh>3){ans.push(b);return}
+  res.push({x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1})});
+ res.sort(function(a,b){return a.y0-b.y0});
+ return{figs:res,answerBoxes:ans}};
+
+/* OCR sözlərindən sətirlər (y üzrə qruplaşma) */
+BK.linesFrom=function(words,offX,offY){var A=[],L=[];
+ words.forEach(function(wd){var t=String(wd.text||"").trim();if(!t)return;var b=wd.bbox||wd;A.push({x0:b.x0+offX,x1:b.x1+offX,y0:b.y0+offY,y1:b.y1+offY,t:t})});
+ A.sort(function(a,b){return(a.y0+a.y1)-(b.y0+b.y1)});
+ A.forEach(function(a){var ln=L[L.length-1],cy=(a.y0+a.y1)/2;
+  if(ln&&Math.abs(cy-ln.cy)<Math.max(8,(ln.y1-ln.y0)*.55)){ln.w.push(a);ln.y0=Math.min(ln.y0,a.y0);ln.y1=Math.max(ln.y1,a.y1);ln.cy=(ln.y0+ln.y1)/2}
+  else L.push({w:[a],y0:a.y0,y1:a.y1,cy:cy})});
+ return L.map(function(ln){ln.w.sort(function(a,b){return a.x0-b.x0});var s="",pe=null,hh=ln.y1-ln.y0;
+  ln.w.forEach(function(a){if(pe!==null)s+=(a.x0-pe>hh*1.4?"   ":" ");s+=a.t;pe=a.x1});
+  return{t:s,y0:ln.y0,y1:ln.y1,x0:ln.w[0].x0}})};
+
+/* Axın: sətirlər + şəkil nişanları (sütun üzrə y sırası) */
+BK.stream=function(lines,figs,figBase,ans){var it=[],used={};
+ (ans||[]).forEach(function(a){it.push({k:"a",y:a.y0})});
+ lines.forEach(function(l){it.push({k:"l",y:l.y0,l:l})});
+ figs.forEach(function(f,i){var inl=false,hit=null;
+  lines.forEach(function(l){var ov=Math.min(l.y1,f.y1)-Math.max(l.y0,f.y0);if(ov>0&&ov>=Math.min(l.y1-l.y0,f.y1-f.y0)*.5&&(f.y1-f.y0)<110)hit=l});
+  it.push({k:"f",y:hit?hit.y1+.5:f.y0,id:figBase+i})});
+ it.sort(function(a,b){return a.y-b.y});
+ return it.map(function(o){return o.k==="l"?o.l.t:(o.k==="a"?"§§ANS§§":"§§IMG:"+o.id+"§§")})};
+
+/* Səhifə sırası: sual nömrəsinin başlandığı ardıcıllığa görə */
+BK.starts=function(textLines){var out=[],exp=0;
+ textLines.forEach(function(t){var m=/^\s*(\d{1,3})\s*[.)]\s*(\S.{17,})$/.exec(t);if(m&&!/^\d{1,2}[\.\/]\d{1,2}[\.\/]\d{2,4}/.test(t.trim()))out.push(+m[1])});
+ return out};
+BK.order=function(pages){var keys=pages.map(function(p,i){var s=BK.starts(p),qs=[];
+  /* ardıcıl artan nömrələr = suallar (alt-bəndlər 1,2,3… ayrıca qalır) */
+  var mn=null;s.forEach(function(n){if(mn===null||n>=mn){qs.push(n)}if(mn===null||n>mn)mn=n});
+  return{i:i,min:qs.length?Math.min.apply(0,qs):null,max:qs.length?Math.max.apply(0,qs):null}});
+ var withK=keys.filter(function(k){return k.min!==null}).sort(function(a,b){return a.min-b.min||a.max-b.max||a.i-b.i}),
+  noK=keys.filter(function(k){return k.min===null}),res=withK.map(function(k){return k.i});
+ noK.forEach(function(k){var pos=Math.min(res.length,k.i);res.splice(pos,0,k.i)});
+ return res};
+
+/* Şəkil nişanlarını suallara bağla: sualın mətnindəki → sual şəkli; yalnız nişandan ibarət variant → variant şəkli */
+BK.attach=function(qs,figUrl){var RX=/§§IMG:(\d+)§§/g,AX=/§§ANS§§/g;
+ qs.forEach(function(q){var ids=[],hasAns=false;
+  q.text=String(q.text||"").replace(RX,function(_,id){ids.push(+id);return""}).replace(AX,function(){hasAns=true;return""}).replace(/[ \t]+\n/g,"\n").replace(/\n{2,}/g,"\n").trim();
+  var oi=[],anyO=false;
+  (q.o||[]).forEach(function(o,i){var got=[],rest=String(o.t||"").replace(RX,function(_,id){got.push(+id);return""}).replace(AX,function(){hasAns=true;return""}).trim();
+   if(got.length){if(rest){ids=ids.concat(got);o.t=rest}else{oi[i]=got;o.t="";anyO=true}}else o.t=rest});
+  if(ids.length)q.img=figUrl(ids);
+  if(anyO){q.oimgs=[];(q.o||[]).forEach(function(o,i){q.oimgs[i]=oi[i]?figUrl(oi[i]):""})}
+  if(hasAns)q.written=true});
+ return qs};
+
+/* Altlıq/əlaqə/sosial şəbəkə sətirləri və mənasız xətlər */
+BK.junk=function(t){t=String(t||"").trim();if(!t)return true;if(/^[\W_]+$/.test(t))return true;
+ if(/(^|\s)\+?\d[\d\s\-]{8,}\d(\s|$)/.test(t))return true;if(/@|instagram|whatsapp|youtube|www\.|https?:\/\/|\.com\b/i.test(t))return true;return false};
+
+/* Eyni səhifə iki dəfə atılıbsa təkrarı say */
+BK.dupes=function(pages){var sig=pages.map(function(L){var set={};L.forEach(function(x){var k=String(x).toLowerCase().replace(/[^a-z0-9əıöüçşğ]/g,"");if(k.length>3)set[k]=1});return set}),res={};
+ for(var i=0;i<pages.length;i++){if(res[i])continue;for(var j=i+1;j<pages.length;j++){if(res[j])continue;var a=Object.keys(sig[i]),b=Object.keys(sig[j]);if(a.length<5||b.length<5)continue;
+  var inter=0;a.forEach(function(k){if(sig[j][k])inter++});if(inter/(a.length+b.length-inter)>=.9)res[j]=1}}
+ return res};
+/*BOOK-END*/
+/* ===== Kitab rejimi: çoxlu səhifə şəkli → ardıcıl təmiz suallar ===== */
+var BKS={run:false,stop:false};
+function bkUI(on){$("bkO").hidden=!on}
+function bkLog(t,pct){$("bkLog").textContent=t;if(pct!=null)$("bkBar").style.width=Math.max(0,Math.min(100,Math.round(pct)))+"%"}
+function bkLoad(file){return new Promise(function(ok,no){var u=URL.createObjectURL(file),im=new Image();
+ im.onload=function(){var k=Math.min(2,1400/im.naturalWidth),c=document.createElement("canvas");c.width=Math.max(1,Math.round(im.naturalWidth*k));c.height=Math.max(1,Math.round(im.naturalHeight*k));
+  var g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c)};
+ im.onerror=function(){URL.revokeObjectURL(u);no(new Error((file.name||"şəkil")+" açılmadı"))};im.src=u})}
+function bkWords(r){var d=(r&&r.data)||{},ws=d.words;
+ if(!ws||!ws.length){ws=[];(d.blocks||[]).forEach(function(b){(b.paragraphs||[]).forEach(function(p){(p.lines||[]).forEach(function(l){(l.words||[]).forEach(function(x){ws.push(x)})})})})}
+ return ws.filter(function(x){return x&&x.bbox&&String(x.text||"").trim()})}
+function bkSub(c,b){var o=document.createElement("canvas");o.width=Math.max(1,b.x1-b.x0);o.height=Math.max(1,b.y1-b.y0);o.getContext("2d").drawImage(c,b.x0,b.y0,o.width,o.height,0,0,o.width,o.height);return o}
+function bkAnalyse(cv){var w=cv.width,h=cv.height,d=cv.getContext("2d").getImageData(0,0,w,h).data,
+ fd=new ImageData(new Uint8ClampedArray(d),w,h);BK.pinkOut(fd.data,w,h);
+ var fc=document.createElement("canvas");fc.width=w;fc.height=h;fc.getContext("2d").putImageData(fd,0,0);
+ var g=BK.cleanGray(d,w,h);BK.killBadge(g,w,h);
+ var C=BK.columns(g,w,h),res=C.cols.map(function(c){return BK.figures(g,w,h,c,C.div&&C.div.x)}),tg=new Uint8Array(g);
+ res.forEach(function(r){r.figs.concat(r.answerBoxes).forEach(function(f){for(var y=Math.max(0,f.y0-2);y<Math.min(h,f.y1+2);y++)tg.fill(255,y*w+Math.max(0,f.x0-2),y*w+Math.min(w,f.x1+2))})});
+ var tc=document.createElement("canvas");tc.width=w;tc.height=h;var tx=tc.getContext("2d"),td=tx.createImageData(w,h),o=td.data,i,p;
+ for(i=0,p=0;i<w*h;i++,p+=4){o[p]=o[p+1]=o[p+2]=tg[i];o[p+3]=255}tx.putImageData(td,0,0);
+ return{C:C,res:res,tc:tc,fc:fc}}
+function bkStack(cs){if(cs.length===1)return dqNeat(cs[0],900);var W=0,H=0,gap=12;cs.forEach(function(c){W=Math.max(W,c.width);H+=c.height+gap});
+ var o=document.createElement("canvas");o.width=W;o.height=H-gap;var g=o.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,o.width,o.height);
+ var y=0;cs.forEach(function(c){g.drawImage(c,Math.round((W-c.width)/2),y);y+=c.height+gap});return dqNeat(o,900)}
+async function bkRun(files){
+ if(BKS.run)return;
+ files=[].slice.call(files).filter(function(f){return/^image\//.test(f.type)||/\.(jpe?g|png|webp)$/i.test(f.name||"")});
+ if(!files.length)return toast("Şəkil seçilmədi",1);
+ files.sort(function(a,b){return String(a.name).localeCompare(String(b.name),undefined,{numeric:true})});
+ BKS.run=true;BKS.stop=false;$("bkStop").disabled=false;bkUI(true);
+ var pages=[],figs=[],E=null,n=files.length,t0=Date.now();
+ try{
+  bkLog("OCR mühərriki yüklənir…",2);E=await ocrEng();
+  for(var i=0;i<n;i++){
+   if(BKS.stop)throw new Error("stop");
+   var base=4+90*i/n,step=90/n;
+   var left=i?Math.round((Date.now()-t0)/i*(n-i)/1000):0;bkLog("Səhifə "+(i+1)+" / "+n+": filiqran, loqo və şəkillər təmizlənir…"+(left>4?" (təxminən "+(left>=90?Math.round(left/60)+" dəq":left+" san")+" qalıb)":""),base);
+   var cv=await bkLoad(files[i]),A=bkAnalyse(cv),items=[],lines=[];cv=null;
+   for(var ci=0;ci<A.C.cols.length;ci++){
+    if(BKS.stop)throw new Error("stop");
+    bkLog("Səhifə "+(i+1)+" / "+n+": mətn oxunur ("+(ci+1)+"/"+A.C.cols.length+". sütun)…",base+step*(.3+.35*ci));
+    var c=A.C.cols[ci],r=await E.rec(bkSub(A.tc,c)),
+     L=BK.linesFrom(bkWords(r),c.x0,c.y0).filter(function(l){return!BK.junk(l.t)}),fg=A.res[ci].figs;
+    items=items.concat(BK.stream(L,fg,figs.length,A.res[ci].answerBoxes));
+    fg.forEach(function(f){figs.push(dqCrop(A.fc,f))});
+    L.forEach(function(l){lines.push(l.t)})}
+   pages.push({items:items,lines:lines})}
+  bkLog("Səhifələr sıralanır, suallar ayrılır…",96);
+  var dup=BK.dupes(pages.map(function(p){return p.lines})),idx=[],nd=0;pages.forEach(function(p,i){if(dup[i])nd++;else idx.push(i)});
+  var order=BK.order(idx.map(function(i){return pages[i].lines})).map(function(k){return idx[k]}),
+   text=order.map(function(pi,k){return"§§P"+(k+1)+"§§\n"+pages[pi].items.join("\n")}).join("\n"),qs;
+  pdGap(true);try{qs=parseDoc(text)}finally{pdGap(false)}
+  BK.attach(qs,function(ids){return bkStack(ids.map(function(id){return figs[id]}))});
+  dqQAClean(qs);
+  S.keyB=null;S.key={};S.keyN=0;keyLabel();
+  bkUI(false);
+  if(!qs.length)toast("Sual tapılmadı — şəkillərin aydın olduğunu yoxlayın",1);
+  else{S.qpNext=0;sxOpen(qs);var wr=qs.filter(function(q){return q.written}).length;
+   toast(qs.length+" sual · "+figs.length+" şəkil/cədvəl ayrıldı"+(order.join()!==order.map(function(_,k){return k}).join()?" · səhifələr avtomatik sıralandı ("+order.map(function(x){return x+1}).join("→")+")":"")+(nd?" · "+nd+" təkrar səhifə atıldı":"")+(wr?" · "+wr+" yazılı cavab sualı — yoxlayın":""))}
+ }catch(e){bkUI(false);if(e&&e.message==="stop")toast("Kitab rejimi dayandırıldı");else toast("Alınmadı: "+(e&&e.message||e),1)}
+ endEng();BKS.run=false}
+$("bookQ").addEventListener("click",function(){$("fBook").click()});
+$("fBook").addEventListener("change",function(){var fl=[].slice.call(this.files||[]);this.value="";if(fl.length)bkRun(fl)});
+$("bkStop").addEventListener("click",function(){BKS.stop=true;this.disabled=true});
+$("bkX").addEventListener("click",function(){if(BKS.run)BKS.stop=true;bkUI(false)});
 
 /* ---------- Mətn sahəsi: sual başlığı + variantlar → avtomatik ayır və əlavə et ---------- */
 function newId(){return"q"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
