@@ -2,7 +2,7 @@
 // Marşrutlar:
 //   /news?id=...        → xəbər üçün şəkilli önizləmə kartı (WhatsApp / Telegram / Facebook), insanı sayta yönləndirir
 //   /news-img?id=...    → xəbərin önizləmə şəkli (data:image → real şəkil, keşlənir)
-//   /news-debug?id=...  → diaqnostika
+//   /news-debug?id=...  → diaqnostika (v6: id hansı sahədə, şəkil niyə seçildi/seçilmədi)
 //   /news (id-siz)      → xəbərlər bölməsi
 //   /qeydiyyat          → imtahan qeydiyyatı üçün önizləmə kartı
 //   /test               → testlər bölməsi
@@ -34,18 +34,39 @@ const CORS = {
 };
 
 /* ---------------- Supabase ---------------- */
-async function findNews(id) {
+const ID_KEYS = ['slug', 'id', 'uid', 'nid', 'key', '_id', 'newsId', 'news_id', 'sid', 'code', 'ref', 'hash', 'token', 'permalink'];
+async function sbJson(path) {
+  const r = await fetch(`${SB}/rest/v1/dq_v2_store?${path}`, { headers: { apikey: KEY } });
+  if (!r.ok) throw new Error('supabase ' + r.status);
+  return r.json();
+}
+const valuesOf = o => {
+  const out = [];
+  (function w(v, d) {
+    if (d > 2 || v == null) return;
+    if (typeof v === 'string' || typeof v === 'number') out.push(String(v));
+    else if (typeof v === 'object') for (const k in v) w(v[k], d + 1);
+  })(o, 0);
+  return out;
+};
+// Link slug, data içindəki id, cədvəlin id-si və ya başqa sahə ilə gələ bilər — hamısını yoxla
+async function findNews(id, trace) {
   id = String(id || '').trim();
-  if (!id || id.length > 80 || !/^[A-Za-z0-9_-]+$/.test(id)) return null;   // yalnız təhlükəsiz simvollar (filtr inyeksiyasının qarşısı)
-  // Link həm slug, həm data içindəki id, həm də cədvəlin rəqəmli id-si ilə gələ bilər
-  const keys = ['slug', 'id', 'uid', 'nid', 'key', '_id'].map(k => `data->>${k}.eq.${id}`);
-  const q = /^\d+$/.test(id) ? `or=(${keys.join(',')},id.eq.${id})` : `or=(${keys.join(',')})`;
-  try {
-    const r = await fetch(`${SB}/rest/v1/dq_v2_store?select=id,data&collection=eq.news&${q}&limit=1`, { headers: { apikey: KEY } });
-    if (!r.ok) return null;
-    const rows = await r.json();
-    return rows[0] ? { ...rows[0].data, _id: rows[0].id } : null;
-  } catch (e) { return null; }
+  const t = trace || {};
+  if (!id || id.length > 80 || !/^[A-Za-z0-9_-]+$/.test(id)) { t.by = 'bad-id'; return null; }   // filtr inyeksiyasının qarşısı
+  try {                                             // 1) dəqiq sorğu
+    const keys = ID_KEYS.map(k => `data->>${k}.eq.${id}`);
+    const q = /^\d+$/.test(id) ? `or=(${keys.join(',')},id.eq.${id})` : `or=(${keys.join(',')})`;
+    const rows = await sbJson(`select=id,data&collection=eq.news&${q}&limit=1`);
+    if (rows[0]) { t.by = 'query'; return { ...rows[0].data, _id: rows[0].id }; }
+  } catch (e) { t.err1 = String(e); }
+  try {                                             // 2) ehtiyat: ən yeni xəbərlərdə istənilən sahənin dəyəri id-yə bərabərdirsə
+    const rows = await sbJson('select=id,data&collection=eq.news&order=id.desc&limit=25');
+    t.scanned = rows.length;
+    for (const r of rows) if (String(r.id) === id || valuesOf(r.data).includes(id)) { t.by = 'scan'; return { ...r.data, _id: r.id }; }
+  } catch (e) { t.err2 = String(e); }
+  t.by = 'not-found';
+  return null;
 }
 const sb = (env, q, init = {}) => {
   const url = env.SUPABASE_URL || SB, key = env.SUPABASE_KEY || KEY;
@@ -83,13 +104,39 @@ function dims(b, type) {
   } catch (e) {}
   return { w: 0, h: 0 };
 }
-// Xəbər üçün ən yaxşı şəkil: əvvəl og (kvadrat önizləmə), sonra img — yalnız WhatsApp limitinə sığırsa
-function pickImage(n) {
-  const og = decodeDataUrl(n.og);
-  if (og && og.bytes.length < WA_MAX) return og;
-  const im = decodeDataUrl(n.img);
-  if (im && im.bytes.length < WA_MAX) return im;
-  return null;
+const THUMB = 280;   // 300px-dən kiçik kvadrat → WhatsApp göndərilən mesajda da KİÇİK şəkil + başlıq + mətn kartı göstərir
+// Önizləmə şəklini seç. env.IMAGES (Cloudflare Images binding) varsa — istənilən mənbə (data:image və ya URL) 280×280 JPEG-ə kiçildilir.
+// Yoxdursa: xarici URL olduğu kimi, kiçik data:image olduğu kimi; böyük data:image — ikon (WhatsApp ~300KB-dan böyük şəkli göstərmir)
+async function cardImage(n, env, doIt) {
+  const cands = [n.og, n.img, n.image, n.cover].filter(v => typeof v === 'string' && v);
+  let first = null;
+  for (const v of cands) {
+    if (/^https?:\/\//i.test(v)) { first = { kind: 'ext', url: v }; break; }
+    const d = decodeDataUrl(v);
+    if (d) { first = { kind: 'data', d }; break; }
+  }
+  if (!first) return null;
+  const srcLen = first.kind === 'data' ? first.d.bytes.length : first.url.length;
+
+  if (env && env.IMAGES) {
+    if (!doIt) return { mode: 'resize', type: 'image/jpeg', w: THUMB, h: THUMB, v: srcLen };
+    try {
+      let bytes, type;
+      if (first.kind === 'data') { bytes = first.d.bytes; type = first.d.type; }
+      else {
+        const r = await fetch(first.url);
+        if (!r.ok) throw new Error('şəkil ' + r.status);
+        bytes = new Uint8Array(await r.arrayBuffer()); type = r.headers.get('content-type') || 'image/jpeg';
+      }
+      const out = await env.IMAGES.input(new Blob([bytes], { type }).stream())
+        .transform({ width: THUMB, height: THUMB, fit: 'cover' }).output({ format: 'image/jpeg', quality: 80 });
+      return { mode: 'resize', type: 'image/jpeg', bytes: new Uint8Array(await out.response().arrayBuffer()), w: THUMB, h: THUMB, v: srcLen };
+    } catch (e) { return { mode: 'resize-failed', error: String(e), url: first.kind === 'ext' ? first.url : '' }; }
+  }
+  if (first.kind === 'ext') return { mode: 'external', url: first.url, v: srcLen };
+  const small = [n.og, n.img, n.image, n.cover].map(decodeDataUrl).find(d => d && d.bytes.length < WA_MAX);
+  if (small) return { mode: 'raw', type: small.type, bytes: small.bytes, w: small.w, h: small.h, v: small.bytes.length };
+  return { mode: 'toobig', bytesOrig: first.d.bytes.length };
 }
 
 /* ---------------- Web Push (VAPID) ---------------- */
@@ -155,18 +202,24 @@ export default {
     const pass = () => (env.ASSETS ? env.ASSETS.fetch(request) : fetch(request));
     const head = request.method === 'HEAD';
 
-    /* 0) Diaqnostika */
+    /* 0) Diaqnostika: /news-debug?id=... */
     if (url.pathname === '/news-debug') {
       const id = url.searchParams.get('id') || '';
-      const n = await findNews(id);
-      const pick = n && pickImage(n);
-      let fb;
-      try { const r = await fetch(FALLBACK.url, { method: 'HEAD' }); fb = { status: r.status, type: r.headers.get('content-type'), bytes: r.headers.get('content-length') }; } catch (e) { fb = String(e); }
+      const trace = {};
+      const n = await findNews(id, trace);
+      let sample;
+      try {   // ən yeni xəbərlərin sahə adları: id hansı sahədədir?
+        const rows = await sbJson('select=id,data&collection=eq.news&order=id.desc&limit=3');
+        sample = rows.map(r => ({
+          rowId: r.id, keys: Object.keys(r.data || {}),
+          idLike: Object.fromEntries(ID_KEYS.map(k => [k, (r.data || {})[k]]).filter(([, v]) => v != null && typeof v !== 'object').map(([k, v]) => [k, String(v).slice(0, 40)]))
+        }));
+      } catch (e) { sample = String(e); }
+      const ci = n && await cardImage(n, env, false);
       return new Response(JSON.stringify({
-        worker: 'v5', found: !!n, idTried: id, title: n && n.title, slug: n && n.slug, id: n && n._id,
-        hasImg: !!(n && n.img), hasOg: !!(n && n.og),
-        chosen: pick ? { type: pick.type, bytes: pick.bytes.length, w: pick.w, h: pick.h } : 'fallback',
-        fallback: fb
+        worker: 'v6', idTried: id, found: !!n, lookup: trace, title: n && n.title, slug: n && n.slug, rowId: n && n._id,
+        image: !n ? null : ci ? { mode: ci.mode, bytesOrig: ci.bytesOrig, w: ci.w, h: ci.h, url: ci.url } : 'none',
+        hasImagesBinding: !!(env && env.IMAGES), newestNewsFields: sample
       }, null, 2), { headers: { 'content-type': 'application/json;charset=utf-8', 'cache-control': 'no-store' } });
     }
 
@@ -179,10 +232,9 @@ export default {
       if (hit) return head ? new Response(null, hit) : hit;
 
       const n = await findNews(id);
-      const ext = n && (/^https?:\/\//i.test(n.og || '') ? n.og : /^https?:\/\//i.test(n.img || '') ? n.img : '');
-      if (ext) return Response.redirect(ext, 302);
-      const d = n && pickImage(n);
-      if (!d) return Response.redirect(FALLBACK.url, 302);
+      const d = n && await cardImage(n, env, true);
+      if (d && d.url) return Response.redirect(d.url, 302);   // external və ya resize-failed (mənbə URL-i)
+      if (!d || !d.bytes) return Response.redirect(FALLBACK.url, 302);
 
       const res = new Response(d.bytes, { headers: {
         'content-type': d.type,
@@ -197,23 +249,23 @@ export default {
     /* 2) Xəbər səhifəsi (OG kart) */
     if (url.pathname.replace(/\/$/, '') === '/news') {
       const id = url.searchParams.get('id') || '';
-      if (!id) return section('Xəbərlər', '📰 DQPlatform — Xəbərlər və elanlar', 'İmtahan elanları, qanunvericilikdə dəyişikliklər və yeniliklər bir yerdə.', SITE + '/news', SITE + '/?go=news', head);
+      const generic = () => section('Xəbərlər', '📰 DQPlatform — Xəbərlər və elanlar', 'İmtahan elanları, qanunvericilikdə dəyişikliklər və yeniliklər bir yerdə.', SITE + '/news', SITE + '/?go=news', head);
+      if (!id) return generic();
       const n = await findNews(id);
-      if (!n) return Response.redirect(SITE + '/?go=news', 302);
+      if (!n) return generic();                       // 302 yox: yönləndirmə ümumi səhifənin kartını göstərməsin
 
-      const key = n.slug || n._id;
+      const key = String(id).trim();                  // linkdə gələn id-ni olduğu kimi saxla (sayt onu bu formada açır)
       const title = clean(n.title, 90) || 'DQPlatform';
-      const desc = clean(n.sum || n.body, 200) || 'DQPlatform — dövlət qulluğu imtahanlarına hazırlıq platforması';
+      const desc = clean(n.sum || n.body || n.text, 200) || 'DQPlatform — dövlət qulluğu imtahanlarına hazırlıq platforması';
       const page = `${SITE}/news?id=${encodeURIComponent(key)}`;
       const go = `${SITE}/?news=${encodeURIComponent(key)}`;
 
       let img = FALLBACK.url, itype = FALLBACK.type, iw = FALLBACK.w, ih = FALLBACK.h;
-      const d = pickImage(n);
-      if (d) {
-        img = `${SITE}/news-img?id=${encodeURIComponent(key)}&v=${d.bytes.length}`;
-        itype = d.type; iw = d.w; ih = d.h;
-      } else if (/^https?:\/\//i.test(n.og || n.img || '')) {
-        img = n.og || n.img; itype = ''; iw = 0; ih = 0;
+      const ci = await cardImage(n, env, false);
+      if (ci && ci.mode === 'external') { img = ci.url; itype = ''; iw = 0; ih = 0; }
+      else if (ci && (ci.mode === 'raw' || ci.mode === 'resize')) {
+        img = `${SITE}/news-img?id=${encodeURIComponent(key)}&v=${ci.v}`;
+        itype = ci.type; iw = ci.w; ih = ci.h;
       }
 
       const html = ogPage({ title, ptitle: title + ' | DQPlatform', desc, page, go, img, itype, iw, ih, type: 'article' });
