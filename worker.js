@@ -2,7 +2,7 @@
 // Marşrutlar:
 //   /news?id=...        → xəbər üçün şəkilli önizləmə kartı (WhatsApp / Telegram / Facebook), insanı sayta yönləndirir
 //   /news-img?id=...    → xəbərin önizləmə şəkli (data:image → real şəkil, keşlənir)
-//   /news-debug?id=...  → diaqnostika (v7: id necə tapıldı, şəkil niyə seçildi/seçilmədi)
+//   /news-debug?id=...  → diaqnostika
 //   /news (id-siz)      → xəbərlər bölməsi
 //   /qeydiyyat          → imtahan qeydiyyatı üçün önizləmə kartı
 //   /test               → testlər bölməsi
@@ -34,70 +34,18 @@ const CORS = {
 };
 
 /* ---------------- Supabase ---------------- */
-const ID_KEYS = ['slug', 'id', 'uid', 'nid', 'key', '_id', 'newsId', 'news_id', 'sid', 'code', 'ref', 'hash', 'token', 'permalink'];
-async function sbJson(path) {
-  const r = await fetch(`${SB}/rest/v1/dq_v2_store?${path}`, { headers: { apikey: KEY } });
-  if (!r.ok) throw new Error('supabase ' + r.status);
-  return r.json();
-}
-// Yüngül siyahı (şəkilsiz): id-yə bənzər və vaxt/tarix sahələri
-const LIGHT = 'select=id,a:data->>id,b:data->>uid,c:data->>slug,d:data->>nid,e:data->>key,m:data->>_id,n:data->>newsId,'
-  + 'f:data->>ts,g:data->>created,h:data->>createdAt,i:data->>at,k:data->>time,j:data->>date,l:data->>title';
-const toMs = x => {
-  if (x == null || x === '') return NaN;
-  const s = String(x);
-  if (/^\d{12,14}$/.test(s)) return +s;
-  const d = Date.parse(s);
-  return isNaN(d) ? NaN : d;
-};
-// Linkdəki id = 6 təsadüfi + 8 simvol Date.now().toString(36)  →  yaradılma vaxtı (ms)
-function idTime(id) {
-  const t = String(id).slice(-8);
-  if (!/^[0-9a-z]{8}$/i.test(t)) return 0;
-  const v = parseInt(t.toLowerCase(), 36);
-  return v > 1.5e12 && v < 2.5e12 ? v : 0;
-}
-const isoDay = (ms, off) => new Date(ms + off * 3600e3).toISOString().slice(0, 10);
-
-async function fullRow(rowId) {
-  const rows = await sbJson(`select=id,data&collection=eq.news&id=eq.${rowId}&limit=1`);
-  return rows[0] ? { ...rows[0].data, _id: rows[0].id } : null;
-}
-// Xəbəri tap: 1) id-yə bənzər sahələr, 2) id-dəki yaradılma vaxtı, 3) tarix, 4) köhnə dəqiq sorğu
-async function findNews(id, trace) {
+async function findNews(id) {
   id = String(id || '').trim();
-  const t = trace || {};
-  if (!id || id.length > 80 || !/^[A-Za-z0-9_-]+$/.test(id)) { t.by = 'bad-id'; return null; }   // filtr inyeksiyasının qarşısı
-  const ts = idTime(id);
-  t.idTimeMs = ts || null;
+  if (!id || id.length > 80) return null;
+  const q = /^\d+$/.test(id)
+    ? `or=(data->>slug.eq.${id},id.eq.${id})`
+    : `data->>slug=eq.${encodeURIComponent(id)}`;
   try {
-    const list = await sbJson(`${LIGHT}&collection=eq.news&order=id.desc&limit=300`);
-    t.listed = list.length;
-    let hit = list.find(r => String(r.id) === id || [r.a, r.b, r.c, r.d, r.e, r.m, r.n].some(v => v != null && String(v) === id));
-    if (hit) t.by = 'field';
-    if (!hit && ts) {                                              // vaxt sahəsi id-dəki vaxta ±5 dəq yaxındırsa
-      let best = 1e18;
-      for (const r of list) for (const v of [r.f, r.g, r.h, r.i, r.k]) {
-        const d = Math.abs(toMs(v) - ts);
-        if (d < 5 * 60e3 && d < best) { best = d; hit = r; }
-      }
-      if (hit) t.by = 'time';
-    }
-    if (!hit && ts) {                                              // tarix (Bakı və UTC) uyğundursa və yeganədirsə
-      const days = [isoDay(ts, 4), isoDay(ts, 0)];
-      const same = list.filter(r => r.j && days.some(d => String(r.j).startsWith(d)));
-      t.sameDay = same.length;
-      if (same.length === 1) { hit = same[0]; t.by = 'date'; }
-    }
-    if (hit) { t.rowId = hit.id; const n = await fullRow(hit.id); if (n) return n; }
-  } catch (e) { t.err1 = String(e); }
-  try {                                                            // köhnə dəqiq sorğu
-    const keys = ID_KEYS.map(k => `data->>${k}.eq.${id}`);
-    const rows = await sbJson(`select=id,data&collection=eq.news&or=(${keys.join(',')})&limit=1`);
-    if (rows[0]) { t.by = 'query'; return { ...rows[0].data, _id: rows[0].id }; }
-  } catch (e) { t.err2 = String(e); }
-  t.by = 'not-found';
-  return null;
+    const r = await fetch(`${SB}/rest/v1/dq_v2_store?select=id,data&collection=eq.news&${q}&limit=1`, { headers: { apikey: KEY } });
+    if (!r.ok) return null;
+    const rows = await r.json();
+    return rows[0] ? { ...rows[0].data, _id: rows[0].id } : null;
+  } catch (e) { return null; }
 }
 const sb = (env, q, init = {}) => {
   const url = env.SUPABASE_URL || SB, key = env.SUPABASE_KEY || KEY;
@@ -135,39 +83,13 @@ function dims(b, type) {
   } catch (e) {}
   return { w: 0, h: 0 };
 }
-const THUMB = 280;   // 300px-dən kiçik kvadrat → WhatsApp göndərilən mesajda da KİÇİK şəkil + başlıq + mətn kartı göstərir
-// Önizləmə şəklini seç. env.IMAGES (Cloudflare Images binding) varsa — istənilən mənbə (data:image və ya URL) 280×280 JPEG-ə kiçildilir.
-// Yoxdursa: xarici URL olduğu kimi, kiçik data:image olduğu kimi; böyük data:image — ikon (WhatsApp ~300KB-dan böyük şəkli göstərmir)
-async function cardImage(n, env, doIt) {
-  const cands = [n.og, n.img, n.image, n.cover].filter(v => typeof v === 'string' && v);
-  let first = null;
-  for (const v of cands) {
-    if (/^https?:\/\//i.test(v)) { first = { kind: 'ext', url: v }; break; }
-    const d = decodeDataUrl(v);
-    if (d) { first = { kind: 'data', d }; break; }
-  }
-  if (!first) return null;
-  const srcLen = first.kind === 'data' ? first.d.bytes.length : first.url.length;
-
-  if (env && env.IMAGES) {
-    if (!doIt) return { mode: 'resize', type: 'image/jpeg', w: THUMB, h: THUMB, v: srcLen };
-    try {
-      let bytes, type;
-      if (first.kind === 'data') { bytes = first.d.bytes; type = first.d.type; }
-      else {
-        const r = await fetch(first.url);
-        if (!r.ok) throw new Error('şəkil ' + r.status);
-        bytes = new Uint8Array(await r.arrayBuffer()); type = r.headers.get('content-type') || 'image/jpeg';
-      }
-      const out = await env.IMAGES.input(new Blob([bytes], { type }).stream())
-        .transform({ width: THUMB, height: THUMB, fit: 'cover' }).output({ format: 'image/jpeg', quality: 80 });
-      return { mode: 'resize', type: 'image/jpeg', bytes: new Uint8Array(await out.response().arrayBuffer()), w: THUMB, h: THUMB, v: srcLen };
-    } catch (e) { return { mode: 'resize-failed', error: String(e), url: first.kind === 'ext' ? first.url : '' }; }
-  }
-  if (first.kind === 'ext') return { mode: 'external', url: first.url, v: srcLen };
-  const small = [n.og, n.img, n.image, n.cover].map(decodeDataUrl).find(d => d && d.bytes.length < WA_MAX);
-  if (small) return { mode: 'raw', type: small.type, bytes: small.bytes, w: small.w, h: small.h, v: small.bytes.length };
-  return { mode: 'toobig', bytesOrig: first.d.bytes.length };
+// Xəbər üçün ən yaxşı şəkil: əvvəl og (kvadrat önizləmə), sonra img — yalnız WhatsApp limitinə sığırsa
+function pickImage(n) {
+  const og = decodeDataUrl(n.og);
+  if (og && og.bytes.length < WA_MAX) return og;
+  const im = decodeDataUrl(n.img);
+  if (im && im.bytes.length < WA_MAX) return im;
+  return null;
 }
 
 /* ---------------- Web Push (VAPID) ---------------- */
@@ -233,25 +155,18 @@ export default {
     const pass = () => (env.ASSETS ? env.ASSETS.fetch(request) : fetch(request));
     const head = request.method === 'HEAD';
 
-    /* 0) Diaqnostika: /news-debug?id=... */
+    /* 0) Diaqnostika */
     if (url.pathname === '/news-debug') {
       const id = url.searchParams.get('id') || '';
-      const trace = {};
-      const n = await findNews(id, trace);
-      let sample;
-      try {   // ən yeni xəbərlərin yüngül görünüşü: id hansı sahədədir, vaxt necədir?
-        sample = await sbJson(`${LIGHT}&collection=eq.news&order=id.desc&limit=5`);
-        sample = sample.map(r => Object.fromEntries(Object.entries(r).filter(([, v]) => v != null).map(([k, v]) => [k, String(v).slice(0, 60)])));
-      } catch (e) { sample = String(e); }
-      let fields = null;
-      try {   // tapılan xəbərin sahələri (uzun mətn/şəkil gizlədilir)
-        if (n) fields = Object.fromEntries(Object.entries(n).map(([k, v]) => [k, typeof v === 'string' ? (v.length > 60 ? `[${v.length} simvol]` : v) : v]));
-      } catch (e) {}
-      const ci = n && await cardImage(n, env, false);
+      const n = await findNews(id);
+      const pick = n && pickImage(n);
+      let fb;
+      try { const r = await fetch(FALLBACK.url, { method: 'HEAD' }); fb = { status: r.status, type: r.headers.get('content-type'), bytes: r.headers.get('content-length') }; } catch (e) { fb = String(e); }
       return new Response(JSON.stringify({
-        worker: 'v7.1', idTried: id, found: !!n, lookup: trace, title: n && n.title, slug: n && n.slug, rowId: n && n._id,
-        image: !n ? null : ci ? { mode: ci.mode, bytesOrig: ci.bytesOrig, w: ci.w, h: ci.h, url: ci.url } : 'none',
-        hasImagesBinding: !!(env && env.IMAGES), foundFields: fields, newestNews: sample
+        worker: 'v4', found: !!n, title: n && n.title, slug: n && n.slug, id: n && n._id,
+        hasImg: !!(n && n.img), hasOg: !!(n && n.og),
+        chosen: pick ? { type: pick.type, bytes: pick.bytes.length, w: pick.w, h: pick.h } : 'fallback',
+        fallback: fb
       }, null, 2), { headers: { 'content-type': 'application/json;charset=utf-8', 'cache-control': 'no-store' } });
     }
 
@@ -264,9 +179,10 @@ export default {
       if (hit) return head ? new Response(null, hit) : hit;
 
       const n = await findNews(id);
-      const d = n && await cardImage(n, env, true);
-      if (d && d.url) return Response.redirect(d.url, 302);   // external və ya resize-failed (mənbə URL-i)
-      if (!d || !d.bytes) return Response.redirect(FALLBACK.url, 302);
+      const ext = n && (/^https?:\/\//i.test(n.og || '') ? n.og : /^https?:\/\//i.test(n.img || '') ? n.img : '');
+      if (ext) return Response.redirect(ext, 302);
+      const d = n && pickImage(n);
+      if (!d) return Response.redirect(FALLBACK.url, 302);
 
       const res = new Response(d.bytes, { headers: {
         'content-type': d.type,
@@ -281,28 +197,23 @@ export default {
     /* 2) Xəbər səhifəsi (OG kart) */
     if (url.pathname.replace(/\/$/, '') === '/news') {
       const id = url.searchParams.get('id') || '';
-      const generic = () => section('Xəbərlər', '📰 DQPlatform — Xəbərlər və elanlar', 'İmtahan elanları, qanunvericilikdə dəyişikliklər və yeniliklər bir yerdə.', SITE + '/news', SITE + '/?go=news', head);
-      if (!id) return generic();
-      const trace = {};
-      const n = await findNews(id, trace);
-      if (!n) {                                       // 302 yox. Xəta kartı keşlənmir; kartda qısa texniki iz var (səbəbi ekran görüntüsündən oxumaq üçün)
-        const why = `v7.1 · xəbər tapılmadı · ${trace.by || '?'} · siyahı:${trace.listed ?? '?'} · vaxt:${trace.idTimeMs ? 'ok' : 'yox'} · eyniGün:${trace.sameDay ?? '-'} · xəta:${String(trace.err1 || trace.err2 || 'yox').slice(0, 50)}`;
-        const html = ogPage({ title: '📰 DQPlatform — Xəbərlər və elanlar', ptitle: 'Xəbərlər | DQPlatform', desc: 'İmtahan elanları, qanunvericilikdə dəyişikliklər və yeniliklər. [' + why + ']', page: SITE + '/news', go: SITE + '/?go=news', img: FALLBACK.url, itype: FALLBACK.type, iw: FALLBACK.w, ih: FALLBACK.h, type: 'website' });
-        return new Response(head ? null : html, { headers: { 'content-type': 'text/html;charset=utf-8', 'cache-control': 'no-store' } });
-      }
+      if (!id) return section('Xəbərlər', '📰 DQPlatform — Xəbərlər və elanlar', 'İmtahan elanları, qanunvericilikdə dəyişikliklər və yeniliklər bir yerdə.', SITE + '/news', SITE + '/?go=news', head);
+      const n = await findNews(id);
+      if (!n) return Response.redirect(SITE + '/?go=news', 302);
 
-      const key = String(id).trim();                  // linkdə gələn id-ni olduğu kimi saxla (sayt onu bu formada açır)
+      const key = n.slug || n._id;
       const title = clean(n.title, 90) || 'DQPlatform';
-      const desc = clean(n.sum || n.body || n.text, 200) || 'DQPlatform — dövlət qulluğu imtahanlarına hazırlıq platforması';
+      const desc = clean(n.sum || n.body, 200) || 'DQPlatform — dövlət qulluğu imtahanlarına hazırlıq platforması';
       const page = `${SITE}/news?id=${encodeURIComponent(key)}`;
       const go = `${SITE}/?news=${encodeURIComponent(key)}`;
 
       let img = FALLBACK.url, itype = FALLBACK.type, iw = FALLBACK.w, ih = FALLBACK.h;
-      const ci = await cardImage(n, env, false);
-      if (ci && ci.mode === 'external') { img = ci.url; itype = ''; iw = 0; ih = 0; }
-      else if (ci && (ci.mode === 'raw' || ci.mode === 'resize')) {
-        img = `${SITE}/news-img?id=${encodeURIComponent(key)}&v=${ci.v}`;
-        itype = ci.type; iw = ci.w; ih = ci.h;
+      const d = pickImage(n);
+      if (d) {
+        img = `${SITE}/news-img?id=${encodeURIComponent(key)}&v=${d.bytes.length}`;
+        itype = d.type; iw = d.w; ih = d.h;
+      } else if (/^https?:\/\//i.test(n.og || n.img || '')) {
+        img = n.og || n.img; itype = ''; iw = 0; ih = 0;
       }
 
       const html = ogPage({ title, ptitle: title + ' | DQPlatform', desc, page, go, img, itype, iw, ih, type: 'article' });
