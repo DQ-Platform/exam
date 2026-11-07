@@ -36,10 +36,10 @@ const CORS = {
 /* ---------------- Supabase ---------------- */
 async function findNews(id) {
   id = String(id || '').trim();
-  if (!id || id.length > 80) return null;
-  const q = /^\d+$/.test(id)
-    ? `or=(data->>slug.eq.${id},id.eq.${id})`
-    : `data->>slug=eq.${encodeURIComponent(id)}`;
+  if (!id || id.length > 80 || !/^[A-Za-z0-9_-]+$/.test(id)) return null;   // yalnız təhlükəsiz simvollar (filtr inyeksiyasının qarşısı)
+  // Link həm slug, həm data içindəki id, həm də cədvəlin rəqəmli id-si ilə gələ bilər
+  const keys = ['slug', 'id', 'uid', 'nid', 'key', '_id'].map(k => `data->>${k}.eq.${id}`);
+  const q = /^\d+$/.test(id) ? `or=(${keys.join(',')},id.eq.${id})` : `or=(${keys.join(',')})`;
   try {
     const r = await fetch(`${SB}/rest/v1/dq_v2_store?select=id,data&collection=eq.news&${q}&limit=1`, { headers: { apikey: KEY } });
     if (!r.ok) return null;
@@ -163,7 +163,7 @@ export default {
       let fb;
       try { const r = await fetch(FALLBACK.url, { method: 'HEAD' }); fb = { status: r.status, type: r.headers.get('content-type'), bytes: r.headers.get('content-length') }; } catch (e) { fb = String(e); }
       return new Response(JSON.stringify({
-        worker: 'v4', found: !!n, title: n && n.title, slug: n && n.slug, id: n && n._id,
+        worker: 'v5', found: !!n, idTried: id, title: n && n.title, slug: n && n.slug, id: n && n._id,
         hasImg: !!(n && n.img), hasOg: !!(n && n.og),
         chosen: pick ? { type: pick.type, bytes: pick.bytes.length, w: pick.w, h: pick.h } : 'fallback',
         fallback: fb
