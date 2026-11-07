@@ -249,7 +249,7 @@ export default {
       } catch (e) {}
       const ci = n && await cardImage(n, env, false);
       return new Response(JSON.stringify({
-        worker: 'v7', idTried: id, found: !!n, lookup: trace, title: n && n.title, slug: n && n.slug, rowId: n && n._id,
+        worker: 'v7.1', idTried: id, found: !!n, lookup: trace, title: n && n.title, slug: n && n.slug, rowId: n && n._id,
         image: !n ? null : ci ? { mode: ci.mode, bytesOrig: ci.bytesOrig, w: ci.w, h: ci.h, url: ci.url } : 'none',
         hasImagesBinding: !!(env && env.IMAGES), foundFields: fields, newestNews: sample
       }, null, 2), { headers: { 'content-type': 'application/json;charset=utf-8', 'cache-control': 'no-store' } });
@@ -283,8 +283,13 @@ export default {
       const id = url.searchParams.get('id') || '';
       const generic = () => section('Xəbərlər', '📰 DQPlatform — Xəbərlər və elanlar', 'İmtahan elanları, qanunvericilikdə dəyişikliklər və yeniliklər bir yerdə.', SITE + '/news', SITE + '/?go=news', head);
       if (!id) return generic();
-      const n = await findNews(id);
-      if (!n) return generic();                       // 302 yox: yönləndirmə ümumi səhifənin kartını göstərməsin
+      const trace = {};
+      const n = await findNews(id, trace);
+      if (!n) {                                       // 302 yox. Xəta kartı keşlənmir; kartda qısa texniki iz var (səbəbi ekran görüntüsündən oxumaq üçün)
+        const why = `v7.1 · xəbər tapılmadı · ${trace.by || '?'} · siyahı:${trace.listed ?? '?'} · vaxt:${trace.idTimeMs ? 'ok' : 'yox'} · eyniGün:${trace.sameDay ?? '-'} · xəta:${String(trace.err1 || trace.err2 || 'yox').slice(0, 50)}`;
+        const html = ogPage({ title: '📰 DQPlatform — Xəbərlər və elanlar', ptitle: 'Xəbərlər | DQPlatform', desc: 'İmtahan elanları, qanunvericilikdə dəyişikliklər və yeniliklər. [' + why + ']', page: SITE + '/news', go: SITE + '/?go=news', img: FALLBACK.url, itype: FALLBACK.type, iw: FALLBACK.w, ih: FALLBACK.h, type: 'website' });
+        return new Response(head ? null : html, { headers: { 'content-type': 'text/html;charset=utf-8', 'cache-control': 'no-store' } });
+      }
 
       const key = String(id).trim();                  // linkdə gələn id-ni olduğu kimi saxla (sayt onu bu formada açır)
       const title = clean(n.title, 90) || 'DQPlatform';
