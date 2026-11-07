@@ -2,7 +2,7 @@
 // Marşrutlar:
 //   /news?id=...        → xəbər üçün şəkilli önizləmə kartı (WhatsApp / Telegram / Facebook), insanı sayta yönləndirir
 //   /news-img?id=...    → xəbərin önizləmə şəkli (data:image → real şəkil, keşlənir)
-//   /news-debug?id=...  → diaqnostika (v6: id hansı sahədə, şəkil niyə seçildi/seçilmədi)
+//   /news-debug?id=...  → diaqnostika (v7: id necə tapıldı, şəkil niyə seçildi/seçilmədi)
 //   /news (id-siz)      → xəbərlər bölməsi
 //   /qeydiyyat          → imtahan qeydiyyatı üçün önizləmə kartı
 //   /test               → testlər bölməsi
@@ -40,30 +40,61 @@ async function sbJson(path) {
   if (!r.ok) throw new Error('supabase ' + r.status);
   return r.json();
 }
-const valuesOf = o => {
-  const out = [];
-  (function w(v, d) {
-    if (d > 2 || v == null) return;
-    if (typeof v === 'string' || typeof v === 'number') out.push(String(v));
-    else if (typeof v === 'object') for (const k in v) w(v[k], d + 1);
-  })(o, 0);
-  return out;
+// Yüngül siyahı (şəkilsiz): id-yə bənzər və vaxt/tarix sahələri
+const LIGHT = 'select=id,a:data->>id,b:data->>uid,c:data->>slug,d:data->>nid,e:data->>key,m:data->>_id,n:data->>newsId,'
+  + 'f:data->>ts,g:data->>created,h:data->>createdAt,i:data->>at,k:data->>time,j:data->>date,l:data->>title';
+const toMs = x => {
+  if (x == null || x === '') return NaN;
+  const s = String(x);
+  if (/^\d{12,14}$/.test(s)) return +s;
+  const d = Date.parse(s);
+  return isNaN(d) ? NaN : d;
 };
-// Link slug, data içindəki id, cədvəlin id-si və ya başqa sahə ilə gələ bilər — hamısını yoxla
+// Linkdəki id = 6 təsadüfi + 8 simvol Date.now().toString(36)  →  yaradılma vaxtı (ms)
+function idTime(id) {
+  const t = String(id).slice(-8);
+  if (!/^[0-9a-z]{8}$/i.test(t)) return 0;
+  const v = parseInt(t.toLowerCase(), 36);
+  return v > 1.5e12 && v < 2.5e12 ? v : 0;
+}
+const isoDay = (ms, off) => new Date(ms + off * 3600e3).toISOString().slice(0, 10);
+
+async function fullRow(rowId) {
+  const rows = await sbJson(`select=id,data&collection=eq.news&id=eq.${rowId}&limit=1`);
+  return rows[0] ? { ...rows[0].data, _id: rows[0].id } : null;
+}
+// Xəbəri tap: 1) id-yə bənzər sahələr, 2) id-dəki yaradılma vaxtı, 3) tarix, 4) köhnə dəqiq sorğu
 async function findNews(id, trace) {
   id = String(id || '').trim();
   const t = trace || {};
   if (!id || id.length > 80 || !/^[A-Za-z0-9_-]+$/.test(id)) { t.by = 'bad-id'; return null; }   // filtr inyeksiyasının qarşısı
-  try {                                             // 1) dəqiq sorğu
-    const keys = ID_KEYS.map(k => `data->>${k}.eq.${id}`);
-    const q = /^\d+$/.test(id) ? `or=(${keys.join(',')},id.eq.${id})` : `or=(${keys.join(',')})`;
-    const rows = await sbJson(`select=id,data&collection=eq.news&${q}&limit=1`);
-    if (rows[0]) { t.by = 'query'; return { ...rows[0].data, _id: rows[0].id }; }
+  const ts = idTime(id);
+  t.idTimeMs = ts || null;
+  try {
+    const list = await sbJson(`${LIGHT}&collection=eq.news&order=id.desc&limit=300`);
+    t.listed = list.length;
+    let hit = list.find(r => String(r.id) === id || [r.a, r.b, r.c, r.d, r.e, r.m, r.n].some(v => v != null && String(v) === id));
+    if (hit) t.by = 'field';
+    if (!hit && ts) {                                              // vaxt sahəsi id-dəki vaxta ±5 dəq yaxındırsa
+      let best = 1e18;
+      for (const r of list) for (const v of [r.f, r.g, r.h, r.i, r.k]) {
+        const d = Math.abs(toMs(v) - ts);
+        if (d < 5 * 60e3 && d < best) { best = d; hit = r; }
+      }
+      if (hit) t.by = 'time';
+    }
+    if (!hit && ts) {                                              // tarix (Bakı və UTC) uyğundursa və yeganədirsə
+      const days = [isoDay(ts, 4), isoDay(ts, 0)];
+      const same = list.filter(r => r.j && days.some(d => String(r.j).startsWith(d)));
+      t.sameDay = same.length;
+      if (same.length === 1) { hit = same[0]; t.by = 'date'; }
+    }
+    if (hit) { t.rowId = hit.id; const n = await fullRow(hit.id); if (n) return n; }
   } catch (e) { t.err1 = String(e); }
-  try {                                             // 2) ehtiyat: ən yeni xəbərlərdə istənilən sahənin dəyəri id-yə bərabərdirsə
-    const rows = await sbJson('select=id,data&collection=eq.news&order=id.desc&limit=25');
-    t.scanned = rows.length;
-    for (const r of rows) if (String(r.id) === id || valuesOf(r.data).includes(id)) { t.by = 'scan'; return { ...r.data, _id: r.id }; }
+  try {                                                            // köhnə dəqiq sorğu
+    const keys = ID_KEYS.map(k => `data->>${k}.eq.${id}`);
+    const rows = await sbJson(`select=id,data&collection=eq.news&or=(${keys.join(',')})&limit=1`);
+    if (rows[0]) { t.by = 'query'; return { ...rows[0].data, _id: rows[0].id }; }
   } catch (e) { t.err2 = String(e); }
   t.by = 'not-found';
   return null;
@@ -208,18 +239,19 @@ export default {
       const trace = {};
       const n = await findNews(id, trace);
       let sample;
-      try {   // ən yeni xəbərlərin sahə adları: id hansı sahədədir?
-        const rows = await sbJson('select=id,data&collection=eq.news&order=id.desc&limit=3');
-        sample = rows.map(r => ({
-          rowId: r.id, keys: Object.keys(r.data || {}),
-          idLike: Object.fromEntries(ID_KEYS.map(k => [k, (r.data || {})[k]]).filter(([, v]) => v != null && typeof v !== 'object').map(([k, v]) => [k, String(v).slice(0, 40)]))
-        }));
+      try {   // ən yeni xəbərlərin yüngül görünüşü: id hansı sahədədir, vaxt necədir?
+        sample = await sbJson(`${LIGHT}&collection=eq.news&order=id.desc&limit=5`);
+        sample = sample.map(r => Object.fromEntries(Object.entries(r).filter(([, v]) => v != null).map(([k, v]) => [k, String(v).slice(0, 60)])));
       } catch (e) { sample = String(e); }
+      let fields = null;
+      try {   // tapılan xəbərin sahələri (uzun mətn/şəkil gizlədilir)
+        if (n) fields = Object.fromEntries(Object.entries(n).map(([k, v]) => [k, typeof v === 'string' ? (v.length > 60 ? `[${v.length} simvol]` : v) : v]));
+      } catch (e) {}
       const ci = n && await cardImage(n, env, false);
       return new Response(JSON.stringify({
-        worker: 'v6', idTried: id, found: !!n, lookup: trace, title: n && n.title, slug: n && n.slug, rowId: n && n._id,
+        worker: 'v7', idTried: id, found: !!n, lookup: trace, title: n && n.title, slug: n && n.slug, rowId: n && n._id,
         image: !n ? null : ci ? { mode: ci.mode, bytesOrig: ci.bytesOrig, w: ci.w, h: ci.h, url: ci.url } : 'none',
-        hasImagesBinding: !!(env && env.IMAGES), newestNewsFields: sample
+        hasImagesBinding: !!(env && env.IMAGES), foundFields: fields, newestNews: sample
       }, null, 2), { headers: { 'content-type': 'application/json;charset=utf-8', 'cache-control': 'no-store' } });
     }
 
