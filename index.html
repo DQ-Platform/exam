@@ -8612,6 +8612,230 @@ html.dqx-exam .feed-btn,html.dqx-exam .login-topbar,html.dqx-exam #btn-open-news
  box-shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -14px rgba(15,23,42,.28)!important;border:1px solid #cbd5e1!important}
 </style>
 
+<style id="dqdm-css">
+/* DQ Masaüstü rejim: üzən telefon/masaüstü düyməsi + sınaq başlanğıcında yuxarı keçid zolağı */
+html.dqdm-fz body{zoom:var(--dqdm-z,1)!important;min-height:0!important}
+html #dqdm{position:fixed;left:0;top:0;z-index:2147483000;transform-origin:0 0;display:none;align-items:center;justify-content:center;gap:0;width:46px;height:46px;padding:0;margin:0;border:1.5px solid rgba(255,255,255,.85);opacity:.5;transition:opacity .25s;border-radius:50%;font-size:0;color:#fff;background:linear-gradient(135deg,#0f2d6b,#2f63bd);box-shadow:0 4px 12px rgba(10,30,90,.3);cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+html #dqdm.on{display:flex}
+html #dqdm.d{background:linear-gradient(135deg,#b45309,#e0a93b)}
+html #dqdm:active,html #dqdm.drag{cursor:grabbing;opacity:1}
+html #dqdm svg{width:22px;height:22px;display:block;pointer-events:none}
+html #dqdm-t{position:fixed;left:0;top:0;z-index:2147483002;transform-origin:0 0;display:none;box-sizing:border-box;max-width:260px;padding:10px 14px;border-radius:12px;background:#0f2d6b;color:#fff;font:600 13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;box-shadow:0 8px 22px rgba(0,0,0,.35);pointer-events:none}
+#dqdm-bar{position:fixed;left:0;top:0;z-index:2147483001;transform-origin:0 0;display:none;box-sizing:border-box;padding:10px 12px 8px;border-radius:16px;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(135deg,#0b2457,#1e4fa3);border:1px solid rgba(224,169,59,.7);box-shadow:0 14px 34px rgba(5,15,50,.5);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#dqdm-bar.on{display:block;animation:dqdmIn .38s cubic-bezier(.22,.9,.24,1) both}
+@keyframes dqdmIn{0%{opacity:0;filter:blur(3px)}100%{opacity:1;filter:none}}
+#dqdm-bar .r1{display:flex;align-items:center;gap:10px}
+#dqdm-bar .ic{flex:none;width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:rgba(255,255,255,.14)}
+#dqdm-bar .ic svg{width:22px;height:22px;display:block}
+#dqdm-bar .tx{flex:1;min-width:0;line-height:1.3;text-align:left}
+#dqdm-bar .tx b{display:block;font-size:14px;font-weight:800}
+#dqdm-bar .tx small{display:block;margin-top:1px;font-size:12px;font-weight:500;opacity:.85}
+#dqdm-bar .x{flex:none;width:30px;height:30px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:15px;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#dqdm-bar .sg{display:flex;gap:6px;margin-top:10px;padding:4px;border-radius:12px;background:rgba(255,255,255,.1)}
+#dqdm-bar .sg button{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 8px;border:0;border-radius:9px;background:transparent;color:#dbe6ff;font:800 13px/1.1 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .25s,color .25s}
+#dqdm-bar .sg button svg{width:18px;height:18px;display:block;flex:none}
+#dqdm-bar .sg button.on{background:linear-gradient(180deg,#f3d98b,#e0a93b);color:#1b1405;box-shadow:0 4px 12px rgba(224,169,59,.35)}
+#dqdm-bar .pb{height:3px;margin-top:9px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden}
+#dqdm-bar .pb i{display:block;height:100%;width:100%;background:#e0a93b;transform-origin:0 50%}
+@media(prefers-reduced-motion:reduce){#dqdm-bar.on{animation:none}#dqdm-bar .sg button{transition:none}}
+@media print{#dqdm,#dqdm-bar,#dqdm-t{display:none!important}}
+</style>
+<script id="dqdm-js">
+/* DQ Desktop Mode v1
+   (1) Sınaq başlayanda telefonda/planşetdə həmişə 1280px masaüstü görünüş (brauzer viewport dəyişikliyini qəbul etməsə — CSS zoom ehtiyatı),
+   (2) sınaq başlayanda yuxarıda «Masaüstü / Mobil» keçid zolağı,
+   (3) sürüşdürülə bilən üzən telefon/masaüstü düyməsi (yeri yadda qalır; sınaq zamanı da görünür). */
+(function(){"use strict";
+if(window.__dqDM)return;
+var D=document,H=D.documentElement,W=window,KEY="dq_desktop_mode",POS="dq_dm_pos",DW=1280,BS=46,
+ DESK="width=1280, user-scalable=yes, maximum-scale=5, viewport-fit=cover",
+ MOB="width=device-width, initial-scale=1.0, viewport-fit=cover",
+ PHONE='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M10.5 18.5h3"/></svg>',
+ MON='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+ vpOld=null,vpAt=0,btn=null,bar=null,tip=null,ready=false,lastExam=false,barT=0,tipT=0,raf=0,
+ cur={x:12,y:0},dr=null,btnD=null;
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){}return null}
+function touch(){try{return matchMedia("(pointer:coarse)").matches||"ontouchstart" in W||(navigator.maxTouchPoints||0)>0}catch(e){return false}}
+function eligible(){return touch()&&!(Math.max(screen.width,screen.height)>=1280&&Math.min(screen.width,screen.height)>=800)}
+function wantDesk(){return ls(KEY)!=="0"}
+function act(id){var e=D.getElementById(id);return!!(e&&e.classList.contains("active"))}
+function examOn(){return act("exam-screen")}
+function screenOn(){return examOn()||act("result-screen")}
+function vis(id){var e=D.getElementById(id);if(!e)return false;try{var r=e.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(e).display!=="none"}catch(x){return false}}
+function loginShell(){return!screenOn()&&(H.classList.contains("dqg-pre")||vis("dqg")||vis("dqg-shell"))}
+function meta(){var m=D.querySelector('meta[name="viewport"]');if(!m){m=D.createElement("meta");m.name="viewport";(D.head||H).appendChild(m)}return m}
+function setVp(c){var m=meta();if(m.getAttribute("content")!==c){m.setAttribute("content",c);vpAt=Date.now()}}
+function isDeskVp(){return meta().getAttribute("content")===DESK}
+function effDesk(){return eligible()&&isDeskVp()}
+
+/* Brauzer viewport meta-nı qəbul etməsə (innerWidth dar qalır) — eyni görünüş CSS zoom ilə təmin edilir */
+function zoomFix(){
+ if(Date.now()-vpAt<450)return;
+ var on=eligible()&&screenOn()&&isDeskVp(),iw=W.innerWidth||0;
+ if(on&&iw>0&&iw<DW*.8){
+  var z=Math.round(Math.max(.2,Math.min(1,iw/DW))*1000)/1000;
+  if(H.__dz!==z){H.__dz=z;H.style.setProperty("--dqdm-z",String(z))}
+  H.classList.add("dqdm-fz");
+ }else if(H.classList.contains("dqdm-fz")){H.classList.remove("dqdm-fz");H.style.removeProperty("--dqdm-z");H.__dz=0}
+}
+
+/* Üzən elementlər vizual viewport-a görə sabit ölçüdə qalır (masaüstü rejimdə də, yaxınlaşdırmada da) */
+function metrics(){
+ var v=W.visualViewport,vw=v?v.width:W.innerWidth,vh=v?v.height:W.innerHeight,
+  ox=v?v.offsetLeft:0,oy=v?v.offsetTop:0,
+  sw=(W.innerWidth>W.innerHeight)?Math.max(screen.width,screen.height):Math.min(screen.width,screen.height),
+  k=sw>0?vw/sw:1;
+ if(!isFinite(k)||k<=0)k=1;k=Math.max(.4,Math.min(8,k));
+ return{k:k,ox:ox,oy:oy,sw:vw/k,sh:vh/k}
+}
+function put(el,x,y,m){el.style.transform="translate("+(m.ox+x*m.k)+"px,"+(m.oy+y*m.k)+"px) scale("+m.k+")"}
+function clampPos(m){
+ cur.x=Math.max(6,Math.min(m.sw-BS-6,cur.x));
+ cur.y=Math.max(6,Math.min(m.sh-BS-6,cur.y));
+}
+function loadPos(m){
+ var p=null;try{p=JSON.parse(ls(POS)||"null")}catch(e){}
+ if(p&&isFinite(p.fx)&&isFinite(p.fy)){cur.x=p.fx*Math.max(1,m.sw-BS);cur.y=p.fy*Math.max(1,m.sh-BS)}
+ else{cur.x=6;cur.y=m.sh-BS-96}
+ clampPos(m)
+}
+function savePos(m){ls(POS,JSON.stringify({fx:+(cur.x/Math.max(1,m.sw-BS)).toFixed(4),fy:+(cur.y/Math.max(1,m.sh-BS)).toFixed(4)}))}
+function place(){
+ raf=0;if(!ready)return;
+ var m=metrics();
+ if(!dr)loadPos(m);
+ put(btn,cur.x,cur.y,m);
+ if(bar&&bar.classList.contains("on")){
+  var w=Math.min(520,m.sw-16);bar.style.width=w+"px";
+  put(bar,(m.sw-w)/2,Math.max(8,8),m)
+ }
+ if(tip&&tip.style.display==="block"){
+  put(tip,Math.max(8,Math.min(m.sw-268,cur.x)),Math.max(8,cur.y-54),m)
+ }
+}
+function placeSoon(){if(!raf)raf=requestAnimationFrame(place)}
+
+function showTip(t){
+ if(!tip)return;tip.textContent=t;tip.style.display="block";place();
+ clearTimeout(tipT);tipT=setTimeout(function(){tip.style.display="none"},2400)
+}
+
+/* Keçid zolağı */
+function segHtml(d){
+ return '<button type="button" data-m="d" class="'+(d?"on":"")+'">'+MON.replace(/#fff/g,"currentColor")+'Masaüstü rejim</button>'+
+        '<button type="button" data-m="m" class="'+(d?"":"on")+'">'+PHONE.replace(/#fff/g,"currentColor")+'Mobil görünüş</button>'
+}
+function buildBar(){
+ if(bar)return;
+ bar=D.createElement("div");bar.id="dqdm-bar";bar.setAttribute("role","status");bar.className="dqx-keep";
+ bar.innerHTML='<div class="r1"><span class="ic">'+MON+'</span><div class="tx"><b></b><small></small></div><button type="button" class="x" aria-label="Bağla">✕</button></div><div class="sg"></div><div class="pb"><i></i></div>';
+ H.appendChild(bar);
+ bar.querySelector(".x").addEventListener("click",hideBar);
+ bar.querySelector(".sg").addEventListener("click",function(e){
+  var b=e.target&&e.target.closest?e.target.closest("button[data-m]"):null;if(!b)return;
+  setMode(b.getAttribute("data-m")==="d");armBar(9000)
+ });
+}
+function updateBar(){
+ if(!bar)return;var d=effDesk();
+ bar.querySelector(".tx b").textContent=d?"Sınaq masaüstü rejimdə açıldı":"Masaüstü rejimə keçid";
+ bar.querySelector(".tx small").textContent=d?"Suallar tam və aydın görünür. İstəsəniz mobil görünüşə keçə bilərsiniz.":"Suallar tam və aydın görünsün deyə masaüstü rejimi seçin.";
+ bar.querySelector(".ic").innerHTML=d?MON:PHONE;
+ bar.querySelector(".sg").innerHTML=segHtml(d)
+}
+function armBar(ms){
+ clearTimeout(barT);var i=bar&&bar.querySelector(".pb i");
+ if(i){i.style.transition="none";i.style.transform="scaleX(1)";void i.offsetWidth;i.style.transition="transform "+ms+"ms linear";i.style.transform="scaleX(0)"}
+ barT=setTimeout(hideBar,ms)
+}
+function showBar(){
+ if(!ready||!eligible())return;
+ buildBar();updateBar();bar.classList.add("on");place();armBar(12000)
+}
+function hideBar(){clearTimeout(barT);if(bar)bar.classList.remove("on")}
+
+/* Rejimi dəyiş (düymə və zolaq üçün ortaq) */
+function setMode(d){
+ if(!eligible())return;
+ ls(KEY,d?"1":"0");
+ if(screenOn()&&vpOld===null)vpOld=meta().getAttribute("content")||"";
+ setVp(d?DESK:MOB);
+ if(!d){H.classList.remove("dqdm-fz");H.style.removeProperty("--dqdm-z");H.__dz=0}
+ sync();updateBar();
+ showTip(d?"Masaüstü rejim aktivdir":"Mobil görünüş aktivdir")
+}
+
+/* exam-pro skriptindən çağırılır: on=true — sınaq/nəticə ekranı açıqdır */
+function apply(on){
+ if(!eligible())return;
+ var ex=examOn();
+ if(on){
+  if(ex&&!lastExam){lastExam=true;ls(KEY,"1");if(ready)setTimeout(showBar,350)}
+  if(vpOld===null)vpOld=meta().getAttribute("content")||"";
+  setVp(wantDesk()?DESK:MOB);
+ }else{
+  if(lastExam){lastExam=false;hideBar()}
+  if(vpOld!==null){setVp(wantDesk()?(vpOld||MOB):MOB);vpOld=null}
+ }
+ zoomFix();sync()
+}
+
+function sync(){
+ if(!ready)return;
+ var show=eligible()&&examOn(),d=effDesk();
+ btn.classList.toggle("on",show);
+ if(btnD!==d){btnD=d;btn.classList.toggle("d",d);btn.innerHTML=d?PHONE:MON;
+  btn.setAttribute("aria-label",d?"Mobil görünüşə keç":"Masaüstü rejimə keç");btn.title=btn.getAttribute("aria-label")}
+ if(bar&&bar.classList.contains("on")){var b=bar.querySelectorAll(".sg button");for(var i=0;i<b.length;i++)b[i].classList.toggle("on",(b[i].getAttribute("data-m")==="d")===d)}
+ placeSoon()
+}
+function tick(){
+ if(!ready)return;
+ var ex=examOn();
+ if(ex&&!lastExam)apply(true);
+ else if(!ex&&lastExam)apply(screenOn());
+ zoomFix();sync()
+}
+
+function build(){
+ if(ready||!H)return;
+ btn=D.createElement("button");btn.id="dqdm";btn.type="button";btn.className="dqx-keep";btn.setAttribute("aria-label","Mobil görünüşə keç");
+ tip=D.createElement("div");tip.id="dqdm-t";tip.className="dqx-keep";tip.setAttribute("role","status");
+ H.appendChild(btn);H.appendChild(tip);
+ btn.addEventListener("pointerdown",function(e){
+  if(e.button!==undefined&&e.button>0)return;
+  var m=metrics();dr={id:e.pointerId,sx:e.clientX,sy:e.clientY,x0:cur.x,y0:cur.y,k:m.k,mv:false};
+  try{btn.setPointerCapture(e.pointerId)}catch(x){}
+ });
+ btn.addEventListener("pointermove",function(e){
+  if(!dr||e.pointerId!==dr.id)return;
+  var dx=e.clientX-dr.sx,dy=e.clientY-dr.sy;
+  if(!dr.mv){if(Math.abs(dx)+Math.abs(dy)<8*dr.k)return;dr.mv=true;btn.classList.add("drag");tip.style.display="none"}
+  var m=metrics();cur.x=dr.x0+dx/dr.k;cur.y=dr.y0+dy/dr.k;clampPos(m);put(btn,cur.x,cur.y,m);
+  if(e.cancelable)e.preventDefault()
+ });
+ function end(e){
+  if(!dr||(e&&e.pointerId!==dr.id))return;
+  var d=dr;dr=null;btn.classList.remove("drag");try{btn.releasePointerCapture(d.id)}catch(x){}
+  if(d.mv){savePos(metrics())}
+  else if(e&&e.type==="pointerup"){setMode(!wantDesk())}
+ }
+ btn.addEventListener("pointerup",end);btn.addEventListener("pointercancel",end);
+ btn.addEventListener("contextmenu",function(e){e.preventDefault()});
+ btn.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();setMode(!wantDesk())}});
+ ready=true;
+ var v=W.visualViewport;if(v){v.addEventListener("resize",function(){zoomFix();placeSoon()});v.addEventListener("scroll",placeSoon)}
+ W.addEventListener("resize",function(){zoomFix();placeSoon()});W.addEventListener("orientationchange",function(){setTimeout(function(){zoomFix();placeSoon()},300)});
+ W.addEventListener("scroll",placeSoon,{passive:true});
+ setInterval(tick,500);
+ tick();
+ if(examOn()){lastExam=false;apply(true)}
+}
+window.__dqDM={apply:apply,setMode:setMode,showBar:showBar,isDesktop:effDesk};
+if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",build);else build();
+})();
+</script>
+
 <script id="dqx-exam-pro-js">
 /* DQ Exam Pro v2 — (1) sınaq/nəticə ekranı həmişə açıq rejimdə, (2) su nişanı ləğv, boş sahə və artıq elementlər təmizlənir,
    (3) ekran görüntüsü/çap/fokus itkisi cəhdlərində suallar dərhal örtülür, (4) nəticə ekranına keçid səliqəli olur. */
@@ -8642,6 +8866,7 @@ function meta(on){
 var vpOld=null,DESK="width=1280, user-scalable=yes, maximum-scale=5, viewport-fit=cover";
 function touch(){try{return matchMedia("(pointer:coarse)").matches||"ontouchstart" in window||(navigator.maxTouchPoints||0)>0}catch(e){return false}}
 function desk(on){
+ if(window.__dqDM){window.__dqDM.apply(on);return}
  var m=D.querySelector('meta[name="viewport"]');
  if(on){
   if(!touch()||Math.max(screen.width,screen.height)>=1280&&Math.min(screen.width,screen.height)>=800)return;
