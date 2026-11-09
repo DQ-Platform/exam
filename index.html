@@ -5980,724 +5980,14 @@ function reveal(){var h=home();if(!h)return;var now=Date.now();
 function stats(){var h=home();if(!h||!h.classList.contains("active")||D.hidden)return;
  if(h.querySelector("#dq-stats")||!(h.querySelector(".v3-hero")||h.querySelector("#dt-home")||h.querySelector("#dt-grid")||h.querySelector(".v3-ft"))||tries>=4)return;
  if(window.DQST&&window.DQST.mount){tries++;try{window.DQST.mount(true)}catch(e){}}}
-function tick(){reveal();stats()}
-[3000,5000,8000,12000,18000,30000].forEach(function(ms){setTimeout(tick,ms)});
-D.addEventListener("visibilitychange",function(){if(!D.hidden)setTimeout(tick,400)});
-addEventListener("pageshow",function(){setTimeout(tick,400)});
-addEventListener("scroll",function(){setTimeout(reveal,2600)},{passive:true,once:true});
-function watch(){var h=home();if(!h){setTimeout(watch,500);return}
- var t=0;new MutationObserver(function(){clearTimeout(t);t=setTimeout(tick,3000)}).observe(h,{childList:true})}
-watch();
-})();
-</script>
-<script id="dq-fix-foot-guard">
-/* Footer və statistika kartları: yoxdursa və ya gizlidirsə (opacity/display/visibility), avtomatik yaradır və göstərir */
-(function(){"use strict";
-var D=document,H=D.documentElement;
-function home(){return D.getElementById("v3-home")}
-function shown(el){
- if(!el||!el.isConnected)return false;
- for(var e=el;e&&e!==D.body;e=e.parentElement){var cs=getComputedStyle(e);
-  if(cs.display==="none"||cs.visibility==="hidden"||parseFloat(cs.opacity)<.6)return false}
- return el.getBoundingClientRect().height>8}
-function force(el,h){
- for(var e=el;e&&e!==h&&e!==D.body;e=e.parentElement){var cs=getComputedStyle(e);
-  if(e.classList&&e.classList.contains("dq-rv"))e.classList.add("in");
-  if(cs.display==="none")e.style.setProperty("display","block","important");
-  if(cs.visibility==="hidden")e.style.setProperty("visibility","visible","important");
-  if(parseFloat(cs.opacity)<1){e.style.setProperty("opacity","1","important");e.style.setProperty("transform","none","important")}}}
-function makeFooter(h){
- var f=D.createElement("div");f.className="v3-ft dq-ft-fallback";
- f.innerHTML='\u00a9 2026 DQ Platform \u2013 Developed by Yunis \u0130manov<div style="margin-top:16px;font-size:14px"><a style="color:#22c55e;cursor:pointer" onclick="V3.info(\'terms\')">\u0130stifad\u0259 \u015e\u0259rtl\u0259ri</a> &nbsp;|&nbsp; <a style="color:#22c55e;cursor:pointer" onclick="V3.info(\'priv\')">M\u0259xfilik Siyas\u0259ti</a></div>';
- h.appendChild(f);
- try{if(window.HOME&&HOME.fab)HOME.fab()}catch(e){}
- return f}
-function makeStats(h,ft,vv){
- var c=null;try{c=JSON.parse(localStorage.getItem("dq_stats_cache_v2")||"null")}catch(e){}
- if(vv)c={v:vv};
- if(!c||!c.v)return;
- if(h.querySelector("#dq-stats"))return;
- var L=[["users","fa-users","\u0130stifad\u0259\u00e7i say\u0131"],["exams","fa-file-pen","\u0130mtahan say\u0131"],["mocks","fa-graduation-cap","S\u0131naq say\u0131"],["qs","fa-circle-question","Sual say\u0131"]];
- var b=D.createElement("div");b.id="dq-stats";b.className="dqst";
- b.innerHTML=L.map(function(x){var n=+c.v[x[0]]||0;
-  return'<div class="dqst-c"><span class="dqst-ic"><i class="fa-solid '+x[1]+'"></i></span><b>'+n+(n?"+":"")+'</b><small>'+x[2]+'</small></div>'}).join("");
- var cd=h.querySelector("#dq-count"),anc=cd;while(anc&&anc.parentElement&&anc.parentElement!==h)anc=anc.parentElement;
- if(anc&&anc.parentElement===h)h.insertBefore(b,anc.nextSibling);else h.insertBefore(b,ft||null)}
-var sTry=0,cdTry=0,calcing=false;
-async function calc(){var v={users:0,exams:0,mocks:0,qs:0};
- try{var r=await _supabase.from("exam_questions").select("*",{count:"exact",head:true});v.qs=r&&r.count||0}catch(e){}
- try{var regs=(await V2.list("regs")).filter(function(x){return x.status==="approved"}).length;
-  var r2=await _supabase.from("allowed_students").select("*",{count:"exact",head:true});v.users=Math.max(regs,r2&&r2.count||0)}catch(e){}
- try{var res=await _supabase.from("exam_questions").select("exam_id,category").limit(20000),ex={},sn={};
-  ((res&&res.data)||[]).forEach(function(q){ex[q.exam_id]=1;sn[q.exam_id+"|"+q.category]=1});
-  v.exams=Object.keys(ex).length;v.mocks=Object.keys(sn).length}catch(e){}
- try{localStorage.setItem("dq_stats_cache_v2",JSON.stringify({t:Date.now(),v:v}))}catch(e){}
- return v}
-var runs=0;
-function run(){
- var h=home();
- if(!h||!h.classList.contains("active")||D.hidden||H.classList.contains("dq-hold"))return;
- if(!h.querySelector(".v3-hero")&&!h.querySelector("#dt-home")&&!h.querySelector("#dq-count"))return;
- runs++;
- var ft=h.querySelector(".v3-ft");
- if(!ft)ft=makeFooter(h);
- else if(!shown(ft))force(ft,h);
- var st=h.querySelector("#dq-stats");
- if(!st){sTry++;
-  if(sTry===1){try{if(window.DQST&&DQST.mount)DQST.mount(true)}catch(e){}}
-  var h1=home();
-  if(h1&&!h1.querySelector("#dq-count")&&window.DQCD&&DQCD.mount&&cdTry<3){cdTry++;try{DQCD.mount()}catch(e){}}
-  if(h1&&!h1.querySelector("#dq-stats")&&(h1.querySelector("#dq-count")||sTry>=3)){makeStats(h1,h1.querySelector(".v3-ft"))}
-  if(!calcing&&!(home()||h).querySelector("#dq-stats")||(!calcing&&sTry<=2)){calcing=true;
-   calc().then(function(v){var h2=home();if(h2){var o=h2.querySelector("#dq-stats");if(o)o.remove();makeStats(h2,h2.querySelector(".v3-ft"),v)}}).then(function(){calcing=false},function(){calcing=false})}}
- else if(!shown(st))force(st,h)}
-setInterval(run,3000);[400,1200,2200].forEach(function(t){setTimeout(run,t)});
-D.addEventListener("visibilitychange",function(){if(!D.hidden)setTimeout(run,300)});
-addEventListener("pageshow",function(){setTimeout(run,300)});
-})();
-</script>
-<style id="dq-home-polish-css">
-/* ===== DQ Home Polish ===== */
-/* 1) Sağ kartın şəkli: üzən ikon yazının üstünə düşmür, yazı həmişə aydın oxunur */
-html .lx-cv .dqv .ring{top:42%;left:50%;width:auto;height:60%;aspect-ratio:1/1;margin:0;translate:-50% -50%}
-html .lx-cv .dqv .pulse{top:42%;left:50%;width:auto;height:34%;aspect-ratio:1/1;margin:0;translate:-50% -50%}
-html .lx-cv .dqv .cap{top:42%}
-html .lx-cv .dqv .cl{bottom:7px;z-index:3}
-html .lx-cv .dqv .cl span{text-shadow:0 1px 8px rgba(3,12,38,.55)}
-/* 2) Giriş animasiyası: bütün bloklar ~0.75 san-yə tam oturur, "yarı solğun" mərhələ qısadır */
-.dq-rv{transform:translateY(14px);transition:opacity .45s ease min(var(--d,0s),.32s),transform .45s cubic-bezier(.2,.8,.2,1) min(var(--d,0s),.32s)}
-.dq-rv.in{opacity:1;transform:none}
-/* 3) Footer ekranın dibinə oturur (JS hündürlüyü hesablayır) */
-#v3-home .v3-ft{box-sizing:border-box}
-</style>
-<script id="dq-home-polish">
-/* Ana səhifə qısadırsa, footer ekranın ən altına qədər uzanır → footer-dən sonra boş fon qalmır */
-(function(){"use strict";
-var raf=0;
-function fit(){raf=0;
- var f=document.querySelector("#v3-home .v3-ft");if(!f)return;
- var home=document.getElementById("v3-home");
- if(!home||!home.classList.contains("active")||!f.offsetParent)return;
- var pb=parseFloat(getComputedStyle(document.body).paddingBottom)||0,
-     top=f.getBoundingClientRect().top+window.pageYOffset,
-     need=Math.ceil(window.innerHeight-top);
- f.style.minHeight=need>0?need+"px":"";
- f.style.marginBottom=pb?(-pb)+"px":""}
-function sched(){raf||(raf=requestAnimationFrame(fit))}
-function init(){
- sched();
- addEventListener("resize",sched);addEventListener("orientationchange",sched);
- try{window.visualViewport&&visualViewport.addEventListener("resize",sched)}catch(e){}
- try{var home=document.getElementById("v3-home");
-  if(home){new MutationObserver(sched).observe(home,{childList:true,subtree:true});
-   home.addEventListener("transitionend",sched);
-   if(window.ResizeObserver)new ResizeObserver(sched).observe(home)}}catch(e){}
- [300,900,2000,4000].forEach(function(t){setTimeout(sched,t)})}
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
-})();
-</script>
-<style id="dq-row-wait-css">
-/* Yeniləmə zamanı "Günün testi" + sağdakı imtahan kartı gələnə qədər: yarım/boş görünüş əvəzinə hər iki xana eyni ölçülü skeleton olur,
-   hazır olanda birlikdə yumşaq görünür */
-#v3-home.dq-rowwait>#dt-home,#v3-home.dq-rowwait>#dt-grid{position:relative;pointer-events:none;overflow:hidden;border-radius:20px;min-height:min(62vw,380px);background:linear-gradient(100deg,#e1eaf8 30%,#f6f9ff 50%,#e1eaf8 70%) 0 0/200% 100%;animation:dqSk 1.1s linear infinite}
-#v3-home.dq-rowwait>#dt-home>*,#v3-home.dq-rowwait>#dt-grid>*{visibility:hidden}
-@keyframes dqRowIn{0%{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-#v3-home.dq-rowin>#dt-home,#v3-home.dq-rowin>#dt-grid{animation:dqRowIn .5s cubic-bezier(.2,.8,.2,1) both}
-</style>
-<script id="dq-row-wait">
-(function(){"use strict";
-var D=document,H=D.documentElement,lostAt=0,raf=0,inT=0,on=false;
-function home(){return D.getElementById("v3-home")}
-function check(){raf=0;var h=home();if(!h)return;
- var now=Date.now(),need=false,lim=7000;
- if(h.classList.contains("active")&&!H.classList.contains("dq-hold")&&!h.classList.contains("dq-nogrid")&&!h.classList.contains("dq11-noex")){
-  var ln=window.__dqLiveN,tn=window.__dqTestN;
-  if(ln!==0&&ln!==undefined&&!h.querySelector(".lx-card")){need=true;if(ln===-1)lim=2500}
-  if(tn!==0&&tn!==undefined&&h.querySelector("#dt-home")&&!h.querySelector(".dt-day")){need=true;if(tn===-1)lim=Math.min(lim,2500)}}
- if(need){if(!lostAt)lostAt=now;
-  if(now-lostAt<lim){if(!on){on=true;h.classList.remove("dq-rowin");h.classList.add("dq-rowwait")}}
-  else if(on){on=false;h.classList.remove("dq-rowwait")}}
- else{
-  if(on){on=false;h.classList.remove("dq-rowwait");h.classList.add("dq-rowin");clearTimeout(inT);inT=setTimeout(function(){h.classList.remove("dq-rowin")},700)}
-  lostAt=0}}
-function sched(){raf||(raf=requestAnimationFrame(check))}
-function init(){var h=home();if(!h){setTimeout(init,200);return}
- try{new MutationObserver(sched).observe(h,{childList:true,subtree:true})}catch(e){}
- try{new MutationObserver(sched).observe(H,{attributes:true,attributeFilter:["class"]})}catch(e){}
- setInterval(sched,400);sched()}
-init();
-})();
-</script>
-<script id="dq-tools-patch">
-
-(function () {
-  'use strict';
-  if (window.DQTools) return;
-
-  /* ---------- Ayarlar ---------- */
-  var CFG = {
-    bell: '',                       // bildiriş düyməsi (boşdursa avto-axtarış)
-    chat: '',                       // çatbot düyməsi   (boşdursa avto-axtarış)
-    display: '#dq13-dock',          // göz rahatlığı / gecə rejimi / parlaqlıq paneli
-    // Bunlardan biri görünürsə = imtahan/test gedir → alətlər gizlənir
-    hideWhen: ['#exam-screen.active', '#tlx-run.open', '.tv2-ov.on'],
-    // İmtahan zamanı diqqəti yayındıran digər üzən elementlər də gizlənir
-    hideAlso: ['#dq-ticker', '#dq-exbar', '#dq-install-fab'],
-    storeKey: 'dqt_pos_v2'
-  };
-  var U = window.DQ_TOOLS || {};
-  for (var k in U) if (Object.prototype.hasOwnProperty.call(U, k)) CFG[k] = U[k];
-
-  /* ---------- CSS ---------- */
-  var hideSel = ['#dqt-dock', '[data-dqt-panel]'].concat(CFG.hideAlso)
-    .map(function (s) { return 'html.dqt-off ' + s; }).join(',');
-
-  var css =
-    '#dqt-dock{display:flex;align-items:center;gap:6px;padding:5px 7px 5px 2px;border-radius:999px;' +
-    'background:rgba(8,29,69,.92);border:1px solid rgba(255,255,255,.22);box-shadow:0 6px 18px rgba(0,0,0,.35);' +
-    'touch-action:none;user-select:none;-webkit-user-select:none;box-sizing:border-box;width:max-content;' +
-    'font-family:inherit;z-index:99991;transition:box-shadow .2s,transform .2s}' +
-    '#dqt-dock.dqt-drag{transform:scale(1.05);box-shadow:0 14px 32px rgba(0,0,0,.5);z-index:2147483000!important}' +
-    '#dqt-grip{width:18px;height:38px;display:flex;align-items:center;justify-content:center;flex:none;' +
-    'color:rgba(255,255,255,.65);font-size:17px;line-height:1;letter-spacing:-3px;cursor:grab;touch-action:none}' +
-    '#dqt-dock.dqt-drag #dqt-grip{cursor:grabbing}' +
-    /* köçürülən düymələrin köhnə "fixed" mövqeyini ləğv edirik */
-    '#dqt-dock .dqt-it{position:relative!important;inset:auto!important;left:auto!important;right:auto!important;' +
-    'top:auto!important;bottom:auto!important;transform:none!important;margin:0!important;flex:none!important;' +
-    'z-index:auto!important;box-sizing:border-box!important}' +
-    '#dqt-dock .dqt-it:not(.dqt-disp){width:38px!important;height:38px!important;min-width:0!important;' +
-    'min-height:0!important;padding:0!important}' +
-    '#dqt-dock .dqt-lh{line-height:38px!important;text-align:center!important}' +
-    '#dqt-dock .dqt-disp{display:flex!important;gap:6px!important;align-items:center}' +
-    hideSel + '{display:none!important}';
-
-  var st = document.createElement('style');
-  st.id = 'dqt-style';
-  st.textContent = css;
-  document.head.appendChild(st);
-
-  /* ---------- Dok ---------- */
-  var dock = document.createElement('div');
-  dock.id = 'dqt-dock';
-  var grip = document.createElement('span');
-  grip.id = 'dqt-grip';
-  grip.textContent = '\u22EE\u22EE';
-  grip.title = 'Sürüşdür və yerini dəyiş (2 dəfə toxun: ilkin yerə qaytar)';
-  dock.appendChild(grip);
-
-  var adopted = { bell: null, disp: null, chat: null };
-  var pos = load();       // null = susmaya görə (footer-in solu)
-  var drag = null;
-
-  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-  function load() {
-    try {
-      var p = JSON.parse(localStorage.getItem(CFG.storeKey) || 'null');
-      if (p && (p.m === 'footer' || p.m === 'free')) return p;
-    } catch (e) {}
-    return null;
-  }
-  function save() {
-    try {
-      if (pos) localStorage.setItem(CFG.storeKey, JSON.stringify(pos));
-      else localStorage.removeItem(CFG.storeKey);
-    } catch (e) {}
-  }
-  function css1(el, o) { for (var p in o) el.style[p] = o[p]; }
-
-  /* ---------- Footer tapmaq ---------- */
-  function visible(el) {
-    if (!el || el === dock || dock.contains(el)) return false;
-    var r = el.getBoundingClientRect();
-    return r.width > 40 && r.height > 20 && el.getClientRects().length > 0 &&
-      getComputedStyle(el).visibility !== 'hidden';
-  }
-  function footers() {
-    var out = [], l = document.querySelectorAll('.v3-ft,footer,.footer');
-    for (var i = 0; i < l.length; i++) if (visible(l[i])) out.push(l[i]);
-    return out;
-  }
-  function footerAt(x, y) {
-    var l = footers();
-    for (var i = 0; i < l.length; i++) {
-      var r = l[i].getBoundingClientRect();
-      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return l[i];
-    }
-    return null;
-  }
-
-  /* ---------- Düymələri tutub doka yığmaq ---------- */
-  function take(key, el) {
-    if (!el || el === dock || el.contains(dock)) return;
-    adopted[key] = el;
-    var d = getComputedStyle(el).display;
-    el.classList.add('dqt-it');
-    if (key === 'disp') el.classList.add('dqt-disp');
-    else if (!/flex|grid/.test(d)) el.classList.add('dqt-lh');
-    dock.appendChild(el);
-  }
-  function bySel(key, sel) {
-    if (!sel || (adopted[key] && document.contains(adopted[key]))) return;
-    adopted[key] = null;
-    try { var el = document.querySelector(sel); if (el) take(key, el); } catch (e) {}
-  }
-
-  var RX_SKIP = /toast|ticker|banner|install|pwa|exbar|dqt-|dq13/;
-  var RX_CHAT_ID = /chat|bot\b|assist|mesaj|d[əe]st[əe]k/;
-  var RX_CHAT_HTML = /fa-comment|chat-?(dots|bubble)|\uD83D\uDCAC/;
-  var RX_BELL_ID = /bell|bildiri|notif/;
-  var RX_BELL_HTML = /\uD83D\uDD14|fa-bell|bi-bell/;
-
-  var lastScan = 0;
-  function scan() {
-    var nw = performance.now(); if (nw - lastScan < 600) return; lastScan = nw;
-    var list = document.body.querySelectorAll(':scope > *, :scope > * > *');
-    for (var i = 0; i < list.length; i++) {
-      var el = list[i];
-      if (el === dock || dock.contains(el) || el.classList.contains('dqt-it')) continue;
-      if (/^(SCRIPT|STYLE|LINK|META|NOSCRIPT)$/.test(el.tagName)) continue;
-      var cs = getComputedStyle(el);
-      if (cs.position !== 'fixed') continue;
-      var cls = typeof el.className === 'string' ? el.className : '';
-      var idc = (el.id + ' ' + cls + ' ' + (el.getAttribute('aria-label') || '') + ' ' + (el.title || '')).toLowerCase();
-      if (RX_SKIP.test(idc)) continue;
-      var r = el.getBoundingClientRect();
-      /* böyük çat pəncərəsini imtahanda gizlətmək üçün işarələ */
-      if (RX_CHAT_ID.test(idc) && (r.width > 120 || r.height > 120)) { el.setAttribute('data-dqt-panel', ''); continue; }
-      if (r.width < 28 || r.width > 96 || r.height < 28 || r.height > 96) continue;
-      var html = (el.innerHTML || '').slice(0, 600).toLowerCase();
-      if (!adopted.chat && (RX_CHAT_ID.test(idc) || RX_CHAT_HTML.test(html))) take('chat', el);
-      else if (!adopted.bell && (RX_BELL_ID.test(idc) || RX_BELL_HTML.test(html))) take('bell', el);
-    }
-  }
-
-  function adopt() {
-    bySel('disp', CFG.display);
-    bySel('bell', CFG.bell);
-    bySel('chat', CFG.chat);
-    ['bell', 'disp', 'chat'].forEach(function (k) {
-      if (adopted[k] && !document.contains(adopted[k])) adopted[k] = null;
-    });
-    if (!adopted.bell || !adopted.chat) scan();
-    var want = [grip, adopted.bell, adopted.disp, adopted.chat].filter(Boolean);
-    var cur = Array.prototype.slice.call(dock.children).filter(function (c) { return want.indexOf(c) > -1; });
-    if (want.length !== cur.length || want.some(function (c, i) { return cur[i] !== c; })) {
-      want.forEach(function (c) { dock.appendChild(c); });
-    }
-  }
-
-  /* ---------- Yerləşdirmə ---------- */
-  function place() {
-    if (drag) return;
-    var f = (!pos || pos.m === 'footer') ? footers()[0] : null;
-    var w, h;
-    if (f) {
-      if (dock.parentNode !== f) f.appendChild(dock);
-      if (getComputedStyle(f).position === 'static') f.style.position = 'relative';
-      w = dock.offsetWidth; h = dock.offsetHeight;
-      var fw = f.clientWidth, fh = f.clientHeight, x, y;
-      if (pos) { x = pos.x; y = pos.y; }
-      else { x = 12; y = fw >= 720 ? (fh - h) / 2 : fh - h - 8; }
-      x = clamp(x, 0, Math.max(0, fw - w));
-      y = clamp(y, 0, Math.max(0, fh - h));
-      css1(dock, { position: 'absolute', left: x + 'px', top: y + 'px', right: 'auto', bottom: 'auto', zIndex: '5' });
-    } else {
-      if (dock.parentNode !== document.body) document.body.appendChild(dock);
-      w = dock.offsetWidth; h = dock.offsetHeight;
-      if (pos && pos.m === 'free') {
-        css1(dock, {
-          position: 'fixed', right: 'auto', bottom: 'auto', zIndex: '99991',
-          left: clamp(pos.fx * (innerWidth - w), 0, Math.max(0, innerWidth - w)) + 'px',
-          top: clamp(pos.fy * (innerHeight - h), Math.min(innerHeight * 0.5, Math.max(0, innerHeight - h)), Math.max(0, innerHeight - h)) + 'px'
-        });
-      } else { /* bu ekranda footer yoxdur → sol-aşağıda üzən */
-        css1(dock, {
-          position: 'fixed', left: '12px', right: 'auto', top: 'auto', zIndex: '99991',
-          bottom: 'calc(12px + env(safe-area-inset-bottom,0px))'
-        });
-      }
-    }
-    dock.classList.toggle('dqt-r', dock.getBoundingClientRect().left > innerWidth / 2);
-  }
-
-  /* ---------- İmtahan zamanı gizlət ---------- */
-  var wasOff = false;
-  function hideState() {
-    var on = CFG.hideWhen.some(function (s) {
-      try { return !!document.querySelector(s); } catch (e) { return false; }
-    });
-    if (on !== wasOff) {
-      wasOff = on;
-      document.documentElement.classList.toggle('dqt-off', on);
-    }
-  }
-
-  var busy = false, lastRun = 0;
-  function refresh() {                       /* ən çox 250ms-də bir dəfə (əvvəl: hər kadrda) */
-    if (busy) return;
-    busy = true;
-    setTimeout(function () {
-      requestAnimationFrame(function () {
-        busy = false; lastRun = performance.now();
-        try { hideState(); adopt(); place(); } catch (e) { console.warn('[DQTools]', e); }
-      });
-    }, Math.max(0, 250 - (performance.now() - lastRun)));
-  }
-
-  /* ---------- Sürüşdürmə ---------- */
-  var lastTap = 0;
-  dock.addEventListener('pointerdown', function (e) {
-    if (e.button > 0 || (e.target !== dock && e.target !== grip)) return;
-    var r = dock.getBoundingClientRect();
-    drag = { id: e.pointerId, dx: e.clientX - r.left, dy: e.clientY - r.top, x0: e.clientX, y0: e.clientY, on: false, y: e.clientY };
-    try { e.target.setPointerCapture(e.pointerId); } catch (x) {}
-    e.preventDefault();
-  });
-  window.addEventListener('pointermove', function (e) {
-    if (!drag || e.pointerId !== drag.id) return;
-    if (!drag.on) {
-      if (Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) < 6) return;
-      drag.on = true;
-      var r = dock.getBoundingClientRect();
-      dock.classList.add('dqt-drag');
-      css1(dock, { position: 'fixed', left: r.left + 'px', top: r.top + 'px', right: 'auto', bottom: 'auto' });
-      (function tick() {            /* kənara yaxınlaşanda səhifəni sürüşdür */
-        if (!drag) return;
-        if (drag.y > innerHeight - 70) window.scrollBy(0, 14);
-        else if (drag.y < 70) window.scrollBy(0, -14);
-        drag.raf = requestAnimationFrame(tick);
-      })();
-    }
-    drag.y = e.clientY;
-    var w = dock.offsetWidth, h = dock.offsetHeight;
-    dock.style.left = clamp(e.clientX - drag.dx, 0, Math.max(0, innerWidth - w)) + 'px';
-    dock.style.top = clamp(e.clientY - drag.dy, 0, Math.max(0, innerHeight - h)) + 'px';
-  });
-  function end(e) {
-    if (!drag || (e && e.pointerId !== drag.id)) return;
-    var d = drag; drag = null;
-    cancelAnimationFrame(d.raf);
-    dock.classList.remove('dqt-drag');
-    if (d.on) {
-      var r = dock.getBoundingClientRect();
-      var f = footerAt(r.left + r.width / 2, r.top + r.height / 2);
-      if (f) {
-        var fr = f.getBoundingClientRect();
-        pos = { m: 'footer', x: r.left - fr.left - f.clientLeft, y: r.top - fr.top - f.clientTop };
-      } else {
-        pos = {
-          m: 'free',
-          fx: clamp(r.left / Math.max(1, innerWidth - r.width), 0, 1),
-          fy: clamp(r.top / Math.max(1, innerHeight - r.height), 0, 1)
-        };
-      }
-      save();
-    } else if (d.id !== undefined) {          /* sadə toxunuş: 2 dəfə = sıfırla */
-      var now = Date.now();
-      if (now - lastTap < 350) { pos = null; save(); lastTap = 0; }
-      else lastTap = now;
-    }
-    place();
-  }
-  window.addEventListener('pointerup', end);
-  window.addEventListener('pointercancel', end);
-  window.addEventListener('resize', refresh);
-
-  /* ---------- Başlat ---------- */
-  function start() {
-    document.body.appendChild(dock);
-    refresh();
-    new MutationObserver(refresh).observe(document.body, { childList: true });
-    new MutationObserver(refresh).observe(document.documentElement, {
-      attributes: true, subtree: true, attributeFilter: ['class']
-    });
-    setInterval(refresh, 800);   /* gec yaranan düymələr / ekran dəyişməsi üçün */
-  }
-  if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
-
-  /* ---------- Yoxlama köməkçiləri (konsolda) ---------- */
-  window.DQTools = {
-    report: function () {
-      return {
-        bell: adopted.bell, display: adopted.disp, chat: adopted.chat,
-        position: pos, examHidden: wasOff
-      };
-    },
-    reset: function () { pos = null; save(); refresh(); },
-    hide: function (on) { document.documentElement.classList.toggle('dqt-off', !!on); }
-  };
-})();
-
-</script>
-<style id="dq-pro-polish">
-/* ===== DQ Pro Polish — son qat. Mövcud məntiqə toxunmur, yalnız görünüşü nizamlayır ===== */
-:root{--pro-ink:#0f1e45;--pro-line:#d6e0f2;--pro-r:18px;--pro-sh:0 1px 2px rgba(10,47,122,.06),0 10px 28px -12px rgba(10,47,122,.22)}
-html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;scroll-padding-top:64px}
-body{font-feature-settings:"kern","liga";font-variant-numeric:tabular-nums}
-::selection{background:#2f63bd;color:#fff}
-button,a,[role=button],.btn{-webkit-tap-highlight-color:transparent}
-:focus-visible{outline:3px solid rgba(47,99,189,.55)!important;outline-offset:2px!important;border-radius:6px}
-h1,h2,h3{letter-spacing:-.01em;text-wrap:balance}
-p{text-wrap:pretty}
-
-/* Kartlar: vahid radius, yumşaq çoxqatlı kölgə */
-#v3-home .lx-card,#v3-home .dt-day,#v3-home .v3-hero,.dqn-card,.exam-item-card,.dc-card,.dc-row{border-radius:var(--pro-r)!important;box-shadow:var(--pro-sh)!important}
-#v3-home .lx-card,#v3-home .dt-day{border:1px solid var(--pro-line)}
-
-/* Düymələr: vahid hündürlük və toxunma ölçüsü */
-#v3-home .v3-b,#v3-home .lx-go,#v3-home .lx-reg,#v3-home button{min-height:44px;font-weight:700;letter-spacing:.01em}
-#v3-home .v3-b:active,#v3-home button:active{transform:scale(.98)}
-
-/* Menyu: eyni şrift, sürüşdürülə bilən, kəsilmir */
-#v3-home .v3-nav{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;flex-wrap:nowrap!important}
-#v3-home .v3-nav::-webkit-scrollbar{display:none}
-#v3-home .v3-nav>a{flex:0 0 auto;white-space:nowrap;font-size:13px!important;line-height:1}
-#v3-home .v3-nav>.dq2-r,#v3-home .dq2-r{flex:0 0 auto;margin-left:auto}
-
-/* Statistika kartları: tam sətir, sıxışmır */
-#dq-stats.dqst .dqst-c{box-shadow:var(--pro-sh)}
-#dq-stats.dqst .dqst-c b{font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-
-/* Geri sayım: rəqəmlər sabit en */
-#dq-count .dqcd-c b{font-variant-numeric:tabular-nums}
-
-/* ===== Mobil: tək sütun, footer ekranın dibinə oturur ===== */
-@media(max-width:599px){
- html #v3-home.active{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:stretch!important;min-height:100vh;min-height:100dvh}
- html #v3-home.active:not(.dq11-noex)>#dt-grid,
- html #v3-home.active:not(.dq11-noex)>#dt-home{width:calc(100% - 24px)!important;margin:12px auto 0!important;align-self:center!important}
- html #v3-home.active:not(.dq-nogrid)>#dt-grid .lx-cv{height:150px!important;font-size:40px!important}
- html #v3-home.active:not(.dq-nogrid)>#dt-grid .lx-bd{padding:14px!important}
- html #v3-home.active:not(.dq-nogrid)>#dt-grid .lx-on{grid-template-columns:1fr!important}
- html #v3-home .dt-day{height:auto!important}
- html #v3-home .dt-day .cv{aspect-ratio:16/8}
- html #v3-home .v3-ft{margin-top:auto!important;min-height:0!important;margin-bottom:0!important;padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px))}
- #dq-stats.dqst{margin-bottom:24px!important}
- #dq-stats.dqst .dqst-c small{font-size:10.5px!important}
+function tick(){
+ if(!ready)return;
+ if(login()){hideBar();sync();return}
+ if(screenOn()){if(examOn()&&!lastExam)apply(true)}
+ else if(lastExam||vpOld!==null)apply(false);
+ zoomFix();sync()
 }
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
-</style>
-<style id="dq-home-match">
-/* ===== Ana səhifə: şəkildəki düzülüş (qeydiyyat zolağı → 2 kart → geri sayım → statistika → footer) ===== */
-@media(min-width:600px){
- html #v3-home.active{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:flex-start!important;align-content:flex-start!important;column-gap:22px!important}
- html #v3-home.active>*{width:100%}
- /* sıra: geri sayım (1) → banner (3) → sol kart (4) + sağ kart (5) → statistika (7) → footer (9) */
- html #v3-home.active>#lxp-ban{order:3}
- html #v3-home.active>#dt-home{order:4}
- html #v3-home.active>#dt-grid{order:5}
- html #v3-home.active>#dq-count{order:1}
- html #v3-home.active>#dq-stats{order:7}
- html #v3-home.active>.v3-ft{order:9}
- /* qeydiyyat zolağı */
- html #v3-home #lxp-ban{width:calc(100% - 52px)!important;max-width:1180px!important;margin:16px auto 0!important;padding:0!important;box-sizing:border-box}
- html #v3-home #lxp-ban .lxp-bi{flex-wrap:nowrap!important;padding:18px 20px!important;border-radius:22px!important;background:linear-gradient(110deg,#17154a,#2e2a86 55%,#5b4f6e)!important;box-shadow:0 14px 34px #1e1b4b47!important}
- html #v3-home #lxp-ban b{font-size:19px;font-weight:800}
- html #v3-home #lxp-ban span{font-size:14px;opacity:.9}
- html #v3-home #lxp-ban button{width:auto!important;flex:0 0 auto!important;padding:13px 28px!important;border-radius:14px!important;background:linear-gradient(135deg,#fcd34d,#f59e0b)!important;color:#4a3000!important;font-weight:800;box-shadow:0 6px 16px #f59e0b55!important}
- /* 600–820px: kartlar alt-alta, tam en */
- html #v3-home.active:not(.dq11-noex)>#dt-home,
- html #v3-home.active:not(.dq11-noex)>#dt-grid{width:calc(100% - 32px)!important;max-width:none!important;padding:0!important;margin:16px auto 0!important;display:flex!important}
- /* geri sayım zolağı */
- html #v3-home #dq-count.dqcd{width:calc(100% - 52px)!important;max-width:1180px!important;margin:12px auto 0!important;box-sizing:border-box}
- html #v3-home #dq-count .dqcd-in{border-radius:22px!important}
- /* statistika kartları: 4 yan-yana, geri sayımla eyni en */
- html #v3-home #dq-stats.dqst{width:calc(100% - 52px)!important;max-width:1180px!important;gap:14px!important;margin:22px auto 60px!important}
- html #v3-home #dq-stats.dqst .dqst-c{padding:20px 8px 16px!important;border-radius:20px!important}
- html #v3-home #dq-stats.dqst .dqst-c b{font-size:30px!important}
- html #v3-home #dq-stats.dqst .dqst-c small{font-size:12.5px!important}
-}
-@media(min-width:821px){
- /* iki kart: sol = Günün tövsiyə testi, sağ = Sınaq; bərabər hündürlük, üst-üstə düşmür */
- html #v3-home.active:not(.dq11-noex)>#dt-home,
- html #v3-home.active:not(.dq11-noex)>#dt-grid{width:calc((100% - 54px)/2)!important;max-width:none!important;padding:0!important;margin-top:22px!important;margin-bottom:0!important;align-self:stretch!important}
- html #v3-home.active:not(.dq11-noex)>#dt-home{margin-left:16px!important;margin-right:0!important}
- html #v3-home.active:not(.dq11-noex)>#dt-grid{margin-left:0!important;margin-right:16px!important;display:flex!important}
- html #v3-home.active:not(.dq-nogrid)>#dt-grid .lx-on{grid-template-columns:minmax(0,1fr)!important}
- html #v3-home #dt-home .dt-day{height:100%!important;border-radius:28px!important;overflow:hidden}
- html #v3-home #dt-grid .lx-card{border-radius:22px!important}
-}
-/* dar ekran (telefon): tək sütun, eyni sıra */
-@media(max-width:599px){
- html #v3-home.active>#lxp-ban{order:3}
- html #v3-home.active>#dt-home{order:4}
- html #v3-home.active>#dt-grid{order:5}
- html #v3-home.active>#dq-count{order:1}
- html #v3-home.active>#dq-stats{order:7}
- html #v3-home.active>.v3-ft{order:9}
-}
-</style>
-<style id="dq-cab-home-css">
-/* Kabinet — ana səhifə stili: tünd göy + qızılı */
-#dq-cab{--h-n1:#061a47;--h-n2:#0a2a6e;--h-n3:#123a8c;--h-gold:#f5b942;--h-gold2:#e4a11b;--h-bg:#eef2fa;--h-line:#dbe3f2;
- background:var(--h-bg)!important}
-/* Yan panel */
-#dq-cab aside{background:linear-gradient(180deg,var(--h-n1),var(--h-n2))!important;border-right:0!important;box-shadow:6px 0 24px #061a4733;color:#e8eefc}
-#dq-cab .dc-brand{color:#fff!important;border-bottom:1px solid #ffffff1f!important}
-#dq-cab .dc-logo{background:linear-gradient(135deg,var(--h-gold),var(--h-gold2))!important;color:#0a1f4d!important}
-#dq-cab .dc-user{color:#fff!important;border-bottom:1px solid #ffffff1f!important}
-#dq-cab .dc-user .dq-av,#dq-cab aside .dq-av{background:var(--h-gold)!important;color:#0a1f4d!important}
-#dq-cab .dc-nav a{color:#c9d6f3!important;border-radius:12px!important;border-left:3px solid transparent!important}
-#dq-cab .dc-nav a:hover{background:#ffffff14!important;color:#fff!important}
-#dq-cab .dc-nav a.on{background:linear-gradient(90deg,#f5b94238,#f5b94212)!important;color:var(--h-gold)!important;border-left-color:var(--h-gold)!important}
-#dq-cab .dc-nav a.r{color:#ff9aa2!important}
-/* Başlıq banneri */
-#dq-cab .dq-hd{position:relative;overflow:hidden;background:radial-gradient(120% 160% at 85% -20%,#2a5bc4 0,transparent 55%),linear-gradient(120deg,var(--h-n1),var(--h-n2) 60%,var(--h-n3))!important;
- border-radius:20px!important;border-bottom:3px solid var(--h-gold);box-shadow:0 14px 34px #061a4745!important;color:#fff}
-#dq-cab .dq-hd h2{color:#fff!important;text-align:left;font-weight:800;letter-spacing:-.3px}
-#dq-cab .dq-hd h2 span,#dq-cab .dq-hd h2 em{color:var(--h-gold)}
-#dq-cab .dq-hd p,#dq-cab .dq-hd small{color:#c9d6f3!important}
-#dq-cab .dc-chip{background:#ffffff1f!important;border:1px solid #ffffff2e;color:#fff}
-#dq-cab .dc-chip .dq-av{background:var(--h-gold)!important;color:#0a1f4d!important}
-/* Salamlama kartı */
-#dq-cab .dc-hero{position:relative;overflow:hidden;background:radial-gradient(110% 150% at 90% -30%,#2a5bc4 0,transparent 55%),linear-gradient(120deg,var(--h-n1),var(--h-n2) 65%,var(--h-n3))!important;
- border-bottom:3px solid var(--h-gold);box-shadow:0 16px 36px #061a474d!important}
-#dq-cab .dc-hero h2{color:var(--h-gold)!important}
-#dq-cab .dc-hs div{background:#ffffff14!important;border:1px solid #ffffff22}
-#dq-cab .dc-hs b{color:var(--h-gold)}
-/* Bölmə başlıqları */
-#dq-cab .dc-sec{color:var(--h-n1)!important;padding-left:10px;border-left:4px solid var(--h-gold)}
-#dq-cab .dc-sec i{color:var(--h-gold2)!important}
-#dq-cab .dc-sec a{color:var(--h-n2)!important}
-/* Kartlar */
-#dq-cab .dc-card,#dq-cab .dc-row,#dq-cab .dc-tbl,#dq-cab .dc-empty,#dq-cab .v3-c,#dq-cab .dq-card{border:1px solid var(--h-line)!important;border-radius:18px!important;box-shadow:0 10px 26px #0a2a6e14!important;background:#fff}
-#dq-cab .dc-card{border-top:3px solid var(--h-gold)!important}
-#dq-cab .dc-ic{background:linear-gradient(135deg,var(--h-n1),var(--h-n3))!important;color:var(--h-gold)!important}
-#dq-cab .dc-card b{color:var(--h-n1)!important}
-/* Düymələr: qızılı əsas, tünd ikinci */
-#dq-cab .dc-btn,#dq-cab .v3-bt,#dq-cab .dc-eye{background:linear-gradient(180deg,var(--h-gold),var(--h-gold2))!important;color:#0a1f4d!important;border-radius:999px!important;font-weight:800!important;box-shadow:0 8px 18px #e4a11b40!important}
-#dq-cab .dc-btn.o{background:#fff!important;color:var(--h-n2)!important;border:1.5px solid var(--h-n2)!important;box-shadow:none!important}
-#dq-cab .dc-btn.dc-wa{background:#25D366!important;color:#fff!important;box-shadow:none!important}
-#dq-cab .dc-badge{background:#fff4d6;color:#8a5a00}
-/* Cədvəl */
-#dq-cab .dc-tbl th{background:var(--h-n1)!important;color:var(--h-gold)!important}
-/* Sınaq tabları */
-#dq-cab .dc-tabs{background:#fff;border:1px solid var(--h-line)}
-#dq-cab .dc-tab.on{background:linear-gradient(120deg,var(--h-n1),var(--h-n3))!important;color:var(--h-gold)!important}
-/* Mobil: üfüqi menyu */
-@media(max-width:820px){
- #dq-cab aside{box-shadow:0 6px 18px #061a4740}
- #dq-cab .dc-nav a{background:#ffffff14!important;color:#dbe5fb!important}
- #dq-cab .dc-nav a.on{background:var(--h-gold)!important;color:#0a1f4d!important}
-}
-</style>
 
-<style id="dq-reg-portal-css">
-/* Qeydiyyat portalı — yeni kart dizaynı */
-#lxp .rp{--n1:#061a47;--n2:#0a2a6e;--n3:#1b4cb5;--gd:#f5b942;--gd2:#e4a11b;--ink:#0b1b3d;--mu:#5b6b8a;--ln:#e1e8f5;max-width:1120px;margin:0 auto;color:var(--ink);text-align:left}
-#lxp .rp *{box-sizing:border-box}
-#lxp .rp h1,#lxp .rp h2,#lxp .rp h3{text-align:left;margin:0}
-#lxp .rp-hero{position:relative;overflow:hidden;display:grid;grid-template-columns:1.2fr .8fr;gap:26px;align-items:center;padding:42px 36px;border-radius:30px;color:#fff;
- background:radial-gradient(60% 90% at 90% 0,#2a5bc455,transparent 60%),radial-gradient(50% 70% at 0 100%,#f5b94226,transparent 60%),linear-gradient(135deg,var(--n1),var(--n2) 70%,#0f3a96);box-shadow:0 24px 50px -18px #061a47aa}
-#lxp .rp-hero:after{content:"";position:absolute;right:-70px;top:-70px;width:240px;height:240px;border-radius:50%;border:44px solid #ffffff0d;pointer-events:none}
-#lxp .rp-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:#ffffff14;border:1px solid #ffffff2b;font-size:12.5px;font-weight:700;color:#ffe3a3}
-#lxp .rp-pill i{width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 0 4px #34d39933}
-#lxp .rp-hero h1{color:#fff;font-size:clamp(28px,4.4vw,44px);line-height:1.1;font-weight:800;letter-spacing:-1px;margin:14px 0 12px}
-#lxp .rp-hero h1 em{font-style:normal;color:var(--gd)}
-#lxp .rp-hero p{margin:0;color:#c9d6f3;font-size:15.5px;line-height:1.6;max-width:520px}
-#lxp .rp-cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
-#lxp .rp-b{border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:14.5px;padding:13px 22px;border-radius:999px;color:#0a1f4d;background:linear-gradient(180deg,var(--gd),var(--gd2));box-shadow:0 10px 22px #e4a11b40}
-#lxp .rp-b.ghost{background:#ffffff14;color:#fff;border:1.5px solid #ffffff40;box-shadow:none}
-#lxp .rp-b.ghost.dk{background:#fff;color:var(--n2);border-color:var(--ln);padding:10px 16px}
-#lxp .rp-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1}
-#lxp .rp-steps li{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:18px;background:#ffffff12;border:1px solid #ffffff24;backdrop-filter:blur(6px)}
-#lxp .rp-steps b{flex:none;width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;background:linear-gradient(135deg,var(--gd),var(--gd2));color:#0a1f4d}
-#lxp .rp-steps strong{display:block;font-size:15px}
-#lxp .rp-steps small{color:#b8c8ee;font-size:12.5px}
-#lxp .rp-sec{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:30px 4px 14px}
-#lxp .rp-sec h2{font-size:22px;font-weight:800;color:var(--n1);padding-left:12px;border-left:5px solid var(--gd)}
-#lxp .rp-sec small{display:block;margin:4px 0 0 17px;color:var(--mu);font-size:13px}
-#lxp .rp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
-#lxp .rp-c{position:relative;display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:24px;background:#fff;border:1px solid var(--ln);box-shadow:0 14px 30px -14px #0a2a6e33;transition:transform .2s,box-shadow .2s}
-#lxp .rp-c:hover{transform:translateY(-3px);box-shadow:0 20px 38px -14px #0a2a6e55}
-#lxp .rp-c:before{content:"";position:absolute;left:20px;right:20px;top:0;height:4px;border-radius:0 0 6px 6px;background:linear-gradient(90deg,var(--n2),var(--n3))}
-#lxp .rp-c.perm{background:linear-gradient(180deg,#fffaf0,#fff 45%);border-color:#f3d48a}
-#lxp .rp-c.perm:before{background:linear-gradient(90deg,var(--gd),var(--gd2))}
-#lxp .rp-c.off{opacity:.78}
-#lxp .rp-ct{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-#lxp .rp-cat{padding:5px 12px;border-radius:10px;background:var(--n2);color:var(--gd);font-weight:800;font-size:13px}
-#lxp .rp-inf{padding:5px 10px;border-radius:10px;background:#fff1cc;color:#8a5a00;font-weight:800;font-size:12px}
-#lxp .rp-st{margin-left:auto;font-size:12px;font-weight:800;padding:5px 10px;border-radius:999px;background:#dcfce7;color:#15803d}
-#lxp .rp-st.x{background:#fee2e2;color:#b91c1c}
-#lxp .rp-c h3{font-size:19px;font-weight:800;color:var(--n1);line-height:1.25}
-#lxp .rp-pl{margin:-4px 0 0;color:var(--mu);font-size:13px}
-#lxp .rp-dl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0}
-#lxp .rp-dl div{padding:10px 12px;border-radius:14px;background:#f3f6fd}
-#lxp .rp-dl dt{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mu);font-weight:700}
-#lxp .rp-dl dd{margin:2px 0 0;font-weight:800;font-size:14px;color:var(--n1)}
-#lxp .rp-dl dd.fr{color:#047857}
-#lxp .rp-bar{height:6px;border-radius:6px;background:#e8eefb;overflow:hidden}
-#lxp .rp-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--gd),var(--gd2))}
-#lxp .rp-ft{font-size:12.5px;color:var(--mu);margin-top:-4px}
-#lxp .rp-go{margin-top:auto;border:0;cursor:pointer;font-family:inherit;width:100%;padding:14px;border-radius:16px;font-weight:800;font-size:15px;color:#fff;background:linear-gradient(120deg,var(--n1),var(--n3));box-shadow:0 10px 20px #0a2a6e40}
-#lxp .rp-go.ok{background:linear-gradient(180deg,#22c55e,#16a34a)}
-#lxp .rp-go:disabled{background:#e5e9f3;color:#9aa6bf;box-shadow:none;cursor:not-allowed}
-#lxp .rp-em{padding:36px;text-align:center;color:var(--mu);background:#fff;border:1.5px dashed #c8d4ec;border-radius:22px}
-@media(max-width:760px){#lxp .rp-hero{grid-template-columns:1fr;padding:28px 20px;border-radius:24px}#lxp .rp-grid{grid-template-columns:1fr}#lxp .rp-sec h2{font-size:19px}}
-</style>
-
-<style id="dqap-ag-css">
-.admin-nav-grid.dqap-on{display:block!important}
-.admin-nav-grid.dqap-on>.dq-ag{display:none!important}
-.dqap-root{max-width:1080px;margin:0 auto;text-align:left}
-.dqap-bar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 18px;padding:10px 0;background:linear-gradient(#fff 82%,rgba(255,255,255,0))}
-.dqap-search{flex:1;min-width:200px;padding:11px 14px;border:1.5px solid #dbe3f1;border-radius:12px;font-size:14px;background:#f8fafc;color:#0f172a;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
-.dqap-search:focus{border-color:#2f63bd;background:#fff;box-shadow:0 0 0 4px #2f63bd22}
-.dqap-tog{padding:10px 14px;border:1.5px solid #dbe3f1;border-radius:12px;background:#fff;color:#334155;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
-.dqap-tog:hover{background:#eaf1fc;border-color:#2f63bd;color:#0a2f7a}
-.dqap-g{display:block;width:auto;margin:0 0 14px;padding:0;background:#fff;border:1px solid #e3e9f4;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px #0f172a0a,0 6px 18px -10px #0f172a26;transition:box-shadow .25s}
-.dqap-g:hover{box-shadow:0 1px 2px #0f172a0a,0 10px 26px -10px #0f172a33}
-.dqap-h{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none;background:color-mix(in srgb,var(--ag) 6%,#fff);border-bottom:1px solid color-mix(in srgb,var(--ag) 14%,#e3e9f4);position:relative}
-.dqap-h:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ag)}
-.dqap-g.dqap-shut .dqap-h{border-bottom-color:transparent}
-.dqap-i{flex:none;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;line-height:1;background:color-mix(in srgb,var(--ag) 14%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ag) 25%,transparent)}
-.dqap-tt{flex:1;min-width:0;text-align:left}
-.dqap-tt b{display:block;font-size:14.5px;color:var(--ag);font-weight:800;letter-spacing:.1px;line-height:1.25}
-.dqap-tt small{display:block;font-size:12px;color:#64748b;margin-top:2px;line-height:1.35}
-.dqap-n{flex:none;min-width:26px;padding:3px 10px;border-radius:999px;background:var(--ag);color:#fff;font-size:11.5px;font-weight:800;text-align:center}
-.dqap-ch{flex:none;font-size:10px;color:#94a3b8;transition:transform .25s}
-.dqap-g.dqap-shut .dqap-ch{transform:rotate(-90deg)}
-.dqap-c{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:14px 16px 16px}
-.dqap-g.dqap-shut .dqap-c{display:none}
-.dqap-c .admin-nav-card{background:#fff!important;background-image:none!important;color:#1e293b!important;border:1px solid #e3e9f4!important;border-radius:12px!important;box-shadow:none!important;min-height:88px;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px 8px;font-size:12px;font-weight:600;line-height:1.3;text-align:center;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s,border-color .2s,background .2s}
-.dqap-c .admin-nav-card:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--ag);opacity:.85}
-.dqap-c .admin-nav-card .icon{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;font-size:18px;line-height:1;background:color-mix(in srgb,var(--ag) 10%,#fff)}
-.dqap-c .admin-nav-card:hover{background:color-mix(in srgb,var(--ag) 5%,#fff)!important;border-color:color-mix(in srgb,var(--ag) 45%,#e3e9f4)!important;transform:translateY(-2px);box-shadow:0 10px 20px -10px color-mix(in srgb,var(--ag) 55%,transparent)!important}
-.dqap-c .admin-nav-card:active{transform:scale(.97)}
-.dqap-c .admin-nav-card.dqap-hide{display:none!important}
-.dqap-g.dqap-empty{display:none}
-@media(max-width:600px){.dqap-c{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px}.dqap-h{padding:10px 12px}.dqap-c .admin-nav-card{min-height:80px;font-size:11.5px}.dqap-tog{flex:1}}
-</style>
-<script id="dqap-ag-js">(function(){"use strict";
-var G=[
-["bank","📝","Suallar və sual bankı","Sual daxiletmə, bank və redaktə","#1e3a8a",/suallar modulu|sual bank|sual baza|məntiq sual|sual studiya|ardıcıl daxil|şablon|sual idarəsi|redakt[əe]\s*m[əe]rk/],
-["ai","✨","AI & PDF idxal alətləri","PDF/OCR, Gemini, kəsmə və avtomatik yükləmə","#6d28d9",/pdf|\bai\b|ocr|kəsmə|telefon|gemini|sinxron/],
-["bulk","📋","Toplu daxiletmə","Copy/Paste və kütləvi sual yükləmə","#0e7490",/copy|toplu/],
-["verify","✅","Yoxlama və təsdiq","Keyfiyyət nəzarəti və təsdiq prosesləri","#b45309",/yoxlama|təsdiq|elan/],
-["exam","📊","Sınaqlar, testlər və nəticələr","Sınaq idarəsi, iştirakçılar, statistika","#0f766e",/testl|sınaq|iştirakçı|nəticə|cavablar|statistika|karusel.*test|test/],
-["access","🔐","İcazələr və qeydiyyat","Giriş, kodlar və iştirak icazələri","#7c3aed",/icazə|kod yarat|istifadəçi|iştirak|qeydiyyat|tekrar|təkrar/],
-["content","📢","Məzmun və elanlar","Xəbərlər, dərs materialları, məlumat","#c2410c",/xəbər|dərs|material|məlumat|təəssürat|imtahan elan|sessiya/],
-["home","🏠","Ana səhifə və dizayn","Sayğac, qapaqlar, sayt redaktoru, animasiya","#be185d",/ana səhifə|sayğac|qapaq|redaktor|redakt|animasiya|premium|dizayn|sayt/],
-["panel","🧭","İdarəçi panelləri","V2–V7 və YSPRO idarəçi mərkəzləri","#1e1b4b",/idarəçi|yspro|v\d/],
-["sys","⚙️","Sistem və ayarlar","Ümumi ayarlar, qiymət və modullar","#334155",/idarə\s*&|ayar|qiymət|modullar|sistem/]
-];
-var other=["other","📁","Digər alətlər","Kateqoriyalaşdırılmamış","#475569",null];
-function lab(c){return (c.textContent||"").replace(/\s+/g," ").trim()}
-function key(s){return s.toLocaleLowerCase("az").replace(/[^\p{L}\p{N} ]/gu,"").replace(/\s+/g," ").trim()}
-function pick(t){var l=t.toLocaleLowerCase("az");
- if(/canlı redaktə/.test(l))return "other";
-  if(/nəticə mərkəzi/.test(l))return "other";
- if(/sınaq toplusu/.test(l))return "other";
- if(/pro add/.test(l))return "bank";
- // xüsusi sıralama: dəqiq qaydalar əvvəl
- if(/ana səhifə/.test(l))return "home";
- if(/təsdiq.*elan|yoxlama/.test(l))return "verify";
- if(/iş nömrəsi|iştirak icazə|istifadəçi icazə|icazə müdd|təkrar iştirak|kod yarat/.test(l))return "access";
- if(/imtahan elan|xəbər|təəssürat/.test(l))return "content";
- if(/idarəçi|yspro/.test(l))return "panel";
- for(var i=0;i<G.length;i++){if(G[i][5]&&G[i][5].test(l))return G[i][0]}
- return "other"}
-var busy=false,t=null,q="";
 function build(){
  var grid=document.querySelector("#admin-panel .admin-nav-grid");if(!grid)return;
  var cards=[].slice.call(grid.querySelectorAll(".admin-nav-card"));if(!cards.length)return;
@@ -8612,6 +7902,42 @@ html.dqx-exam .feed-btn,html.dqx-exam .login-topbar,html.dqx-exam #btn-open-news
  box-shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -14px rgba(15,23,42,.28)!important;border:1px solid #cbd5e1!important}
 </style>
 
+<style id="dqx-mobile-layout">
+/* Mobil görünüş: sual yuxarıda, cavab kartı (sual nömrələri) aşağıda — tək sütun, geniş toxunuş sahələri */
+@media(max-width:900px){
+ html:not(.dqdm-fz) body.v3on,html:not(.dqdm-fz) body{padding-left:6px;padding-right:6px}
+ html:not(.dqdm-fz) #exam-screen .exam-header{flex-wrap:wrap;gap:8px 10px;border-radius:12px}
+ html:not(.dqdm-fz) #exam-screen .exam-layout{display:flex;flex-direction:column;gap:14px;align-items:stretch}
+ html:not(.dqdm-fz) #exam-screen .questions-area{order:1;flex:none;width:100%;max-width:100%;box-sizing:border-box;padding:14px 12px;min-height:0}
+ html:not(.dqdm-fz) #exam-screen .answer-card-sidebar{order:2;flex:none;width:100%;max-width:100%;box-sizing:border-box;padding:12px}
+ html:not(.dqdm-fz) #exam-screen .question-top{flex-wrap:wrap;gap:8px}
+ html:not(.dqdm-fz) #exam-screen .options label{width:100%;box-sizing:border-box;overflow-wrap:anywhere}
+ html:not(.dqdm-fz) #exam-screen .grid-nav{grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:8px}
+ html:not(.dqdm-fz) #exam-screen .nav-box{padding:11px 0;font-size:14px;border-radius:8px}
+ html:not(.dqdm-fz) #exam-screen .subject-nav-group{padding:10px 10px 12px}
+ html:not(.dqdm-fz) #exam-screen .exam-navigation-buttons{gap:8px}
+ html:not(.dqdm-fz) #exam-screen .exam-navigation-buttons .btn{flex:1 1 130px;min-height:46px}
+ html:not(.dqdm-fz) #exam-screen #sidebar-container #calculator-widget{max-width:100%!important}
+}
+</style>
+<style id="dqx-mobile-pro">
+/* Mobil görünüş (sınaq): sual yuxarıda, cavab kartı aşağıda — tək sütun. Başqa üslub fayllarının üstünə çıxsın deyə !important */
+@media(max-width:900px){
+ html:not(.dqdm-fz) body #exam-screen{padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))!important;max-width:100%!important;box-sizing:border-box!important}
+ html:not(.dqdm-fz) body #exam-screen .exam-header{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:8px 12px!important;padding:10px 12px!important;margin-bottom:12px!important;border-radius:12px!important}
+ html:not(.dqdm-fz) body #exam-screen .exam-header>*{min-width:0}
+ html:not(.dqdm-fz) body #exam-screen .exam-layout{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;grid-template-columns:none!important;gap:14px!important;align-items:stretch!important;width:100%!important;max-width:100%!important}
+ html:not(.dqdm-fz) body #exam-screen .exam-layout .questions-area{order:1!important;flex:none!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;margin:0!important;padding:14px 12px!important;min-height:0!important}
+ html:not(.dqdm-fz) body #exam-screen .exam-layout .answer-card-sidebar{order:2!important;flex:none!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;margin:0!important;padding:12px!important;position:static!important;height:auto!important;max-height:none!important;top:auto!important}
+ html:not(.dqdm-fz) body #exam-screen .options label{display:flex!important;align-items:flex-start!important;gap:12px!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;padding:12px 14px!important;overflow-wrap:anywhere}
+ html:not(.dqdm-fz) body #exam-screen .options label>span,html:not(.dqdm-fz) body #exam-screen .options label .dq-opt,html:not(.dqdm-fz) body #exam-screen .options label .dq-ot{flex:1 1 auto!important;min-width:0!important;width:auto!important;max-width:100%!important}
+ html:not(.dqdm-fz) body #exam-screen .questions-area img{max-width:100%!important;height:auto!important}
+ html:not(.dqdm-fz) body #exam-screen .grid-nav{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(46px,1fr))!important;gap:8px!important}
+ html:not(.dqdm-fz) body #exam-screen .nav-box{box-sizing:border-box!important;min-height:42px!important;height:42px!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:14px!important;border-radius:8px!important}
+ html:not(.dqdm-fz) body #exam-screen .exam-navigation-buttons{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
+ html:not(.dqdm-fz) body #exam-screen .exam-navigation-buttons .btn{flex:1 1 130px!important;min-height:46px!important}
+}
+</style>
 <style id="dqdm-css">
 /* DQ Masaüstü rejim: üzən telefon/masaüstü düyməsi + sınaq başlanğıcında yuxarı keçid zolağı */
 html.dqdm-fz body{zoom:var(--dqdm-z,1)!important;min-height:0!important}
@@ -8637,6 +7963,13 @@ html #dqdm-t{position:fixed;left:0;top:0;z-index:2147483002;transform-origin:0 0
 #dqdm-bar .sg button.on{background:linear-gradient(180deg,#f3d98b,#e0a93b);color:#1b1405;box-shadow:0 4px 12px rgba(224,169,59,.35)}
 #dqdm-bar .pb{height:3px;margin-top:9px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden}
 #dqdm-bar .pb i{display:block;height:100%;width:100%;background:#e0a93b;transform-origin:0 50%}
+#dqdm-bar{padding:8px 10px 6px;border-radius:14px}
+#dqdm-bar .ic{width:28px;height:28px;border-radius:9px}#dqdm-bar .ic svg{width:18px;height:18px}
+#dqdm-bar .tx b{font-size:13px}#dqdm-bar .tx small{display:none}
+#dqdm-bar .x{width:26px;height:26px;font-size:13px}
+#dqdm-bar .sg{margin-top:7px;padding:3px;border-radius:10px}
+#dqdm-bar .sg button{padding:7px 6px;font-size:12px;border-radius:8px}#dqdm-bar .sg button svg{width:15px;height:15px}
+#dqdm-bar .pb{margin-top:6px;height:2px}
 @media(prefers-reduced-motion:reduce){#dqdm-bar.on{animation:none}#dqdm-bar .sg button{transition:none}}
 @media print{#dqdm,#dqdm-bar,#dqdm-t{display:none!important}}
 </style>
@@ -8652,7 +7985,7 @@ var D=document,H=D.documentElement,W=window,KEY="dq_desktop_mode",POS="dq_dm_pos
  MOB="width=device-width, initial-scale=1.0, viewport-fit=cover",
  PHONE='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M10.5 18.5h3"/></svg>',
  MON='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
- vpOld=null,vpAt=0,btn=null,bar=null,tip=null,ready=false,lastExam=false,barT=0,tipT=0,raf=0,
+ vpOld=null,vpAt=0,endT=0,lastStart=0,btn=null,bar=null,tip=null,ready=false,lastExam=false,barT=0,tipT=0,raf=0,
  cur={x:12,y:0},dr=null,btnD=null;
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){}return null}
 function touch(){try{return matchMedia("(pointer:coarse)").matches||"ontouchstart" in W||(navigator.maxTouchPoints||0)>0}catch(e){return false}}
@@ -8662,6 +7995,7 @@ function act(id){var e=D.getElementById(id);return!!(e&&e.classList.contains("ac
 function examOn(){return act("exam-screen")}
 function screenOn(){return examOn()||act("result-screen")}
 function vis(id){var e=D.getElementById(id);if(!e)return false;try{var r=e.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(e).display!=="none"}catch(x){return false}}
+function login(){return vis("dqg")||vis("dqg-shell")}
 function loginShell(){return!screenOn()&&(H.classList.contains("dqg-pre")||vis("dqg")||vis("dqg-shell"))}
 function meta(){var m=D.querySelector('meta[name="viewport"]');if(!m){m=D.createElement("meta");m.name="viewport";(D.head||H).appendChild(m)}return m}
 function setVp(c){var m=meta();if(m.getAttribute("content")!==c){m.setAttribute("content",c);vpAt=Date.now()}}
@@ -8671,7 +8005,7 @@ function effDesk(){return eligible()&&isDeskVp()}
 /* Brauzer viewport meta-nı qəbul etməsə (innerWidth dar qalır) — eyni görünüş CSS zoom ilə təmin edilir */
 function zoomFix(){
  if(Date.now()-vpAt<450)return;
- var on=eligible()&&screenOn()&&isDeskVp(),iw=W.innerWidth||0;
+ var on=eligible()&&screenOn()&&!login()&&isDeskVp(),iw=W.innerWidth||0;
  if(on&&iw>0&&iw<DW*.8){
   var z=Math.round(Math.max(.2,Math.min(1,iw/DW))*1000)/1000;
   if(H.__dz!==z){H.__dz=z;H.style.setProperty("--dqdm-z",String(z))}
@@ -8706,7 +8040,7 @@ function place(){
  if(!dr)loadPos(m);
  put(btn,cur.x,cur.y,m);
  if(bar&&bar.classList.contains("on")){
-  var w=Math.min(520,m.sw-16);bar.style.width=w+"px";
+  var w=Math.min(400,m.sw-16);bar.style.width=w+"px";
   put(bar,(m.sw-w)/2,Math.max(8,8),m)
  }
  if(tip&&tip.style.display==="block"){
@@ -8750,7 +8084,7 @@ function armBar(ms){
 }
 function showBar(){
  if(!ready||!eligible())return;
- buildBar();updateBar();bar.classList.add("on");place();armBar(12000)
+ buildBar();updateBar();bar.classList.add("on");place();armBar(7000)
 }
 function hideBar(){clearTimeout(barT);if(bar)bar.classList.remove("on")}
 
@@ -8766,23 +8100,33 @@ function setMode(d){
 }
 
 /* exam-pro skriptindən çağırılır: on=true — sınaq/nəticə ekranı açıqdır */
+function startExam(){
+ lastExam=true;
+ if(Date.now()-lastStart>30000)ls(KEY,"1");
+ lastStart=Date.now();
+ if(ready)setTimeout(function(){if(lastExam&&examOn()&&!login())showBar()},350)
+}
+function finish(){
+ lastExam=false;hideBar();
+ if(vpOld!==null){setVp(wantDesk()?(vpOld||MOB):MOB);vpOld=null}
+ zoomFix();sync()
+}
 function apply(on){
- if(!eligible())return;
- var ex=examOn();
+ if(!eligible()||login())return;
  if(on){
-  if(ex&&!lastExam){lastExam=true;ls(KEY,"1");if(ready)setTimeout(showBar,350)}
+  if(endT){clearTimeout(endT);endT=0}
+  if(examOn()&&!lastExam)startExam();
   if(vpOld===null)vpOld=meta().getAttribute("content")||"";
   setVp(wantDesk()?DESK:MOB);
- }else{
-  if(lastExam){lastExam=false;hideBar()}
-  if(vpOld!==null){setVp(wantDesk()?(vpOld||MOB):MOB);vpOld=null}
+ }else if((lastExam||vpOld!==null)&&!endT){
+  endT=setTimeout(function(){endT=0;if(!(screenOn()&&!login()))finish()},1500);
  }
  zoomFix();sync()
 }
 
 function sync(){
  if(!ready)return;
- var show=eligible()&&examOn(),d=effDesk();
+ var show=eligible()&&examOn()&&!login(),d=effDesk();
  btn.classList.toggle("on",show);
  if(btnD!==d){btnD=d;btn.classList.toggle("d",d);btn.innerHTML=d?PHONE:MON;
   btn.setAttribute("aria-label",d?"Mobil görünüşə keç":"Masaüstü rejimə keç");btn.title=btn.getAttribute("aria-label")}
@@ -8829,7 +8173,7 @@ function build(){
  W.addEventListener("scroll",placeSoon,{passive:true});
  setInterval(tick,500);
  tick();
- if(examOn()){lastExam=false;apply(true)}
+ if(examOn())apply(true)
 }
 window.__dqDM={apply:apply,setMode:setMode,showBar:showBar,isDesktop:effDesk};
 if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",build);else build();
@@ -8927,17 +8271,17 @@ function two(x){return(x<10?"0":"")+x}
 function tileURL(txt){
  var c=D.createElement("canvas"),W=250,Hh=120,r=2,x;c.width=W*r;c.height=Hh*r;x=c.getContext("2d");if(!x)return"";
  x.scale(r,r);x.translate(W/2,Hh/2);x.rotate(-24*Math.PI/180);x.textAlign="center";x.textBaseline="middle";
- x.fillStyle="rgba(15,23,42,.12)";x.font="700 13px Arial,sans-serif";x.fillText(txt,0,0);
+ x.fillStyle="rgba(15,23,42,.06)";x.font="600 12px Arial,sans-serif";x.fillText(txt,0,0);
  return c.toDataURL("image/png")
 }
 function microURL(txt){
  var c=D.createElement("canvas"),W=170,Hh=110,r=2,x;c.width=W*r;c.height=Hh*r;x=c.getContext("2d");if(!x)return"";
  x.scale(r,r);x.translate(W/2+22,Hh/2+14);x.rotate(17*Math.PI/180);x.textAlign="center";x.textBaseline="middle";
- x.fillStyle="rgba(15,23,42,.06)";x.font="600 8.5px Arial,sans-serif";x.fillText(txt,0,0);
+ x.fillStyle="rgba(15,23,42,.03)";x.font="600 8.5px Arial,sans-serif";x.fillText(txt,0,0);
  return c.toDataURL("image/png")
 }
 function wmStyle(fixed){
- var p=["position:"+(fixed?"fixed":"absolute"),"left:0","top:0","right:0","bottom:0","z-index:"+(fixed?"2147482000":"4"),
+ var p=["position:"+(fixed?"fixed":"absolute"),"left:0","top:0","right:0","bottom:0","z-index:"+(fixed?"2147482000":"0"),
   "pointer-events:none","display:block","opacity:1","visibility:visible","mix-blend-mode:multiply","overflow:hidden",
   "transform:none","filter:none","margin:0","padding:0","border:0","width:auto","height:auto","clip-path:none","-webkit-user-select:none","user-select:none"];
  return p.join("!important;")+"!important"
@@ -8949,16 +8293,17 @@ function buildWM(fixed){
  host.className="dqx-wmh";host.setAttribute("aria-hidden","true");host.setAttribute("style",wmStyle(fixed));
  try{sr=host.attachShadow({mode:"closed"})}catch(e){sr=host}
  box=D.createElement("div");
- box.setAttribute("style","position:absolute;inset:0;"+(WM.adm?"":"background-repeat:repeat;background-image:url("+WM.t1+"),url("+WM.t2+");background-size:250px 120px,170px 110px;")+"pointer-events:none");
+ box.setAttribute("style","position:absolute;inset:0;"+(WM.adm?"":"background-repeat:repeat;background-image:url("+WM.t1+"),url("+WM.t2+");background-size:250px 120px,170px 110px;")+"opacity:"+(fixed?".5":"1")+";pointer-events:none");
  sr.appendChild(box);
  if(!fixed){var br=D.createElement("div");br.textContent="Ys.imanoff";
-  br.setAttribute("style","position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-24deg);white-space:nowrap;font:800 clamp(42px,9vw,84px)/1 Arial,sans-serif;letter-spacing:2px;color:rgba(15,23,42,.07);pointer-events:none");
+  br.setAttribute("style","position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-24deg);white-space:nowrap;font:800 clamp(42px,9vw,84px)/1 Arial,sans-serif;letter-spacing:2px;color:rgba(15,23,42,.035);pointer-events:none");
   sr.appendChild(br);WM.brand=br}
  return{host:host,fixed:fixed}
 }
+function lift(a){try{a.style.isolation="isolate";for(var i=0;i<a.children.length;i++){var c=a.children[i];if(c.classList&&c.classList.contains("dqx-wmh"))continue;var cs=getComputedStyle(c);if(cs.position==="static")c.style.position="relative";if(cs.zIndex==="auto")c.style.zIndex="1"}}catch(e){}}
 function ensureWM(){
  if(!examOn())return;
- var a=area();if(!a)return;
+ var a=area();if(!a)return;lift(a);
  var adm=adminEdit();
  if(adm!==WM.adm){WM.adm=adm;killWM(true)}
  var u=(WM.u&&WM.u.id!=="-")?WM.u:(WM.u=who()),key=u.n+"|"+u.id;
