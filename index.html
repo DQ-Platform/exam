@@ -8201,6 +8201,42 @@ function start(){guardAll();render();
 if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",start);else start();
 })();
 </script>
+<style id="dq-gear-gate-css">
+/* Sol aşağıdakı dişli (⚙) düyməsi yalnız admin kimi daxil olanda görünür */
+html:not(.dq-gear-ok) [data-dq-gear]{display:none!important}
+</style>
+<script id="dq-gear-gate-js">
+(function(){"use strict";
+if(window.__dqGearGate)return;window.__dqGearGate=1;
+var D=document,H=D.documentElement,tm=0;
+var SKIP=/^(dq-admin-dock|admin-float-back|dq-eye|dq-install-fab|dqpro-top|dqe-fab)$/;
+function isAdmin(){try{return !!(window.DQAdminGate&&DQAdminGate.is())}catch(e){return false}}
+function round(cs,w){var v=cs.borderTopLeftRadius||"";var n=parseFloat(v);if(isNaN(n))return false;return v.indexOf("%")>0?n>=30:n>=w*.3}
+function check(e){
+ if(!e||e.nodeType!==1||e.hasAttribute("data-dq-gear")||SKIP.test(e.id||""))return;
+ var cs=getComputedStyle(e);if(cs.position!=="fixed"||cs.display==="none"||cs.visibility==="hidden")return;
+ var r=e.getBoundingClientRect(),vh=innerHeight,w=r.width,h=r.height;
+ if(w<30||w>72||h<30||h>72||w/h<.8||w/h>1.25)return;
+ if(r.left>90||r.bottom<vh-170||r.bottom>vh+2)return;
+ if(!round(cs,w))return;
+ if(e.closest&&e.closest("#admin-panel,#dq-admin-dock"))return;
+ e.setAttribute("data-dq-gear","1");
+}
+function scan(){
+ try{
+  var ok=isAdmin();
+  if(H.classList.contains("dq-gear-ok")!==ok)H.classList.toggle("dq-gear-ok",ok);
+  var k=D.body?D.body.children:[],i,j,c;
+  for(i=0;i<k.length;i++){check(k[i]);c=k[i].children;if(c&&c.length<25)for(j=0;j<c.length;j++)check(c[j])}
+ }catch(x){}}
+function sched(){if(tm)return;tm=setTimeout(function(){tm=0;scan()},60)}
+function start(){scan();
+ try{new MutationObserver(sched).observe(D.body,{childList:true,subtree:false})}catch(e){}
+ setInterval(scan,700);
+ addEventListener("storage",sched);addEventListener("resize",sched);D.addEventListener("visibilitychange",sched)}
+if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",start);else start();
+})();
+</script>
 <script id="dq-reg-nav-js">
 /* «Qeydiyyat imtahanları» menyu bəndi (yalnız admin panelində) */
 (function(){"use strict";
@@ -8839,101 +8875,5 @@ if(r.top>innerHeight*.3)e.classList.add("dq-bell-off")}}catch(x){}}
 function go(){scan();setInterval(scan,1200)}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",go);else go()})();
 </script>
-<script id="dq-gear-gate">
-/* 1) Dişli (⚙) düyməsi yalnız admin girişində görünür  2) "İmanov" sözünə basılı tutmaqla admin girişi */
-(function(){"use strict";
-if(window.__dqGearGate)return;window.__dqGearGate=1;
-var D=document,H=D.documentElement;
-
-function isAdmin(){try{
- if(window.DQAdminGate&&typeof window.DQAdminGate.is==="function")return !!window.DQAdminGate.is();
- if(!window.__dqaOK)return false;
- return window.__dqAuthed===true||localStorage.getItem("dq_admin_logged")==="true";
-}catch(e){return false}}
-
-var st=D.createElement("style");st.id="dq-gear-gate-css";
-st.textContent="html:not(.dq-gear-ok) [data-dqgear]{display:none!important}"+
-".dq-imbtn{-webkit-touch-callout:none!important;-webkit-user-select:none!important;user-select:none!important;-webkit-tap-highlight-color:transparent}";
-(D.head||H).appendChild(st);
-
-/* ---------- Dişli düyməsini tap və işarələ ---------- */
-var SIG=/gear|cog|sliders|setting|ayar|tənzim|parametr|\u2699|dişli/i;
-function isOrange(cs){var s=cs.backgroundImage+" "+cs.backgroundColor,m=/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g,x;
- while((x=m.exec(s))){var r=+x[1],g=+x[2],b=+x[3];if(r>200&&g>90&&g<200&&b<100)return true}return false}
-function looksGear(e){
- if(!e||e.nodeType!==1||e.hasAttribute("data-dqgear"))return false;
- if(e.closest("#dq-admin-dock,#admin-panel"))return false;
- var cs=getComputedStyle(e);if(cs.position!=="fixed")return false;
- var r=e.getBoundingClientRect();
- if(r.width<28||r.width>84||Math.abs(r.width-r.height)>8)return false;
- if(r.left>130||r.top<innerHeight*.45)return false;
- var raw=cs.borderTopLeftRadius,br=parseFloat(raw)||0;
- if(!(raw.indexOf("%")>-1?br>=30:br>=r.width*.3))return false;
- var html=e.innerHTML||"";
- var sig=(e.className||"")+" "+(e.id||"")+" "+(e.getAttribute("aria-label")||"")+" "+(e.title||"")+" "+(html.length<800?html:"");
- if(SIG.test(sig))return true;
- /* ikon var, mətn yoxdur, narıncı fon */
- if(!(e.textContent||"").trim()&&/<(svg|i)\b/i.test(html)&&isOrange(cs))return true;
- return false}
-function scanGear(){try{
- var b=D.body;if(!b)return;
- var top=b.children,i,j,e,c;
- for(i=0;i<top.length;i++){e=top[i];
-  if(looksGear(e)){e.setAttribute("data-dqgear","1");continue}
-  c=e.children;if(c&&c.length<=12)for(j=0;j<c.length;j++){if(looksGear(c[j]))c[j].setAttribute("data-dqgear","1")}}
-}catch(x){}}
-
-/* ---------- "İmanov" sözünü tap və işarələ ---------- */
-var RE=/[İIiı]manov/i,BAD=/^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA|INPUT|TITLE|OPTION|SELECT)$/;
-function wrapIm(){try{
- var b=D.body;if(!b)return;
- var w=D.createTreeWalker(b,NodeFilter.SHOW_TEXT,null),n,list=[];
- while((n=w.nextNode())){
-  if(n.data.length>200||!RE.test(n.data))continue;
-  var p=n.parentNode;if(!p||BAD.test(p.nodeName))continue;
-  if(p.closest&&p.closest(".dq-imbtn,#admin-panel,[contenteditable],.rt-ed,#dq-cab,#exam-screen,#dq-admin-dock"))continue;
-  list.push(n)}
- list.forEach(function(n){
-  var m=RE.exec(n.data);if(!m)return;
-  var tail=n.splitText(m.index);tail.splitText(m[0].length);
-  var s=D.createElement("span");s.className="dq-imbtn";s.textContent=tail.data;
-  tail.parentNode.replaceChild(s,tail)})
-}catch(x){}}
-
-/* ---------- Basılı tutma (1.2 san) ---------- */
-var timer=0,sx=0,sy=0,HOLD=1200;
-function cancel(){if(timer){clearTimeout(timer);timer=0}}
-function fire(){timer=0;
- try{if(navigator.vibrate)navigator.vibrate(40)}catch(e){}
- if(isAdmin()){
-  if(typeof window.dqGoAdmin==="function")window.dqGoAdmin();
-  else if(typeof window.showScreen==="function")window.showScreen("admin-panel");
-  return}
- location.href=location.pathname+"?proysl"}
-function pt(ev){return ev.touches&&ev.touches[0]?ev.touches[0]:ev}
-function down(ev){
- var t=ev.target;if(!t||!t.closest||!t.closest(".dq-imbtn"))return;
- if(ev.type==="pointerdown"&&ev.pointerType==="mouse"&&ev.button>0)return;
- var p=pt(ev);sx=p.clientX;sy=p.clientY;cancel();timer=setTimeout(fire,HOLD)}
-function move(ev){if(!timer)return;var p=pt(ev);if(Math.abs(p.clientX-sx)>14||Math.abs(p.clientY-sy)>14)cancel()}
-["pointerdown","touchstart","mousedown"].forEach(function(n){D.addEventListener(n,down,{capture:true,passive:true})});
-["pointermove","touchmove","mousemove"].forEach(function(n){D.addEventListener(n,move,{capture:true,passive:true})});
-["pointerup","pointercancel","touchend","touchcancel","mouseup"].forEach(function(n){D.addEventListener(n,cancel,{capture:true,passive:true})});
-["contextmenu","selectstart","dragstart"].forEach(function(n){D.addEventListener(n,function(ev){
- var t=ev.target&&(ev.target.nodeType===1?ev.target:ev.target.parentElement);
- if(t&&t.closest&&t.closest(".dq-imbtn"))ev.preventDefault()},true)});
-
-/* ---------- Dövri yoxlama ---------- */
-var tm=0;
-function tick(){tm=0;H.classList.toggle("dq-gear-ok",isAdmin());scanGear();wrapIm()}
-function sched(){if(!tm)tm=setTimeout(tick,150)}
-function start(){tick();
- try{new MutationObserver(sched).observe(D.body,{childList:true,subtree:true})}catch(e){}
- setInterval(tick,1000);
- window.addEventListener("storage",sched);window.addEventListener("resize",sched)}
-if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",start);else start();
-})();
-</script>
-
 </body>
 </html>
