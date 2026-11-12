@@ -7591,7 +7591,7 @@ function blockOf(text){
 function apply(){
  var r=$('lxp');if(!r||!r.getClientRects().length)return;
  replaceIn(r);
- var hero=r.querySelector('.lxp-hero');if(hero)hero.style.display=cfg.show.hero?'':'none';
+ var hero=r.querySelector('.lxp-hero');if(hero)hero.style.display='none';
  var s=blockOf(last.sesT||DEFTXT.sesT);var sc=s&&s.closest('.lxp-card');if(sc)sc.style.display=cfg.show.sessions?'':'none';
  var t=r.querySelector('#dq-types');if(t)t.style.display=cfg.show.types?'':'none';
  sub(r);cta(r);
@@ -7811,6 +7811,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  </div>
 </div>
 <div id="dqa-t" role="status"></div>
+<style id="dq-exam-only">#lxp .lxp-hero{display:none!important}#lxp .lxp-w,#lxp .lxp-g{grid-template-columns:minmax(0,1fr)!important}[data-dq-regtab]{cursor:pointer}</style>
 <script id="dqa-js">
 (function(){"use strict";
 if(window.__dqaAuth)return;window.__dqaAuth=1;
@@ -7822,11 +7823,38 @@ function sb(){try{var c=window._supabase||window.sb||window.supabaseClient;if(!c
 
 /* 1) «Qeydiyyat» düyməsini gizlət (yalnız dəqiq mətn; modal və admin paneldən kənarda) */
 var HEAD=".v3-hd,.v3-top,header,nav,[class*=header],[class*=navbar],[class*=topbar]";
+function nz(t){return String(t||"").replace(/\u0307/g,"").replace(/\u0131/g,"i").replace(/\s+/g," ").trim().toLowerCase()}
+var EXC="#dqa-ov,#admin-panel,#login-screen,#dq-cab,#exam-screen";
+function isTabItem(e){var p=e.parentElement;if(!p)return false;for(var i=0;i<p.children.length;i++){var c=p.children[i];if(c!==e&&nz(c.textContent)==="imtahan")return true}return false}
+function examTab(){var l=D.querySelectorAll("a,button,[role=tab],[role=button]");
+ for(var i=0;i<l.length;i++){var e=l[i];
+  if(nz(e.textContent)!=="imtahan"||e.closest(EXC)||e.hasAttribute("data-dq-regtab"))continue;
+  var p=e.parentElement;if(!p||p.children.length<2)continue;
+  if(!e.closest("nav,.v3-nav,[class*=nav],[class*=menu],[class*=tabs]"))continue;
+  return e}
+ return null}
+function ensureRegTab(){
+ var ex=examTab();if(!ex)return;
+ var p=ex.parentElement,reg=null,i;
+ for(i=0;i<p.children.length;i++){var c=p.children[i];if(c!==ex&&nz(c.textContent)==="qeydiyyat"){reg=c;break}}
+ if(!reg){
+  reg=ex.cloneNode(true);
+  ["id","onclick","href","aria-selected","aria-current","aria-controls","data-tab","data-go","data-target"].forEach(function(a){reg.removeAttribute(a)});
+  reg.className=String(reg.className||"").split(/\s+/).filter(function(c){return c&&!/(^|[-_])(on|active|act|sel|selected|current|cur)($|[-_])/i.test(c)}).join(" ");
+  if(reg.tagName==="A"){reg.setAttribute("role","button");reg.setAttribute("tabindex","0")}
+  var w=D.createTreeWalker(reg,NodeFilter.SHOW_TEXT,null),n,first=true;
+  while(n=w.nextNode()){if(!n.nodeValue.trim())continue;if(first){n.nodeValue="Qeydiyyat";first=false}else n.nodeValue=""}
+ }
+ reg.setAttribute("data-dq-regtab","1");
+ if(reg.previousElementSibling!==ex)p.insertBefore(reg,ex.nextSibling);
+ reg.classList.toggle("dqa-hide",loggedIn());
+}
 function hideReg(root){
  var list=(root||D).querySelectorAll("a,button,[role=button]");
  for(var i=0;i<list.length;i++){var e=list[i];
-  if(e.classList.contains("dqa-hide")||e.closest("#dqa-ov,#admin-panel,#login-screen,#dq-cab,#exam-screen"))continue;
-  if(norm(e.textContent)==="qeydiyyat"&&e.closest(HEAD))e.classList.add("dqa-hide")}
+  if(e.classList.contains("dqa-hide")||e.hasAttribute("data-dq-regtab")||e.closest(EXC))continue;
+  if(norm(e.textContent)==="qeydiyyat"&&e.closest(HEAD)&&!isTabItem(e))e.classList.add("dqa-hide")}
+ try{ensureRegTab()}catch(e){}
 }
 var pend=0;function sched(){if(pend)return;pend=1;(window.requestAnimationFrame||setTimeout)(function(){pend=0;hideReg()})}
 try{new MutationObserver(sched).observe(D.documentElement,{childList:true,subtree:true})}catch(e){}
@@ -7835,6 +7863,8 @@ hideReg();
 /* 2) «Daxil ol» (yalnız başlıqdakı) → pəncərə */
 function loggedIn(){return D.body.classList.contains("dq-authed")||!!D.querySelector('[data-dqauth="user"]')}
 D.addEventListener("click",function(ev){
+ var rt=ev.target.closest&&ev.target.closest("[data-dq-regtab]");
+ if(rt){ev.preventDefault();ev.stopImmediatePropagation();openM("r");return}
  var a=ev.target.closest&&ev.target.closest("a,button,[role=button]");
  if(!a||a.closest("#dqa-ov,#admin-panel,#login-screen,#dq-cab,#exam-screen"))return;
  var guest=a.matches('[data-dqauth="guest"]');
@@ -7852,6 +7882,7 @@ window.DQAuth={open:openM,close:closeM};
 $("dqa-x").onclick=closeM;
 ov.addEventListener("click",function(e){if(e.target===ov)closeM()});
 D.addEventListener("keydown",function(e){if(e.key==="Escape"&&ov.classList.contains("on"))closeM()});
+D.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&e.target.closest&&e.target.closest("[data-dq-regtab]")&&e.target.tagName!=="BUTTON"){e.preventDefault();openM("r")}});
 $("dqa-tr").onclick=function(){tab("r")};$("dqa-tl").onclick=function(){tab("l")};
 [].forEach.call(ov.querySelectorAll("[data-go]"),function(b){b.onclick=function(){tab(b.dataset.go)}});
 
