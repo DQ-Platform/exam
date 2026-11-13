@@ -1,9 +1,9 @@
 /*!
- * DQ Platform — İmtahan bölməsi (v9)
+ * DQ Platform — İmtahan bölməsi (v10)
  * Sınaq siyahısı + qeydiyyat (iş nömrəsi avtomatik) + 3 addımlı giriş portalı.
  *
  * Qoşulma: index.html-in sonunda, digər skriptlərdən sonra
- *   <script src="dq-imtahan-giris.js?v=9"></script>
+ *   <script src="dq-imtahan-giris.js?v=10"></script>
  *
  * İstəyə görə tənzimləmə (bu faylı yükləməzdən əvvəl):
  *   window.DQ_IG_CONFIG = {
@@ -44,6 +44,7 @@
     resultCollections: ['results', 'exam_results', 'netice'],
     allowRetake: false,
     homeCarousel: true,
+    stackHome: true, /* ana səhifədə «Sınaqlar» üstdə, «Yeniliklər» altda — tək sütun */
     videos: { register: '', exam: '' }, /* məs. { register: 'video/qeydiyyat.mp4', exam: 'video/imtahan.mp4' } */
     notifyNew: true,
     carouselMs: 2000,
@@ -843,7 +844,21 @@ a{color:inherit}
       '.dqa-bn{position:fixed;left:12px;right:12px;top:12px;z-index:2147483200;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#0c1f4d;color:#fff;border:1px solid #c9a24a;border-radius:16px;padding:12px 14px;box-shadow:0 14px 34px #0006;font-family:Mulish,system-ui,sans-serif;font-size:13px;max-width:520px;margin:0 auto}' +
       '.dqa-bn b{color:#f3d47a;font-size:14px}.dqa-bn span{flex:1 1 120px;color:#c3cfe8}.dqa-bn button{border:0;border-radius:10px;padding:9px 14px;font-weight:800;background:#f3d47a;color:#13203f;cursor:pointer}.dqa-bn i{cursor:pointer;font-style:normal;font-size:20px;color:#9fb0d6;padding:0 4px}' +
       '@media (prefers-reduced-motion:reduce){.dqa-tr{transition:none}}';
+    AC.css = st.textContent;
     (document.head || document.documentElement).appendChild(st);
+  }
+
+  /* Shadow DOM: saytın ümumi CSS-i kartlara toxuna bilmir */
+  var EXTRA_CSS = ':host{display:block!important;width:100%!important;max-width:100%!important}' +
+    '.dqa{box-shadow:0 10px 28px -16px rgba(0,0,0,.6)}.dqa-sl{padding:20px 20px 14px;gap:10px}.dqa-tag{justify-self:start}' +
+    '.dqa-go{white-space:nowrap}' +
+    '@media(min-width:520px){.dqa-sl{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:20px;row-gap:8px}.dqa-sl .dqa-go{grid-column:2;grid-row:1/span 3;align-self:center;margin:0}}';
+  function shadowHost(id, inner) {
+    carCss();
+    var h = document.createElement('div'); h.id = id;
+    var sr = h.attachShadow({ mode: 'open' });
+    sr.innerHTML = '<style>' + (AC.css || '') + EXTRA_CSS + '</style>' + inner;
+    return { host: h, sr: sr };
   }
 
   function slideHtml(e, i) {
@@ -874,17 +889,16 @@ a{color:inherit}
   }
 
   function carBuild() {
-    carCss();
     var n = AC.exams.length;
-    var node = document.createElement('div'); node.className = 'dqa'; node.id = 'dqa-home';
-    node.innerHTML = '<div class="dqa-tr">' + AC.exams.map(slideHtml).join('') + (n > 1 ? slideHtml(AC.exams[0], 0) : '') + '</div>' +
-      (n > 1 ? '<div class="dqa-dots">' + AC.exams.map(function () { return '<i></i>'; }).join('') + '</div>' : '');
-    AC.node = node; AC.track = node.firstChild; AC.dots = node.querySelector('.dqa-dots') || document.createElement('div'); AC.idx = 0;
-    node.addEventListener('click', function (ev) {
+    var sh = shadowHost('dqa-home', '<div class="dqa"><div class="dqa-tr">' + AC.exams.map(slideHtml).join('') + (n > 1 ? slideHtml(AC.exams[0], 0) : '') + '</div>' +
+      (n > 1 ? '<div class="dqa-dots">' + AC.exams.map(function () { return '<i></i>'; }).join('') + '</div>' : '') + '</div>');
+    AC.node = sh.host; AC.sr = sh.sr; AC.track = sh.sr.querySelector('.dqa-tr');
+    AC.dots = sh.sr.querySelector('.dqa-dots') || document.createElement('div'); AC.idx = 0;
+    sh.sr.addEventListener('click', function (ev) {
       var b = ev.target.closest('[data-i]'); if (b) onStartTap(AC.exams[+b.getAttribute('data-i')]);
     });
     var pause = function () { AC.pauseUntil = Date.now() + 4000; };
-    ['pointerenter', 'touchstart', 'pointerdown'].forEach(function (n2) { node.addEventListener(n2, pause, { passive: true }); });
+    ['pointerenter', 'touchstart', 'pointerdown'].forEach(function (n2) { sh.host.addEventListener(n2, pause, { passive: true }); });
     if (n > 1) carMove(false);
   }
 
@@ -1010,22 +1024,22 @@ a{color:inherit}
     if (!lx || !lx.getClientRects().length || !AC.exams.length) { if (old && !AC.exams.length) old.remove(); return; }
     if (old && old.isConnected && old.getAttribute('data-sig') === AC.sig) return;
     if (old) old.remove();
-    var w = lx.querySelector('.lxp-w') || lx, c = document.createElement('div');
-    c.id = 'dqa-lxp'; c.className = 'dqa-lx'; c.setAttribute('data-sig', AC.sig);
-    c.innerHTML = '<h3>Aktiv imtahanlar</h3><div class="dqa-lxs">Seçin və qeydiyyatdan keçin</div>' + AC.exams.map(function (e, i) {
+    var w = lx.querySelector('.lxp-w') || lx;
+    var sh = shadowHost('dqa-lxp', '<div class="dqa-lx"><h3>Aktiv imtahanlar</h3><div class="dqa-lxs">Seçin və qeydiyyatdan keçin</div>' + AC.exams.map(function (e, i) {
       return '<div class="dqa-lxr"><div><span class="dqa-tag">' + esc(e.group) + ' · Sınaq ' + esc(e.number) + '</span><div class="dqa-lxt">' + esc(e.title) + '</div>' +
         '<div class="dqa-lxm">' + esc(e.questions) + ' sual · ' + esc(e.duration) + ' dəq' + (CFG.prices[e.group] ? ' · ' + CFG.prices[e.group] + ' AZN' : '') + '</div></div>' +
         '<div class="dqa-lxa"><button type="button" class="dqa-lxb" data-i="' + i + '">Qeydiyyatdan keç</button>' +
         '<button type="button" class="dqa-lxb gh" data-s="' + i + '">📣 Paylaş</button></div></div>';
     }).join('') + videosHtml() +
-      ((window.Notification && Notification.permission === 'default') ? '<button type="button" class="dqa-lxb gh" data-bell style="width:100%;margin-top:12px">🔔 Yeni imtahanlardan xəbərdar ol</button>' : '');
-    c.addEventListener('click', function (ev) {
-      var sh = ev.target.closest('[data-s]');
-      if (sh) return shareExam(AC.exams[+sh.getAttribute('data-s')]);
-      if (ev.target.closest('[data-bell]')) return askNotify(ev.target.closest('[data-bell]'));
-      var b = ev.target.closest('[data-i]'); if (b) openRegister(AC.exams[+b.getAttribute('data-i')]);
+      ((window.Notification && Notification.permission === 'default') ? '<button type="button" class="dqa-lxb gh" data-bell style="width:100%;margin-top:12px">🔔 Yeni imtahanlardan xəbərdar ol</button>' : '') + '</div>');
+    sh.host.setAttribute('data-sig', AC.sig);
+    sh.sr.addEventListener('click', function (ev) {
+      var t = ev.target, x;
+      if ((x = t.closest('[data-s]'))) return shareExam(AC.exams[+x.getAttribute('data-s')]);
+      if ((x = t.closest('[data-bell]'))) return askNotify(x);
+      if ((x = t.closest('[data-i]'))) openRegister(AC.exams[+x.getAttribute('data-i')]);
     });
-    w.appendChild(c);
+    w.appendChild(sh.host);
   }
 
   /* Elan linki: ?qeyd=BB-1 (və ya #qeyd=BB-1) → qeydiyyat pəncərəsi birbaşa açılır */
@@ -1038,8 +1052,46 @@ a{color:inherit}
     }).catch(function () { openRegister(null); });
   }
 
+  /* Ana səhifədə iki paneli tək sütuna salır: əvvəl «Aktiv sınaqlar», sonra «Yeniliklər» */
+  function textEls(txt) {
+    var out = [], w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), t;
+    while ((t = w.nextNode())) {
+      var v = t.nodeValue;
+      if (v && v.length < 60 && norm(v) === txt && t.parentElement && !t.parentElement.closest('header,nav,#dqa-lxp,#dqg-host')) out.push(t.parentElement);
+    }
+    return out;
+  }
+  function lca(a, b) { for (var n = a; n; n = n.parentElement) if (n.contains(b)) return n; return null; }
+  function stackPanels() {
+    if (!CFG.stackHome) return;
+    if (!stackPanels.c || !stackPanels.c.isConnected) {
+      var bs = textEls('aktiv sinaqlar ve movzu testleri'), as = textEls('yenilikler'), best = null, bsz = 1e9;
+      bs.forEach(function (b) {
+        as.forEach(function (a) {
+          var c = lca(a, b);
+          if (!c || c === document.body || c === document.documentElement || c.id === 'lxp') return;
+          var sz = c.getElementsByTagName('*').length;
+          if (sz < bsz) { bsz = sz; best = { c: c, a: a, b: b }; }
+        });
+      });
+      if (!best) return;
+      stackPanels.c = best.c; stackPanels.a = best.a; stackPanels.b = best.b;
+    }
+    var c = stackPanels.c, pa = null, pb = null;
+    for (var k = 0; k < c.children.length; k++) {
+      if (c.children[k].contains(stackPanels.a)) pa = c.children[k];
+      if (c.children[k].contains(stackPanels.b)) pb = c.children[k];
+    }
+    if (!pa || !pb || pa === pb) return;
+    var S = function (el, o) { for (var p in o) el.style.setProperty(p, o[p], 'important'); };
+    S(c, { display: 'flex', 'flex-direction': 'column', gap: '20px', 'grid-template-columns': 'minmax(0,1fr)', 'align-items': 'stretch' });
+    S(pb, { order: '1', width: '100%', 'max-width': 'none', 'min-width': '0', flex: 'none', margin: '0', 'grid-column': 'auto' });
+    S(pa, { order: '2', width: '100%', 'max-width': 'none', 'min-width': '0', flex: 'none', margin: '0', 'grid-column': 'auto' });
+  }
+
   function carTick() {
     if (document.hidden) return;
+    try { stackPanels(); } catch (e) {}
     carRefresh(false).then(function () { carMount(); lxpMount(); });
   }
   function carStart() {
