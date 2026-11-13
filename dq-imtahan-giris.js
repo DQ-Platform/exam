@@ -1,5 +1,5 @@
 /*!
- * DQ Platform — İmtahan bölməsi (v11)
+ * DQ Platform — İmtahan bölməsi (v13)
  * Sınaq siyahısı + qeydiyyat (iş nömrəsi avtomatik) + 3 addımlı giriş portalı.
  *
  * Qoşulma: index.html-in sonunda, digər skriptlərdən sonra
@@ -426,7 +426,7 @@ a{color:inherit}
     var open = listOpen || ovs.children.length > 0;
     styleHost(open);
     if (open && prevOverflow === null) { prevOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden'; }
-    else if (!open && prevOverflow !== null) { document.body.style.overflow = prevOverflow; prevOverflow = null; }
+    else if (!open && prevOverflow !== null) { document.body.style.overflow = (prevOverflow === 'hidden' ? '' : prevOverflow); prevOverflow = null; }
   }
 
   function modal(html) {
