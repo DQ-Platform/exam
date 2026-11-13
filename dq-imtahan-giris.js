@@ -549,7 +549,7 @@
     for (var i = 0, el = target; el && el !== document.body && i < 5; i++, el = el.parentElement) {
       var key = norm((el.getAttribute && (el.getAttribute('data-tab') || el.getAttribute('data-page'))) || '');
       var hit = key === 'imtahan' || key === 'exam' || norm(el.textContent) === 'imtahan';
-      if (hit && (el.hasAttribute('data-dqnav') || el.closest(NAVSEL))) return true;
+      if (hit && (el.hasAttribute('data-dqnav') || el.closest(NAVSEL) || el.closest('#dqr'))) return true;
     }
     return false;
   }
