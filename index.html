@@ -8510,10 +8510,15 @@ async function byIds(ids){var out=[];for(var i=0;i<ids.length;i+=10){var r=await
 async function put(rows,exam,cat,mode){await schema();var st={ins:0,rep:0,skip:0},ex=await list(exam,cat,false),key={};
  rows.forEach(function(r){key[r[M.num]]=nn(r[M.sub])});
  var occ=ex.filter(function(e){return key[e[M.num]]!==undefined&&key[e[M.num]]===nn(e[M.sub])}),oc={};occ.forEach(function(e){oc[e[M.num]]=1});
- var todo=rows;
+ var todo=rows,remap=null;
+ if(mode==="fill"){remap={};var used={},mn={},mx={};ex.forEach(function(e){var n=+e[M.num];used[n]=1;var k=nn(e[M.sub]);if(mn[k]===undefined||n<mn[k])mn[k]=n;if(mx[k]===undefined||n>mx[k])mx[k]=n});
+  var sorted=rows.slice().sort(function(a,b){return a[M.num]-b[M.num]});
+  sorted.forEach(function(r){var k=nn(r[M.sub]),lo=mn[k]===undefined?1:mn[k],hi=mx[k]===undefined?0:mx[k],n=lo;
+   while(n<=hi&&used[n])n++;if(n>hi){n=hi+1;while(used[n])n++}
+   used[n]=1;if(mx[k]===undefined||n>mx[k])mx[k]=n;if(mn[k]===undefined)mn[k]=n;remap[r.id]=n});occ=[]}
  if(mode==="skip"){todo=rows.filter(function(r){return !oc[r[M.num]]});st.skip=rows.length-todo.length}
  else if(occ.length){var ids=occ.map(function(e){return e.id});for(var i=0;i<ids.length;i+=50){var d=await sb().from("exam_questions").delete().in("id",ids.slice(i,i+50));if(d.error)throw d.error}st.rep=occ.length}
- var ins=todo.map(function(r){var o=Object.assign({},r);delete o.id;delete o.created_at;delete o.updated_at;o[M.exam]=eid(exam);o[M.cat]=cat;return o});
+ var ins=todo.map(function(r){var o=Object.assign({},r);delete o.id;delete o.created_at;delete o.updated_at;o[M.exam]=eid(exam);o[M.cat]=cat;if(remap&&remap[r.id]!==undefined)o[M.num]=remap[r.id];return o});
  for(var j=0;j<ins.length;j+=10){var w=await sb().from("exam_questions").insert(ins.slice(j,j+10));if(w.error)throw new Error(w.error.message+" (Sınaq "+exam+" · "+cat+")")}
  st.ins=ins.length;return st}
 /* ---------- UI köməkçiləri ---------- */
@@ -8585,7 +8590,7 @@ async function openXfer(){var T={exam:curExam(),cat:curCat()},ex=exams(),oc=CATS
  var o=sheet("📥 Köçür","Hədəf: Sınaq "+T.exam+" · "+T.cat,'<div class="qmv-l">Mənbə sınaq</div>'+chips("sx",ex.map(function(e){return{v:e,t:"Sınaq "+e,on:String(e)===String(T.exam)}}),0)+
   '<div class="qmv-l">Mənbə kateqoriya</div>'+chips("sc",CATS.map(function(c){return{v:c,t:c,on:c===oc[0]}}),0)+'<div class="qmv-l">Fənn</div><div id="qmv-subs" class="qmv-sum">Yüklənir…</div>'+
   '<div class="qmv-l">Suallar <span id="qmv-cnt"></span></div><div class="qmv-tb"><button type="button" id="qmv-all">☑ Hamısını seç</button><button type="button" id="qmv-none">☐ Təmizlə</button></div><div id="qmv-qs"></div>'+
-  '<div class="qmv-l">Hədəfdə eyni nömrə varsa</div>'+chips("xm",[{v:"replace",t:"Əvəz et",on:1},{v:"skip",t:"Ötür"}],0),'<button type="button" class="qmv-go" id="qmv-go" disabled>Köçür</button>');
+  '<div class="qmv-l">Hədəfdə eyni nömrə varsa</div>'+chips("xm",[{v:"fill",t:"Boş yerlərə yerləşdir",on:1},{v:"replace",t:"Əvəz et"},{v:"skip",t:"Ötür"}],0),'<button type="button" class="qmv-go" id="qmv-go" disabled>Köçür</button>');
  function vis(){var s=picked("xs",o);return S.rows.filter(function(r){return s.indexOf(String(r[M.sub]))>-1})}
  function upd(){var n=Object.keys(S.sel).length,g=$("qmv-go");$("qmv-cnt").textContent="· "+n+" seçildi";g.disabled=!n;g.textContent=n?"Köçür ("+n+")":"Köçür"}
  function paint(){var tk={};S.tgt.forEach(function(r){tk[nn(r[M.sub])+"|"+r[M.num]]=1});var rs=vis();
@@ -8601,8 +8606,8 @@ async function openXfer(){var T={exam:curExam(),cat:curCat()},ex=exams(),oc=CATS
  o.addEventListener("change",function(e){var c=e.target;if(c.dataset&&c.dataset.id){if(c.checked)S.sel[c.dataset.id]=1;else delete S.sel[c.dataset.id];upd()}});
  $("qmv-all").onclick=function(){vis().forEach(function(r){S.sel[r.id]=1});paint()};
  $("qmv-none").onclick=function(){S.sel={};paint()};
- $("qmv-go").onclick=async function(){var ids=Object.keys(S.sel),mode=picked("xm",o)[0]||"replace",b=this;
-  if(!confirm(ids.length+" sual Sınaq "+T.exam+" · "+T.cat+" kateqoriyasına köçürülsün?\nMövcud eyni nömrəli suallar: "+(mode==="skip"?"ötürüləcək":"əvəz olunacaq")))return;
+ $("qmv-go").onclick=async function(){var ids=Object.keys(S.sel),mode=picked("xm",o)[0]||"fill",b=this;
+  if(!confirm(ids.length+" sual Sınaq "+T.exam+" · "+T.cat+" kateqoriyasına köçürülsün?\n"+(mode==="fill"?"Suallar hədəfdəki boş nömrələrə yerləşdiriləcək":"Mövcud eyni nömrəli suallar: "+(mode==="skip"?"ötürüləcək":"əvəz olunacaq"))))return;
   b.disabled=true;b.textContent="Köçürülür…";
   try{var rows=await byIds(ids.map(function(i){var r=S.rows.filter(function(x){return String(x.id)===i})[0];return r?r.id:i})),s=await put(rows,T.exam,T.cat,mode);toast("✅ "+summary(s));closeSheet();refreshCounts()}
   catch(e){toast("Xəta: "+(e.message||e),true);b.disabled=false;upd()}};
