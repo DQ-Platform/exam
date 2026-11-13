@@ -350,7 +350,7 @@
       '<label class="dqg-lbl">Adınız</label><input class="dqg-in" id="dqgAd" autocomplete="given-name" value="' + esc(pre.ad || '') + '">' +
       '<label class="dqg-lbl">Soyadınız</label><input class="dqg-in" id="dqgSoy" autocomplete="family-name" value="' + esc(pre.soyad || '') + '">' +
       '<label class="dqg-lbl">Kateqoriya</label><div class="dqg-pay" id="dqgG">' +
-      CFG.groups.map(function (g) { return '<span data-g="' + g + '" class="' + (g === group ? 'on' : '') + '">' + g + ' — ' + CFG.prices[g] + '₼</span>'; }).join('') + '</div>' +
+      CFG.groups.map(function (g) { return '<span data-g="' + g + '" class="' + (g === group ? 'on' : '') + '">' + g + ' — ' + CFG.prices[g] + ' AZN</span>'; }).join('') + '</div>' +
       '<div class="dqg-err" id="dqgErr"></div>' +
       '<div class="dqg-row"><button class="dqg-ghost" data-c>Ləğv et</button><button class="dqg-navy" data-n>Davam et</button></div>');
     var q = function (s) { return m.box.querySelector(s); };
@@ -374,14 +374,14 @@
 
   /* ---------- iş nömrəsi + ödəniş məlumatı + WhatsApp ---------- */
   function showPayment(user, exam) {
-    var prices = CFG.groups.map(function (g) { return g + ' ' + CFG.prices[g] + '₼'; });
+    var prices = CFG.groups.map(function (g) { return g + ' ' + CFG.prices[g] + ' AZN'; });
     var m = modal('<h3>Qeydiyyat tamamlandı</h3>' +
       '<div class="dqg-box"><b>' + esc(user.ad + ' ' + user.soyad) + '</b><br>İş nömrəniz:<div class="dqg-big">' + esc(user.code) + '</div>' +
       '<button class="dqg-copy" data-copy>Nömrəni kopyala</button>' +
       '<span style="font-size:13px">Bu nömrəni saxlayın — imtahana bununla daxil olacaqsınız.</span></div>' +
       '<div class="dqg-box"><b>Ödəniş</b><div class="dqg-pay">' +
-      CFG.groups.map(function (g) { return '<span class="' + (g === user.group ? 'on' : '') + '">' + g + ' ' + CFG.prices[g] + '₼</span>'; }).join('') + '</div>' +
-      '<p class="dqg-p" style="margin:10px 0 0">Ödəniş ' + prices.join(', ') + ' təşkil edir. Seçdiyiniz qrup: <b>' + esc(user.group) + ' — ' + user.price + '₼</b>. ' +
+      CFG.groups.map(function (g) { return '<span class="' + (g === user.group ? 'on' : '') + '">' + g + ' ' + CFG.prices[g] + ' AZN</span>'; }).join('') + '</div>' +
+      '<p class="dqg-p" style="margin:10px 0 0">Ödəniş ' + prices.join(', ') + ' təşkil edir. Seçdiyiniz qrup: <b>' + esc(user.group) + ' — ' + user.price + ' AZN</b>. ' +
       '«Razıyam» düyməsinə toxunduqda ödəniş qeyd olunur və WhatsApp-da hazır mesaj açılır. Admin ödənişi təsdiqləyib sizə sınaq icazəsi verəcək.</p></div>' +
       '<div class="dqg-row"><button class="dqg-ghost" data-c>Ləğv et</button><button class="dqg-navy" data-ok>Razıyam</button></div>');
     m.box.querySelector('[data-c]').onclick = m.close;
@@ -401,7 +401,7 @@
         'Ad Soyad: ' + user.ad + ' ' + user.soyad + '\n' +
         'İş nömrəsi: ' + user.code + '\n' +
         'Kateqoriya: ' + user.group + (user.want ? ' (Sınaq ' + user.want.split('-')[1] + ')' : '') + '\n' +
-        'Ödəniş: ' + user.price + '₼\n' +
+        'Ödəniş: ' + user.price + ' AZN\n' +
         'Ödənişi qeyd etdim. Sınaq icazəsi və təsdiq üçün yazıram.';
       var url = waLink(text);
       var w = null; try { w = window.open(url, '_blank'); } catch (e) {}
