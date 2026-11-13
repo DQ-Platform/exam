@@ -8277,5 +8277,49 @@ try{new MO(function(){if(!ok())fix()}).observe(D.documentElement,{childList:true
 fix();
 })();
 </script>
+<style id="dq-fix-corner-css">
+/* Admin düymələri səhifənin sonundakı kartları həmişə örtməsin: aşağıda boşluq qalır */
+html.dq-admin-ok #mod-suallar{padding-bottom:240px!important}
+</style>
+<script id="dq-fix-corner-js">
+/* 1) «Sınaqlar» (breadcrumb) toxunanda Əsas Admin Panelə qayıt.
+   2) Kukilər paneli sol aşağıdakı admin düymələrinin üstünə düşməsin: onların üstündə dayansın. */
+(function(){"use strict";
+var D=document,touched=null;
+function isAdmin(){try{return !!(window.DQAdminGate&&DQAdminGate.is())||localStorage.getItem("dq_admin_logged")==="true"}catch(e){return false}}
+D.addEventListener("click",function(ev){
+ var t=ev.target&&ev.target.closest&&ev.target.closest("#mod-suallar .breadcrumb-nav span");
+ if(!t||t!==t.parentNode.querySelector("span"))return;
+ if(!isAdmin()||typeof window.backToAdminHub!=="function")return;
+ ev.preventDefault();ev.stopImmediatePropagation();
+ try{window.backToAdminHub()}catch(e){}
+},true);
+function shown(e){return e&&e.getClientRects().length>0}
+function findCookie(){
+ var l=D.querySelectorAll("div,section,aside"),i,e,best=null;
+ for(i=0;i<l.length;i++){e=l[i];
+  if(e.id==="dq-admin-dock"||e.closest("#dq-admin-dock"))continue;
+  var t=e.textContent||"";if(t.length>500||!/Kukil/i.test(t)||!/Qəbul et/i.test(t))continue;
+  if(getComputedStyle(e).position!=="fixed"||!shown(e))continue;
+  if(!best||t.length<best.textContent.length)best=e}
+ return best}
+function stackTop(){
+ var top=window.innerHeight,a=D.getElementById("dq-admin-dock"),b=D.getElementById("admin-float-back"),r;
+ if(a&&shown(a)){r=a.getBoundingClientRect();top=Math.min(top,r.top)}
+ if(b&&shown(b)){r=b.getBoundingClientRect();top=Math.min(top,r.top)}
+ return top}
+function fix(){
+ try{
+  var c=findCookie();
+  if(touched&&touched!==c&&touched.isConnected){touched.style.removeProperty("bottom");touched.style.removeProperty("left");touched.style.removeProperty("right");touched=null}
+  if(!c)return;
+  var top=stackTop();
+  if(top>=window.innerHeight-1){if(touched===c){c.style.removeProperty("bottom");c.style.removeProperty("left");c.style.removeProperty("right");touched=null}return}
+  c.style.setProperty("bottom",(window.innerHeight-top+10)+"px","important");
+  c.style.setProperty("left","12px","important");c.style.setProperty("right","12px","important");
+  touched=c}catch(e){}}
+setInterval(fix,400);window.addEventListener("resize",fix);window.addEventListener("orientationchange",fix);
+})();
+</script>
 </body>
 </html>
