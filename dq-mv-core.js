@@ -1,7 +1,7 @@
 /* DQ Mövzu PRO — ortaq kitabxana (Supabase dq_v2_store üzərində) */
 (function(){"use strict";
 var U="https://cpzwliqlgaplroscvduo.supabase.co",K="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF",TBL="dq_v2_store";
-var WA="994506671557";
+var WA="994504305162";
 var COL={cfg:"mv_cfg",cat:"mv_catalog",q:"mv_q",order:"mv_order",att:"mv_attempt",exam:"ip_exam"};
 function H(x){var h={apikey:K,Authorization:"Bearer "+K,"Content-Type":"application/json"};for(var k in x||{})h[k]=x[k];return h}
 function req(path,opt){return fetch(U+"/rest/v1/"+path,opt).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(r.status+" "+t.slice(0,160))});return r.status===204?null:r.text().then(function(t){return t?JSON.parse(t):null})})}
