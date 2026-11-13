@@ -1,9 +1,9 @@
 /*!
- * DQ Platform — İmtahan bölməsi (v10)
+ * DQ Platform — İmtahan bölməsi (v11)
  * Sınaq siyahısı + qeydiyyat (iş nömrəsi avtomatik) + 3 addımlı giriş portalı.
  *
  * Qoşulma: index.html-in sonunda, digər skriptlərdən sonra
- *   <script src="dq-imtahan-giris.js?v=10"></script>
+ *   <script src="dq-imtahan-giris.js?v=11"></script>
  *
  * İstəyə görə tənzimləmə (bu faylı yükləməzdən əvvəl):
  *   window.DQ_IG_CONFIG = {
@@ -786,6 +786,7 @@ a{color:inherit}
 
   function isNavTab(target) {
     if (!target || !target.closest || target.closest(SKIP)) return false;
+    if (window.__dqInAdminUI && window.__dqInAdminUI(target)) return false; /* İmtahanPro / admin interfeysi istisnadır */
     for (var i = 0, el = target; el && el !== document.body && i < 5; i++, el = el.parentElement) {
       var key = norm((el.getAttribute && (el.getAttribute('data-tab') || el.getAttribute('data-page'))) || '');
       var hit = key === 'imtahan' || key === 'exam' || norm(el.textContent) === 'imtahan';
@@ -918,6 +919,30 @@ a{color:inherit}
     return box;
   }
 
+  /* Saytın öz skripti sınaq kartlarını özü çəkibsə (alt-alta düzülən siyahı), onu gizlədib yerinə karusel qoyuruq */
+  function findHostCards() {
+    var hdr = stackPanels.b && stackPanels.b.isConnected ? stackPanels.b : textEls('aktiv sinaqlar ve movzu testleri')[0];
+    if (!hdr) return null;
+    var pan = hdr, btns = [];
+    function scan(root) {
+      var out = [], all = root.querySelectorAll('button,a,[role="button"]');
+      for (var i = 0; i < all.length; i++) {
+        if (/^sinaga kec/.test(norm(all[i].textContent)) && all[i].getClientRects().length) out.push(all[i]);
+      }
+      return out;
+    }
+    for (var up = 0; pan && up < 7; up++, pan = pan.parentElement) {
+      btns = scan(pan);
+      if (btns.length) break;
+    }
+    if (!btns.length) return null;
+    var L = btns[0];
+    btns.forEach(function (b) { L = lca(L, b); });
+    while (L.parentElement && !L.parentElement.contains(hdr)) L = L.parentElement;
+    if (L.contains(hdr) || L === document.body) return null;
+    return L;
+  }
+
   function carBindArrows(box) {
     var el = box;
     for (var up = 0; el && up < 5; up++, el = el.parentElement) {
@@ -940,7 +965,7 @@ a{color:inherit}
       if (AC.hidden) { AC.hidden.style.removeProperty('display'); AC.hidden = null; }
       return;
     }
-    var box = findEmpty();
+    var box = findEmpty() || findHostCards();
     if (box) { AC.hidden = box; box.style.setProperty('display', 'none', 'important'); }
     if (!AC.node) carBuild();
     if (AC.hidden && AC.hidden.parentNode && (!AC.node.isConnected || AC.node.previousElementSibling !== AC.hidden)) {

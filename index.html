@@ -9,13 +9,42 @@
 (function(){"use strict";
 if(window.__dqImtEarly)return;window.__dqImtEarly=1;
 if(/[?&]safe=1(&|$)/.test(location.search))return;
+/* ===== Admin interfeysi (İmtahanPro, Suallar modulu, admin panel və s.) ictimai «İmtahan» menyusu sayılmasın =====
+   Əvvəl İmtahanPro-nun «Sınaqlar» tabı (data-tab="exam" / role=tablist) ictimai menyu kimi tutulurdu:
+   klik udulur, admin panel öz tabını aça bilmir, ictimai portal açılırdı. İndi admin interfeysi tam istisnadır. */
+window.__dqInAdminUI=function(t){
+ try{
+  if(!t||t.nodeType!==1)t=t&&t.parentElement;
+  var el,cs,tx,B=document.body,H=document.documentElement;
+  for(el=t;el&&el!==B&&el!==H;el=el.parentElement){
+   if(el.hasAttribute&&el.hasAttribute("data-dq-admin-ui"))return true;
+   var k=(el.id||"")+" "+(typeof el.className==="string"?el.className:"");
+   if(/imtahanpro|dqimp|dq-?ip(?![a-z])|admin-panel|dq-admin|dq-reg-?admin|regadmin|(^|\s)mod-[a-z]|admin-nav|dqe(?![a-z-])/i.test(k))return true}
+  for(el=t;el&&el!==B&&el!==H;el=el.parentElement){
+   cs=getComputedStyle(el);
+   if(cs.position==="fixed"||cs.position==="absolute"){
+    tx=el.textContent||"";
+    if(tx.length<40000&&/[\u0130I]mtahanPro/.test(tx)&&/Qeydiyyatlar|Ba\u011fla/.test(tx))return true}}
+ }catch(e){}
+ return false};
+/* İmtahanPro-da «Sınaqlar» tabına toxunduqdan sonra 1 san ərzində ictimai portalı açan çağırışlar ləğv edilir (ikinci müdafiə qatı) */
+(function(){
+ function nz(x){return String(x||"").replace(/\u0130/g,"i").replace(/\u0307/g,"").replace(/\u0131/g,"i").replace(/\s+/g," ").trim().toLowerCase()}
+ function mark(e){
+  try{var t=e.target;if(!t||t.nodeType!==1)t=t&&t.parentElement;if(!t||!window.__dqInAdminUI(t))return;
+   for(var i=0,el=t;el&&i<4;i++,el=el.parentElement){var x=nz(el.textContent);if(x==="sinaqlar"||x==="sinaq"){window.__dqAdminTabAt=Date.now();return}}}catch(_e){}}
+ ["pointerdown","mousedown","touchstart","click"].forEach(function(n){window.addEventListener(n,mark,{capture:true,passive:true})});
+ function blocked(){return window.__dqAdminTabAt&&Date.now()-window.__dqAdminTabAt<1000}
+ function wrap(o,m){try{var f=o&&o[m];if(typeof f!=="function"||f.__dqAG)return;var g=function(){if(blocked())return;return f.apply(this,arguments)};g.__dqAG=1;o[m]=g}catch(e){}}
+ var n=0,iv=setInterval(function(){wrap(window.DQExam,"open");wrap(window.DQImtahanGiris,"open");if(++n>200)clearInterval(iv)},300);
+})();
 var NAVSEL='[data-dqnav],.v3-hd,.v3-top,.v3-nav,header,nav,[class*=header],[class*=navbar],[class*=topbar],[class*=menu],[class*=dock],[class*=tabbar],[role="tablist"]',
     SKIP='.dqg-page,.dqg-ov,#dqx-ov,#dqa-ov,#rga,#admin-panel,#login-screen,#exam-screen,#dq-cab,#dq-reg-nav,.admin-nav-card',
     busy=0;
 function norm(s){return String(s||"").replace(/\u0130/g,"i").replace(/\u0307/g,"").replace(/\u0131/g,"i").replace(/\s+/g," ").trim().toLowerCase()}
 function isTab(t){
  if(!t||t.nodeType!==1)t=t&&t.parentElement;
- if(!t||!t.closest||t.closest(SKIP))return false;
+ if(!t||!t.closest||t.closest(SKIP)||window.__dqInAdminUI(t))return false;
  for(var i=0,el=t;el&&el!==document.body&&el!==document.documentElement&&i<5;i++,el=el.parentElement){
   var k=norm(el.getAttribute&&(el.getAttribute("data-tab")||el.getAttribute("data-page")));
   if((k==="imtahan"||k==="exam"||norm(el.textContent)==="imtahan")&&(el.hasAttribute("data-dqnav")||el.closest(NAVSEL)||el.closest("#dqr")))return true}
@@ -8033,12 +8062,12 @@ window.addEventListener("click",regGo,true);
 setTimeout(banMake,300);setInterval(banMake,1500);
 var HEAD=".v3-hd,.v3-top,.v3-nav,header,nav,[class*=header],[class*=navbar],[class*=topbar]";
 function navFix(){try{var q=D.querySelectorAll(HEAD+" a,"+HEAD+" button,"+HEAD+" li,"+HEAD+" span"),k,e;
- for(k=0;k<q.length;k++){e=q[k];if(e.children.length||e.closest("#dqr,#dqx-ov,#dqa-ov,#admin-panel,#login-screen,#dq-cab,#exam-screen"))continue;
+ for(k=0;k<q.length;k++){e=q[k];if(e.children.length||e.closest("#dqr,#dqx-ov,#dqa-ov,#admin-panel,#login-screen,#dq-cab,#exam-screen")||(window.__dqInAdminUI&&window.__dqInAdminUI(e)))continue;
   if(norm(e.textContent)==="imtahan"){e.setAttribute("data-dqnav","1")}}}catch(x){}}
 setInterval(navFix,1200);setTimeout(navFix,300);
 D.addEventListener("click",function(ev){var t=ev.target;if(!t||!t.closest)return;
  var a=t.closest("[data-dqnav]")||t.closest("a,button,[role=button]");
- if(!a||a.closest("#dqr,#dqx-ov,#dqa-ov,#admin-panel,#login-screen,#dq-cab,#exam-screen"))return;
+ if(!a||a.closest("#dqr,#dqx-ov,#dqa-ov,#admin-panel,#login-screen,#dq-cab,#exam-screen")||(window.__dqInAdminUI&&window.__dqInAdminUI(a)))return;
  if(!(a.hasAttribute("data-dqnav")||(norm(a.textContent)==="imtahan"&&a.closest(HEAD))))return;
  ev.preventDefault();ev.stopImmediatePropagation();try{if(window.DQImtahanGiris&&window.DQImtahanGiris.open){window.DQImtahanGiris.open();return}}catch(_e){}openX("sinaq")},true);
 D.addEventListener("click",function(ev){var t=ev.target,r,e,k,hit=null,x;if(!t||!t.closest)return;
@@ -8634,7 +8663,7 @@ setInterval(function(){try{syncEd();syncBar();wrapSave()}catch(e){}},1000);
 })();
 </script>
 <script src="dq-imtahanpro.js?v=2"></script>
-<script src="dq-imtahan-giris.js?v=10"></script>
+<script src="dq-imtahan-giris.js?v=11"></script>
 <script src="dq-elan.js?v=1"></script>
 <script src="dq-admin-kecid.js?v=1"></script>
 </body>
