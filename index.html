@@ -1,6 +1,51 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<script id="dq-pro-net">/* DQ Pro Net: Supabase sorğuları üçün dayanıqlı şəbəkə qatı (timeout + avtomatik təkrar cəhd) və real bağlantı statusu */
+(function(){
+if(window.__dqProNet)return;window.__dqProNet=1;
+var F=window.fetch;if(typeof F!=="function")return;
+var BASE="https://cpzwliqlgaplroscvduo.supabase.co",HOST=/\.supabase\.co/i,TMO=25000,TRIES=3;
+var st={fails:0,lastOk:0,checking:false};
+function slp(ms){return new Promise(function(r){setTimeout(r,ms)})}
+function good(){st.fails=0;st.lastOk=Date.now()}
+function bad(){st.fails++}
+function once(input,init){
+ var o=init||{},ctl=typeof AbortController==="function"?new AbortController():null,tm=0;
+ if(ctl){var sg=o.signal;if(sg){if(sg.aborted)ctl.abort();else sg.addEventListener("abort",function(){ctl.abort()})}
+  o=Object.assign({},o,{signal:ctl.signal});tm=setTimeout(function(){ctl.abort()},TMO)}
+ return F.call(window,input,o).then(function(r){clearTimeout(tm);return r},function(e){clearTimeout(tm);throw e})
+}
+window.fetch=function(input,init){
+ var url=typeof input==="string"?input:(input&&input.url)||"";
+ if(!HOST.test(url))return F.apply(this,arguments);
+ var m=String((init&&init.method)||(input&&input.method)||"GET").toUpperCase();
+ var idem=m==="GET"||m==="HEAD",max=idem?TRIES:1,i=0;
+ function go(){
+  return once(input,init).then(function(r){
+   if(idem&&i<max-1&&(r.status===429||r.status===502||r.status===503||r.status===504)){i++;return slp(300+400*i*i).then(go)}
+   good();return r
+  },function(e){
+   if(init&&init.signal&&init.signal.aborted)throw e;
+   if(i<max-1){i++;return slp(300+400*i*i).then(go)}
+   bad();throw e
+  })
+ }
+ return go()
+};
+/* Real yoxlama: istənilən HTTP cavabı = server əlçatandır */
+function ping(){
+ if(st.checking)return Promise.resolve(window.DQNet.ok());
+ st.checking=true;
+ var ctl=typeof AbortController==="function"?new AbortController():null,tm=ctl?setTimeout(function(){ctl.abort()},8000):0;
+ return F.call(window,BASE+"/auth/v1/health?t="+Date.now(),{mode:"no-cors",cache:"no-store",signal:ctl?ctl.signal:undefined})
+  .then(function(){good();return true},function(){bad();return false})
+  .then(function(v){clearTimeout(tm);st.checking=false;
+   try{window.dispatchEvent(new CustomEvent("dq:net",{detail:{ok:v}}))}catch(e){}return v})
+}
+window.DQNet={ping:ping,ok:function(){return st.fails===0&&Date.now()-st.lastOk<90000},state:st};
+})();
+</script>
 <script id="dq-admin-mode-loader">/* İdarə modu: yalnız /proysl ilə daxil olmuş admin cihazında dq-admin-mode.js yüklənir */
 try{if(localStorage.dqa){var s=document.createElement("script");s.src="dq-admin-mode.js?v=2";s.defer=true;document.head.appendChild(s)}}catch(e){}</script>
 <script id="dq-gate-admin">/* Mərkəzi admin panel yalnız /proysl giriş məlumatları ilə daxil olmuş cihazda görünür */
@@ -294,7 +339,87 @@ window.__dqLibs=(function(o){return function(k){if(k==="ocr")return real().then(
 })();</script>
 <script src="dq-admin.js?v=4"></script>
 <script src="dq-net.js?v=1"></script>
+<script id="dq-backend-config">/* DQ arxa plan konfiqurasiyası. mode: "auto" (Supabase işləməsə Firebase-ə keç), "firebase" (yalnız Firebase), "supabase" (köhnə rejim). projectId və apiKey boşdursa heç nə dəyişmir. */
+window.DQ_BACKEND={mode:"auto",firebase:{projectId:"",apiKey:""}};
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script id="dq-gateway">/* DQ Gateway: Supabase sorğularını Firestore REST ilə əvəz edir / ehtiyat kimi işlədir. Auth, storage, realtime olduğu kimi Supabase-də qalır. */
+(function(){
+var C=window.DQ_BACKEND||{},FB=C.firebase||{},S=window.supabase;
+if(!S||!S.createClient||!FB.projectId||!FB.apiKey||C.mode==="supabase")return;
+var MODE=C.mode==="firebase"?"firebase":"auto",ORIG=S.createClient.bind(S);
+var ROOT="https://firestore.googleapis.com/v1/projects/"+encodeURIComponent(FB.projectId)+"/databases/(default)/documents";
+var KEY="?key="+encodeURIComponent(FB.apiKey);
+function tv(v){if(v===null||v===undefined)return{nullValue:null};
+ if(Array.isArray(v))return{arrayValue:{values:v.map(tv)}};
+ switch(typeof v){case"boolean":return{booleanValue:v};case"number":return Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:v};
+  case"string":return{stringValue:v}}
+ return{mapValue:{fields:tf(v)}}}
+function tf(o){var f={};Object.keys(o).forEach(function(k){if(o[k]!==undefined)f[k]=tv(o[k])});return f}
+function fv(v){if("nullValue"in v)return null;if("integerValue"in v)return Number(v.integerValue);
+ if("arrayValue"in v)return(v.arrayValue.values||[]).map(fv);
+ if("mapValue"in v)return fd(v.mapValue.fields||{});
+ return v.stringValue!==undefined?v.stringValue:v.booleanValue!==undefined?v.booleanValue:v.doubleValue!==undefined?v.doubleValue:v.timestampValue}
+function fd(f){var o={};Object.keys(f).forEach(function(k){o[k]=fv(f[k])});return o}
+function rid(){var a="abcdefghijklmnopqrstuvwxyz0123456789",s="";for(var i=0;i<20;i++)s+=a[Math.floor(Math.random()*a.length)];return s}
+function post(path,body){return fetch(ROOT+path+KEY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+ .then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error((j.error&&j.error.message)||("HTTP "+r.status));return j})})}
+var OP={eq:"EQUAL",neq:"NOT_EQUAL",gt:"GREATER_THAN",gte:"GREATER_THAN_OR_EQUAL",lt:"LESS_THAN",lte:"LESS_THAN_OR_EQUAL",in:"IN"};
+function query(t,P){
+ var fl=P.f.map(function(x){return{fieldFilter:{field:{fieldPath:x[1]},op:OP[x[0]],value:tv(x[2])}}});
+ var q={from:[{collectionId:t}]};
+ if(fl.length)q.where=fl.length===1?fl[0]:{compositeFilter:{op:"AND",filters:fl}};
+ if(P.o.length)q.orderBy=P.o.map(function(o){return{field:{fieldPath:o[0]},direction:o[1]?"ASCENDING":"DESCENDING"}});
+ if(P.lim!=null)q.limit=P.lim;
+ return post(":runQuery",{structuredQuery:q}).then(function(a){
+  return a.filter(function(x){return x.document}).map(function(x){var d=fd(x.document.fields||{});d.__n=x.document.name;if(d.id===undefined)d.id=x.document.name.split("/").pop();return d})})}
+function strip(r){var c={};Object.keys(r).forEach(function(k){if(k!=="__n")c[k]=r[k]});return c}
+function pick(r,cols){r=strip(r);if(!cols||cols==="*")return r;var o={};cols.split(",").forEach(function(c){c=c.trim();if(c in r)o[c]=r[c]});return o}
+function commit(writes){var p=Promise.resolve();for(var i=0;i<writes.length;i+=400)(function(ch){p=p.then(function(){return post(":commit",{writes:ch})})})(writes.slice(i,i+400));return p}
+function fire(t,ops){
+ var P={f:[],o:[],lim:null,act:"select",cols:"*",data:null,head:false,single:0,ret:false,conf:"id"};
+ for(var i=0;i<ops.length;i++){var n=ops[i][0],a=ops[i][1];
+  if(OP[n]&&a.length>=2)P.f.push([n,a[0],a[1]]);
+  else if(n==="is")P.f.push(["eq",a[0],a[1]]);
+  else if(n==="select"){if(i===0||!P.data){P.act="select"}else P.ret=true;P.cols=a[0]||"*";P.head=!!(a[1]&&a[1].head);P.cnt=!!(a[1]&&a[1].count)}
+  else if(n==="insert"||n==="upsert"||n==="update"){P.act=n;P.data=a[0];if(n==="upsert"&&a[1]&&a[1].onConflict)P.conf=a[1].onConflict}
+  else if(n==="delete")P.act="delete";
+  else if(n==="order")P.o.push([a[0],!(a[1]&&a[1].ascending===false)]);
+  else if(n==="limit")P.lim=a[0];
+  else if(n==="range")P.lim=a[1]+1;
+  else if(n==="single"||n==="maybeSingle")P.single=n==="single"?2:1;
+  else throw new Error("Firestore rejimində dəstəklənmir: "+n)}
+ var fin=function(rows){rows=rows.map(function(r){return pick(r,P.cols)});
+  if(P.single){if(rows.length===1)return{data:rows[0],error:null};
+   return P.single===1&&!rows.length?{data:null,error:null}:{data:null,error:{message:"Nəticə tam 1 sətir olmalıdır",code:"PGRST116"}}}
+  return{data:rows,error:null}};
+ var run;
+ if(P.act==="select")run=query(t,P).then(function(r){if(P.head)return{data:null,count:r.length,error:null};var o=fin(r);if(P.cnt)o.count=r.length;return o});
+ else if(P.act==="insert"||P.act==="upsert"){var rows=[].concat(P.data).map(function(r){r=Object.assign({},r);var k=r[P.conf];if(r.id===undefined)r.id=rid();return r});
+  run=commit(rows.map(function(r){var id=String(P.act==="upsert"&&r[P.conf]!==undefined?r[P.conf]:r.id);return{update:{name:ROOT.replace("https://firestore.googleapis.com/v1/","")+"/"+t+"/"+encodeURIComponent(id),fields:tf(r)},currentDocument:P.act==="insert"?{exists:false}:undefined}}))
+   .then(function(){return P.ret?fin(rows):{data:null,error:null}})}
+ else run=query(t,P).then(function(docs){
+  var base=ROOT.replace("https://firestore.googleapis.com/v1/","");
+  if(P.act==="delete")return commit(docs.map(function(d){return{delete:d.__n}})).then(function(){return P.ret?fin(docs):{data:null,error:null}});
+  return commit(docs.map(function(d){return{update:{name:d.__n,fields:tf(P.data)},updateMask:{fieldPaths:Object.keys(P.data)}}}))
+   .then(function(){return P.ret?fin(docs.map(function(d){return Object.assign({},d,P.data)})):{data:null,error:null}})});
+ return run.catch(function(e){return{data:null,error:{message:String(e&&e.message||e),code:"FIRESTORE"}}})
+}
+function down(r){var e=r&&r.error;if(!e)return false;var m=String(e.message||"")+String(e.code||"");
+ return /fetch|network|timeout|abort|failed|paused|unavailable|50\d|52\d|522|523|524/i.test(m)||r.status>=500||r.status===0}
+function viaSb(real,t,ops){var b=real.from(t);ops.forEach(function(o){b=b[o[0]].apply(b,o[1])});return Promise.resolve(b)}
+function rec(real,t){var ops=[];var p=new Proxy({},{get:function(_,k){
+ if(k==="then")return function(ok,no){
+  var go=MODE==="firebase"?Promise.resolve().then(function(){return fire(t,ops)})
+   :viaSb(real,t,ops).then(function(r){return down(r)?fire(t,ops):r},function(){return fire(t,ops)});
+  return go.then(ok,no)};
+ return function(){ops.push([k,[].slice.call(arguments)]);return p}}});return p}
+S.createClient=function(){
+ var real=ORIG.apply(S,arguments);
+ return new Proxy(real,{get:function(o,k){if(k==="from")return function(t){return rec(o,t)};var v=o[k];return typeof v==="function"?v.bind(o):v}})};
+window.DQGateway={mode:MODE,project:FB.projectId};
+})();
+</script>
 <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 <link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2">
@@ -9232,5 +9357,124 @@ if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boo
 
 <script src="dq-mv-link.js?v=1" defer></script>
 <script src="dq-an-stats.js?v=1" defer></script>
+<script id="dq-pro-guard">/* DQ Pro Guard: admin keçidlərinin dayanıqlı işləməsi, gizli giriş (3 san basılı tutma), bağlantı statusu */
+(function(){
+if(window.__dqProGuard)return;window.__dqProGuard=1;
+var D=document,HOLD=3000,MOVE=12;
+/* ---------- Bildiriş ---------- */
+function toast(msg,kind){
+ try{var t=D.getElementById("dqpg-toast");
+ if(!t){t=D.createElement("div");t.id="dqpg-toast";t.setAttribute("role","status");t.setAttribute("aria-live","polite");
+  t.style.cssText="position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);max-width:min(92vw,460px);padding:12px 18px;border-radius:12px;font:600 14px/1.4 system-ui,sans-serif;color:#fff;z-index:2147483600;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.35);text-align:center";
+  D.body.appendChild(t)}
+ t.style.background=kind==="err"?"#b42318":kind==="ok"?"#067647":"#0a2f7a";t.textContent=msg;
+ requestAnimationFrame(function(){t.style.opacity="1";t.style.transform="translateX(-50%) translateY(0)"});
+ clearTimeout(t._h);t._h=setTimeout(function(){t.style.opacity="0";t.style.transform="translateX(-50%) translateY(20px)"},3600)}catch(e){}
+}
+/* ---------- Ekran köməkçiləri (yalnız əsas funksiya yoxdursa) ---------- */
+var fb={
+ goHome:function(){[].forEach.call(D.querySelectorAll(".screen.active"),function(s){s.classList.remove("active")});
+  var h=D.getElementById("v3-home");if(h)h.classList.add("active");scrollTo(0,0)},
+ closeAdminPanel:function(){var p=D.getElementById("admin-panel");if(p)p.classList.remove("active");fb.goHome()},
+ switchAdminTab:function(n){var all=D.querySelectorAll("#admin-panel [id^='mod-'],[id^='mod-']");
+  [].forEach.call(all,function(m){var on=m.id==="mod-"+n;m.style.display=on?"block":"none";m.classList.toggle("active",on)});
+  var t=D.getElementById("mod-"+n);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});else toast("«"+n+"» bölməsi tapılmadı","err")}
+};
+function ensureFallbacks(code){
+ Object.keys(fb).forEach(function(k){if(code.indexOf(k)>-1&&typeof window[k]!=="function")window[k]=fb[k]})
+}
+function openAdminScreen(){
+ var p=D.getElementById("admin-panel");if(!p)return false;
+ [].forEach.call(D.querySelectorAll(".screen.active"),function(s){s.classList.remove("active")});
+ p.classList.add("active");scrollTo(0,0);return true
+}
+/* ---------- Admin kartları: səssiz xəta yox, təkrar cəhd + aydın mesaj ---------- */
+function runCard(card,code,n){
+ try{ensureFallbacks(code);new Function(code).call(card)}
+ catch(e){
+  var missing=e&&(e.name==="ReferenceError"||e.name==="TypeError");
+  if(missing&&n<4){setTimeout(function(){runCard(card,code,n+1)},900);return}
+  toast("Bu modul yüklənməyib. Səhifəni yeniləyin; yenə açılmasa müvafiq .js faylı serverdə yoxdur.","err");
+  try{console.error("[DQ] admin kartı:",code,e)}catch(_){}
+ }
+}
+var lastCard=0;
+D.addEventListener("click",function(e){
+ if(sup>Date.now()){e.stopImmediatePropagation();e.preventDefault();return}
+ var c=e.target.closest&&e.target.closest("#admin-panel .admin-nav-card");
+ if(!c)return;var code=c.getAttribute("onclick");if(!code)return;
+ e.stopImmediatePropagation();e.preventDefault();
+ if(Date.now()-lastCard<350)return;lastCard=Date.now();
+ c.style.opacity=".75";setTimeout(function(){c.style.opacity=""},220);
+ runCard(c,code,0)
+},true);
+/* ---------- Gizli admin girişi: Giriş düyməsi və İmanov yazısı 3 san ---------- */
+var sup=0;
+function kind(el){
+ for(var i=0;el&&el!==D.body&&i<4;i++,el=el.parentElement){
+  var t=(el.textContent||"").replace(/\s+/g," ").trim();
+  if(!t||t.length>90)continue;
+  if(/imanov|imanoff|imanof/i.test(t))return"brand";
+  if(t.length<32&&/^(giriş|daxil ol|daxil ol ?\/ ?qeydiyyat|kabinetə giriş)$/i.test(t))return"login"
+ }
+ return""
+}
+var hold=null;
+function cancel(){if(hold){clearTimeout(hold.t);hold=null}}
+function fire(){
+ cancel();sup=Date.now()+900;
+ try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}
+ openAdminEntry()
+}
+function openAdminEntry(){
+ if(window.__dqaOK){
+  if(typeof window.openAdminPanel==="function"){try{window.openAdminPanel();return}catch(e){}}
+  if(openAdminScreen()){toast("Admin panel açıldı","ok");return}
+ }
+ toast("Admin girişi yoxlanılır…");
+ fetch("proysl.html",{cache:"no-store"}).then(function(r){
+  if(r.ok)location.href=location.pathname+"?proysl";
+  else toast("proysl.html serverdə tapılmadı. Onu index.html ilə eyni qovluğa yükləyin.","err")
+ },function(){toast("Server cavab vermir. Bağlantını yoxlayın.","err")})
+}
+D.addEventListener("pointerdown",function(e){
+ if(e.pointerType==="mouse"&&e.button!==0)return;
+ var k=kind(e.target);if(!k)return;cancel();
+ hold={x:e.clientX,y:e.clientY,t:setTimeout(fire,HOLD)}
+},{capture:true,passive:true});
+D.addEventListener("pointermove",function(e){
+ if(hold&&(Math.abs(e.clientX-hold.x)>MOVE||Math.abs(e.clientY-hold.y)>MOVE))cancel()
+},{capture:true,passive:true});
+["pointerup","pointercancel","dragstart","scroll"].forEach(function(n){D.addEventListener(n,cancel,{capture:true,passive:true})});
+D.addEventListener("contextmenu",function(e){if(hold||sup>Date.now()||kind(e.target)==="login"||kind(e.target)==="brand"){if(hold||sup>Date.now())e.preventDefault()}},true);
+/* ---------- Bağlantı statusu: yalnız həqiqətən kəsiləndə göstər ---------- */
+var BAD=/(mərkəzi baza|baza ilə əlaqə|əlaqə (zəif|zəyif))/i,pill=null,miss=0;
+function showPill(on){
+ if(!pill){pill=D.createElement("div");pill.id="dqpg-net";pill.setAttribute("role","status");
+  pill.style.cssText="position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:8px 16px;border-radius:999px;background:#7a2e0e;color:#fff;font:600 13px/1.3 system-ui,sans-serif;z-index:2147483500;box-shadow:0 6px 18px rgba(0,0,0,.3);display:none";
+  pill.textContent="Bağlantı bərpa olunur…";D.body.appendChild(pill)}
+ pill.style.display=on?"block":"none"
+}
+function check(){
+ if(!window.DQNet)return;
+ DQNet.ping().then(function(ok){
+  if(ok){miss=0;showPill(false)}else{miss++;if(miss>=2)showPill(true)}
+ })
+}
+setInterval(function(){if(!D.hidden)check()},miss?6000:20000);
+addEventListener("online",check);addEventListener("offline",function(){miss=2;showPill(true)});
+D.addEventListener("visibilitychange",function(){if(!D.hidden)check()});
+setTimeout(check,1500);
+/* Server əlçatandırsa, yalançı «əlaqə zəifdir» bildirişləri göstərilməsin */
+var oa=window.alert;
+window.alert=function(m){if(BAD.test(String(m))&&window.DQNet&&DQNet.ok()){check();return}return oa.apply(this,arguments)};
+new MutationObserver(function(rs){
+ if(!(window.DQNet&&DQNet.ok()))return;
+ rs.forEach(function(r){[].forEach.call(r.addedNodes,function(n){
+  if(n.nodeType===1&&n.id!=="dqpg-net"&&n.id!=="dqpg-toast"){var t=(n.textContent||"");if(t.length<260&&BAD.test(t)){n.style.display="none";check()}}
+ })})
+}).observe(D.documentElement,{childList:true,subtree:true});
+})();
+</script>
 </body>
 </html>
