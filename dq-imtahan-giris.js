@@ -1,9 +1,9 @@
 /*!
- * DQ Platform — İmtahan bölməsi (v7)
+ * DQ Platform — İmtahan bölməsi (v9)
  * Sınaq siyahısı + qeydiyyat (iş nömrəsi avtomatik) + 3 addımlı giriş portalı.
  *
  * Qoşulma: index.html-in sonunda, digər skriptlərdən sonra
- *   <script src="dq-imtahan-giris.js?v=7"></script>
+ *   <script src="dq-imtahan-giris.js?v=9"></script>
  *
  * İstəyə görə tənzimləmə (bu faylı yükləməzdən əvvəl):
  *   window.DQ_IG_CONFIG = {
@@ -44,6 +44,8 @@
     resultCollections: ['results', 'exam_results', 'netice'],
     allowRetake: false,
     homeCarousel: true,
+    videos: { register: '', exam: '' }, /* məs. { register: 'video/qeydiyyat.mp4', exam: 'video/imtahan.mp4' } */
+    notifyNew: true,
     carouselMs: 2000,
     legacyRegs: 'dq_exam_regs',
     supabase: {
@@ -242,6 +244,18 @@
       if (found) { store[key] = found; lsSet(CFG.storageResults, store); }
       return found;
     },
+    /* Admin tərəfindən hazırlanmış elan qapağı (dq-elan.js). null = yoxdur */
+    async getCover(key) {
+      Data._cov = Data._cov || {};
+      if (key in Data._cov) return Data._cov[key];
+      var img = null;
+      try {
+        var r = await sbFetch('dq_v2_store?select=data&collection=eq.elan&data->>key=eq.' + encodeURIComponent(key) + '&order=id.desc&limit=1', {}, 4000);
+        if (r.ok) { var a = await r.json(); img = (a && a[0] && a[0].data && a[0].data.img) || null; }
+      } catch (e) {}
+      Data._cov[key] = img;
+      return img;
+    },
     async uniqueCode() {
       var all = ls(CFG.storageUsers, {}), c, i;
       for (i = 0; i < 6; i++) {
@@ -337,6 +351,7 @@ a{color:inherit}
 .dot.done{background:#4caf8a;color:#fff}
 .line{flex:1;height:4px;background:#ebe9e2;margin:0 6px;border-radius:2px}
 .line.done{background:#4caf8a}
+.cov{display:block;width:100%;max-height:280px;object-fit:cover;border-radius:16px;margin:0 0 14px}
 .kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid #f0eee8;font-size:14px;color:#4b5563}
 .kv b{color:#1e1b4b}
 .or{display:flex;align-items:center;gap:10px;margin:16px 0 10px;font-size:13px;color:#6b7280}
@@ -519,6 +534,11 @@ a{color:inherit}
       '<div class="err" id="err" role="alert"></div>' +
       '<div class="row"><button class="ghost" type="button" data-c>Ləğv et</button><button class="navy" type="button" data-n>Davam et</button></div>');
     var q = function (s) { return m.box.querySelector(s); };
+    if (exam) Data.getCover(examKey(exam)).then(function (img) {
+      if (!img || !m.ov.isConnected) return;
+      var im = document.createElement('img'); im.className = 'cov'; im.alt = ''; im.src = img;
+      m.box.insertBefore(im, m.box.firstChild);
+    });
     q('#grp').onclick = function (e) {
       var s = e.target.closest('[data-g]'); if (!s) return;
       group = s.getAttribute('data-g');
@@ -812,6 +832,16 @@ a{color:inherit}
       '.dqa-go{align-self:flex-start;margin-top:4px;border:0;border-radius:12px;padding:11px 20px;font:800 14px Mulish,system-ui,sans-serif;color:#13203f;background:linear-gradient(180deg,#f3d47a,#d4a73c);box-shadow:0 4px 12px rgba(212,167,60,.25);cursor:pointer}' +
       '.dqa-dots{display:flex;justify-content:center;gap:6px;padding:0 0 12px}' +
       '.dqa-dots i{width:7px;height:7px;border-radius:99px;background:#3b4f86;transition:all .3s}.dqa-dots i.on{width:20px;background:#f3d47a}' +
+      '.dqa-lx{background:#fff;border:1px solid #e3e8f2;border-radius:20px;padding:20px;color:#0f1f45;font-family:inherit;text-align:left}' +
+      '.dqa-lx h3{margin:0 0 2px;font-size:20px;font-weight:800;color:#0f1f45;text-align:left}.dqa-lxs{font-size:13px;color:#5d6a88;margin-bottom:12px}' +
+      '.dqa-lx .dqa-tag{background:#fff7e0;color:#8a6410;border-color:#f0d58a}' +
+      '.dqa-lxr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #eef1f7;flex-wrap:wrap}.dqa-lxr>div{min-width:0;flex:1 1 180px}' +
+      '.dqa-lxt{font-size:15px;font-weight:700;margin:6px 0 2px;color:#0f1f45}.dqa-lxm{font-size:12px;color:#5d6a88}' +
+      '.dqa-lxb{border:0;border-radius:12px;padding:11px 16px;font:800 13px Mulish,system-ui,sans-serif;color:#fff;background:#1e1b4b;cursor:pointer;white-space:nowrap}' +
+      '.dqa-lxa{display:flex;gap:8px;flex-wrap:wrap}.dqa-lxb.gh{background:#eef2fb;color:#1e1b4b}' +
+      '.dqa-vd{margin-top:14px}.dqa-vd video{display:block;width:100%;max-height:420px;border-radius:14px;background:#000;margin-top:6px}' +
+      '.dqa-bn{position:fixed;left:12px;right:12px;top:12px;z-index:2147483200;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#0c1f4d;color:#fff;border:1px solid #c9a24a;border-radius:16px;padding:12px 14px;box-shadow:0 14px 34px #0006;font-family:Mulish,system-ui,sans-serif;font-size:13px;max-width:520px;margin:0 auto}' +
+      '.dqa-bn b{color:#f3d47a;font-size:14px}.dqa-bn span{flex:1 1 120px;color:#c3cfe8}.dqa-bn button{border:0;border-radius:10px;padding:9px 14px;font-weight:800;background:#f3d47a;color:#13203f;cursor:pointer}.dqa-bn i{cursor:pointer;font-style:normal;font-size:20px;color:#9fb0d6;padding:0 4px}' +
       '@media (prefers-reduced-motion:reduce){.dqa-tr{transition:none}}';
     (document.head || document.documentElement).appendChild(st);
   }
@@ -916,6 +946,7 @@ a{color:inherit}
         var ga = CFG.groups.indexOf(a.group), gb = CFG.groups.indexOf(b.group);
         return ((ga < 0 ? 99 : ga) - (gb < 0 ? 99 : gb)) || ((a.number || 0) - (b.number || 0));
       });
+      if (list.length || AC.sig) notifyNew(list);
       var sig = list.map(function (e) { return examKey(e) + e.title + e.questions + e.duration; }).join('|');
       if (sig !== AC.sig) {
         AC.sig = sig; AC.exams = list;
@@ -926,9 +957,90 @@ a{color:inherit}
     AC.loading = false;
   }
 
+  function videosHtml() {
+    var v = CFG.videos || {}, h = '';
+    [['register', 'Necə qeydiyyatdan keçmək olar?'], ['exam', 'İmtahanda necə iştirak olunur?']].forEach(function (x) {
+      if (v[x[0]]) h += '<div class="dqa-vd"><div class="dqa-lxt">' + x[1] + '</div><video controls playsinline preload="metadata" src="' + esc(v[x[0]]) + '"></video></div>';
+    });
+    return h;
+  }
+
+  /* istifadəçi elanı özü paylaşır: qapaq şəkli + qeydiyyat linki */
+  function shareExam(e) {
+    if (!e) return;
+    if (window.DQElan && DQElan.quickShare) return DQElan.quickShare(e);
+    var url = location.origin + location.pathname + '?qeyd=' + encodeURIComponent(examKey(e));
+    var text = '📢 Qeydiyyat elanı\n' + e.title + '\n\nQeydiyyat: ' + url;
+    if (navigator.share) { navigator.share({ text: text }).catch(function () {}); }
+    else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+
+  /* Bildirişlər: yeni imtahan əlavə olunanda (sayt açılanda) xəbərdarlıq.
+     Sayt bağlı ikən telefona push göndərmək üçün server tərəfi (FCM/VAPID) lazımdır. */
+  function askNotify(btn) {
+    try { Notification.requestPermission().then(function (p) { if (btn && p !== 'default') btn.remove(); }); } catch (e) {}
+  }
+  function notifyNew(list) {
+    if (!CFG.notifyNew) return;
+    var seen = ls('dq_ig_seen', null), keys = list.map(examKey);
+    lsSet('dq_ig_seen', keys);
+    if (!seen) return; /* ilk ziyarətdə xəbərdarlıq yoxdur */
+    var fresh = list.filter(function (e) { return seen.indexOf(examKey(e)) < 0; });
+    if (!fresh.length) return;
+    var e = fresh[0], title = 'Yeni imtahan: ' + e.group + ' · Sınaq ' + e.number, body = 'Qeydiyyat açıqdır. Toxunun və qeydiyyatdan keçin.';
+    try {
+      if (window.Notification && Notification.permission === 'granted') {
+        var open = function () { window.focus(); openRegister(e); };
+        if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+          navigator.serviceWorker.ready.then(function (r) { r.showNotification(title, { body: body, icon: 'icon-512.png', tag: 'dq-new-' + examKey(e), data: { url: location.pathname + '?qeyd=' + examKey(e) } }); })
+            .catch(function () { var n = new Notification(title, { body: body }); n.onclick = open; });
+        } else { var n = new Notification(title, { body: body }); n.onclick = open; }
+      }
+    } catch (er) {}
+    var bn = document.createElement('div'); bn.className = 'dqa-bn';
+    bn.innerHTML = '<b>' + esc(title) + '</b><span>' + (fresh.length > 1 ? '+ ' + (fresh.length - 1) + ' yeni imtahan' : 'Qeydiyyat açıqdır') + '</span><button type="button">Qeydiyyat</button><i>×</i>';
+    bn.querySelector('button').onclick = function () { bn.remove(); openRegister(e); };
+    bn.querySelector('i').onclick = function () { bn.remove(); };
+    document.body.appendChild(bn); setTimeout(function () { bn.remove(); }, 12000);
+  }
+
+  /* Qeydiyyat portalında (#lxp) aktiv imtahanlar siyahısı: hər birindən qeydiyyatdan keçmək olur */
+  function lxpMount() {
+    var lx = document.getElementById('lxp'), old = document.getElementById('dqa-lxp');
+    if (!lx || !lx.getClientRects().length || !AC.exams.length) { if (old && !AC.exams.length) old.remove(); return; }
+    if (old && old.isConnected && old.getAttribute('data-sig') === AC.sig) return;
+    if (old) old.remove();
+    var w = lx.querySelector('.lxp-w') || lx, c = document.createElement('div');
+    c.id = 'dqa-lxp'; c.className = 'dqa-lx'; c.setAttribute('data-sig', AC.sig);
+    c.innerHTML = '<h3>Aktiv imtahanlar</h3><div class="dqa-lxs">Seçin və qeydiyyatdan keçin</div>' + AC.exams.map(function (e, i) {
+      return '<div class="dqa-lxr"><div><span class="dqa-tag">' + esc(e.group) + ' · Sınaq ' + esc(e.number) + '</span><div class="dqa-lxt">' + esc(e.title) + '</div>' +
+        '<div class="dqa-lxm">' + esc(e.questions) + ' sual · ' + esc(e.duration) + ' dəq' + (CFG.prices[e.group] ? ' · ' + CFG.prices[e.group] + ' AZN' : '') + '</div></div>' +
+        '<div class="dqa-lxa"><button type="button" class="dqa-lxb" data-i="' + i + '">Qeydiyyatdan keç</button>' +
+        '<button type="button" class="dqa-lxb gh" data-s="' + i + '">📣 Paylaş</button></div></div>';
+    }).join('') + videosHtml() +
+      ((window.Notification && Notification.permission === 'default') ? '<button type="button" class="dqa-lxb gh" data-bell style="width:100%;margin-top:12px">🔔 Yeni imtahanlardan xəbərdar ol</button>' : '');
+    c.addEventListener('click', function (ev) {
+      var sh = ev.target.closest('[data-s]');
+      if (sh) return shareExam(AC.exams[+sh.getAttribute('data-s')]);
+      if (ev.target.closest('[data-bell]')) return askNotify(ev.target.closest('[data-bell]'));
+      var b = ev.target.closest('[data-i]'); if (b) openRegister(AC.exams[+b.getAttribute('data-i')]);
+    });
+    w.appendChild(c);
+  }
+
+  /* Elan linki: ?qeyd=BB-1 (və ya #qeyd=BB-1) → qeydiyyat pəncərəsi birbaşa açılır */
+  function deepLink() {
+    var m = /[?&#]qeyd=([^&#]*)/.exec(location.search + location.hash);
+    if (!m) return;
+    var key = decodeURIComponent(m[1]).toUpperCase();
+    Data.getExams().then(function (list) {
+      openRegister(list.filter(function (e) { return examKey(e) === key; })[0] || null);
+    }).catch(function () { openRegister(null); });
+  }
+
   function carTick() {
     if (document.hidden) return;
-    carRefresh(false).then(carMount);
+    carRefresh(false).then(function () { carMount(); lxpMount(); });
   }
   function carStart() {
     if (!CFG.homeCarousel || AC.timer) return;
@@ -945,11 +1057,14 @@ a{color:inherit}
     close: closeAll,
     register: function () { openRegister(null); },
     config: CFG,
+    sb: sbFetch,
+    registerFor: function (e) { openRegister(e || null); },
     getExams: function () { return Data.getExams(); },
     startExam: onStartTap,
     saveResult: saveResult,
     refreshHome: function () { return carRefresh(true).then(carMount); }
   };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', carStart); else carStart();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { carStart(); setTimeout(deepLink, 400); });
+  else { carStart(); setTimeout(deepLink, 400); }
   if (CFG.autoBind) autoBind();
 })();
