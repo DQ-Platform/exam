@@ -8280,6 +8280,8 @@ fix();
 <style id="dq-fix-corner-css">
 /* Admin düymələri səhifənin sonundakı kartları həmişə örtməsin: aşağıda boşluq qalır */
 html.dq-admin-ok #mod-suallar{padding-bottom:240px!important}
+#mod-suallar .breadcrumb-nav[data-dq-root]{font-size:0!important}
+#mod-suallar .breadcrumb-nav[data-dq-root] span.active{font-size:15px!important}
 </style>
 <script id="dq-fix-corner-js">
 /* 1) «Sınaqlar» (breadcrumb) toxunanda Əsas Admin Panelə qayıt.
@@ -8290,9 +8292,22 @@ function isAdmin(){try{return !!(window.DQAdminGate&&DQAdminGate.is())||localSto
 D.addEventListener("click",function(ev){
  var t=ev.target&&ev.target.closest&&ev.target.closest("#mod-suallar .breadcrumb-nav span");
  if(!t||t!==t.parentNode.querySelector("span"))return;
- if(!isAdmin()||typeof window.backToAdminHub!=="function")return;
+ /* «Sınaqlar» → admin paneldəki Suallar Modulunun papka siyahısı (Sınaq 1, 2, 3 …) */
+ if(!isAdmin())return;
  ev.preventDefault();ev.stopImmediatePropagation();
- try{window.backToAdminHub()}catch(e){}
+ try{
+  var m=D.getElementById("mod-suallar");
+  if(!(m&&m.getClientRects().length>0)&&typeof window.switchAdminTab==="function")window.switchAdminTab("suallar");
+  if(typeof window.showStep==="function")window.showStep(1);
+  var se=D.getElementById("stepExams");if(se&&se.style.display==="none")se.style.display="";
+  var ex=D.getElementById("navExam"),ct=D.getElementById("navCategory"),sb=D.getElementById("navSubject");
+  if(ex)ex.style.display="none";if(ct)ct.style.display="none";if(sb)sb.style.display="none";
+  var bc=t.parentNode;bc.setAttribute("data-dq-root","1");
+  var f=t;f.classList.add("active");
+  var sp=bc.querySelectorAll("span");
+  for(var i=0;i<sp.length;i++)if(sp[i]!==f&&sp[i].getAttribute("onclick")){sp[i].addEventListener("click",function(){
+   ex&&(ex.style.display="");ct&&(ct.style.display="");sb&&(sb.style.display="");f.classList.remove("active");bc.removeAttribute("data-dq-root")},{once:true})}
+ }catch(e){}
 },true);
 function shown(e){return e&&e.getClientRects().length>0}
 function findCookie(){
@@ -8304,9 +8319,8 @@ function findCookie(){
   if(!best||t.length<best.textContent.length)best=e}
  return best}
 function stackTop(){
- var top=window.innerHeight,a=D.getElementById("dq-admin-dock"),b=D.getElementById("admin-float-back"),r;
- if(a&&shown(a)){r=a.getBoundingClientRect();top=Math.min(top,r.top)}
- if(b&&shown(b)){r=b.getBoundingClientRect();top=Math.min(top,r.top)}
+ var top=window.innerHeight,st=D.getElementById("dq-stack"),r;
+ if(st&&shown(st)){r=st.getBoundingClientRect();top=Math.min(top,r.top)}
  return top}
 function fix(){
  try{
@@ -8319,6 +8333,87 @@ function fix(){
   c.style.setProperty("left","12px","important");c.style.setProperty("right","12px","important");
   touched=c}catch(e){}}
 setInterval(fix,400);window.addEventListener("resize",fix);window.addEventListener("orientationchange",fix);
+})();
+</script>
+<style id="dq-stack-css">
+/* ===== Sol aşağı vahid panel (#dq-stack): admin düymələri + baza xəbərdarlığı + əsas panelə qayıt =====
+   Hamısı bir konteynerdədir → üst-üstə düşmə və sıçrayış mümkün deyil. */
+#dq-stack{position:fixed;left:calc(12px + env(safe-area-inset-left,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:99992;
+ display:flex;flex-direction:column;align-items:stretch;gap:8px;width:max-content;min-width:196px;max-width:calc(100vw - 24px);
+ pointer-events:none;contain:layout style;font-family:inherit}
+#dq-stack>*{pointer-events:auto}
+#dq-stack:empty{display:none}
+/* qatlama düyməsi (yalnız admin) */
+#dq-stack-toggle{display:none;align-items:center;justify-content:space-between;gap:10px;height:34px;padding:0 14px;margin:0;box-sizing:border-box;cursor:pointer;
+ font:800 12px/1 inherit;font-family:inherit;letter-spacing:.3px;color:#e2e8f0;background:rgba(10,22,52,.92);
+ border:1px solid rgba(255,255,255,.14);border-radius:12px;box-shadow:0 8px 22px rgba(2,8,23,.35);-webkit-tap-highlight-color:transparent;
+ -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+html.dq-admin-ok #dq-stack-toggle{display:flex}
+#dq-stack-toggle .dqs-ar{display:inline-block;transition:transform .2s ease;font-size:11px}
+#dq-stack.dq-collapsed #dq-stack-toggle .dqs-ar{transform:rotate(180deg)}
+#dq-stack-toggle:focus-visible{outline:2px solid #f6c453;outline-offset:2px}
+#dq-stack.dq-collapsed>#dq-admin-dock{display:none!important}
+/* dok stack-in içində normal axınla durur */
+html.dq-admin-ok.dq-admin-ok.dq-admin-ok #dq-stack #dq-admin-dock#dq-admin-dock{position:static!important;left:auto!important;bottom:auto!important;
+ transform:none!important;width:100%!important;max-width:none!important;margin:0!important;will-change:auto;contain:none}
+#dq-stack #dq-admin-dock .dqd-b{width:100%;min-width:0;height:38px;background:rgba(15,45,107,.96);border-color:rgba(255,255,255,.16);
+ -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+/* xəbərdarlıq */
+#dq-stack [data-dq-warn][data-dq-warn]{position:static!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;
+ transition:none!important;width:auto!important;max-width:100%!important;margin:0!important;box-sizing:border-box;z-index:auto!important;
+ border-radius:12px!important;box-shadow:0 8px 22px rgba(2,8,23,.35)!important}
+/* əsas admin panelə qayıt */
+#dq-stack #admin-float-back#admin-float-back{position:static!important;left:auto!important;bottom:auto!important;z-index:auto!important;transform:none!important;
+ will-change:auto;transition:none!important;width:100%!important;max-width:none!important;height:40px!important;line-height:1!important;margin:0!important;
+ padding:0 16px!important;box-sizing:border-box;border-radius:12px!important;text-align:center;
+ background:linear-gradient(135deg,#1e1b4b,#312e81)!important;border:1px solid rgba(250,204,21,.35)!important;box-shadow:0 8px 22px rgba(2,8,23,.4)!important}
+@media(max-width:560px){#dq-stack{min-width:176px}}
+@media print{#dq-stack{display:none!important}}
+html.dq-admin-ok #mod-suallar{padding-bottom:280px!important}
+</style>
+<script id="dq-stack-js">
+(function(){"use strict";
+var D=document,KEY="dq_stack_collapsed",st=null,tg=null;
+function shown(e){return e&&e.getClientRects().length>0}
+function lsGet(){try{return localStorage.getItem(KEY)==="1"}catch(e){return false}}
+function lsSet(v){try{localStorage.setItem(KEY,v?"1":"0")}catch(e){}}
+function ensure(){
+ if(st&&st.isConnected)return st;
+ st=D.getElementById("dq-stack");
+ if(!st){
+  st=D.createElement("div");st.id="dq-stack";
+  tg=D.createElement("button");tg.type="button";tg.id="dq-stack-toggle";tg.setAttribute("aria-label","Admin qısayollarını göstər/gizlət");
+  tg.innerHTML='<span>🛠 Admin paneli</span><span class="dqs-ar">▼</span>';
+  tg.addEventListener("click",function(){var c=!st.classList.contains("dq-collapsed");st.classList.toggle("dq-collapsed",c);lsSet(c);tg.setAttribute("aria-expanded",String(!c))});
+  st.appendChild(tg);
+  if(lsGet())st.classList.add("dq-collapsed");
+  tg.setAttribute("aria-expanded",String(!st.classList.contains("dq-collapsed")));
+  D.body.appendChild(st)}
+ return st}
+function markWarn(){
+ var l=D.querySelectorAll("div,span,button,a"),i,e,t,best=null;
+ for(i=0;i<l.length;i++){e=l[i];
+  if(e.closest("#dq-admin-dock")||e.id==="dq-stack"||e.id==="dq-stack-toggle")continue;
+  t=e.textContent||"";if(t.length>90||!/Mərkəzi baza/i.test(t))continue;
+  var cs=getComputedStyle(e);
+  if(cs.position!=="fixed"&&!e.hasAttribute("data-dq-warn"))continue;
+  if(!best||t.length<best.textContent.length)best=e}
+ var old=D.querySelectorAll("[data-dq-warn]"),k;
+ for(k=0;k<old.length;k++)if(old[k]!==best)old[k].removeAttribute("data-dq-warn");
+ if(best&&!best.hasAttribute("data-dq-warn"))best.setAttribute("data-dq-warn","1");
+ return best}
+function adopt(){
+ try{
+  var s=ensure(),w=markWarn(),dock=D.getElementById("dq-admin-dock"),back=D.getElementById("admin-float-back");
+  /* sıranı qur */
+  var order=[w,back,D.getElementById("dq-stack-toggle"),dock].filter(Boolean),j;  /* yuxarıdan aşağı: xəbərdarlıq, geri, qatlama, dok → dok və qatlama həmişə eyni yerdə */
+  for(j=0;j<order.length;j++){if(s.children[j]!==order[j])s.insertBefore(order[j],s.children[j]||null)}
+ }catch(x){}}
+var tm=0;function sched(){if(tm)return;tm=setTimeout(function(){tm=0;adopt()},80)}
+function start(){adopt();
+ try{new MutationObserver(sched).observe(D.body,{childList:true,subtree:true,attributes:true,attributeFilter:["style","class","hidden"]})}catch(e){}
+ setInterval(adopt,800)}
+if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",start);else start()
 })();
 </script>
 </body>
