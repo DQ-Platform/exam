@@ -567,41 +567,28 @@
   }
 
   /* ---------------- «Digər alətlər» bölməsinə kart ---------------- */
+  function nrm(t) { return String(t || '').replace(/\u0130/g, 'i').replace(/\u0307/g, '').toLowerCase().replace(/\s+/g, ' ').trim(); }
   function injectTile() {
     try {
-      if (!isAdmin()) return;
-      var all = document.querySelectorAll('body *'), src = null;
-      for (var i = 0; i < all.length; i++) {
-        var e = all[i]; if (e.closest('#dqes-host') || e.children.length > 0) continue;
-        if ((e.textContent || '').trim() === 'ImtahanPro') {
-          var t = e; for (var k = 0; k < 5 && t.parentElement; k++) { if (t.parentElement.children.length >= 4 && t.parentElement.children.length === [].filter.call(t.parentElement.children, function (c) { return c.tagName === t.tagName; }).length) break; t = t.parentElement; }
-          if (t.parentElement && t.parentElement.children.length >= 3) { src = t; break; }
-        }
+      if (!isAdmin() || document.hidden) return;
+      if (document.querySelector('[data-dqes-tile]')) return;
+      var cards = document.querySelectorAll('.admin-nav-card'), src = null;
+      for (var i = 0; i < cards.length; i++) {
+        if (nrm(cards[i].textContent).replace(/[^a-z]/g, '') === 'imtahanpro' && cards[i].getClientRects().length) { src = cards[i]; break; }
       }
       if (!src) return;
-      var par = src.parentElement; if (par.querySelector('[data-dqes-tile]')) return;
       var c = src.cloneNode(true);
-      [c].concat([].slice.call(c.querySelectorAll('*'))).forEach(function (n) {
-        n.removeAttribute('id'); n.removeAttribute('onclick'); n.removeAttribute('href');
-        [].slice.call(n.attributes).forEach(function (a) { if (/^data-/.test(a.name)) n.removeAttribute(a.name); });
-      });
-      var w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT), n, done = false, iconDone = false;
-      while ((n = w.nextNode())) { if (n.data.trim() === 'ImtahanPro') { n.data = 'Elan Studio'; done = true; } }
-      [].forEach.call(c.querySelectorAll('*'), function (el) {
-        if (iconDone) return; var tx = (el.textContent || '').trim();
-        if (!el.children.length && tx && tx.length <= 4 && !/[A-Za-z0-9]/.test(tx)) { el.textContent = '📣'; iconDone = true; }
-      });
-      if (!done) return;
-      c.setAttribute('data-dqes-tile', '1'); c.style.cursor = 'pointer';
+      c.removeAttribute('onclick'); c.removeAttribute('id');
+      c.style.background = 'linear-gradient(135deg,#d4a73c,#8a5a0a)'; c.style.color = '#fff'; c.style.cursor = 'pointer';
+      c.innerHTML = '<span class="icon">📣</span> Elan Studio';
+      c.setAttribute('data-dqes-tile', '1');
       c.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); open(); });
       src.insertAdjacentElement('afterend', c);
     } catch (e) {}
   }
-  var tmr = 0;
-  function schedTile() { if (tmr) return; tmr = setTimeout(function () { tmr = 0; injectTile(); }, 400); }
   function initTile() {
-    try { new MutationObserver(schedTile).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
-    setInterval(injectTile, 2500); schedTile();
+    /* nadir yoxlama; MutationObserver və tam DOM skanı yoxdur */
+    setInterval(injectTile, 3000); setTimeout(injectTile, 800);
   }
 
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && host && host.style.display === 'block') close(); });

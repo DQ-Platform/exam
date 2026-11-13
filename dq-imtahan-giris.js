@@ -1030,8 +1030,8 @@ a{color:inherit}
       if (AC.hidden) { AC.hidden.style.removeProperty('display'); AC.hidden = null; }
       return;
     }
-    var box = findEmpty() || findHostCards();
-    if (box) { AC.hidden = box; box.style.setProperty('display', 'none', 'important'); }
+    var box = (AC.hidden && AC.hidden.isConnected) ? AC.hidden : (findEmpty() || findHostCards());
+    if (box) { AC.hidden = box; if (box.style.display !== 'none') box.style.setProperty('display', 'none', 'important'); }
     if (!AC.node) carBuild();
     if (AC.hidden && AC.hidden.parentNode && (!AC.node.isConnected || AC.node.previousElementSibling !== AC.hidden)) {
       AC.hidden.parentNode.insertBefore(AC.node, AC.hidden.nextSibling);
@@ -1155,6 +1155,8 @@ a{color:inherit}
   function lca(a, b) { for (var n = a; n; n = n.parentElement) if (n.contains(b)) return n; return null; }
   function stackPanels() {
     if (!CFG.stackHome) return;
+    if (stackPanels.c && stackPanels.c.isConnected && Date.now() - (stackPanels.t || 0) < 8000) return;
+    if (!stackPanels.c && Date.now() - (stackPanels.f || 0) < 6000) return;
     if (!stackPanels.c || !stackPanels.c.isConnected) {
       var bs = textEls('aktiv sinaqlar ve movzu testleri'), as = textEls('yenilikler'), best = null, bsz = 1e9;
       bs.forEach(function (b) {
@@ -1165,7 +1167,7 @@ a{color:inherit}
           if (sz < bsz) { bsz = sz; best = { c: c, a: a, b: b }; }
         });
       });
-      if (!best) return;
+      if (!best) { stackPanels.f = Date.now(); return; }
       stackPanels.c = best.c; stackPanels.a = best.a; stackPanels.b = best.b;
     }
     var c = stackPanels.c, pa = null, pb = null;
@@ -1174,14 +1176,18 @@ a{color:inherit}
       if (c.children[k].contains(stackPanels.b)) pb = c.children[k];
     }
     if (!pa || !pb || pa === pb) return;
+    stackPanels.t = Date.now();
     var S = function (el, o) { for (var p in o) el.style.setProperty(p, o[p], 'important'); };
     S(c, { display: 'flex', 'flex-direction': 'column', gap: '20px', 'grid-template-columns': 'minmax(0,1fr)', 'align-items': 'stretch' });
     S(pb, { order: '1', width: '100%', 'max-width': 'none', 'min-width': '0', flex: 'none', margin: '0', 'grid-column': 'auto' });
     S(pa, { order: '2', width: '100%', 'max-width': 'none', 'min-width': '0', flex: 'none', margin: '0', 'grid-column': 'auto' });
   }
 
+  /* istifadəçi sürüşdürərkən heç bir DOM skanı aparılmır */
+  var lastScroll = 0;
+  ['scroll', 'touchstart', 'touchmove', 'wheel', 'pointermove'].forEach(function (n) { window.addEventListener(n, function () { lastScroll = Date.now(); }, { capture: true, passive: true }); });
   function carTick() {
-    if (document.hidden) return;
+    if (document.hidden || Date.now() - lastScroll < 1500) return;
     try { stackPanels(); } catch (e) {}
     carRefresh(false).then(function () { carMount(); lxpMount(); });
   }

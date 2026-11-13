@@ -22,6 +22,7 @@
     if (!t || t.nodeType !== 1) t = t && t.parentElement;
     for (var i = 0, el = t; el && el !== D.body && i < 5; i++, el = el.parentElement) {
       if (el.hasAttribute && el.hasAttribute('data-dq-admin-hold')) return true;
+      if (el.childElementCount > 8) continue; /* böyük konteynerlərin mətnini hər toxunuşda oxumuruq */
       var tx = norm(el.textContent);
       if (!tx || tx.length > 120) continue;
       if (/imanov/.test(tx) && tx.length < 90) return true;
