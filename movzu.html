@@ -68,7 +68,7 @@ function submit(){var nm=$("#nm").value.trim(),ph=$("#ph").value.trim();S.name=n
  DB.add(M.COL.order,o).then(function(r){o._id=r._id;lsSet("mv_code",o.code);done(o)}).catch(function(e){M.toast("Xəta: "+e.message,1);$("#next").disabled=false;$("#next").textContent="Qeydiyyatı tamamla"})}
 function done(o){showBar(false);var msg=waMessage(o),link=M.waLink(msg,cfg.wa);
  set('<div class="card" style="text-align:center"><div style="font-size:46px">✅</div><h1>Qeydiyyat tamamlandı</h1><p class="s">İş nömrəniz (yaddaşda saxlayın):</p><div class="score" style="font-size:40px;letter-spacing:4px">'+o.code+'</div><p class="s mt">Ödəniş: <b style="color:var(--gold)">'+M.azn(o.price)+'</b>. Məlumatlar WhatsApp-da adminə göndərilir. Əgər WhatsApp açılmadısa, aşağıdakı düyməyə basın.</p><div class="grid" style="max-width:360px;margin:auto"><a class="btn" href="'+link+'" target="_blank" rel="noopener">WhatsApp-da göndər</a><button class="btn ghost" id="toCab">Kabinetə keç</button></div></div>');
- $("#toCab").onclick=function(){location.hash="kabinet";route()};
+ $("#toCab").onclick=function(){nav("#kabinet")};
  setTimeout(function(){try{window.open(link,"_blank")}catch(e){}},400)}
 /* ================= KABİNET ================= */
 function loginView(msg){showBar(false);set('<div class="card" style="max-width:400px;margin:36px auto"><h1 style="text-align:center">Kabinetə giriş</h1><p class="s" style="text-align:center">İştirak üçün sizə verilən iş nömrəsini yazın</p><label class="l">İş nömrəsi</label><input type="text" id="cd" maxlength="40" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="İş nömrəsini daxil edin"><div style="color:#fca5a5;min-height:20px;margin:6px 0">'+esc(msg||"")+'</div><button class="btn block" id="go">Daxil ol</button><p class="s mt" style="font-size:13px">İş nömrəsini WhatsApp mesajından kopyalayıb yapışdıra bilərsiniz.</p></div>');
@@ -78,7 +78,7 @@ function login(c){Promise.all([DB.list(M.COL.order,"data->>code=eq."+encodeURICo
   var orders=r[0],exams=r[1].filter(function(x){return(x.codes||[]).some(function(k){return String(k.code||k).toUpperCase()===c})||(x.codes||[]).indexOf("*")>=0});
   if(!orders.length&&!exams.length){loginView("Bu iş nömrəsi tapılmadı.");return}
   var nm=(orders[0]&&orders[0].name)||((exams[0].codes||[]).find(function(k){return String(k.code||k).toUpperCase()===c})||{}).name||"İştirakçı";
-  user={code:c,name:nm,orders:orders,exams:exams};lsSet("mv_code",c);cabinet()}).catch(function(e){loginView("Xəta: "+e.message)})}
+  user={code:c,name:nm,orders:orders,exams:exams};lsSet("mv_code",c);cabinet()}).catch(function(e){loginView(M.friendly(e))})}
 function cabinet(){showBar(false);$("#logout").classList.remove("hide");
  DB.list(M.COL.att,"data->>code=eq."+user.code).then(function(att){user.att=att;drawCab()}).catch(function(){user.att=[];drawCab()})}
 function attOf(key){return(user.att||[]).find(function(a){return a.key===key})}
@@ -133,14 +133,15 @@ function showResult(a){showBar(false);clearInterval(timerInt);var total=a.qs.len
   '<div class="card mt"><h3>Suallara baxış</h3>'+a.qs.map(function(q,i){return'<div style="margin:14px 0;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08)"><div class="qtxt" style="font-size:16px">'+(i+1)+". "+esc(q.t)+"</div>"+q.o.map(function(o,k){var cl=k===q.c?"right":(a.ans[i]===k?"wrong":"");return'<div class="ans '+cl+'" style="cursor:default"><b>'+"ABCDE"[k]+"</b><div>"+esc(o)+"</div></div>"}).join("")+(q.e?'<p class="s"><b>İzah:</b> '+esc(q.e)+"</p>":"")+"</div>"}).join("")+'</div><div class="mt"><button class="btn" id="bk">Kabinetə qayıt</button></div>');
  $("#bk").onclick=function(){drawCab()};scrollTo(0,0)}
 /* ================= ROUTE ================= */
+function nav(h){if(location.hash===h)route();else location.hash=h}
 function route(){document.body.classList.remove("noselect");clearInterval(timerInt);
  if(location.hash==="#kabinet"){var c=lsGet("mv_code");if(user){cabinet();return}if(c){set('<p class="s">Yüklənir…</p>');login(c);return}loginView();return}
  $("#logout").classList.add("hide");S={step:1,cat:"",subs:{},sel:{},name:"",phone:""};render()}
-$("#goCab").onclick=function(){location.hash="kabinet";route()};
-$("#logout").onclick=function(){user=null;lsSet("mv_code",null);location.hash="";route()};
+$("#goCab").onclick=function(){nav("#kabinet")};
+$("#logout").onclick=function(){user=null;lsSet("mv_code",null);nav("")};
 addEventListener("hashchange",route);
 Promise.all([M.loadCfg(),M.loadCat()]).then(function(r){cfg=r[0];catalog=r[1];
  if(!cfg.cats.some(function(c){return subsOf(c).length})&&location.hash!=="#kabinet"){set('<div class="card"><h1>Tezliklə</h1><p class="s">Mövzu sınaqları hazırlanır. Kabinetə giriş üçün yuxarıdakı «Kabinet» düyməsindən istifadə edin.</p></div>');showBar(false);return}
- route()}).catch(function(e){set('<div class="card"><h2>Bağlantı xətası</h2><p class="s">'+esc(e.message)+"</p></div>")});
+ route()}).catch(function(e){set('<div class="card"><h2>Bağlantı xətası</h2><p class="s">'+esc(M.friendly(e))+'</p><button class="btn" onclick="location.reload()">Yenidən cəhd et</button></div>')});
 })();
 </script></body></html>

@@ -77,6 +77,12 @@ function parseBulk(txt){var blocks=String(txt).replace(/\r/g,"").split(/\n\s*\n+
  return{ok:out,bad:bad}}
 function waLink(msg,num){return"https://wa.me/"+(num||WA)+"?text="+encodeURIComponent(msg)}
 window.MV={U:U,K:K,DB:DB,COL:COL,DEF_CFG:DEF_CFG,DEF_CAT:DEF_CAT,uid:uid,esc:esc,code:code,shuffle:shuffle,$:$,toast:toast,azn:azn,price:price,plan:plan,snap:snap,parseBulk:parseBulk,waLink:waLink,WA:WA,
- loadCfg:function(){return DB.one(COL.cfg).then(function(r){var c=r||{};return Object.assign({_id:c._id},JSON.parse(JSON.stringify(DEF_CFG)),c)})},
- loadCat:function(){return DB.one(COL.cat).then(function(r){var c=r||JSON.parse(JSON.stringify(DEF_CAT));["BB","BA","AC"].forEach(function(k){c.categories[k]=c.categories[k]||{subjects:[]}});return c})}};
+ loadCfg:function(fresh){return cached("cfg",fresh,function(){return DB.one(COL.cfg)}).then(function(r){var c=r||{};return Object.assign({_id:c._id},JSON.parse(JSON.stringify(DEF_CFG)),c)})},
+ loadCat:function(fresh){return cached("cat",fresh,function(){return DB.one(COL.cat)}).then(function(r){var c=r||JSON.parse(JSON.stringify(DEF_CAT));["BB","BA","AC"].forEach(function(k){c.categories[k]=c.categories[k]||{subjects:[]}});return c})},
+ clearCache:function(){try{localStorage.removeItem("mv_c_cfg");localStorage.removeItem("mv_c_cat")}catch(e){}},
+ friendly:function(e){var m=String(e&&e.message||e);if(/402|egress|quota|restricted/i.test(m))return"Server hazırda müvəqqəti əlçatmazdır (verilənlər bazası limiti). Bir az sonra yenidən cəhd edin.";if(/Failed to fetch|NetworkError/i.test(m))return"İnternet bağlantısı yoxdur.";return m}};
+/* konfiqurasiya/kataloq 10 dəq keşlənir: bazaya sorğu və trafik azalır; baza əlçatmaz olanda köhnə keş istifadə olunur */
+function cached(k,fresh,fn){var key="mv_c_"+k,now=Date.now(),o=null;try{o=JSON.parse(localStorage.getItem(key)||"null")}catch(e){}
+ if(!fresh&&o&&now-o.t<600000)return Promise.resolve(o.v);
+ return fn().then(function(v){try{localStorage.setItem(key,JSON.stringify({t:now,v:v}))}catch(e){}return v}).catch(function(e){if(o)return o.v;throw e})}
 })();
