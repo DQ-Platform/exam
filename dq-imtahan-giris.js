@@ -555,6 +555,9 @@
   }
   function autoBind() {
     /* window-capture: səhifədəki digər «İmtahan» dinləyicilərindən (qeydiyyat portalı və s.) əvvəl işləyir */
+    ['pointerdown', 'mousedown', 'touchstart', 'pointerup', 'mouseup', 'touchend'].forEach(function (n) {
+      window.addEventListener(n, function (e) { if (isNavTab(e.target)) e.stopImmediatePropagation(); }, { capture: true, passive: true });
+    });
     window.addEventListener('click', function (e) {
       if (!isNavTab(e.target)) return;
       e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();

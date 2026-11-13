@@ -1,6 +1,40 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<script id="dq-imtahan-early">
+/* «İmtahan» menyusu → İmtahan bölməsi (sınaq siyahısı).
+   <head>-in ƏN BAŞINDA işləyir: səhifədəki 50-yə yaxın digər skriptdən əvvəl qeydiyyatdan keçir.
+   Toxunuş/klik hadisələrini başqa skriptlər (Fənlər/Materiallar yönləndirməsi və s.) görmədən tutur və
+   sınaq siyahısını açır. Siyahı modulu hələ yüklənməyibsə, hazır olana qədər (≤8 san) gözləyir. */
+(function(){"use strict";
+if(window.__dqImtEarly)return;window.__dqImtEarly=1;
+if(/[?&]safe=1(&|$)/.test(location.search))return;
+var NAVSEL='[data-dqnav],.v3-hd,.v3-top,.v3-nav,header,nav,[class*=header],[class*=navbar],[class*=topbar],[class*=menu],[class*=dock],[class*=tabbar],[role="tablist"]',
+    SKIP='.dqg-page,.dqg-ov,#dqx-ov,#dqa-ov,#rga,#admin-panel,#login-screen,#exam-screen,#dq-cab,#dq-reg-nav,.admin-nav-card',
+    busy=0;
+function norm(s){return String(s||"").replace(/\u0130/g,"i").replace(/\u0307/g,"").replace(/\u0131/g,"i").replace(/\s+/g," ").trim().toLowerCase()}
+function isTab(t){
+ if(!t||t.nodeType!==1)t=t&&t.parentElement;
+ if(!t||!t.closest||t.closest(SKIP))return false;
+ for(var i=0,el=t;el&&el!==document.body&&el!==document.documentElement&&i<5;i++,el=el.parentElement){
+  var k=norm(el.getAttribute&&(el.getAttribute("data-tab")||el.getAttribute("data-page")));
+  if((k==="imtahan"||k==="exam"||norm(el.textContent)==="imtahan")&&(el.hasAttribute("data-dqnav")||el.closest(NAVSEL)))return true}
+ return false}
+function openIt(n){
+ n=n||0;
+ try{
+  if(window.DQImtahanGiris&&typeof window.DQImtahanGiris.open==="function"){window.DQImtahanGiris.open();busy=0;if(!openIt.r){openIt.r=1;setTimeout(function(){openIt.r=0;var p=document.querySelector(".dqg-page");if(!p||!p.getClientRects().length){try{window.DQImtahanGiris.open()}catch(e){}}},700)}return}
+  if(n>=53){busy=0;if(window.DQExam&&window.DQExam.open)window.DQExam.open("sinaq");return}
+ }catch(e){busy=0;return}
+ setTimeout(function(){openIt(n+1)},150)}
+["pointerdown","mousedown","touchstart","pointerup","mouseup","touchend"].forEach(function(n){
+ window.addEventListener(n,function(e){if(isTab(e.target))e.stopImmediatePropagation()},{capture:true,passive:true})});
+window.addEventListener("click",function(e){
+ if(!isTab(e.target))return;
+ e.preventDefault();e.stopImmediatePropagation();
+ if(busy)return;busy=1;openIt(0)},true);
+})();
+</script>
 <script id="dq-sinaqlar-back">
 /* «Sınaqlar» (breadcrumb) → admin paneldəki «Sınaq Seçin» siyahısı (Sınaq 1, 2, 3 …).
    Ən əvvəl işləyir (window capture), xarici showStep()-ə bağlı deyil, ictimai Sınaqlar səhifəsinə keçidi dayandırır. */
@@ -8612,7 +8646,7 @@ async function openXfer(){var T={exam:curExam(),cat:curCat()},ex=exams(),oc=CATS
 setInterval(function(){try{syncEd();syncBar();wrapSave()}catch(e){}},1000);
 })();
 </script>
-<script src="dq-imtahanpro.js?v=1"></script>
-<script src="dq-imtahan-giris.js?v=4"></script>
+<script src="dq-imtahanpro.js?v=2"></script>
+<script src="dq-imtahan-giris.js?v=5"></script>
 </body>
 </html>
