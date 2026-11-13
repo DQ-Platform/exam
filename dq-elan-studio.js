@@ -8,7 +8,7 @@
  *  - Format: Post 4:5, Kvadrat 1:1, Story 9:16
  *  - Hazır şablonlar, geri/irəli (undo/redo), qat siyahısı, təkrarla, sil, öndə/arxada
  *  - Kitabxana: elanlar Supabase-də (collection «elan2») və bu cihazda saxlanır
- *  - Aktiv imtahandan bir toxunuşla elan yaratma; imtahana bağlı elan portalda «Elan kimi paylaş» düyməsində istifadə olunur
+ *  - Aktiv imtahandan bir toxunuşla elan yaratma; imtahana bağlı elan portalda «🔗 Paylaş» düyməsində istifadə olunur
  *  - PNG yüklə, WhatsApp/sistem paylaşımı, link kopyala
  *
  * Qoşulma: dq-imtahan-giris.js-dən SONRA
@@ -366,7 +366,7 @@
     if (view !== 'lib') return;
     exams.sort(function (a, b) { return String(a.group).localeCompare(b.group) || a.number - b.number; });
     var exEl = $('#ex');
-    exEl.innerHTML = exams.length ? '<div class="row">' + exams.map(function (e, i) { return '<button class="b gh sm" data-i="' + i + '">' + esc(e.group) + ' · Sınaq ' + esc(e.number) + '</button>'; }).join('') + '</div><p class="hint">Seçdiyiniz imtahanın məlumatları elana avtomatik yazılır. Bu elan portalda həmin sınağın «Elan kimi paylaş» düyməsində istifadə olunacaq.</p>' : 'Hazırda aktiv imtahan yoxdur (İmtahanPro-da aktiv edin).';
+    exEl.innerHTML = exams.length ? '<div class="row">' + exams.map(function (e, i) { return '<button class="b gh sm" data-i="' + i + '">' + esc(e.group) + ' · Sınaq ' + esc(e.number) + '</button>'; }).join('') + '</div><p class="hint">Seçdiyiniz imtahanın məlumatları elana avtomatik yazılır. Bu elan portalda həmin sınağın «🔗 Paylaş» düyməsində istifadə olunacaq.</p>' : 'Hazırda aktiv imtahan yoxdur (İmtahanPro-da aktiv edin).';
     exEl.onclick = async function (ev) {
       var b = ev.target.closest('[data-i]'); if (!b) return; var e = exams[+b.getAttribute('data-i')];
       var ex = await findByKey(keyOf(e)); if (ex) { if (confirm('Bu sınaq üçün elan artıq var. Onu açım? (Ləğv = yenisini yarat)')) { await preload(ex); return openEditor(ex, true); } }
@@ -505,7 +505,7 @@
       h += '<div class="card"><h3>Elan məlumatı</h3>' + field('i-nm', 'Elanın adı (yalnız sizin üçün)', '<input type="text" id="i-nm" value="' + esc(D.name) + '">') +
         field('i-key', 'Sınağa bağla (məs. BB-1)', '<input type="text" id="i-key" value="' + esc(D.key) + '" placeholder="boş = ümumi elan">') +
         field('i-lk', 'Paylaşım linki', '<input type="text" id="i-lk" value="' + esc(D.link) + '" placeholder="boş = ' + esc(examLink(D.key)) + '">') +
-        '<p class="hint">Sınağa bağlanan elan portalda həmin sınağın «Elan kimi paylaş» düyməsində istifadə olunur.</p></div>';
+        '<p class="hint">Sınağa bağlanan elan portalda həmin sınağın «🔗 Paylaş» düyməsində istifadə olunur.</p></div>';
     } else h += '<div class="card"><p class="hint" style="margin:0">Elementi seçmək üçün üzərinə toxunun. Sürüşdürmək üçün barmaqla çəkin, ölçüsünü dəyişmək üçün mavi dairəni çəkin. Fon, format və məlumat üçün yuxarıdakı düymələr.</p></div>';
     P.innerHTML = h; bindPanel(l, mode); layersUi();
   }

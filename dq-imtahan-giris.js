@@ -1120,7 +1120,7 @@ a{color:inherit}
       return '<div class="dqa-lxr"><div><span class="dqa-tag">' + esc(e.group) + ' · Sınaq ' + esc(e.number) + '</span><div class="dqa-lxt">' + esc(e.title) + '</div>' +
         '<div class="dqa-lxm">' + esc(e.questions) + ' sual · ' + esc(e.duration) + ' dəq' + (CFG.prices[e.group] ? ' · ' + CFG.prices[e.group] + ' AZN' : '') + '</div></div>' +
         '<div class="dqa-lxa"><button type="button" class="dqa-lxb" data-i="' + i + '">Qeydiyyatdan keç</button>' +
-        '<button type="button" class="dqa-lxb gh" data-s="' + i + '">📣 Paylaş</button></div></div>';
+        '<button type="button" class="dqa-lxb gh" data-s="' + i + '">🔗 Paylaş</button></div></div>';
     }).join('') + videosHtml() +
       ((window.Notification && Notification.permission === 'default') ? '<button type="button" class="dqa-lxb gh" data-bell style="width:100%;margin-top:12px">🔔 Yeni imtahanlardan xəbərdar ol</button>' : '') + '</div>');
     sh.host.setAttribute('data-sig', AC.sig);
