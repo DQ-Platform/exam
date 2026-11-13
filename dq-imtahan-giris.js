@@ -238,10 +238,12 @@
     document.head.appendChild(l);
   }
   function injectCss() {
-    if ($('dqg-css')) return;
+    var old = $('dqig-css');
+    if (old && old.isConnected && old.textContent.length > 1000) return;
+    if (old) old.remove();
     injectFont();
-    var s = document.createElement('style'); s.id = 'dqg-css'; s.textContent = CSS;
-    document.head.appendChild(s);
+    var s = document.createElement('style'); s.id = 'dqig-css'; s.textContent = CSS;
+    (document.head || document.documentElement).appendChild(s);
   }
 
   /* ================= sınaq siyahısı ================= */
@@ -257,6 +259,7 @@
     var exams = [], shown = [];
     var u = ls(CFG.storageSession, null);
     page = document.createElement('div'); page.className = 'dqg-page';
+    page.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483000;overflow:auto;background:linear-gradient(180deg,#0b1a40,#06112c);color:#e9eefb;text-align:left;-webkit-overflow-scrolling:touch';
     page.innerHTML =
       '<div class="dqg-top"><div class="dqg-logo"><div class="dqg-lg">DQ</div><div class="dqg-brand"><b>DQ Platform</b><small>DÖVLƏT QULLUĞU SINAQ İMTAHANI</small></div></div>' +
       '<button class="dqg-x" data-x>Çıxış</button></div>' +
@@ -308,7 +311,9 @@
   function modal(html) {
     injectCss();
     var ov = document.createElement('div'); ov.className = 'dqg-ov';
+    ov.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483500;background:rgba(15,18,35,.62);display:flex;align-items:center;justify-content:center;padding:14px';
     ov.innerHTML = '<div class="dqg-modal">' + html + '</div>';
+    ov.firstChild.style.cssText = 'position:relative;width:100%;max-width:460px;max-height:94vh;overflow:auto;background:#fff;color:#1e1b4b;border-radius:26px;padding:26px 22px 22px;box-sizing:border-box;text-align:left';
     document.body.appendChild(ov);
     return { ov: ov, box: ov.firstChild, close: function () { ov.remove(); } };
   }
