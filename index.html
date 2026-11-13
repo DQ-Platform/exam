@@ -164,21 +164,7 @@ setInterval(function(){try{wrap(window.YQ2,"logout");wrap(window.DQ,"logout");wr
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 <script id="dq-perf-core">(function(){"use strict";
 if(window.__dqPerf)return;window.__dqPerf=1;
-var NMO=window.MutationObserver;
-if(NMO){
-  var PMO=function(cb){
-    var q=[],on=0,self=this;
-    function run(){on=0;if(!q.length)return;var r=q;q=[];try{cb.call(self,r,self)}catch(e){try{console.error(e)}catch(_){}}}
-    function go(){if(on)return;on=1;if(document.hidden)setTimeout(run,60);else requestAnimationFrame(run)}
-    this.__n=new NMO(function(l){for(var i=0;i<l.length;i++)q.push(l[i]);go()});
-    this.__c=function(){q=[]};
-    this.__t=function(){var r=q.concat(self.__n.takeRecords());q=[];return r};
-  };
-  PMO.prototype.observe=function(t,o){return this.__n.observe(t,o)};
-  PMO.prototype.disconnect=function(){this.__n.disconnect();this.__c()};
-  PMO.prototype.takeRecords=function(){return this.__t()};
-  window.MutationObserver=PMO;
-}
+var NMO=window.MutationObserver; /* MutationObserver-in sürət məhdudlaşdırması yalnız #dq11-early-də edilir (təkrar sarğı silindi) */
 /* Adaptiv interval: DOM-yamaq dövrələri (hook/fix/sync/repair...) səhifə sakit olanda ~2 san-də bir işləyir.
    Toxunuş, klik, naviqasiya və ya yeni DOM düyünü görünəndə dərhal əvvəlki sürətə qayıdır (2,5 san).
    Zaman/sayğac kimi görünən (Date, tick, left, ++/--, finish...) dövrələrə TOXUNULMUR. */
@@ -8647,6 +8633,6 @@ setInterval(function(){try{syncEd();syncBar();wrapSave()}catch(e){}},1000);
 })();
 </script>
 <script src="dq-imtahanpro.js?v=2"></script>
-<script src="dq-imtahan-giris.js?v=5"></script>
+<script src="dq-imtahan-giris.js?v=7"></script>
 </body>
 </html>
