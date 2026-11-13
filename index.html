@@ -2799,6 +2799,7 @@ window.scrollTo({top:0,behavior:"smooth"})};</script>
 <div class="admin-nav-card" onclick="window.DQKecid?DQKecid.open():alert('Keçid idarəsi yüklənməyib (dq-kecid.js)')" style="background:linear-gradient(135deg,#0a2f7a,#6d4cf5);color:#fff"><span class="icon">🔗</span> Keçid İdarəsi (düymə → keçid)</div>
 <div class="admin-nav-card" onclick="window.DQK?DQK.open():alert('Kitab modulu yüklənməyib (dq-kitab.js)')" style="background:linear-gradient(135deg,#0a2f7a,#d9a441);color:#fff"><span class="icon">📚</span> Sınaq Toplusu (Kitab)</div>
 <div class="admin-nav-card" onclick="window.DQRegAdmin?DQRegAdmin.open():alert('Modul yüklənməyib')" style="background:linear-gradient(135deg,#0a2f7a,#16a34a);color:#fff"><span class="icon">🎓</span> Aktiv İmtahanlar</div>
+<div class="admin-nav-card" onclick="window.DQImtahanPro?DQImtahanPro.open():alert('İmtahanPro modulu yüklənməyib (dq-imtahanpro.js)')" style="background:linear-gradient(135deg,#7c3aed,#0a2f7a);color:#fff"><span class="icon">🎯</span> İmtahanPro</div>
 <div class="admin-nav-card" onclick="window.DQResultsHub?DQResultsHub.open():alert('Nəticə Mərkəzi modulu yüklənməyib (dq-resepsiya-netice.js)')" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">📈</span> Nəticə Mərkəzi</div>
 </div>
 <style id="ppu-css">
@@ -8208,7 +8209,7 @@ function guard(obj,name){
   var g=function(){if(!isAdmin())return;return f.apply(this,arguments)};
   g.__dqGated=1;o[name]=g;return true
  }catch(e){return false}}
-var GUARDS=[[function(){return window},"dqGoAdmin"],[function(){return window.GZL},"open"],[function(){return window.DQNav},"openEditor"],[function(){return window.DQRegAdmin},"open"]];
+var GUARDS=[[function(){return window},"dqGoAdmin"],[function(){return window.GZL},"open"],[function(){return window.DQNav},"openEditor"],[function(){return window.DQRegAdmin},"open"],[function(){return window.DQImtahanPro},"open"]];
 function guardAll(){GUARDS.forEach(function(g){try{var o=g[0]();if(o)guard(o,g[1])}catch(e){}})}
 
 function sched(){if(tm)return;tm=setTimeout(function(){tm=0;guardAll();render()},120)}
@@ -8611,5 +8612,7 @@ async function openXfer(){var T={exam:curExam(),cat:curCat()},ex=exams(),oc=CATS
 setInterval(function(){try{syncEd();syncBar();wrapSave()}catch(e){}},1000);
 })();
 </script>
+<script src="dq-imtahanpro.js?v=1"></script>
+<script src="dq-imtahan-giris.js?v=4"></script>
 </body>
 </html>
