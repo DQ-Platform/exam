@@ -8451,5 +8451,162 @@ function start(){adopt();
 if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",start);else start()
 })();
 </script>
+<style id="dqx-css">
+#stepSubjects .folder-card,#stepCategories .folder-card{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#dqx-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 12px}
+.dqx-btn{background:#0f2d6b;color:#fff;border:0;border-radius:10px;padding:10px 14px;font:700 13px/1 inherit;font-family:inherit;cursor:pointer}
+.dqx-hint{font-size:11px;color:#64748b}
+#dqx-ed .dqx-chips{margin-top:6px}
+.dqx-chips{display:flex;flex-wrap:wrap;gap:6px}
+.dqx-ch{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:999px;padding:7px 12px;font:600 12px/1 inherit;font-family:inherit;cursor:pointer}
+.dqx-ch.on{background:#0f2d6b;border-color:#0f2d6b;color:#fff}
+.dqx-ch.dis{opacity:.35;pointer-events:none}
+#dqx-ov{position:fixed;inset:0;z-index:100001;background:rgba(15,23,42,.55);display:flex;align-items:flex-end;justify-content:center}
+.dqx-sh{background:#fff;width:100%;max-width:640px;max-height:88vh;border-radius:18px 18px 0 0;display:flex;flex-direction:column;box-shadow:0 -10px 40px rgba(2,8,23,.35)}
+.dqx-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:14px 16px 10px;border-bottom:1px solid #e2e8f0}
+.dqx-hd b{display:block;font-size:16px;color:#0f172a}.dqx-hd small{color:#64748b;font-size:12px}
+.dqx-x{border:0;background:#f1f5f9;border-radius:50%;width:32px;height:32px;font-size:14px;cursor:pointer}
+.dqx-bd{padding:6px 16px 12px;overflow:auto;-webkit-overflow-scrolling:touch}
+.dqx-l{font-size:12px;font-weight:700;color:#475569;margin:12px 0 6px}
+.dqx-sum{font-size:13px;color:#334155;background:#f8fafc;border-radius:10px;padding:10px 12px}
+.dqx-tb{display:flex;gap:8px;margin-bottom:8px}.dqx-tb button{border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:600;cursor:pointer}
+.dqx-q{display:flex;align-items:center;gap:8px;padding:9px 6px;border-bottom:1px solid #eef2f7;font-size:13px;cursor:pointer}
+.dqx-q .n{font-weight:800;color:#0f2d6b;min-width:38px}.dqx-q .t{flex:1;color:#334155;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.dqx-q .bd{font-size:10px;background:#fef3c7;color:#92400e;border-radius:6px;padding:2px 6px;white-space:nowrap}
+.dqx-q input{width:18px;height:18px;flex:none}
+.dqx-ft{padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid #e2e8f0}
+.dqx-go{width:100%;background:#16a34a;color:#fff;border:0;border-radius:12px;padding:13px;font:800 14px/1 inherit;font-family:inherit;cursor:pointer}.dqx-go:disabled{background:#94a3b8}
+#dqx-toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:100002;background:#0f172a;color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;max-width:90vw;box-shadow:0 8px 24px rgba(2,8,23,.4)}#dqx-toast.bad{background:#b91c1c}
+</style>
+<script id="dqx-js">
+(function(){"use strict";
+var D=document,CATS=["BA","BB","AC"],M=null,SM=null;
+function $(i){return D.getElementById(i)}
+function sb(){return window._supabase||(typeof _supabase!=="undefined"?_supabase:null)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function plain(h){return String(h||"").replace(/<img[^>]*>/gi," [şəkil] ").replace(/<[^>]+>/g," ").replace(/&nbsp;/g," ").replace(/\s+/g," ").trim()}
+function nn(s){return String(s==null?"":s).toLowerCase().replace(/\s+/g," ").trim()}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+function toast(t,bad){var e=$("dqx-toast");if(e)e.remove();e=D.createElement("div");e.id="dqx-toast";if(bad)e.className="bad";e.textContent=t;D.body.appendChild(e);setTimeout(function(){e.remove()},bad?6000:3500)}
+function G(n){return typeof window[n]!=="undefined"?window[n]:null}
+function curExam(){var m=(($("navExam")||{}).textContent||"").match(/\d+/);return m?m[0]:String(G("editorSelectedExam")||"1")}
+function curCat(){return(($("navCategory")||{}).textContent||"").trim().split(/\s+/)[0]||G("editorSelectedCategory")||"BA"}
+function exams(){var a=[];D.querySelectorAll("#examFolderGrid .folder-title").forEach(function(t){var m=t.textContent.match(/\d+/);if(m&&a.indexOf(m[0])<0)a.push(m[0])});if(!a.length)a=["1","2","3","4","5","6","7"];return a.sort(function(x,y){return x-y})}
+function refreshCounts(){var n=$("navCategory");if(!n)return;var t=n.textContent;n.textContent=t+" ";setTimeout(function(){n.textContent=t},1600)}
+async function schema(){if(M)return M;if(!sb())throw new Error("Verilənlər bazası bağlantısı tapılmadı");
+ var r=await sb().from("exam_questions").select("*").limit(1);if(r.error)throw r.error;SM=r.data&&r.data[0];if(!SM)throw new Error("Bazada nümunə sual yoxdur");
+ var K=Object.keys(SM),f=function(re){return K.filter(function(k){return re.test(k)})[0]};
+ M={exam:"exam_id",cat:"category",num:"q_number",sub:f(/^(subject|subject_name|fenn|fənn|topic|section|bolme|lesson)/i)||f(/subj|fenn|topic/i),q:f(/^(question(_text)?|q_?text|text|title|sual)$/i)};
+ if(!M.sub)throw new Error("Fənn sütunu tapılmadı. Sütunlar: "+K.join(", "));return M}
+function eid(v){return typeof SM[M.exam]==="number"?+v:String(v)}
+function cols(full){if(full)return"*";return["id",M.num,M.sub,M.q].filter(Boolean).join(",")}
+async function list(exam,cat,full){await schema();var out=[],from=0;
+ for(;;){var r=await sb().from("exam_questions").select(cols(full)).eq(M.exam,eid(exam)).eq(M.cat,cat).order(M.num,{ascending:true}).range(from,from+999);
+  if(r.error)throw r.error;var d=r.data||[];out=out.concat(d);if(d.length<1000)break;from+=1000}return out}
+async function byIds(ids){var out=[];for(var i=0;i<ids.length;i+=10){var r=await sb().from("exam_questions").select("*").in("id",ids.slice(i,i+10));if(r.error)throw r.error;out=out.concat(r.data||[])}
+ return out.sort(function(a,b){return a[M.num]-b[M.num]})}
+async function put(rows,exam,cat,mode){await schema();var st={ins:0,rep:0,skip:0},ex=await list(exam,cat,false),key={};
+ rows.forEach(function(r){key[r[M.num]]=nn(r[M.sub])});
+ var occ=ex.filter(function(e){return key[e[M.num]]!==undefined&&key[e[M.num]]===nn(e[M.sub])}),oc={};occ.forEach(function(e){oc[e[M.num]]=1});
+ var todo=rows;
+ if(mode==="skip"){todo=rows.filter(function(r){return !oc[r[M.num]]});st.skip=rows.length-todo.length}
+ else if(occ.length){var ids=occ.map(function(e){return e.id});for(var i=0;i<ids.length;i+=50){var d=await sb().from("exam_questions").delete().in("id",ids.slice(i,i+50));if(d.error)throw d.error}st.rep=occ.length}
+ var ins=todo.map(function(r){var o=Object.assign({},r);delete o.id;delete o.created_at;delete o.updated_at;o[M.exam]=eid(exam);o[M.cat]=cat;return o});
+ for(var j=0;j<ins.length;j+=10){var w=await sb().from("exam_questions").insert(ins.slice(j,j+10));if(w.error)throw new Error(w.error.message+" (Sınaq "+exam+" · "+cat+")")}
+ st.ins=ins.length;return st}
+/* ---------- UI köməkçiləri ---------- */
+function chips(g,items,multi,all){var h='<div class="dqx-chips" data-g="'+g+'" data-m="'+(multi?1:0)+'">';
+ if(all)h+='<button type="button" class="dqx-ch" data-v="*">Hamısı</button>';
+ items.forEach(function(i){h+='<button type="button" class="dqx-ch'+(i.on?" on":"")+(i.dis?" dis":"")+'" data-v="'+esc(i.v)+'">'+esc(i.t)+'</button>'});return h+"</div>"}
+function picked(g,root){return[].map.call((root||D).querySelectorAll('[data-g="'+g+'"] .dqx-ch.on'),function(x){return x.dataset.v}).filter(function(v){return v!=="*"})}
+function closeSheet(){var o=$("dqx-ov");if(o)o.remove()}
+function sheet(t,s,body,foot){closeSheet();var o=D.createElement("div");o.id="dqx-ov";
+ o.innerHTML='<div class="dqx-sh"><div class="dqx-hd"><div><b>'+t+'</b><small>'+s+'</small></div><button type="button" class="dqx-x">✕</button></div><div class="dqx-bd">'+body+'</div><div class="dqx-ft">'+foot+'</div></div>';
+ o.addEventListener("click",function(e){if(e.target===o||e.target.closest(".dqx-x"))closeSheet()});D.body.appendChild(o);return o}
+D.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".dqx-ch");if(!b||b.classList.contains("dis"))return;
+ var g=b.parentNode,multi=g.dataset.m==="1",v=b.dataset.v;
+ if(v==="*"){var on=!b.classList.contains("on");g.querySelectorAll(".dqx-ch:not(.dis)").forEach(function(x){x.classList.toggle("on",on)})}
+ else if(multi){b.classList.toggle("on");var a=g.querySelector('[data-v="*"]');if(a)a.classList.remove("on")}
+ else{g.querySelectorAll(".dqx-ch").forEach(function(x){x.classList.remove("on")});b.classList.add("on")}
+ g.dispatchEvent(new Event("dqx",{bubbles:true}))});
+function summary(r){return r.ins+" sual köçürüldü"+(r.rep?", "+r.rep+" mövcud sual əvəz olundu":"")+(r.skip?", "+r.skip+" ötürüldü":"")}
+/* ---------- 1) Redaktor: digər sınaqlara da vur ---------- */
+function syncEd(){var g=D.querySelector(".target-category-selector");if(!g||!g.parentNode)return;
+ var cur=G("editorSelectedExam"),ex=exams(),sig=ex.join(",")+"|"+cur,box=$("dqx-ed");
+ if(box&&box.dataset.sig===sig)return;var old=box?picked("edex",box):[];
+ var h='<label style="font-size:13px">🔁 Sualı eyni anda digər sınaqlara da vur (eyni kateqoriya və nömrə ilə):</label>'+chips("edex",ex.map(function(e){return{v:e,t:"Sınaq "+e,on:old.indexOf(e)>-1&&String(e)!==String(cur),dis:String(e)===String(cur)}}),1,true);
+ if(!box){box=D.createElement("div");box.id="dqx-ed";box.className="form-group mt-2";g.parentNode.after(box)}
+ box.dataset.sig=sig;box.innerHTML=h}
+async function afterSave(ctx){var ex=ctx.ex;if(!ex.length)return;await sleep(700);
+ try{await schema();var tot=0;
+  for(var i=0;i<ctx.cats.length;i++){var all=await list(ctx.exam,ctx.cats[i],true);
+   var rows=all.filter(function(r){return +r[M.num]===+ctx.num&&(!ctx.sub||nn(r[M.sub])===nn(ctx.sub))});if(!rows.length)continue;
+   for(var j=0;j<ex.length;j++){if(String(ex[j])===String(ctx.exam))continue;var s=await put(rows,ex[j],ctx.cats[i],"replace");tot+=s.ins}}
+  toast(tot?"✅ Sual Sınaq "+ex.join(", ")+" üçün də yazıldı ("+tot+" qeyd)":"Digər sınaqlara köçürüləcək sual tapılmadı",!tot)}
+ catch(e){toast("Digər sınaqlara yazılmadı: "+(e.message||e),true)}}
+function wrapSave(){var f=window.saveQuestionToSupabase;if(typeof f!=="function"||f.__dqx)return;
+ var w=async function(){var box=$("dqx-ed"),ex=box?picked("edex",box):[],cats=[].map.call(D.querySelectorAll(".editor-target-cat-chk:checked"),function(c){return c.value}),cc=G("editorSelectedCategory");
+  if(cc&&cats.indexOf(cc)<0)cats.push(cc);var ctx={ex:ex,cats:cats,exam:G("editorSelectedExam"),num:G("editorCurrentQIndex"),sub:G("editorSelectedSubject")};
+  var r=await f.apply(this,arguments);afterSave(ctx);return r};w.__dqx=1;window.saveQuestionToSupabase=w}
+/* ---------- 2) Papkanı basılı tut → kopyala ---------- */
+async function openCopy(card){
+ var inCat=!!card.closest("#stepCategories"),tt=((card.querySelector(".folder-title")||{}).textContent||"").trim(),
+  src={exam:curExam(),cat:inCat?tt.split(/\s+/)[0]:curCat(),sub:inCat?null:tt},ex=exams(),found=[];
+ var lab="Sınaq "+src.exam+" · "+src.cat+(src.sub?" · "+src.sub:" · bütün fənlər");
+ var o=sheet("📋 Kopyala",esc(lab),'<div class="dqx-sum" id="dqx-sum">Suallar sayılır…</div><div class="dqx-l">Hədəf sınaq</div>'+chips("tx",ex.map(function(e){return{v:e,t:"Sınaq "+e}}),1,true)+
+  '<div class="dqx-l">Hədəf kateqoriya</div>'+chips("tc",CATS.map(function(c){return{v:c,t:c}}),1,true)+'<div class="dqx-l">Hədəfdə eyni nömrə varsa</div>'+chips("tm",[{v:"replace",t:"Əvəz et",on:1},{v:"skip",t:"Ötür"}],0),
+  '<button type="button" class="dqx-go" id="dqx-go" disabled>Kopyala</button>');
+ try{await schema();var L=await list(src.exam,src.cat,false);found=L.filter(function(r){return !src.sub||nn(r[M.sub])===nn(src.sub)});
+  $("dqx-sum").textContent=found.length?found.length+" sual kopyalanacaq":"Bu papkada sual yoxdur";$("dqx-go").disabled=!found.length}
+ catch(e){$("dqx-sum").textContent="Xəta: "+(e.message||e);return}
+ $("dqx-go").onclick=async function(){var te=picked("tx",o),tc=picked("tc",o),mode=picked("tm",o)[0]||"replace",pairs=[];
+  te.forEach(function(e){tc.forEach(function(c){if(!(String(e)===String(src.exam)&&c===src.cat))pairs.push([e,c])})});
+  if(!pairs.length)return toast("Hədəf sınaq və kateqoriya seçin (mənbənin özünə kopyalamaq olmaz)",true);
+  if(!confirm(found.length+" sual "+pairs.length+" yerə kopyalansın?\n"+pairs.map(function(p){return"Sınaq "+p[0]+" · "+p[1]}).join("\n")+"\n\nMövcud eyni nömrəli suallar: "+(mode==="skip"?"ötürüləcək":"əvəz olunacaq")))return;
+  var b=this;b.disabled=true;try{var rows=await byIds(found.map(function(r){return r.id})),t=0,rp=0,sk=0;
+   for(var i=0;i<pairs.length;i++){b.textContent="Kopyalanır… "+(i+1)+"/"+pairs.length;var s=await put(rows,pairs[i][0],pairs[i][1],mode);t+=s.ins;rp+=s.rep;sk+=s.skip}
+   toast("✅ "+summary({ins:t,rep:rp,skip:sk}));closeSheet();refreshCounts()}
+  catch(e){toast("Xəta: "+(e.message||e),true);b.disabled=false;b.textContent="Kopyala"}}}
+var lp=0,tm=0,sx=0,sy=0;
+function cardOf(e){return e.target.closest&&e.target.closest("#stepSubjects .folder-card,#stepCategories .folder-card")}
+D.addEventListener("pointerdown",function(e){var c=cardOf(e);if(!c)return;sx=e.clientX;sy=e.clientY;clearTimeout(tm);tm=setTimeout(function(){lp=Date.now();if(navigator.vibrate)try{navigator.vibrate(30)}catch(x){}openCopy(c)},550)},true);
+D.addEventListener("pointermove",function(e){if(tm&&(Math.abs(e.clientX-sx)>10||Math.abs(e.clientY-sy)>10)){clearTimeout(tm);tm=0}},true);
+["pointerup","pointercancel"].forEach(function(n){D.addEventListener(n,function(){clearTimeout(tm);tm=0},true)});
+window.addEventListener("click",function(e){if(lp&&Date.now()-lp<1200&&cardOf(e)){e.preventDefault();e.stopImmediatePropagation();lp=0}},true);
+D.addEventListener("contextmenu",function(e){if(cardOf(e))e.preventDefault()});
+/* ---------- 3) Digər kateqoriyadan köçür ---------- */
+function syncBar(){var ss=$("stepSubjects");if(!ss||$("dqx-bar"))return;var b=D.createElement("div");b.id="dqx-bar";
+ b.innerHTML='<button type="button" class="dqx-btn" id="dqx-open">📥 Digər kateqoriyadan köçür</button><span class="dqx-hint">Fənn papkasını basılı tutsanız kopyalama açılır</span>';
+ var h=ss.querySelector("h4");if(h)h.after(b);else ss.prepend(b)}
+D.addEventListener("click",function(e){if(e.target.closest&&e.target.closest("#dqx-open"))openXfer()});
+async function openXfer(){var T={exam:curExam(),cat:curCat()},ex=exams(),oc=CATS.filter(function(c){return c!==T.cat}),S={rows:[],tgt:[],sel:{}};
+ var o=sheet("📥 Köçür","Hədəf: Sınaq "+T.exam+" · "+T.cat,'<div class="dqx-l">Mənbə sınaq</div>'+chips("sx",ex.map(function(e){return{v:e,t:"Sınaq "+e,on:String(e)===String(T.exam)}}),0)+
+  '<div class="dqx-l">Mənbə kateqoriya</div>'+chips("sc",CATS.map(function(c){return{v:c,t:c,on:c===oc[0]}}),0)+'<div class="dqx-l">Fənn</div><div id="dqx-subs" class="dqx-sum">Yüklənir…</div>'+
+  '<div class="dqx-l">Suallar <span id="dqx-cnt"></span></div><div class="dqx-tb"><button type="button" id="dqx-all">☑ Hamısını seç</button><button type="button" id="dqx-none">☐ Təmizlə</button></div><div id="dqx-qs"></div>'+
+  '<div class="dqx-l">Hədəfdə eyni nömrə varsa</div>'+chips("xm",[{v:"replace",t:"Əvəz et",on:1},{v:"skip",t:"Ötür"}],0),'<button type="button" class="dqx-go" id="dqx-go" disabled>Köçür</button>');
+ function vis(){var s=picked("xs",o);return S.rows.filter(function(r){return s.indexOf(String(r[M.sub]))>-1})}
+ function upd(){var n=Object.keys(S.sel).length,g=$("dqx-go");$("dqx-cnt").textContent="· "+n+" seçildi";g.disabled=!n;g.textContent=n?"Köçür ("+n+")":"Köçür"}
+ function paint(){var tk={};S.tgt.forEach(function(r){tk[nn(r[M.sub])+"|"+r[M.num]]=1});var rs=vis();
+  $("dqx-qs").innerHTML=rs.length?rs.map(function(r){var ex=tk[nn(r[M.sub])+"|"+r[M.num]];return'<label class="dqx-q"><input type="checkbox" data-id="'+esc(r.id)+'"'+(S.sel[r.id]?" checked":"")+'><span class="n">№'+r[M.num]+'</span><span class="t">'+esc(plain(M.q?r[M.q]:"").slice(0,90)||"(mətnsiz)")+'</span>'+(ex?'<span class="bd">hədəfdə var</span>':"")+'</label>'}).join(""):'<div class="dqx-sum">Fənn seçin</div>';upd()}
+ async function load(){var sx=picked("sx",o)[0],sc=picked("sc",o)[0];$("dqx-qs").innerHTML="";S.sel={};
+  if(String(sx)===String(T.exam)&&sc===T.cat){$("dqx-subs").textContent="Mənbə hədəflə eynidir — başqa kateqoriya və ya sınaq seçin";S.rows=[];upd();return}
+  $("dqx-subs").textContent="Yüklənir…";
+  try{await schema();S.rows=await list(sx,sc,false);S.tgt=await list(T.exam,T.cat,false)}catch(e){$("dqx-subs").textContent="Xəta: "+(e.message||e);return}
+  var seen={},it=[];S.rows.forEach(function(r){var k=r[M.sub];if(!seen[k]){seen[k]=0;it.push(k)}seen[k]++});
+  if(!it.length){$("dqx-subs").textContent="Bu kateqoriyada sual yoxdur";upd();return}
+  $("dqx-subs").outerHTML='<div id="dqx-subs">'+chips("xs",it.map(function(k,i){return{v:k,t:k+" ("+seen[k]+")",on:i===0}}),1,true)+"</div>";paint()}
+ o.addEventListener("dqx",function(e){var g=e.target.dataset.g;if(g==="sx"||g==="sc")load();else if(g==="xs"){var s=picked("xs",o);Object.keys(S.sel).forEach(function(id){var r=S.rows.filter(function(x){return String(x.id)===id})[0];if(!r||s.indexOf(String(r[M.sub]))<0)delete S.sel[id]});paint()}});
+ o.addEventListener("change",function(e){var c=e.target;if(c.dataset&&c.dataset.id){if(c.checked)S.sel[c.dataset.id]=1;else delete S.sel[c.dataset.id];upd()}});
+ $("dqx-all").onclick=function(){vis().forEach(function(r){S.sel[r.id]=1});paint()};
+ $("dqx-none").onclick=function(){S.sel={};paint()};
+ $("dqx-go").onclick=async function(){var ids=Object.keys(S.sel),mode=picked("xm",o)[0]||"replace",b=this;
+  if(!confirm(ids.length+" sual Sınaq "+T.exam+" · "+T.cat+" kateqoriyasına köçürülsün?\nMövcud eyni nömrəli suallar: "+(mode==="skip"?"ötürüləcək":"əvəz olunacaq")))return;
+  b.disabled=true;b.textContent="Köçürülür…";
+  try{var rows=await byIds(ids.map(function(i){var r=S.rows.filter(function(x){return String(x.id)===i})[0];return r?r.id:i})),s=await put(rows,T.exam,T.cat,mode);toast("✅ "+summary(s));closeSheet();refreshCounts()}
+  catch(e){toast("Xəta: "+(e.message||e),true);b.disabled=false;upd()}};
+ load()}
+setInterval(function(){try{syncEd();syncBar();wrapSave()}catch(e){}},1000);
+})();
+</script>
 </body>
 </html>
