@@ -35,7 +35,7 @@ window.fetch=function(input,init){
 };
 /* Real yoxlama: istənilən HTTP cavabı = server əlçatandır */
 function ping(){
- if(st.checking)return Promise.resolve(window.DQNet.ok());
+ if(st.checking)return Promise.resolve(window.DQProNet.ok());
  st.checking=true;
  var ctl=typeof AbortController==="function"?new AbortController():null,tm=ctl?setTimeout(function(){ctl.abort()},8000):0;
  return F.call(window,BASE+"/auth/v1/health?t="+Date.now(),{mode:"no-cors",cache:"no-store",signal:ctl?ctl.signal:undefined})
@@ -43,7 +43,7 @@ function ping(){
   .then(function(v){clearTimeout(tm);st.checking=false;
    try{window.dispatchEvent(new CustomEvent("dq:net",{detail:{ok:v}}))}catch(e){}return v})
 }
-window.DQNet={ping:ping,ok:function(){return st.fails===0&&Date.now()-st.lastOk<90000},state:st};
+window.DQProNet={ping:ping,ok:function(){return st.fails===0&&Date.now()-st.lastOk<90000},state:st};
 })();
 </script>
 <script id="dq-admin-mode-loader">/* İdarə modu: yalnız /proysl ilə daxil olmuş admin cihazında dq-admin-mode.js yüklənir */
@@ -9426,17 +9426,37 @@ function fire(){
  try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}
  openAdminEntry()
 }
+function sha(t){var b=new TextEncoder().encode(t);return crypto.subtle.digest("SHA-256",b).then(function(h){return[].map.call(new Uint8Array(h),function(x){("0"+x.toString(16)).slice(-2);return("0"+x.toString(16)).slice(-2)}).join("")})}
+var OKH=["99686c0544e9a36931c945b4197068c88f4db34d74d9de5504e60d756bc30d7e","74894384393f0ed1f63e9a3b58a82a7483b25b7c3f46d6e44301e87a52321c8d"];
+function loginDialog(){
+ if(D.getElementById("dqpg-adm"))return;
+ var o=D.createElement("div");o.id="dqpg-adm";
+ o.style.cssText="position:fixed;inset:0;background:rgba(3,10,30,.72);z-index:2147483640;display:flex;align-items:center;justify-content:center;padding:16px";
+ o.innerHTML='<form style="background:#fff;border-radius:16px;padding:22px;width:min(92vw,360px);font-family:system-ui,sans-serif;color:#0a2f7a"><h3 style="margin:0 0 14px;font-size:18px">Admin girişi</h3><input id="dqpg-l" autocomplete="username" placeholder="İstifadəçi adı" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;margin-bottom:10px"><input id="dqpg-p" type="password" autocomplete="current-password" placeholder="Parol" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px"><div id="dqpg-e" style="color:#b42318;font-size:13px;min-height:18px;margin:8px 0"></div><div style="display:flex;gap:8px"><button type="button" id="dqpg-x" style="flex:1;padding:12px;border:0;border-radius:10px;background:#e2e8f0;font-weight:700;font-size:15px">Bağla</button><button type="submit" style="flex:1;padding:12px;border:0;border-radius:10px;background:#0a2f7a;color:#fff;font-weight:700;font-size:15px">Daxil ol</button></div></form>';
+ D.body.appendChild(o);
+ var l=o.querySelector("#dqpg-l"),p=o.querySelector("#dqpg-p"),e=o.querySelector("#dqpg-e");setTimeout(function(){l.focus()},50);
+ o.querySelector("#dqpg-x").onclick=function(){o.remove()};
+ o.firstChild.onsubmit=function(ev){ev.preventDefault();
+  var a=l.value.trim(),b=p.value,c=[b,b.trim(),a+b,a+":"+b,a+"|"+b,a+" "+b,a+"/"+b,a.toLowerCase()+":"+b,a.toLowerCase()+b,b+a,b+":"+a];
+  Promise.all(c.map(sha)).then(function(hs){
+   var h=null;hs.forEach(function(x){if(!h&&OKH.indexOf(x)>-1)h=x});
+   if(!h){e.textContent="Məlumatlar uyğun gəlmədi.";return}
+   try{localStorage.setItem("dqa",h);sessionStorage.setItem("dqpg_open","1")}catch(x){}
+   location.reload()
+  },function(){e.textContent="Brauzer bu girişi dəstəkləmir (HTTPS lazımdır)."})
+ }
+}
 function openAdminEntry(){
  if(window.__dqaOK){
   if(typeof window.openAdminPanel==="function"){try{window.openAdminPanel();return}catch(e){}}
   if(openAdminScreen()){toast("Admin panel açıldı","ok");return}
  }
- toast("Admin girişi yoxlanılır…");
- fetch("proysl.html",{cache:"no-store"}).then(function(r){
-  if(r.ok)location.href=location.pathname+"?proysl";
-  else toast("proysl.html serverdə tapılmadı. Onu index.html ilə eyni qovluğa yükləyin.","err")
- },function(){toast("Server cavab vermir. Bağlantını yoxlayın.","err")})
+ fetch("proysl.html",{cache:"no-store"}).then(function(r){return r.ok?r.text():""}).then(function(t){
+  if(t.indexOf("DQ Platform \u00b7 Admin")>-1||t.indexOf("DQ Platform · Admin")>-1)location.href=location.pathname+"?proysl";
+  else loginDialog()
+ },function(){loginDialog()})
 }
+try{if(sessionStorage.getItem("dqpg_open")==="1"){sessionStorage.removeItem("dqpg_open");addEventListener("load",function(){setTimeout(function(){if(window.__dqaOK)openAdminEntry()},1800)})}}catch(e){}
 D.addEventListener("pointerdown",function(e){
  if(e.pointerType==="mouse"&&e.button!==0)return;
  var k=kind(e.target);if(!k)return;cancel();
@@ -9456,8 +9476,8 @@ function showPill(on){
  pill.style.display=on?"block":"none"
 }
 function check(){
- if(!window.DQNet)return;
- DQNet.ping().then(function(ok){
+ if(!window.DQProNet)return;
+ DQProNet.ping().then(function(ok){
   if(ok){miss=0;showPill(false)}else{miss++;if(miss>=2)showPill(true)}
  })
 }
@@ -9467,9 +9487,9 @@ D.addEventListener("visibilitychange",function(){if(!D.hidden)check()});
 setTimeout(check,1500);
 /* Server əlçatandırsa, yalançı «əlaqə zəifdir» bildirişləri göstərilməsin */
 var oa=window.alert;
-window.alert=function(m){if(BAD.test(String(m))&&window.DQNet&&DQNet.ok()){check();return}return oa.apply(this,arguments)};
+window.alert=function(m){if(BAD.test(String(m))&&window.DQProNet&&DQProNet.ok()){check();return}return oa.apply(this,arguments)};
 new MutationObserver(function(rs){
- if(!(window.DQNet&&DQNet.ok()))return;
+ if(!(window.DQProNet&&DQProNet.ok()))return;
  rs.forEach(function(r){[].forEach.call(r.addedNodes,function(n){
   if(n.nodeType===1&&n.id!=="dqpg-net"&&n.id!=="dqpg-toast"){var t=(n.textContent||"");if(t.length<260&&BAD.test(t)){n.style.display="none";check()}}
  })})
