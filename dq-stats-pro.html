@@ -1,86 +1,111 @@
 <style id="dq-stats-pro-css">
-/* DQ Platform · statistika: kartların altında tam enli, səliqəli sıra */
-*:has(>#dq-stats.dqst){flex-wrap:wrap!important}
-#dq-stats.dqst{grid-column:1/-1!important;flex:1 1 100%!important;order:99;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;box-sizing:border-box!important;width:100%!important;max-width:none!important;min-width:0!important;margin:14px 0 0!important;padding:22px 8px 18px!important;border-radius:22px!important;border:1px solid rgba(217,164,65,.28)!important;background:linear-gradient(160deg,rgba(18,42,98,.95),rgba(8,24,60,.97))!important;box-shadow:0 14px 34px -18px rgba(0,0,0,.7)!important;overflow:hidden}
-#dq-stats.dqst:before,#dq-stats.dqst:after{display:none!important;content:none!important}
-#dq-stats.dqst .dqst-c{position:relative;display:flex!important;flex-direction:column!important;align-items:center!important;gap:8px!important;margin:0!important;padding:4px 6px!important;border:0!important;background:none!important;box-shadow:none!important;border-radius:0!important;opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.22,1,.36,1);transition-delay:calc(var(--i,0)*100ms)}
-#dq-stats.dqst.dqsp-in .dqst-c{opacity:1;transform:none}
-#dq-stats.dqst .dqst-c:before{display:none!important}
-#dq-stats.dqst .dqst-c+.dqst-c:after{content:"";position:absolute;left:0;top:10%;bottom:10%;width:1px;background:linear-gradient(transparent,rgba(217,164,65,.4),transparent)}
-#dq-stats.dqst .dqst-ic{width:46px!important;height:46px!important;border-radius:50%!important;display:grid;place-items:center;font-size:17px!important;color:#f6d57a!important;background:rgba(255,255,255,.07)!important;border:1px solid rgba(217,164,65,.5)!important}
-#dq-stats.dqst .dqst-c b{display:flex!important;align-items:baseline;justify-content:center;font-size:clamp(24px,5vw,36px)!important;font-weight:800!important;line-height:1!important;color:#fff!important;-webkit-text-fill-color:#fff!important;background:none!important;text-shadow:none!important;font-variant-numeric:tabular-nums;white-space:nowrap}
-#dq-stats.dqst .dqst-c b .dqsp-pl{color:#d9a441;-webkit-text-fill-color:#d9a441;font-size:.7em;margin-left:1px}
-#dq-stats.dqst .dqst-c small{font-size:12.5px!important;font-weight:500!important;color:#b4c3e6!important;opacity:1!important;text-transform:none!important;letter-spacing:0!important;white-space:normal;text-align:center;line-height:1.25}
-#dq-stats.dqst .dqsp-bar{display:none!important}
-#dq-stats.dqsp-load .dqst-c b{color:transparent!important;-webkit-text-fill-color:transparent!important}
-#dq-stats.dqsp-load .dqst-c b:after{content:"";width:60px;height:28px;border-radius:8px;background:linear-gradient(100deg,rgba(255,255,255,.07) 30%,rgba(255,255,255,.2),rgba(255,255,255,.07) 70%) 0 0/220% 100%;animation:dqspSk 1.2s linear infinite}
-@keyframes dqspSk{to{background-position:-220% 0}}
-@media(max-width:560px){#dq-stats.dqst{padding:16px 2px 12px!important;border-radius:18px!important}#dq-stats.dqst .dqst-ic{width:34px!important;height:34px!important;font-size:13px!important}#dq-stats.dqst .dqst-c b{font-size:21px!important}#dq-stats.dqst .dqst-c small{font-size:10px!important}}
-.dqsp-fill{transition:width 1.3s cubic-bezier(.22,1,.36,1)!important}
-@media(prefers-reduced-motion:reduce){#dq-stats.dqst .dqst-c{opacity:1;transform:none;transition:none}}
+#dq-stats.dqst{display:none!important}
+.pstat{--g:#d9a441;--g2:#f6d57a;--tx:#eaf0ff;--mu:#9fb2da;position:relative;box-sizing:border-box;width:100%;max-width:1240px;margin:34px auto 10px;padding:22px 22px 24px;border-radius:26px;color:var(--tx);border:1px solid rgba(96,150,255,.35);background:radial-gradient(90% 120% at 0% 0%,rgba(47,99,189,.40),transparent 60%),radial-gradient(70% 90% at 100% 100%,rgba(217,164,65,.10),transparent 60%),linear-gradient(160deg,#0c2358,#071535 75%);box-shadow:0 0 0 1px rgba(255,255,255,.04) inset,0 30px 60px -30px #000,0 0 40px -12px rgba(59,130,246,.45)}
+.pstat *{box-sizing:border-box}
+.ps-h{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.ps-h .ps-ic{color:var(--g);font-size:22px}.ps-h h3{margin:0;font-size:clamp(20px,3vw,26px);font-weight:800;color:#fff;text-align:left}
+.ps-ln{flex:0 1 120px;height:2px;background:linear-gradient(90deg,var(--g),transparent)}
+.ps-live{margin-left:auto;display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:99px;font-size:12px;font-weight:700;color:#bfe9d4;background:rgba(52,211,153,.10);border:1px solid rgba(52,211,153,.35)}
+.ps-live b{width:7px;height:7px;border-radius:50%;background:#34d399;animation:psP 2s infinite}
+@keyframes psP{0%{box-shadow:0 0 0 0 rgba(52,211,153,.6)}80%,100%{box-shadow:0 0 0 8px transparent}}
+.ps-g{display:grid;grid-template-columns:210px 250px minmax(0,1.35fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.ps-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center}
+.ps-rw{position:relative;width:190px;height:190px}
+.ps-rw svg{width:100%;height:100%;transform:rotate(-90deg);filter:drop-shadow(0 0 14px rgba(59,130,246,.45))}
+.ps-rw circle{fill:none;stroke-width:15}.ps-tr{stroke:rgba(255,255,255,.08)}
+.ps-pg{stroke:url(#psG);stroke-linecap:round;stroke-dasharray:490.1;stroke-dashoffset:490.1;transition:stroke-dashoffset 1.8s cubic-bezier(.22,1,.36,1) .2s}
+.in .ps-pg{stroke-dashoffset:calc(490.1*(1 - var(--v)/100))}
+.ps-rc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ps-rc b{font-size:42px;font-weight:800;line-height:1;color:#fff;font-variant-numeric:tabular-nums}.ps-rc small{margin-top:6px;font-size:14px;font-weight:600;color:#dce6ff}
+.ps-d{font-weight:800;color:var(--g2);font-size:18px}.ps-d small{display:block;font-weight:500;font-size:12px;color:var(--mu);margin-top:2px}
+.ps-rows{display:grid;gap:10px}
+.ps-r{display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:14px;background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(120,160,255,.16);opacity:0;transform:translateX(-14px);transition:opacity .6s ease,transform .6s cubic-bezier(.22,1,.36,1);transition-delay:calc(var(--i)*110ms + .2s)}
+.in .ps-r{opacity:1;transform:none}
+.ps-r i{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;color:var(--g2);background:rgba(217,164,65,.10);border:1px solid rgba(217,164,65,.32)}
+.ps-r.ok i{color:#4ade80;background:rgba(74,222,128,.10);border-color:rgba(74,222,128,.35)}
+.ps-r b{display:block;font-size:26px;font-weight:800;line-height:1.05;color:#fff;font-variant-numeric:tabular-nums}.ps-r b s{text-decoration:none;color:var(--g);font-size:.75em;margin-left:1px}
+.ps-r small{font-size:12.5px;color:var(--mu)}
+.ps-card{padding:16px 18px;border-radius:18px;background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.015));border:1px solid rgba(120,160,255,.18)}
+.ps-t{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:15px;font-weight:700;color:#fff}.ps-t i{color:var(--g)}
+.ps-chart svg{display:block;width:100%;height:auto;overflow:visible}
+.ps-chart text{fill:#a9bbe0;font-size:11px;font-family:inherit}
+.ps-ar{fill:url(#psA);opacity:0;transition:opacity 1s ease 1.2s}.in .ps-ar{opacity:1}
+.ps-ln2{fill:none;stroke:url(#psL);stroke-width:3;stroke-linecap:round;filter:drop-shadow(0 4px 8px rgba(59,130,246,.6))}
+.ps-pt{fill:#0c2358;stroke:#7fb0ff;stroke-width:2.5;opacity:0;transition:opacity .4s ease;transition-delay:calc(var(--k)*260ms + .5s)}.in .ps-pt{opacity:1}
+.ps-pt.l{fill:#fff;stroke:var(--g);stroke-width:4}
+.ps-tip{opacity:0;transition:opacity .5s ease 1.8s}.in .ps-tip{opacity:1}
+.ps-sj{display:grid;gap:14px}
+.ps-s{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:center}
+.ps-s i{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:17px;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+.ps-s div div{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:6px;color:#e5edff}.ps-s div div b{color:#fff;font-variant-numeric:tabular-nums}
+.ps-s em{display:block;height:8px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}
+.ps-s em u{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 70%,#000),var(--c));box-shadow:0 0 10px color-mix(in srgb,var(--c) 70%,transparent);transition:width 1.4s cubic-bezier(.22,1,.36,1) .5s}
+.in .ps-s em u{width:var(--w)}
+.ps-sk .ps-r b{color:transparent;background:linear-gradient(100deg,rgba(255,255,255,.08) 30%,rgba(255,255,255,.22),rgba(255,255,255,.08) 70%) 0 0/220% 100%;border-radius:6px;animation:psS 1.2s linear infinite;width:70px}
+@keyframes psS{to{background-position:-220% 0}}
+@media(max-width:1100px){.ps-g{grid-template-columns:200px minmax(0,1fr)}.ps-chart,.ps-subj{grid-column:1/-1}}
+@media(max-width:700px){.pstat{padding:16px 12px 18px;border-radius:20px;margin-top:24px}.ps-g{grid-template-columns:1fr}.ps-ln{display:none}.ps-rw{width:170px;height:170px}.ps-r{padding:9px 12px}.ps-r b{font-size:22px}.ps-card{padding:14px}}
+@media(prefers-reduced-motion:reduce){.pstat *{transition:none!important;animation:none!important}.ps-r,.ps-tip,.ps-pt,.ps-ar{opacity:1;transform:none}.ps-pg{stroke-dashoffset:calc(490.1*(1 - var(--v)/100))}.ps-s em u{width:var(--w)}}
 </style>
 <script id="dq-stats-pro-js">
 (function(){"use strict";
-var D=document,io=null,busy=false,raf=0;
-function ease(t){return 1-Math.pow(1-t,4)}
+/* ====== DEMO məlumatlar (əsl məlumatla əvəz etmək üçün buranı dəyişin) ====== */
+var CFG={overall:85,delta:5,
+ trend:[38,66,64,74,85],
+ subjects:[["Azərbaycan dili",92,"fa-book-open","#3b9bff"],["Qanunvericilik",88,"fa-scale-balanced","#f0b43f"],["İnformatika",80,"fa-laptop","#34d399"],["Məntiq",74,"fa-brain","#a77bff"]]};
+/* 4 göstərici: saytın əsl statistikasından (İstifadəçi, İmtahan, Sınaq, Sual) oxunur */
+var D=document,box=null,vals=null,raf=0,io=null;
+function norm(s){return String(s||"").replace(/\u0130/g,"i").replace(/\u0307/g,"").replace(/\u0131/g,"i").replace(/\u0259/g,"e").replace(/\s+/g," ").trim().toLowerCase()}
+function readVals(){
+  var c=D.querySelectorAll("#dq-stats .dqst-c b");
+  if(c.length>=4){var v=[].map.call(c,function(b){return parseInt((b.textContent||"").replace(/[^\d]/g,""),10)||0});return v.slice(0,4)}
+  try{var j=JSON.parse(localStorage.getItem("dq_stats_cache_v2")||"null");if(j&&j.v)return [j.v.users,j.v.exams,j.v.mocks,j.v.qs].map(function(x){return +x||0})}catch(e){}
+  return null}
 function fmt(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g," ")}
-function countUp(el,to,plus){
-  if(matchMedia("(prefers-reduced-motion:reduce)").matches){el.firstChild.nodeValue=fmt(to);return}
-  var t0=0,dur=1500+Math.min(1200,to*2);
-  (function step(ts){if(!t0)t0=ts;var p=Math.min(1,(ts-t0)/dur);
-    el.firstChild.nodeValue=fmt(Math.round(to*ease(p)));
-    if(p<1)requestAnimationFrame(step)})(performance.now?performance.now():0);
-}
-function enhance(box){
-  if(busy)return;busy=true;
-  try{
-    var cards=box.querySelectorAll(".dqst-c");
-    if(!cards.length){box.classList.add("dqsp-load");return}
-    var vals=[];
-    cards.forEach(function(c,i){
-      c.style.setProperty("--i",i);
-      var b=c.querySelector("b");if(!b)return;
-      var raw=b.dataset.dqspV;
-      if(raw===undefined){raw=(b.textContent||"").replace(/[^\d]/g,"");b.dataset.dqspV=raw||"0"}
-      var n=parseInt(b.dataset.dqspV,10)||0;vals.push(n);
-      if(!b.dataset.dqspDone){
-        b.dataset.dqspDone="1";
-        b.innerHTML='0<span class="dqsp-pl">'+(n?"+":"")+'</span>';
-        b._n=n;
-      }
-      if(!c.querySelector(".dqsp-bar")){var bar=D.createElement("div");bar.className="dqsp-bar";bar.innerHTML="<i></i>";c.appendChild(bar)}
-    });
-    box.classList.remove("dqsp-load");
-    if(!io){io=new IntersectionObserver(function(es){es.forEach(function(e){
-      if(!e.isIntersecting)return;io.unobserve(e.target);
-      var bx=e.target;bx.classList.add("dqsp-in");
-      bx.querySelectorAll(".dqst-c b").forEach(function(b){if(b._n!==undefined)countUp(b,b._n)})
-    })},{threshold:.35})}
-    if(!box.classList.contains("dqsp-in")&&!box._obs){box._obs=1;io.observe(box)}
-  }catch(e){}
-  busy=false;
-}
-function boot(){
-  var box=D.getElementById("dq-stats");
-  if(!box||!box.classList.contains("dqst"))return;
-  /* hələ data gəlməyibsə skeleton, gələndə avtomatik tamamlanır */
-  enhance(box);
-}
-/* statistika bloku yenidən qurularsa (DQST.mount) avtomatik yenidən üzlənir */
-new MutationObserver(function(){cancelAnimationFrame(raf);raf=requestAnimationFrame(function(){
-  var box=D.getElementById("dq-stats");
-  if(box&&box.classList.contains("dqst")&&!box.querySelector(".dqsp-pl"))box._obs=0,box.classList.remove("dqsp-in"),enhance(box);
-  else boot();
-})}).observe(D.documentElement,{childList:true,subtree:true});
-/* digər statistikalar: faiz zolaqları və həlqə sakit dolsun */
-function bars(){
-  D.querySelectorAll("#v3-home [style*='width:'][style*='%']").forEach(function(el){
-    if(el.dataset.dqspB||el.children.length||el.offsetHeight>14||!el.parentElement)return;
-    var w=el.style.width;el.dataset.dqspB=1;el.classList.add("dqsp-fill");el.style.width="0";
-    var o=new IntersectionObserver(function(es){if(es[0].isIntersecting){o.disconnect();setTimeout(function(){el.style.width=w},120)}},{threshold:.4});
-    o.observe(el);
-  })}
-setInterval(bars,2500);
-if(D.readyState!=="loading")boot();else D.addEventListener("DOMContentLoaded",boot);
+function cnt(el,to,suf){var t0=0,d=1500;
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches){el.textContent=fmt(to)+(suf||"");return}
+  requestAnimationFrame(function s(ts){if(!t0)t0=ts;var p=Math.min(1,(ts-t0)/d),e=1-Math.pow(1-p,4);el.textContent=fmt(Math.round(to*e))+(suf||"");if(p<1)requestAnimationFrame(s)})}
+function smooth(p){var d="M"+p[0][0]+","+p[0][1];
+  for(var i=0;i<p.length-1;i++){var a=p[i-1]||p[i],b=p[i],c=p[i+1],e=p[i+2]||c;
+    d+=" C"+(b[0]+(c[0]-a[0])/6)+","+(b[1]+(c[1]-a[1])/6)+" "+(c[0]-(e[0]-b[0])/6)+","+(c[1]-(e[1]-b[1])/6)+" "+c[0]+","+c[1]}
+  return d}
+function chart(){
+  var W=520,H=250,x0=52,x1=496,y0=22,y1=200,n=CFG.trend.length,pts=CFG.trend.map(function(v,i){return[x0+(x1-x0)*i/(n-1),y1-(y1-y0)*v/100]});
+  var g="";[0,25,50,75,100].forEach(function(v){var y=y1-(y1-y0)*v/100;g+='<line x1="'+x0+'" x2="'+x1+'" y1="'+y+'" y2="'+y+'" stroke="rgba(255,255,255,.08)"/><text x="'+(x0-10)+'" y="'+(y+4)+'" text-anchor="end">'+v+'%</text>'});
+  var lab="";for(var i=0;i<n;i++){var dt=new Date(Date.now()-(n-1-i)*7*864e5);lab+='<text x="'+pts[i][0]+'" y="228" text-anchor="middle">'+("0"+dt.getDate()).slice(-2)+"."+("0"+(dt.getMonth()+1)).slice(-2)+'</text>'}
+  var path=smooth(pts),L=pts[n-1],dots=pts.map(function(p,i){return'<circle class="ps-pt'+(i==n-1?" l":"")+'" style="--k:'+i+'" cx="'+p[0]+'" cy="'+p[1]+'" r="'+(i==n-1?7:5)+'"/>'}).join("");
+  return'<svg viewBox="0 0 '+W+' '+H+'"><defs><linearGradient id="psL" x1="0" x2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#8fc2ff"/></linearGradient><linearGradient id="psA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b82f6" stop-opacity=".38"/><stop offset="1" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs>'+g+lab+
+   '<path class="ps-ar" d="'+path+" L"+L[0]+","+y1+" L"+pts[0][0]+","+y1+' Z"/><path class="ps-ln2" id="psPath" d="'+path+'"/>'+
+   '<line class="ps-tip" x1="'+L[0]+'" x2="'+L[0]+'" y1="'+(L[1]+8)+'" y2="'+y1+'" stroke="#d9a441" stroke-dasharray="4 4"/>'+dots+
+   '<g class="ps-tip"><rect x="'+(L[0]-27)+'" y="'+(L[1]-40)+'" width="54" height="26" rx="9" fill="#f0b43f"/><path d="M'+(L[0]-6)+","+(L[1]-14)+" L"+L[0]+","+(L[1]-7)+" L"+(L[0]+6)+","+(L[1]-14)+'Z" fill="#f0b43f"/><text x="'+L[0]+'" y="'+(L[1]-22)+'" text-anchor="middle" style="fill:#2a1a00;font-weight:800;font-size:13px">'+CFG.trend[n-1]+'%</text></g></svg>'}
+function build(v){
+  var L=[["İştirakçı sayı","fa-users",0],["İmtahan sayı","fa-circle-play",0],["Sınaq sayı","fa-graduation-cap",0],["Sual sayı","fa-circle-check",1]];
+  var rows=L.map(function(x,i){return'<div class="ps-r'+(x[2]?" ok":"")+'" style="--i:'+i+'"><i><span class="fa-solid '+x[1]+'"></span></i><div><b data-n="'+(v?v[i]:0)+'">'+(v?"0":"")+'</b><small>'+x[0]+'</small></div></div>'}).join("");
+  var sj=CFG.subjects.map(function(s){return'<div class="ps-s" style="--c:'+s[3]+';--w:'+s[1]+'%"><i><span class="fa-solid '+s[2]+'"></span></i><div><div><span>'+s[0]+'</span><b>'+s[1]+'%</b></div><em><u></u></em></div></div>'}).join("");
+  return'<div class="ps-h"><span class="ps-ic fa-solid fa-chart-simple"></span><h3>Statistika</h3><i class="ps-ln"></i><span class="ps-live"><b></b>Canlı</span></div><div class="ps-g">'+
+   '<div class="ps-ring"><div class="ps-rw"><svg viewBox="0 0 200 200"><defs><linearGradient id="psG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset=".55" stop-color="#8fc2ff"/><stop offset="1" stop-color="#f6d57a"/></linearGradient></defs><circle class="ps-tr" cx="100" cy="100" r="78"/><circle class="ps-pg" cx="100" cy="100" r="78" style="--v:'+CFG.overall+'"/></svg><div class="ps-rc"><b data-n="'+CFG.overall+'" data-s="%">0%</b><small>Ümumi nəticə</small></div></div><div class="ps-d">↑ +'+CFG.delta+'%<small>əvvəlki dövrlə müqayisədə</small></div></div>'+
+   '<div class="ps-rows">'+rows+'</div><div class="ps-card ps-chart"><h4 class="ps-t"><i class="fa-solid fa-chart-line"></i>Nəticə dinamikası</h4>'+chart()+'</div>'+
+   '<div class="ps-card ps-subj"><h4 class="ps-t"><i class="fa-solid fa-book-open"></i>Fənlər üzrə nəticələr</h4><div class="ps-sj">'+sj+'</div></div></div>'}
+function anchor(){
+  var w=D.createTreeWalker(D.body,NodeFilter.SHOW_TEXT,null),t,h=null;
+  while((t=w.nextNode())){if(norm(t.nodeValue).indexOf("niye mehz dq platform")!==0)continue;var p=t.parentElement;if(p&&!p.closest("#pstat")&&p.getBoundingClientRect().width){h=p;break}}
+  if(!h)return null;var el=h,g=0;
+  while(el.parentElement&&g<10){var r=el.getBoundingClientRect();if(r.width>=innerWidth*.88&&r.height>180)return el;el=el.parentElement;g++}
+  return null}
+function reveal(){
+  if(!io)io=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;io.unobserve(e.target);var b=e.target;b.classList.add("in");
+    b.querySelectorAll("[data-n]").forEach(function(el){if(+el.dataset.n||el.dataset.s)cnt(el,+el.dataset.n,el.dataset.s);else el.textContent="0"});
+    var p=D.getElementById("psPath");if(p&&p.getTotalLength&&!matchMedia("(prefers-reduced-motion:reduce)").matches){var l=p.getTotalLength();p.style.strokeDasharray=l;p.style.strokeDashoffset=l;p.getBoundingClientRect();p.style.transition="stroke-dashoffset 1.8s cubic-bezier(.22,1,.36,1) .3s";p.style.strokeDashoffset=0}})},{threshold:.25});
+  io.observe(box)}
+function run(){
+  try{var v=readVals();
+   if(box&&box.isConnected){ if(v&&!vals){vals=v;box.classList.remove("ps-sk");box.innerHTML=build(v);box.classList.remove("in");reveal()} return}
+   var a=anchor();if(!a)return;
+   box=D.createElement("section");box.id="pstat";box.className="pstat"+(v?"":" ps-sk");vals=v;box.innerHTML=build(v);
+   a.insertAdjacentElement("afterend",box);if(v)reveal();else{box.classList.add("in")}
+  }catch(e){}}
+new MutationObserver(function(){cancelAnimationFrame(raf);raf=requestAnimationFrame(run)}).observe(D.documentElement,{childList:true,subtree:true});
+setInterval(run,2000);
+if(D.readyState!=="loading")run();else D.addEventListener("DOMContentLoaded",run);
 })();
 </script>
