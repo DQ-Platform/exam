@@ -8,7 +8,7 @@
  *  - Format: Post 4:5, Kvadrat 1:1, Story 9:16
  *  - Hazır şablonlar, geri/irəli (undo/redo), qat siyahısı, təkrarla, sil, öndə/arxada
  *  - Kitabxana: elanlar Supabase-də (collection «elan2») və bu cihazda saxlanır
- *  - Aktiv imtahandan bir toxunuşla elan yaratma; imtahana bağlı elan portalda «🔗 Paylaş» düyməsində istifadə olunur
+ *  - Aktiv imtahandan bir toxunuşla elan yaratma; imtahana bağlı elan portalda «Elan kimi paylaş» düyməsində istifadə olunur
  *  - PNG yüklə, WhatsApp/sistem paylaşımı, link kopyala
  *
  * Qoşulma: dq-imtahan-giris.js-dən SONRA
@@ -366,7 +366,7 @@
     if (view !== 'lib') return;
     exams.sort(function (a, b) { return String(a.group).localeCompare(b.group) || a.number - b.number; });
     var exEl = $('#ex');
-    exEl.innerHTML = exams.length ? '<div class="row">' + exams.map(function (e, i) { return '<button class="b gh sm" data-i="' + i + '">' + esc(e.group) + ' · Sınaq ' + esc(e.number) + '</button>'; }).join('') + '</div><p class="hint">Seçdiyiniz imtahanın məlumatları elana avtomatik yazılır. Bu elan portalda həmin sınağın «🔗 Paylaş» düyməsində istifadə olunacaq.</p>' : 'Hazırda aktiv imtahan yoxdur (İmtahanPro-da aktiv edin).';
+    exEl.innerHTML = exams.length ? '<div class="row">' + exams.map(function (e, i) { return '<button class="b gh sm" data-i="' + i + '">' + esc(e.group) + ' · Sınaq ' + esc(e.number) + '</button>'; }).join('') + '</div><p class="hint">Seçdiyiniz imtahanın məlumatları elana avtomatik yazılır. Bu elan portalda həmin sınağın «Elan kimi paylaş» düyməsində istifadə olunacaq.</p>' : 'Hazırda aktiv imtahan yoxdur (İmtahanPro-da aktiv edin).';
     exEl.onclick = async function (ev) {
       var b = ev.target.closest('[data-i]'); if (!b) return; var e = exams[+b.getAttribute('data-i')];
       var ex = await findByKey(keyOf(e)); if (ex) { if (confirm('Bu sınaq üçün elan artıq var. Onu açım? (Ləğv = yenisini yarat)')) { await preload(ex); return openEditor(ex, true); } }
@@ -505,7 +505,7 @@
       h += '<div class="card"><h3>Elan məlumatı</h3>' + field('i-nm', 'Elanın adı (yalnız sizin üçün)', '<input type="text" id="i-nm" value="' + esc(D.name) + '">') +
         field('i-key', 'Sınağa bağla (məs. BB-1)', '<input type="text" id="i-key" value="' + esc(D.key) + '" placeholder="boş = ümumi elan">') +
         field('i-lk', 'Paylaşım linki', '<input type="text" id="i-lk" value="' + esc(D.link) + '" placeholder="boş = ' + esc(examLink(D.key)) + '">') +
-        '<p class="hint">Sınağa bağlanan elan portalda həmin sınağın «🔗 Paylaş» düyməsində istifadə olunur.</p></div>';
+        '<p class="hint">Sınağa bağlanan elan portalda həmin sınağın «Elan kimi paylaş» düyməsində istifadə olunur.</p></div>';
     } else h += '<div class="card"><p class="hint" style="margin:0">Elementi seçmək üçün üzərinə toxunun. Sürüşdürmək üçün barmaqla çəkin, ölçüsünü dəyişmək üçün mavi dairəni çəkin. Fon, format və məlumat üçün yuxarıdakı düymələr.</p></div>';
     P.innerHTML = h; bindPanel(l, mode); layersUi();
   }
@@ -567,28 +567,44 @@
   }
 
   /* ---------------- «Digər alətlər» bölməsinə kart ---------------- */
-  function nrm(t) { return String(t || '').replace(/\u0130/g, 'i').replace(/\u0307/g, '').toLowerCase().replace(/\s+/g, ' ').trim(); }
   function injectTile() {
     try {
-      if (!isAdmin() || document.hidden) return;
+      if (!isAdmin()) return;
+      if (document.hidden || Date.now() - lastTouch < 1500) return;
       if (document.querySelector('[data-dqes-tile]')) return;
-      var cards = document.querySelectorAll('.admin-nav-card'), src = null;
-      for (var i = 0; i < cards.length; i++) {
-        if (nrm(cards[i].textContent).replace(/[^a-z]/g, '') === 'imtahanpro' && cards[i].getClientRects().length) { src = cards[i]; break; }
+      var all = document.querySelectorAll('body *'), src = null;
+      for (var i = 0; i < all.length; i++) {
+        var e = all[i]; if (e.closest('#dqes-host') || e.children.length > 0) continue;
+        if ((e.textContent || '').trim() === 'ImtahanPro') {
+          var t = e; for (var k = 0; k < 5 && t.parentElement; k++) { if (t.parentElement.children.length >= 4 && t.parentElement.children.length === [].filter.call(t.parentElement.children, function (c) { return c.tagName === t.tagName; }).length) break; t = t.parentElement; }
+          if (t.parentElement && t.parentElement.children.length >= 3) { src = t; break; }
+        }
       }
       if (!src) return;
+      var par = src.parentElement; if (par.querySelector('[data-dqes-tile]')) return;
       var c = src.cloneNode(true);
-      c.removeAttribute('onclick'); c.removeAttribute('id');
-      c.style.background = 'linear-gradient(135deg,#d4a73c,#8a5a0a)'; c.style.color = '#fff'; c.style.cursor = 'pointer';
-      c.innerHTML = '<span class="icon">📣</span> Elan Studio';
-      c.setAttribute('data-dqes-tile', '1');
+      [c].concat([].slice.call(c.querySelectorAll('*'))).forEach(function (n) {
+        n.removeAttribute('id'); n.removeAttribute('onclick'); n.removeAttribute('href');
+        [].slice.call(n.attributes).forEach(function (a) { if (/^data-/.test(a.name)) n.removeAttribute(a.name); });
+      });
+      var w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT), n, done = false, iconDone = false;
+      while ((n = w.nextNode())) { if (n.data.trim() === 'ImtahanPro') { n.data = 'Elan Studio'; done = true; } }
+      [].forEach.call(c.querySelectorAll('*'), function (el) {
+        if (iconDone) return; var tx = (el.textContent || '').trim();
+        if (!el.children.length && tx && tx.length <= 4 && !/[A-Za-z0-9]/.test(tx)) { el.textContent = '📣'; iconDone = true; }
+      });
+      if (!done) return;
+      c.setAttribute('data-dqes-tile', '1'); c.style.cursor = 'pointer';
       c.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); open(); });
       src.insertAdjacentElement('afterend', c);
     } catch (e) {}
   }
+  var tmr = 0, lastTouch = 0;
+  ['touchstart', 'touchmove', 'scroll', 'wheel', 'pointerdown'].forEach(function (n) { window.addEventListener(n, function () { lastTouch = Date.now(); }, { capture: true, passive: true }); });
+  function schedTile() { if (tmr) return; tmr = setTimeout(function () { tmr = 0; injectTile(); }, 400); }
   function initTile() {
-    /* nadir yoxlama; MutationObserver və tam DOM skanı yoxdur */
-    setInterval(injectTile, 3000); setTimeout(injectTile, 800);
+    try { new MutationObserver(schedTile).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
+    setInterval(injectTile, 5000); schedTile();
   }
 
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && host && host.style.display === 'block') close(); });
