@@ -892,8 +892,10 @@ a{color:inherit}
     '.dqa-bx{flex:1 1 0;min-width:0;padding:18px 20px 16px 18px;display:flex;flex-direction:column;justify-content:center;gap:10px}' +
     '.dqa-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}' +
     '.dqa-tag{align-self:auto;font-size:12px;font-weight:800;color:#f3d47a;background:rgba(224,182,72,.16);border:1px solid rgba(224,182,72,.35);padding:4px 11px;border-radius:99px;letter-spacing:.02em}' +
-    '.dqa-live{display:inline-flex;align-items:center;gap:6px;font:700 12px Mulish,system-ui,sans-serif;color:#9fb0d6}.dqa-live i{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 0 0 rgba(52,211,153,.6);animation:dqaPulse 1.8s infinite}' +
-    '@keyframes dqaPulse{70%{box-shadow:0 0 0 7px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}' +
+    '.dqa-live{display:inline-flex;align-items:center;gap:6px;font:700 12px Mulish,system-ui,sans-serif;color:#9fb0d6}.dqa-live i{position:relative;width:7px;height:7px;border-radius:50%;background:#34d399}' +
+    /* yalnız transform/opacity: GPU-da işləyir, səhifəni yenidən çəkmir və sürüşməni ləngitmir (əvvəl box-shadow animasiyası idi) */
+    '.dqa-live i:after{content:"";position:absolute;inset:0;border-radius:50%;background:rgba(52,211,153,.55);opacity:0;animation:dqaPulse 1.8s ease-out infinite;will-change:transform,opacity}' +
+    '@keyframes dqaPulse{0%{transform:scale(1);opacity:.7}70%,100%{transform:scale(2.8);opacity:0}}' +
     '.dqa-t{margin:0;font-size:clamp(16px,4.3vw,21px);line-height:1.28;font-weight:800;color:#fff;letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}' +
     '.dqa-ch{display:flex;flex-wrap:wrap;gap:6px}.dqa-ch span{font:700 12px Mulish,system-ui,sans-serif;color:#c3cfe8;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);padding:5px 10px;border-radius:9px}.dqa-ch b{color:#fff}' +
     '.dqa-go{align-self:flex-start;margin-top:4px;border:0;border-radius:12px;padding:11px 18px;font:800 14px Mulish,system-ui,sans-serif;color:#13203f;background:linear-gradient(180deg,#f3d47a,#d4a73c);box-shadow:0 6px 16px -6px rgba(212,167,60,.55);cursor:pointer;white-space:nowrap;transition:transform .2s,box-shadow .2s}' +
@@ -903,7 +905,7 @@ a{color:inherit}
     '.dqa-dots{display:flex;justify-content:center;gap:7px;padding:2px 0 14px}.dqa-dots i{width:8px;height:8px;border-radius:99px;background:#3b4f86;transition:width .35s cubic-bezier(.3,1.2,.4,1),background-color .3s;cursor:pointer}.dqa-dots i.on{width:24px;background:#f3d47a}' +
     '@media (min-width:640px){.dqa-img{flex-basis:34%;min-height:250px}.dqa-bx{padding:24px 28px;gap:12px}}' +
     '@media (max-width:360px){.dqa-sl{flex-direction:column}.dqa-img{flex:0 0 auto;min-height:150px}}' +
-    '@media (prefers-reduced-motion:reduce){.dqa-tr{transition:none}.dqa-img img{transition:none;transform:none}.dqa-sl.on .dqa-bx>*{animation:none}.dqa-live i{animation:none}}';
+    '@media (prefers-reduced-motion:reduce){.dqa-tr{transition:none}.dqa-img img{transition:none;transform:none}.dqa-sl.on .dqa-bx>*{animation:none}.dqa-live i:after{animation:none;display:none}}';
   function shadowHost(id, inner) {
     carCss();
     var h = document.createElement('div'); h.id = id;
@@ -1194,7 +1196,7 @@ a{color:inherit}
   function carStart() {
     if (!CFG.homeCarousel || AC.timer) return;
     AC.timer = setInterval(function () {
-      if (document.hidden || Date.now() < AC.pauseUntil || !AC.node || !AC.node.isConnected || AC.exams.length < 2) return;
+      if (document.hidden || Date.now() - lastScroll < 1500 || Date.now() < AC.pauseUntil || !AC.node || !AC.node.isConnected || AC.exams.length < 2) return;
       carNext();
     }, CFG.carouselMs);
     setInterval(carTick, 1200);
