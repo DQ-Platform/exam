@@ -1,7 +1,28 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
-<script id="dq-imtahan-early">
+<script id="dq-dbg">/* DIAQNOSTİKA: ?dbg=1 — sürüşmə donanda ekranda səbəbi göstərir */
+(function(){if(!/[?&]dbg=1(&|$)/.test(location.search))return;
+var D=document,H=D.documentElement,box,lx=0,ly=0,tm=0,pd=0,nc=0,lastPD="-",npd=0;
+function cs(e){return getComputedStyle(e)}
+function nm(e){if(!e)return"null";var r=e.getRootNode&&e.getRootNode(),sh=r&&r.host?"(shadow:"+(r.host.id||r.host.tagName)+")":"";return e.tagName+(e.id?"#"+e.id:"")+(typeof e.className==="string"&&e.className?"."+e.className.trim().split(/\s+/)[0].slice(0,18):"")+sh}
+function chain(x,y){var e=D.elementFromPoint(x,y),out=[],k=0;while(e&&k<7){var c=cs(e);out.push(nm(e)+" "+c.position[0]+"|ov:"+c.overflowY+"|ta:"+c.touchAction+"|pe:"+c.pointerEvents+(e.scrollHeight>e.clientHeight+4?"|sh>ch":""));e=e.parentElement||(e.getRootNode&&e.getRootNode().host)||null;k++}return out}
+function fixedBig(){var o=[],a=D.body.children;for(var i=0;i<a.length;i++){var e=a[i];if(/SCRIPT|STYLE/.test(e.tagName))continue;var c=cs(e);if(c.position==="fixed"&&c.display!=="none"&&c.visibility!=="hidden"){var r=e.getBoundingClientRect();if(r.width>innerWidth*.6&&r.height>innerHeight*.6)o.push(nm(e)+" pe:"+c.pointerEvents+" op:"+c.opacity)}}return o}
+function upd(){try{if(!box){box=D.createElement("pre");box.style.cssText="position:fixed;left:0;top:0;right:0;z-index:2147483647;margin:0;padding:4px 6px;background:rgba(0,0,0,.82);color:#7CFC00;font:10px/1.25 monospace;white-space:pre-wrap;pointer-events:none;max-height:45vh;overflow:hidden";(D.body||H).appendChild(box)}
+var b=D.body,t=["sY:"+Math.round(scrollY)+" sH:"+H.scrollHeight+" iH:"+innerHeight+" iW:"+innerWidth,
+"html ov:"+cs(H).overflowY+" ta:"+cs(H).touchAction+" cls:"+H.className,
+"body ov:"+cs(b).overflowY+" pos:"+cs(b).position+" ta:"+cs(b).touchAction+" cls:"+b.className.slice(0,40),
+"touchmove: total "+nc+" | defaultPrevented "+npd+" (son: "+lastPD+")",
+"fixed böyük: "+(fixedBig().join(" ; ")||"yoxdur"),
+"toxunuş ("+Math.round(lx)+","+Math.round(ly)+"):"].concat(chain(lx,ly));
+box.textContent=t.join("\n")}catch(e){if(box)box.textContent="dbg xəta: "+e}}
+["touchstart","touchmove","touchend"].forEach(function(n){addEventListener(n,function(e){var t=e.touches[0]||e.changedTouches[0];if(t){lx=t.clientX;ly=t.clientY}if(n==="touchmove"){nc++}},{capture:true,passive:true})});
+addEventListener("touchmove",function(e){if(e.defaultPrevented){npd++;lastPD=nm(e.target)}},{passive:true});
+setInterval(upd,400);addEventListener("scroll",upd,{passive:true})})();</script>
+<script>/* TEST: ?off=all  və ya  ?off=early,stack,corner,guard,back,qmv,imtahanpro,giris,elan,qapaq,studio,kecid,scroll */
+window.__dqOff={};try{((location.search.match(/[?&]off=([^&]*)/)||[0,""])[1]).split(",").forEach(function(k){if(k)window.__dqOff[k]=1});
+if(window.__dqOff.all)["early","back","corner","stack","guard","qmv","imtahanpro","giris","elan","qapaq","studio","kecid","scroll"].forEach(function(k){window.__dqOff[k]=1})}catch(e){}</script>
+<script id="dq-imtahan-early">if(!(window.__dqOff&&window.__dqOff.early)){
 /* «İmtahan» menyusu → İmtahan bölməsi (sınaq siyahısı).
    <head>-in ƏN BAŞINDA işləyir: səhifədəki 50-yə yaxın digər skriptdən əvvəl qeydiyyatdan keçir.
    Toxunuş/klik hadisələrini başqa skriptlər (Fənlər/Materiallar yönləndirməsi və s.) görmədən tutur və
@@ -63,8 +84,9 @@ window.addEventListener("click",function(e){
  e.preventDefault();e.stopImmediatePropagation();
  if(busy)return;busy=1;openIt(0)},true);
 })();
-</script>
-<script id="dq-sinaqlar-back">
+
+}</script>
+<script id="dq-sinaqlar-back">if(!(window.__dqOff&&window.__dqOff.back)){
 /* «Sınaqlar» (breadcrumb) → admin paneldəki «Sınaq Seçin» siyahısı (Sınaq 1, 2, 3 …).
    Ən əvvəl işləyir (window capture), xarici showStep()-ə bağlı deyil, ictimai Sınaqlar səhifəsinə keçidi dayandırır. */
 (function(){"use strict";
@@ -99,7 +121,8 @@ window.addEventListener("click",function(ev){
 D.addEventListener("click",function(ev){
  if(ev.target&&ev.target.closest&&ev.target.closest("#mod-suallar .folder-card"))setTimeout(restore,0)},false);
 })();
-</script>
+
+}</script>
 <script src="dq-firebase.js?v=20261102"></script>
 <script id="dqg-norm">/* DQ giriş linki: ?giris, ?giris= və ?giris=1 eyni işləsin; səhv yazılmış linklər (məs. ?giris=(https://…?giris=1&qrup=BA&sinaq=1)) avtomatik düzəlsin; səhifə parametrsiz yenilənərsə (≤15 san) link bərpa olunur → birbaşa «Kabinetə giriş» */
 try{var u=new URL(location.href),q=u.searchParams,K="dqg_link",ss=window.sessionStorage;
@@ -8386,7 +8409,7 @@ html.dq-admin-ok #mod-suallar{padding-bottom:240px!important}
 #mod-suallar .breadcrumb-nav[data-dq-root]{font-size:0!important}
 #mod-suallar .breadcrumb-nav[data-dq-root] span.active{font-size:15px!important}
 </style>
-<script id="dq-fix-corner-js">
+<script id="dq-fix-corner-js">if(!(window.__dqOff&&window.__dqOff.corner)){
 /* 1) «Sınaqlar» (breadcrumb) toxunanda Əsas Admin Panelə qayıt.
    2) Kukilər paneli sol aşağıdakı admin düymələrinin üstünə düşməsin: onların üstündə dayansın. */
 (function(){"use strict";
@@ -8438,7 +8461,8 @@ function fix(){
 var lt=0;["touchstart","touchmove","scroll","wheel","pointerdown"].forEach(function(n){addEventListener(n,function(){lt=Date.now()},{capture:true,passive:true})});
 setInterval(function(){if(document.hidden||Date.now()-lt<1500)return;fix()},2500);window.addEventListener("resize",fix);window.addEventListener("orientationchange",fix);
 })();
-</script>
+
+}</script>
 <style id="dq-stack-css">
 /* ===== Sol aşağı vahid panel (#dq-stack): admin düymələri + baza xəbərdarlığı + əsas panelə qayıt =====
    Hamısı bir konteynerdədir → üst-üstə düşmə və sıçrayış mümkün deyil. */
@@ -8475,7 +8499,7 @@ html.dq-admin-ok.dq-admin-ok.dq-admin-ok #dq-stack #dq-admin-dock#dq-admin-dock{
 @media print{#dq-stack{display:none!important}}
 html.dq-admin-ok #mod-suallar{padding-bottom:280px!important}
 </style>
-<script id="dq-stack-js">
+<script id="dq-stack-js">if(!(window.__dqOff&&window.__dqOff.stack)){
 (function(){"use strict";
 var D=document,KEY="dq_stack_collapsed",st=null,tg=null;
 function shown(e){return e&&e.getClientRects().length>0}
@@ -8521,7 +8545,8 @@ function start(){adopt();
  setInterval(adoptIdle,3000)}
 if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",start);else start()
 })();
-</script>
+
+}</script>
 <style id="qmv-css">
 #stepSubjects .folder-card,#stepCategories .folder-card{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 #qmv-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 12px}
@@ -8549,7 +8574,7 @@ if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",start);else st
 .qmv-go{width:100%;background:#16a34a;color:#fff;border:0;border-radius:12px;padding:13px;font:800 14px/1 inherit;font-family:inherit;cursor:pointer}.qmv-go:disabled{background:#94a3b8}
 #qmv-toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:100002;background:#0f172a;color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;max-width:90vw;box-shadow:0 8px 24px rgba(2,8,23,.4)}#qmv-toast.bad{background:#b91c1c}
 </style>
-<script id="qmv-js">
+<script id="qmv-js">if(!(window.__dqOff&&window.__dqOff.qmv)){
 (function(){"use strict";
 if(/[?&]safe=1(&|$)/.test(location.search))return;
 var D=document,CATS=["BA","BB","AC"],M=null,SM=null;
@@ -8684,15 +8709,16 @@ async function openXfer(){var T={exam:curExam(),cat:curCat()},ex=exams(),oc=CATS
  load()}
 setInterval(function(){try{syncEd();syncBar();wrapSave()}catch(e){}},1000);
 })();
-</script>
-<script src="dq-imtahanpro.js?v=2"></script>
-<script src="dq-imtahan-giris.js?v=16"></script>
-<script src="dq-elan.js?v=1"></script>
-<script src="dq-sinaq-qapaq.js?v=1"></script>
-<script src="dq-elan-studio.js?v=3"></script>
-<script src="dq-admin-kecid.js?v=2"></script>
-<script src="dq-scroll-pro.js?v=1"></script>
-<script id="dq-scroll-guard">
+
+}</script>
+<script>if(!(window.__dqOff&&window.__dqOff.imtahanpro))document.write('<script src="dq-imtahanpro.js?v=2"><\/script>')</script>
+<script>if(!(window.__dqOff&&window.__dqOff.giris))document.write('<script src="dq-imtahan-giris.js?v=16"><\/script>')</script>
+<script>if(!(window.__dqOff&&window.__dqOff.elan))document.write('<script src="dq-elan.js?v=1"><\/script>')</script>
+<script>if(!(window.__dqOff&&window.__dqOff.qapaq))document.write('<script src="dq-sinaq-qapaq.js?v=1"><\/script>')</script>
+<script>if(!(window.__dqOff&&window.__dqOff.studio))document.write('<script src="dq-elan-studio.js?v=3"><\/script>')</script>
+<script>if(!(window.__dqOff&&window.__dqOff.kecid))document.write('<script src="dq-admin-kecid.js?v=2"><\/script>')</script>
+<script>if(!(window.__dqOff&&window.__dqOff.scroll))document.write('<script src="dq-scroll-pro.js?v=1"><\/script>')</script>
+<script id="dq-scroll-guard">if(!(window.__dqOff&&window.__dqOff.guard)){
 /* Ana səhifə sürüşməsini «ilişib qalmış» kilidlərdən azad edir.
    Heç bir pəncərə açıq deyilsə, body/html üzərindəki overflow:hidden təmizlənir. */
 (function(){"use strict";if(window.__dqScrollGuard)return;window.__dqScrollGuard=1;
@@ -8712,6 +8738,7 @@ function free(){try{
 }catch(e){}}
 setInterval(free,700);["touchstart","wheel","pointerdown","visibilitychange","focus"].forEach(function(n){addEventListener(n,free,{passive:true,capture:true})});
 })();
-</script>
+
+}</script>
 </body>
 </html>
