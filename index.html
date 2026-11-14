@@ -1,6 +1,51 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<script id="dq-scroll-rescue">
+/* DQ sürüşmə qoruyucusu: heç bir skript səhifənin şaquli sürüşməsini həmişəlik blokalaya bilməsin.
+   1) Pəncərə açıq deyilsə, toxunuşda touchmove.preventDefault() ləğv edilir (canvas/sürüşdürmə alətləri istisna).
+   2) Pəncərə açıq deyilsə, html/body üzərindəki overflow/position kilidləri (inline və sinif) açılır. */
+(function(){"use strict";if(window.__dqRescue)return;window.__dqRescue=1;
+var D=document,H=D.documentElement;
+var TOOLS='canvas,input,textarea,select,[contenteditable="true"],.dz-img,.rt-handle,.rt-ed,.v3-chip,.v2-cv,.annotation-canvas,[data-dq-drag]';
+var KNOWN=["#dqes-host","#dqx-ov.on","#dqa-ov.on","#rga.on","#admin-panel","#dq-cab",".dqe",".dqc",".dqg-ov","#dqp-ov","#v2-root","#v3-root","#tv2-root.on",".tv2-ov.on",".dqrt-ov.on",".dqn-ov.on",".nw-ov",".dq-modal",".dq-mdl","#dq-tp-ov","#dq-pay-ov","#dq-ins-ov","#lx-mod","#dq8-lb","#dq9-lb","#dqpdf-v","#qmv-ov"];
+function vis(e){if(!e||!e.getClientRects().length)return false;var c=getComputedStyle(e);return c.display!=="none"&&c.visibility!=="hidden"&&c.opacity!=="0"}
+function overlayOpen(){try{
+ var B=D.body;if(!B)return false;
+ var h=D.getElementById("dqg-host");if(h&&h.style.display==="block")return true;
+ for(var i=0;i<KNOWN.length;i++){var e;try{e=D.querySelector(KNOWN[i])}catch(_){e=null}if(e&&vis(e))return true}
+ var vw=innerWidth,vh=innerHeight,k=B.children;
+ for(var j=0;j<k.length;j++){var el=k[j];if(/^(SCRIPT|STYLE|LINK)$/.test(el.tagName))continue;var c=getComputedStyle(el);
+  if(c.position==="fixed"&&c.display!=="none"&&c.visibility!=="hidden"&&c.opacity!=="0"&&c.pointerEvents!=="none"){var r=el.getBoundingClientRect();if(r.width>=vw*.9&&r.height>=vh*.9&&el.id!=="dq-splash")return true}}
+ }catch(e){}return false}
+window.__dqOverlayOpen=overlayOpen;
+/* 1) touchmove kilidi */
+try{var P=Event.prototype.preventDefault;
+Event.prototype.preventDefault=function(){try{
+ if(this.type==="touchmove"&&this.cancelable){
+  var p=this.composedPath&&this.composedPath(),el=(p&&p[0])||this.target;if(el&&el.nodeType===3)el=el.parentElement;
+  var tool=false;if(p){for(var i=0;i<p.length&&i<12;i++){var n=p[i];if(n&&n.matches&&n.matches(TOOLS)){tool=true;break}}}
+  if(!tool&&!overlayOpen())return}
+ }catch(e){}
+ return P.apply(this,arguments)}}catch(e){}
+/* 2) overflow/position kilidlərinin açılması */
+var st=D.createElement("style");st.id="dq-free-css";
+st.textContent="html.dq-free{overflow-y:auto!important;height:auto!important;-webkit-overflow-scrolling:touch}html.dq-free body{height:auto!important;position:static!important;touch-action:pan-y pinch-zoom}";
+(D.head||H).appendChild(st);
+function free(){try{var B=D.body;if(!B)return;
+ var open=overlayOpen();
+ if(open){H.classList.remove("dq-free");return}
+ H.classList.add("dq-free");
+ if(B.style.overflow==="hidden")B.style.overflow="";
+ if(H.style.overflow==="hidden")H.style.overflow="";
+ if(B.style.position==="fixed"){B.style.position="";B.style.top="";B.style.width=""}
+ }catch(e){}}
+setInterval(free,500);
+["touchstart","pointerdown","wheel","visibilitychange","focus","pageshow","resize"].forEach(function(n){addEventListener(n,free,{passive:true,capture:true})});
+D.addEventListener("DOMContentLoaded",free);addEventListener("load",free);
+})();
+</script>
+
 <script id="dq-dbg">/* DIAQNOSTİKA: ?dbg=1 — sürüşmə donanda ekranda səbəbi göstərir */
 (function(){if(!/[?&]dbg=1(&|$)/.test(location.search))return;
 var D=document,H=D.documentElement,box,lx=0,ly=0,tm=0,pd=0,nc=0,lastPD="-",npd=0;
@@ -8717,28 +8762,7 @@ setInterval(function(){try{syncEd();syncBar();wrapSave()}catch(e){}},1000);
 <script>if(!(window.__dqOff&&window.__dqOff.qapaq))document.write('<script src="dq-sinaq-qapaq.js?v=1"><\/script>')</script>
 <script>if(!(window.__dqOff&&window.__dqOff.studio))document.write('<script src="dq-elan-studio.js?v=3"><\/script>')</script>
 <script>if(!(window.__dqOff&&window.__dqOff.kecid))document.write('<script src="dq-admin-kecid.js?v=2"><\/script>')</script>
-<script>if(!(window.__dqOff&&window.__dqOff.scroll))document.write('<script src="dq-scroll-pro.js?v=1"><\/script>')</script>
-<script id="dq-scroll-guard">if(!(window.__dqOff&&window.__dqOff.guard)){
-/* Ana səhifə sürüşməsini «ilişib qalmış» kilidlərdən azad edir.
-   Heç bir pəncərə açıq deyilsə, body/html üzərindəki overflow:hidden təmizlənir. */
-(function(){"use strict";if(window.__dqScrollGuard)return;window.__dqScrollGuard=1;
-var D=document,H=D.documentElement,B=D.body,KNOWN=["#dqes-host","#dqx-ov.on","#dqa-ov.on","#rga.on",".dqe",".dqc","#admin-panel","#login-screen","#exam-screen","#dq-cab",".dqg-ov","#dqp-ov","#v2-root","#v3-root",".v2-ov.on",".v3-ov.on"];
-function vis(e){if(!e||!e.getClientRects().length)return false;var c=getComputedStyle(e);return c.display!=="none"&&c.visibility!=="hidden"&&c.opacity!=="0"}
-function overlayOpen(){
- if(H.classList.contains("dqh-lock")||B.classList.contains("dqh-split"))return true;
- for(var i=0;i<KNOWN.length;i++){var e;try{e=D.querySelector(KNOWN[i])}catch(_){e=null}if(e&&vis(e))return true}
- var h=D.getElementById("dqg-host");if(h&&h.style.display==="block")return true;
- var vw=innerWidth,vh=innerHeight,k=B.children;
- for(var j=0;j<k.length;j++){var el=k[j];if(el.tagName==="SCRIPT"||el.tagName==="STYLE")continue;var c=getComputedStyle(el);
-  if(c.position==="fixed"&&c.display!=="none"&&c.visibility!=="hidden"&&c.opacity!=="0"&&c.pointerEvents!=="none"){var r=el.getBoundingClientRect();if(r.width>=vw*.9&&r.height>=vh*.9)return true}}
- return false}
-function free(){try{
- if(B.style.overflow==="hidden"||H.style.overflow==="hidden"||B.style.position==="fixed"){
-  if(!overlayOpen()){B.style.overflow="";H.style.overflow="";if(B.style.position==="fixed"){B.style.position="";B.style.top="";B.style.width=""}}}
-}catch(e){}}
-setInterval(free,700);["touchstart","wheel","pointerdown","visibilitychange","focus"].forEach(function(n){addEventListener(n,free,{passive:true,capture:true})});
-})();
+<!-- dq-scroll-pro.js söndürüldü -->
 
-}</script>
 </body>
 </html>
