@@ -2,9 +2,7 @@
 <html lang="az">
 <head>
 <script id="dq-scroll-rescue">
-/* DQ sürüşmə qoruyucusu: heç bir skript səhifənin şaquli sürüşməsini həmişəlik blokalaya bilməsin.
-   1) Pəncərə açıq deyilsə, toxunuşda touchmove.preventDefault() ləğv edilir (canvas/sürüşdürmə alətləri istisna).
-   2) Pəncərə açıq deyilsə, html/body üzərindəki overflow/position kilidləri (inline və sinif) açılır. */
+/* DQ sürüşmə qoruyucusu: heç bir skript səhifənin şaquli sürüşməsini həmişəlik blokalaya bilməsin. */
 (function(){"use strict";if(window.__dqRescue)return;window.__dqRescue=1;
 var D=document,H=D.documentElement;
 var TOOLS='canvas,input,textarea,select,[contenteditable="true"],.dz-img,.rt-handle,.rt-ed,.v3-chip,.v2-cv,.annotation-canvas,[data-dq-drag]';
@@ -19,22 +17,19 @@ function overlayOpen(){try{
   if(c.position==="fixed"&&c.display!=="none"&&c.visibility!=="hidden"&&c.opacity!=="0"&&c.pointerEvents!=="none"){var r=el.getBoundingClientRect();if(r.width>=vw*.9&&r.height>=vh*.9&&el.id!=="dq-splash")return true}}
  }catch(e){}return false}
 window.__dqOverlayOpen=overlayOpen;
-/* 1) touchmove kilidi */
 try{var P=Event.prototype.preventDefault;
 Event.prototype.preventDefault=function(){try{
  if(this.type==="touchmove"&&this.cancelable){
-  var p=this.composedPath&&this.composedPath(),el=(p&&p[0])||this.target;if(el&&el.nodeType===3)el=el.parentElement;
+  var p=this.composedPath&&this.composedPath();
   var tool=false;if(p){for(var i=0;i<p.length&&i<12;i++){var n=p[i];if(n&&n.matches&&n.matches(TOOLS)){tool=true;break}}}
   if(!tool&&!overlayOpen())return}
  }catch(e){}
  return P.apply(this,arguments)}}catch(e){}
-/* 2) overflow/position kilidlərinin açılması */
 var st=D.createElement("style");st.id="dq-free-css";
 st.textContent="html.dq-free{overflow-y:auto!important;height:auto!important;-webkit-overflow-scrolling:touch}html.dq-free body{height:auto!important;position:static!important;touch-action:pan-y pinch-zoom}";
 (D.head||H).appendChild(st);
 function free(){try{var B=D.body;if(!B)return;
- var open=overlayOpen();
- if(open){H.classList.remove("dq-free");return}
+ if(overlayOpen()){H.classList.remove("dq-free");return}
  H.classList.add("dq-free");
  if(B.style.overflow==="hidden")B.style.overflow="";
  if(H.style.overflow==="hidden")H.style.overflow="";
@@ -6041,307 +6036,7 @@ function init(){var h=home();if(!h){setTimeout(init,200);return}
 init();
 })();
 </script>
-<script id="dq-tools-patch">
 
-(function () {
-  'use strict';
-  if (window.DQTools) return;
-
-  /* ---------- Ayarlar ---------- */
-  var CFG = {
-    bell: '',                       // bildiriş düyməsi (boşdursa avto-axtarış)
-    chat: '',                       // çatbot düyməsi   (boşdursa avto-axtarış)
-    display: '#dq13-dock',          // göz rahatlığı / gecə rejimi / parlaqlıq paneli
-    // Bunlardan biri görünürsə = imtahan/test gedir → alətlər gizlənir
-    hideWhen: ['#exam-screen.active', '#tlx-run.open', '.tv2-ov.on'],
-    // İmtahan zamanı diqqəti yayındıran digər üzən elementlər də gizlənir
-    hideAlso: ['#dq-ticker', '#dq-exbar', '#dq-install-fab'],
-    storeKey: 'dqt_pos_v2'
-  };
-  var U = window.DQ_TOOLS || {};
-  for (var k in U) if (Object.prototype.hasOwnProperty.call(U, k)) CFG[k] = U[k];
-
-  /* ---------- CSS ---------- */
-  var hideSel = ['#dqt-dock', '[data-dqt-panel]'].concat(CFG.hideAlso)
-    .map(function (s) { return 'html.dqt-off ' + s; }).join(',');
-
-  var css =
-    '#dqt-dock{display:flex;align-items:center;gap:6px;padding:5px 7px 5px 2px;border-radius:999px;' +
-    'background:rgba(8,29,69,.92);border:1px solid rgba(255,255,255,.22);box-shadow:0 6px 18px rgba(0,0,0,.35);' +
-    'touch-action:none;user-select:none;-webkit-user-select:none;box-sizing:border-box;width:max-content;' +
-    'font-family:inherit;z-index:99991;transition:box-shadow .2s,transform .2s}' +
-    '#dqt-dock.dqt-drag{transform:scale(1.05);box-shadow:0 14px 32px rgba(0,0,0,.5);z-index:2147483000!important}' +
-    '#dqt-grip{width:18px;height:38px;display:flex;align-items:center;justify-content:center;flex:none;' +
-    'color:rgba(255,255,255,.65);font-size:17px;line-height:1;letter-spacing:-3px;cursor:grab;touch-action:none}' +
-    '#dqt-dock.dqt-drag #dqt-grip{cursor:grabbing}' +
-    /* köçürülən düymələrin köhnə "fixed" mövqeyini ləğv edirik */
-    '#dqt-dock .dqt-it{position:relative!important;inset:auto!important;left:auto!important;right:auto!important;' +
-    'top:auto!important;bottom:auto!important;transform:none!important;margin:0!important;flex:none!important;' +
-    'z-index:auto!important;box-sizing:border-box!important}' +
-    '#dqt-dock .dqt-it:not(.dqt-disp){width:38px!important;height:38px!important;min-width:0!important;' +
-    'min-height:0!important;padding:0!important}' +
-    '#dqt-dock .dqt-lh{line-height:38px!important;text-align:center!important}' +
-    '#dqt-dock .dqt-disp{display:flex!important;gap:6px!important;align-items:center}' +
-    hideSel + '{display:none!important}';
-
-  var st = document.createElement('style');
-  st.id = 'dqt-style';
-  st.textContent = css;
-  document.head.appendChild(st);
-
-  /* ---------- Dok ---------- */
-  var dock = document.createElement('div');
-  dock.id = 'dqt-dock';
-  var grip = document.createElement('span');
-  grip.id = 'dqt-grip';
-  grip.textContent = '\u22EE\u22EE';
-  grip.title = 'Sürüşdür və yerini dəyiş (2 dəfə toxun: ilkin yerə qaytar)';
-  dock.appendChild(grip);
-
-  var adopted = { bell: null, disp: null, chat: null };
-  var pos = load();       // null = susmaya görə (footer-in solu)
-  var drag = null;
-
-  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-  function load() {
-    try {
-      var p = JSON.parse(localStorage.getItem(CFG.storeKey) || 'null');
-      if (p && (p.m === 'footer' || p.m === 'free')) return p;
-    } catch (e) {}
-    return null;
-  }
-  function save() {
-    try {
-      if (pos) localStorage.setItem(CFG.storeKey, JSON.stringify(pos));
-      else localStorage.removeItem(CFG.storeKey);
-    } catch (e) {}
-  }
-  function css1(el, o) { for (var p in o) el.style[p] = o[p]; }
-
-  /* ---------- Footer tapmaq ---------- */
-  function visible(el) {
-    if (!el || el === dock || dock.contains(el)) return false;
-    var r = el.getBoundingClientRect();
-    return r.width > 40 && r.height > 20 && el.getClientRects().length > 0 &&
-      getComputedStyle(el).visibility !== 'hidden';
-  }
-  function footers() {
-    var out = [], l = document.querySelectorAll('.v3-ft,footer,.footer');
-    for (var i = 0; i < l.length; i++) if (visible(l[i])) out.push(l[i]);
-    return out;
-  }
-  function footerAt(x, y) {
-    var l = footers();
-    for (var i = 0; i < l.length; i++) {
-      var r = l[i].getBoundingClientRect();
-      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return l[i];
-    }
-    return null;
-  }
-
-  /* ---------- Düymələri tutub doka yığmaq ---------- */
-  function take(key, el) {
-    if (!el || el === dock || el.contains(dock)) return;
-    adopted[key] = el;
-    var d = getComputedStyle(el).display;
-    el.classList.add('dqt-it');
-    if (key === 'disp') el.classList.add('dqt-disp');
-    else if (!/flex|grid/.test(d)) el.classList.add('dqt-lh');
-    dock.appendChild(el);
-  }
-  function bySel(key, sel) {
-    if (!sel || (adopted[key] && document.contains(adopted[key]))) return;
-    adopted[key] = null;
-    try { var el = document.querySelector(sel); if (el) take(key, el); } catch (e) {}
-  }
-
-  var RX_SKIP = /toast|ticker|banner|install|pwa|exbar|dqt-|dq13/;
-  var RX_CHAT_ID = /chat|bot\b|assist|mesaj|d[əe]st[əe]k/;
-  var RX_CHAT_HTML = /fa-comment|chat-?(dots|bubble)|\uD83D\uDCAC/;
-  var RX_BELL_ID = /bell|bildiri|notif/;
-  var RX_BELL_HTML = /\uD83D\uDD14|fa-bell|bi-bell/;
-
-  var lastScan = 0;
-  function scan() {
-    var nw = performance.now(); if (nw - lastScan < 600) return; lastScan = nw;
-    var list = document.body.querySelectorAll(':scope > *, :scope > * > *');
-    for (var i = 0; i < list.length; i++) {
-      var el = list[i];
-      if (el === dock || dock.contains(el) || el.classList.contains('dqt-it')) continue;
-      if (/^(SCRIPT|STYLE|LINK|META|NOSCRIPT)$/.test(el.tagName)) continue;
-      var cs = getComputedStyle(el);
-      if (cs.position !== 'fixed') continue;
-      var cls = typeof el.className === 'string' ? el.className : '';
-      var idc = (el.id + ' ' + cls + ' ' + (el.getAttribute('aria-label') || '') + ' ' + (el.title || '')).toLowerCase();
-      if (RX_SKIP.test(idc)) continue;
-      var r = el.getBoundingClientRect();
-      /* böyük çat pəncərəsini imtahanda gizlətmək üçün işarələ */
-      if (RX_CHAT_ID.test(idc) && (r.width > 120 || r.height > 120)) { el.setAttribute('data-dqt-panel', ''); continue; }
-      if (r.width < 28 || r.width > 96 || r.height < 28 || r.height > 96) continue;
-      var html = (el.innerHTML || '').slice(0, 600).toLowerCase();
-      if (!adopted.chat && (RX_CHAT_ID.test(idc) || RX_CHAT_HTML.test(html))) take('chat', el);
-      else if (!adopted.bell && (RX_BELL_ID.test(idc) || RX_BELL_HTML.test(html))) take('bell', el);
-    }
-  }
-
-  function adopt() {
-    bySel('disp', CFG.display);
-    bySel('bell', CFG.bell);
-    bySel('chat', CFG.chat);
-    ['bell', 'disp', 'chat'].forEach(function (k) {
-      if (adopted[k] && !document.contains(adopted[k])) adopted[k] = null;
-    });
-    if (!adopted.bell || !adopted.chat) scan();
-    var want = [grip, adopted.bell, adopted.disp, adopted.chat].filter(Boolean);
-    var cur = Array.prototype.slice.call(dock.children).filter(function (c) { return want.indexOf(c) > -1; });
-    if (want.length !== cur.length || want.some(function (c, i) { return cur[i] !== c; })) {
-      want.forEach(function (c) { dock.appendChild(c); });
-    }
-  }
-
-  /* ---------- Yerləşdirmə ---------- */
-  function place() {
-    if (drag) return;
-    var f = (!pos || pos.m === 'footer') ? footers()[0] : null;
-    var w, h;
-    if (f) {
-      if (dock.parentNode !== f) f.appendChild(dock);
-      if (getComputedStyle(f).position === 'static') f.style.position = 'relative';
-      w = dock.offsetWidth; h = dock.offsetHeight;
-      var fw = f.clientWidth, fh = f.clientHeight, x, y;
-      if (pos) { x = pos.x; y = pos.y; }
-      else { x = 12; y = fw >= 720 ? (fh - h) / 2 : fh - h - 8; }
-      x = clamp(x, 0, Math.max(0, fw - w));
-      y = clamp(y, 0, Math.max(0, fh - h));
-      css1(dock, { position: 'absolute', left: x + 'px', top: y + 'px', right: 'auto', bottom: 'auto', zIndex: '5' });
-    } else {
-      if (dock.parentNode !== document.body) document.body.appendChild(dock);
-      w = dock.offsetWidth; h = dock.offsetHeight;
-      if (pos && pos.m === 'free') {
-        css1(dock, {
-          position: 'fixed', right: 'auto', bottom: 'auto', zIndex: '99991',
-          left: clamp(pos.fx * (innerWidth - w), 0, Math.max(0, innerWidth - w)) + 'px',
-          top: clamp(pos.fy * (innerHeight - h), Math.min(innerHeight * 0.5, Math.max(0, innerHeight - h)), Math.max(0, innerHeight - h)) + 'px'
-        });
-      } else { /* bu ekranda footer yoxdur → sol-aşağıda üzən */
-        css1(dock, {
-          position: 'fixed', left: '12px', right: 'auto', top: 'auto', zIndex: '99991',
-          bottom: 'calc(12px + env(safe-area-inset-bottom,0px))'
-        });
-      }
-    }
-    dock.classList.toggle('dqt-r', dock.getBoundingClientRect().left > innerWidth / 2);
-  }
-
-  /* ---------- İmtahan zamanı gizlət ---------- */
-  var wasOff = false;
-  function hideState() {
-    var on = CFG.hideWhen.some(function (s) {
-      try { return !!document.querySelector(s); } catch (e) { return false; }
-    });
-    if (on !== wasOff) {
-      wasOff = on;
-      document.documentElement.classList.toggle('dqt-off', on);
-    }
-  }
-
-  var busy = false, lastRun = 0;
-  function refresh() {                       /* ən çox 250ms-də bir dəfə (əvvəl: hər kadrda) */
-    if (busy) return;
-    busy = true;
-    setTimeout(function () {
-      requestAnimationFrame(function () {
-        busy = false; lastRun = performance.now();
-        try { hideState(); adopt(); place(); } catch (e) { console.warn('[DQTools]', e); }
-      });
-    }, Math.max(0, 250 - (performance.now() - lastRun)));
-  }
-
-  /* ---------- Sürüşdürmə ---------- */
-  var lastTap = 0;
-  dock.addEventListener('pointerdown', function (e) {
-    if (e.button > 0 || (e.target !== dock && e.target !== grip)) return;
-    var r = dock.getBoundingClientRect();
-    drag = { id: e.pointerId, dx: e.clientX - r.left, dy: e.clientY - r.top, x0: e.clientX, y0: e.clientY, on: false, y: e.clientY };
-    try { e.target.setPointerCapture(e.pointerId); } catch (x) {}
-    e.preventDefault();
-  });
-  window.addEventListener('pointermove', function (e) {
-    if (!drag || e.pointerId !== drag.id) return;
-    if (!drag.on) {
-      if (Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) < 6) return;
-      drag.on = true;
-      var r = dock.getBoundingClientRect();
-      dock.classList.add('dqt-drag');
-      css1(dock, { position: 'fixed', left: r.left + 'px', top: r.top + 'px', right: 'auto', bottom: 'auto' });
-      (function tick() {            /* kənara yaxınlaşanda səhifəni sürüşdür */
-        if (!drag) return;
-        if (drag.y > innerHeight - 70) window.scrollBy(0, 14);
-        else if (drag.y < 70) window.scrollBy(0, -14);
-        drag.raf = requestAnimationFrame(tick);
-      })();
-    }
-    drag.y = e.clientY;
-    var w = dock.offsetWidth, h = dock.offsetHeight;
-    dock.style.left = clamp(e.clientX - drag.dx, 0, Math.max(0, innerWidth - w)) + 'px';
-    dock.style.top = clamp(e.clientY - drag.dy, 0, Math.max(0, innerHeight - h)) + 'px';
-  });
-  function end(e) {
-    if (!drag || (e && e.pointerId !== drag.id)) return;
-    var d = drag; drag = null;
-    cancelAnimationFrame(d.raf);
-    dock.classList.remove('dqt-drag');
-    if (d.on) {
-      var r = dock.getBoundingClientRect();
-      var f = footerAt(r.left + r.width / 2, r.top + r.height / 2);
-      if (f) {
-        var fr = f.getBoundingClientRect();
-        pos = { m: 'footer', x: r.left - fr.left - f.clientLeft, y: r.top - fr.top - f.clientTop };
-      } else {
-        pos = {
-          m: 'free',
-          fx: clamp(r.left / Math.max(1, innerWidth - r.width), 0, 1),
-          fy: clamp(r.top / Math.max(1, innerHeight - r.height), 0, 1)
-        };
-      }
-      save();
-    } else if (d.id !== undefined) {          /* sadə toxunuş: 2 dəfə = sıfırla */
-      var now = Date.now();
-      if (now - lastTap < 350) { pos = null; save(); lastTap = 0; }
-      else lastTap = now;
-    }
-    place();
-  }
-  window.addEventListener('pointerup', end);
-  window.addEventListener('pointercancel', end);
-  window.addEventListener('resize', refresh);
-
-  /* ---------- Başlat ---------- */
-  function start() {
-    document.body.appendChild(dock);
-    refresh();
-    new MutationObserver(refresh).observe(document.body, { childList: true });
-    new MutationObserver(refresh).observe(document.documentElement, {
-      attributes: true, subtree: true, attributeFilter: ['class']
-    });
-    setInterval(refresh, 800);   /* gec yaranan düymələr / ekran dəyişməsi üçün */
-  }
-  if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
-
-  /* ---------- Yoxlama köməkçiləri (konsolda) ---------- */
-  window.DQTools = {
-    report: function () {
-      return {
-        bell: adopted.bell, display: adopted.disp, chat: adopted.chat,
-        position: pos, examHidden: wasOff
-      };
-    },
-    reset: function () { pos = null; save(); refresh(); },
-    hide: function (on) { document.documentElement.classList.toggle('dqt-off', !!on); }
-  };
-})();
-
-</script>
 <style id="dq-pro-polish">
 /* ===== DQ Pro Polish — son qat. Mövcud məntiqə toxunmur, yalnız görünüşü nizamlayır ===== */
 :root{--pro-ink:#0f1e45;--pro-line:#d6e0f2;--pro-r:18px;--pro-sh:0 1px 2px rgba(10,47,122,.06),0 10px 28px -12px rgba(10,47,122,.22)}
@@ -8764,5 +8459,75 @@ setInterval(function(){try{syncEd();syncBar();wrapSave()}catch(e){}},1000);
 <script>if(!(window.__dqOff&&window.__dqOff.kecid))document.write('<script src="dq-admin-kecid.js?v=2"><\/script>')</script>
 <!-- dq-scroll-pro.js söndürüldü -->
 
+<style id="dq-no-dock">#dqt-dock,#dqt-grip{display:none!important}</style>
+<script id="dq-no-bell">
+/* Üzən ⋮⋮ dok və təkrar zəng düyməsi silindi (başlıqda zəng düyməsi var). */
+(function(){"use strict";var RX_ID=/bell|bildiri|notif/,RX_H=/\uD83D\uDD14|fa-bell|bi-bell/,SKIP=/toast|ticker|banner|install|pwa|exbar|dq13|push/;
+function sweep(){try{var l=document.body.querySelectorAll(":scope > *, :scope > * > *");
+for(var i=0;i<l.length;i++){var el=l[i];if(el.dataset&&el.dataset.dqNb)continue;if(/^(SCRIPT|STYLE|LINK|META)$/.test(el.tagName))continue;
+ var cs=getComputedStyle(el);if(cs.position!=="fixed"||cs.display==="none")continue;
+ var idc=((el.id||"")+" "+(typeof el.className==="string"?el.className:"")+" "+(el.getAttribute("aria-label")||"")+" "+(el.title||"")).toLowerCase();
+ if(SKIP.test(idc))continue;var r=el.getBoundingClientRect();
+ if(r.width<28||r.width>120||r.height<28||r.height>96)continue;
+ if(RX_ID.test(idc)||RX_H.test((el.innerHTML||"").slice(0,600).toLowerCase())){el.style.setProperty("display","none","important");el.dataset.dqNb="1"}}}catch(e){}}
+setInterval(sweep,1000);document.addEventListener("DOMContentLoaded",sweep);
+})();
+</script>
+<style id="dq-stats-css">
+#dq-stats{width:100%;max-width:none;margin:18px 0 0;padding:0;box-sizing:border-box;clear:both}
+#dq-stats.dqs-foot{max-width:1180px;margin:34px auto 8px;padding:0 14px}
+#dq-stats .dqs-h{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding-left:12px;border-left:3px solid #d9a441;font-size:clamp(16px,4vw,20px);font-weight:800;color:#f3f6ff;letter-spacing:.2px}
+#dq-stats .dqs-card{display:block!important;position:relative!important;width:100%!important;max-width:none!important;min-width:0!important;height:auto!important;min-height:0!important;margin:0!important;padding:24px 16px!important;box-sizing:border-box!important;overflow:visible!important;border-radius:22px;border:1px solid rgba(217,164,65,.28);background:linear-gradient(160deg,rgba(18,42,98,.92),rgba(8,22,56,.96))!important;box-shadow:0 14px 34px -18px rgba(0,0,0,.7)}
+#dq-stats .dqs-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:14px!important;width:100%!important;margin:0!important;padding:0!important}
+#dq-stats .dqs-grid>*{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:8px!important;width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;margin:0!important;padding:6px 4px!important;overflow:visible!important;text-align:center!important;position:static!important}
+#dq-stats .dqs-grid *{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;max-width:100%}
+#dq-stats .dqs-grid>*+*{border-left:1px solid rgba(255,255,255,.08)}
+@media(max-width:560px){#dq-stats .dqs-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;row-gap:20px!important}#dq-stats .dqs-grid>*:nth-child(odd){border-left:0}#dq-stats .dqs-grid>*:nth-child(n+3){border-top:1px solid rgba(255,255,255,.08);padding-top:18px!important}#dq-stats .dqs-grid>*:nth-child(2){border-left:1px solid rgba(255,255,255,.08)}}
+</style>
+<script id="dq-stats-js">
+/* Statistika («İstifadəçi/İmtahan/Sınaq/Sual sayı») «Nəticəni təhlil et» kartının altına köçürülür. */
+(function(){"use strict";
+var D=document,n=0,SEC=null;
+function norm(s){return String(s||"").replace(/\u0130/g,"i").replace(/\u0307/g,"").replace(/\u0131/g,"i").replace(/\u0259/g,"e").replace(/\s+/g," ").trim().toLowerCase()}
+function labels(root){var out=[],w=D.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),t;
+ while((t=w.nextNode())){var v=norm(t.nodeValue);if(!v||v.length>40)continue;
+  var p=t.parentElement;if(!p||p.closest("#dq-stats"))continue;
+  if(/^(istifadeci|imtahan|sinaq|sual) sayi$/.test(norm(p.textContent))&&out.indexOf(p)<0)out.push(p)}
+ return out}
+function lca(a){var el=a[0];while(el&&!a.every(function(x){return el.contains(x)}))el=el.parentElement;return el}
+function find(){
+ var root=D.getElementById("v3-home")||D.body;
+ var all=labels(root),kinds={},pick=[];
+ all.forEach(function(e){var k=norm(e.textContent);if(!kinds[k]){kinds[k]=1;pick.push(e)}});
+ if(pick.length<4)return null;
+ var C=lca(pick);if(!C)return null;
+ var card=C,g=0;
+ while(card.parentElement&&card.parentElement.childElementCount<5&&g<7&&card.parentElement.id!=="v3-home"){card=card.parentElement;g++}
+ return {card:card,grid:C}}
+function build(){var s=D.createElement("section");s.id="dq-stats";s.innerHTML='<h2 class="dqs-h">DQ Platform rəqəmlərlə</h2>';return s}
+function anchorCard(){
+ var root=D.getElementById("v3-home")||D.body,w=D.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),tn,h=null;
+ while((tn=w.nextNode())){var v=norm(tn.nodeValue);if(v.indexOf("neticeni tehlil et")===0&&tn.parentElement&&!tn.parentElement.closest("#dq-stats")){h=tn.parentElement;break}}
+ if(!h)return null;
+ var el=h,g=0,vw=innerWidth;
+ while(el.parentElement&&g<9){var r=el.getBoundingClientRect();if(r.width>=vw*.86&&r.height>140&&el.parentElement.id!=="v3-home")break;el=el.parentElement;g++}
+ return el&&el.parentElement?el:null}
+function run(){try{
+ var f=find();if(!f)return false;
+ if(!SEC||!SEC.isConnected){SEC=build()}
+ var a=anchorCard();
+ if(a){SEC.classList.remove("dqs-foot");if(SEC.previousElementSibling!==a||!SEC.isConnected)a.insertAdjacentElement("afterend",SEC)}
+ else if(!SEC.isConnected){
+  if(n<30)return false;
+  SEC.classList.add("dqs-foot");
+  var ft=D.querySelector("#v3-home .v3-ft")||D.querySelector(".v3-ft");
+  if(ft&&ft.parentNode)ft.parentNode.insertBefore(SEC,ft);else (D.getElementById("v3-home")||D.body).appendChild(SEC)}
+ var old=SEC.querySelector(".dqs-card");if(old&&old!==f.card)old.remove();
+ f.card.classList.add("dqs-card");f.grid.classList.add("dqs-grid");
+ SEC.appendChild(f.card);return true}catch(e){return false}}
+function tick(){n++;var ok=run();var d=n<90?800:6000;if(n<400)setTimeout(tick,ok&&n>6?6000:d)}
+if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",tick);else tick();
+})();
+</script>
 </body>
 </html>
