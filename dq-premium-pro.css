@@ -76,3 +76,6 @@ body.v3on{background:
 ::selection{background:rgba(212,175,55,.35)}
 @media(max-width:640px){.v3-hd{padding:12px 14px}.dq-why-grid{grid-template-columns:repeat(2,1fr)!important}}
 @media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* Dairəyə alınan köhnə CANLI STATİSTİKA kartı: #dq-stats.dqst (1,1,0) gizlətmə qaydasını ötürdü */
+html body #dq-stats.dqst,html body section#dq-stats.dqst,html body #dq-stats{display:none!important;visibility:hidden!important;height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important}
