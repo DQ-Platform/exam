@@ -8530,7 +8530,7 @@ setInterval(sweep,1000);document.addEventListener("DOMContentLoaded",sweep);
 /* Statistika («İstifadəçi/İmtahan/Sınaq/Sual sayı»): köhnə kartın dəyərləri oxunur, hero-nun altında yeni zolaqda
    skeleton → say-sayma animasiyası ilə təqdim olunur. Köhnə kart ekrandan kənara çıxarılır (DOM-da qalır). */
 (function(){"use strict";
-var D=document,W=window,KEYS=["istifadeci","imtahan","sinaq","sual"],RX=/^(istifadeci|imtahan|sinaq|sual) sayi$/;
+var D=document,W=window,KEYS=["istifadeci","imtahan","sinaq","sual"],RX=/^(istifadeci|imtahan|sinaq|sual)(lar|ler)? ?(sayi)?$/;
 var META=[
  {t:"İstifadəçilər",i:'<circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>'},
  {t:"İmtahanlar",i:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/>'},
@@ -8545,22 +8545,22 @@ function home(){return D.getElementById("v3-home")}
 
 /* ---------- mənbə kartı ---------- */
 function findSrc(){
- var root=home();if(!root)return null;
+ var root=D.body;
  var labs=[],got={},w=D.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),t;
  while((t=w.nextNode())){var v=t.nodeValue;if(!v||v.length>40)continue;
-  var p=t.parentElement;if(!p||p.closest("#dqsp"))continue;
+  var p=t.parentElement;if(!p||p.closest("#dqsp")||p.closest("[class*=admin],[id*=admin],#aps-root,#v2-root"))continue;
   var m=RX.exec(norm(p.textContent));if(!m)continue;var k=KEYS.indexOf(m[1]);
   if(k<0||got[k])continue;got[k]=p;labs[k]=p}
  for(var i=0;i<4;i++)if(!labs[i])return null;
  var cells=labs.map(function(l){var c=l;
-  while(c.parentElement&&c.parentElement!==root){var par=c.parentElement,cnt=0;
+  while(c.parentElement&&c.parentElement!==root&&c.parentElement!==home()){var par=c.parentElement,cnt=0;
    for(var j=0;j<4;j++)if(par.contains(labs[j]))cnt++;
    if(cnt>1)break;c=par}
   return c});
  var C=labs[0];while(C&&!labs.every(function(x){return C.contains(x)}))C=C.parentElement;
  if(!C)return null;
  var card=C,g=0;
- while(card.parentElement&&card.parentElement.childElementCount<5&&g<7&&card.parentElement!==root){card=card.parentElement;g++}
+ while(card.parentElement&&card.parentElement.childElementCount<5&&g<7&&card.parentElement!==root&&card.parentElement!==home()){card=card.parentElement;g++}
  return {labs:labs,cells:cells,card:card}}
 function readVals(s){
  var out=[];
@@ -8582,14 +8582,15 @@ function build(){
  META.map(function(m){return'<div class="dqsp-c" role="group" aria-label="'+m.t+'"><span class="dqsp-ic" aria-hidden="true"><svg viewBox="0 0 24 24">'+m.i+'</svg></span><div class="dqsp-tx"><b class="dqsp-n"><span class="v">0</span><span class="s" aria-hidden="true">+</span></b><span class="dqsp-l">'+m.t+'</span></div></div>'}).join("")+'</div></div>';
  return s}
 function place(){
- var h=home();if(!h||!SEC)return false;
- var a=D.getElementById("lxp-ban")||D.getElementById("dt-home")||D.getElementById("dt-grid")||h.querySelector(".v3-ft");
- while(a&&a.parentElement&&a.parentElement!==h)a=a.parentElement;
- if(!a||a.parentElement!==h){if(!SEC.isConnected)h.appendChild(SEC);return true}
- if(SEC.nextElementSibling!==a||SEC.parentElement!==h)h.insertBefore(SEC,a);
+ if(!SEC)return false;
+ var h=home(),ban=D.getElementById("lxp-ban"),a=ban;
+ if(!a&&h)a=D.getElementById("dt-home")||D.getElementById("dt-grid")||h.querySelector(".v3-ft");
+ if(a&&h&&h.contains(a)){while(a.parentElement&&a.parentElement!==h)a=a.parentElement}
+ if(!a||!a.parentElement){if(h&&!SEC.isConnected)h.appendChild(SEC);return !!h}
+ var par=a.parentElement;
+ if(SEC.nextElementSibling!==a||SEC.parentElement!==par)par.insertBefore(SEC,a);
  try{SEC.style.order=getComputedStyle(a).order}catch(e){}
- /* eni qeydiyyat bannerinin eni ilə eyni olsun */
- var ban=D.getElementById("lxp-ban"),inn=ban&&(ban.querySelector(".lxp-bi")||ban);
+ var inn=ban&&(ban.querySelector(".lxp-bi")||ban);
  if(inn&&inn.offsetWidth>120){SEC.style.width=inn.offsetWidth+"px";SEC.style.maxWidth="none"}else{SEC.style.width="";SEC.style.maxWidth=""}
  return true}
 function paint(i,v){var c=SEC.children[0].children[1].children[i];c.querySelector(".v").textContent=fmt(v)}
@@ -8629,7 +8630,7 @@ function tick(){
  n++;
  try{
   var h=home();
-  if(h&&(h.querySelector(".v3-hero")||h.querySelector("#dt-home")||h.querySelector("#dt-grid")||h.querySelector("#dq-count")||h.querySelector(".v3-ft")||n>4)){
+  if(D.body&&(D.getElementById("lxp-ban")||(h&&(h.querySelector(".v3-hero")||h.querySelector("#dt-home")||h.querySelector("#dt-grid")||h.querySelector("#dq-count")||h.querySelector(".v3-ft")))||n>4)){
    if(!SEC){SEC=build();
     try{io=new IntersectionObserver(function(es){es.forEach(function(e){vis=e.isIntersecting;if(vis)flush()})},{threshold:.2});io.observe(SEC)}catch(e){vis=true}}
    place();sync();
