@@ -836,7 +836,7 @@ function updateHeaderButtons(isRegistrationActive,hasNews=!0){const topbar=docum
 ;
 
 /* ===== dq-order-js ===== */
-(function(){var t0=Date.now(),sch=0;function fix(){sch=0;var h=document.getElementById("v3-home");if(h){var g=document.getElementById("dt-grid"),r=document.getElementById("dt-home"),k=h.children,i,gi=-1,both=g&&r&&g.parentNode===h&&r.parentNode===h,noCard=both&&!g.querySelector(".lx-card")&&(Date.now()-t0>4500||h.classList.contains("dq11-noex"));h.classList.toggle("dq-nogrid",!!noCard);var swap=both&&!noCard&&!h.classList.contains("dq11-noex");for(i=0;i<k.length;i++){k[i]===g&&(gi=i);var o=swap?String(i*2):"";k[i].style.order!==o&&(k[i].style.order=o)}if(swap&&gi>=0){var v=String(gi*2-1);r.style.order!==v&&(r.style.order=v)}}}function go(){sch||(sch=1,requestAnimationFrame(fix))}function init(){var h=document.getElementById("v3-home");h&&(new MutationObserver(go).observe(h,{childList:!0,subtree:!0}),go())}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",init):init(),setInterval(fix,400)})();
+(function(){var t0=Date.now(),sch=0;function fix(){sch=0;var h=document.getElementById("v3-home");if(h){var g=document.getElementById("dt-grid"),r=document.getElementById("dt-home"),k=h.children,i,gi=-1,both=g&&r&&g.parentNode===h&&r.parentNode===h,noCard=both&&!g.querySelector(".lx-card")&&(Date.now()-t0>4500||h.classList.contains("dq11-noex"));var nxs=h.classList.contains("dq11-noex"),wk=(noCard?"1":"0")+(nxs?"1":"0"),tn=Date.now();wk!==fix.k&&(fix.k=wk,fix.kt=tn),(!fix.c||tn-fix.kt>=1200)&&(fix.c=wk);var cNo=fix.c.charAt(0)==="1",cNx=fix.c.charAt(1)==="1";h.classList.toggle("dq-nogrid",cNo);var swap=both&&!cNo&&!cNx;for(i=0;i<k.length;i++){k[i]===g&&(gi=i);var o=swap?String(i*2):"";k[i].style.order!==o&&(k[i].style.order=o)}if(swap&&gi>=0){var v=String(gi*2-1);r.style.order!==v&&(r.style.order=v)}}}function go(){sch||(sch=1,requestAnimationFrame(fix))}function init(){var h=document.getElementById("v3-home");h&&(new MutationObserver(go).observe(h,{childList:!0,subtree:!0}),go())}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",init):init(),setInterval(fix,400)})();
 ;
 
 /* ===== dq-pay-js ===== */
@@ -4697,7 +4697,7 @@ setInterval(wrap,700);wrap();
         var n = +b.getAttribute("data-n"), plus = b.getAttribute("data-p") === "1", t0 = performance.now();
         if (reduce || !n) { b.textContent = fmt(n) + (plus ? "+" : ""); return; }
         (function s(t) {
-          var p = Math.min((t - t0) / 1400, 1);
+          var p = Math.min((t - t0) / 700, 1);
           b.textContent = fmt(Math.round(n * (1 - Math.pow(1 - p, 3)))) + (p >= 1 && plus ? "+" : "");
           if (p < 1) requestAnimationFrame(s);
         })(t0);
@@ -4729,10 +4729,19 @@ setInterval(wrap,700);wrap();
     if (mount.busy && !force) return;
     mount.busy = true;
     var tok = ++S.tok, cfg, auto;
+    if (!$("dq-stats") && ref && ref.parentNode) {            /* yer əvvəlcədən ayrılır: sonradan səhifə sürüşmür */
+      var ph = document.createElement("div");
+      ph.id = "dq-stats"; ph.className = "dqst"; ph.style.minHeight = "104px";
+      ref.parentNode.insertBefore(ph, ref);
+    }
     try {
       var rr = await Promise.all([loadCfg(), computeAuto(!!force)]);
       cfg = rr[0]; auto = rr[1];
-    } catch (e) { mount.busy = false; return; }
+    } catch (e) {
+      mount.busy = false;
+      var pe = $("dq-stats"); if (pe && !pe.children.length) pe.remove();
+      return;
+    }
     mount.busy = false;
     if (tok !== S.tok) return;
     var vals = valuesFor(cfg, auto), box = $("dq-stats");
@@ -4745,6 +4754,7 @@ setInterval(wrap,700);wrap();
       ref.parentNode.insertBefore(box, ref);
     }
     box.className = "dqst";
+    box.style.minHeight = "";
     box.setAttribute("role", "group");
     box.setAttribute("aria-label", "Platforma statistikası");
     box.innerHTML = cardsHTML(vals);
