@@ -1,0 +1,80 @@
+<style id="dq-why-stats-fix">
+/* «Niyə məhz DQ Platform?» – statistika ayrıca tam enli sətir kimi */
+#dq-stats.dqst.dq-why-stats{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;
+  width:100%!important;max-width:1100px!important;margin:22px auto 8px!important;padding:6px 0!important;
+  box-sizing:border-box!important;position:relative!important;overflow:hidden!important;
+  background:linear-gradient(165deg,rgba(14,44,104,.92),rgba(6,24,57,.96))!important;
+  border:1px solid rgba(217,164,65,.30)!important;border-radius:20px!important;
+  box-shadow:0 18px 44px -18px rgba(2,8,28,.7),inset 0 1px 0 rgba(255,255,255,.08)!important;
+  grid-column:1/-1!important;filter:none!important}
+#dq-stats.dq-why-stats:before{content:""!important;position:absolute;left:12%;right:12%;top:0;height:2px;
+  background:linear-gradient(90deg,transparent,#d9a441,transparent);opacity:.85;pointer-events:none}
+#dq-stats.dq-why-stats .dqst-c{
+  position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;
+  justify-content:flex-start!important;gap:8px!important;width:auto!important;min-width:0!important;height:auto!important;
+  margin:0!important;padding:22px 10px 20px!important;background:none!important;border:0!important;
+  border-radius:0!important;box-shadow:none!important;text-align:center!important;overflow:visible!important}
+#dq-stats.dq-why-stats .dqst-c:before{content:""!important;position:absolute!important;inset:auto!important;left:0;
+  top:22%;bottom:22%;width:1px;height:auto;background:linear-gradient(180deg,transparent,rgba(255,255,255,.18),transparent)!important}
+#dq-stats.dq-why-stats .dqst-c:first-child:before{display:none!important}
+#dq-stats.dq-why-stats .dqst-ic{width:44px!important;height:44px!important;border-radius:50%!important;display:grid!important;
+  place-items:center!important;font-size:17px!important;color:#f3c565!important;
+  background:radial-gradient(circle at 30% 25%,rgba(243,197,101,.28),rgba(243,197,101,.07))!important;
+  border:1px solid rgba(243,197,101,.4)!important}
+#dq-stats.dq-why-stats .dqst-c b{display:block!important;font-size:clamp(24px,3.6vw,36px)!important;line-height:1.05!important;
+  font-weight:800!important;color:#fff!important;letter-spacing:-.02em!important;white-space:nowrap!important;
+  font-variant-numeric:tabular-nums!important}
+#dq-stats.dq-why-stats .dqst-c small{display:block!important;font-size:12.5px!important;font-weight:600!important;
+  line-height:1.35!important;color:#a9bde0!important;opacity:1!important;max-width:none!important;white-space:normal!important}
+@media(max-width:640px){
+  #dq-stats.dq-why-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;margin:16px auto 6px!important;border-radius:18px!important}
+  #dq-stats.dq-why-stats .dqst-c{padding:18px 8px 16px!important}
+  #dq-stats.dq-why-stats .dqst-c:nth-child(3):before{display:none!important}
+  #dq-stats.dq-why-stats .dqst-c:nth-child(n+3){border-top:1px solid rgba(255,255,255,.08)!important}
+  #dq-stats.dq-why-stats .dqst-c b{font-size:28px!important}
+}
+</style>
+<script id="dq-why-stats-fix-js">
+/* Statistikanı «Niyə məhz DQ Platform?» kartlarının içindən çıxarıb bölmənin altına qoyur */
+(function(){
+  var D=document,busy=false;
+  function whySection(){
+    var hs=D.querySelectorAll("h1,h2,h3");
+    for(var i=0;i<hs.length;i++){
+      if(/Niy[əe]\s+m[əe]hz/i.test(hs[i].textContent||"")){
+        return hs[i].closest("section")||hs[i].parentElement;
+      }
+    }
+    return null;
+  }
+  function fix(){
+    if(busy)return;busy=true;
+    try{
+      var st=D.getElementById("dq-stats"),sec=whySection();
+      if(!st||!sec){return}
+      st.classList.add("dq-why-stats");
+      /* kartların yerləşdiyi qrid: statistikanı onun içindən çıxarıb dərhal sonra qoy */
+      var host=st.parentElement,grid=host;
+      while(grid&&grid!==sec&&grid.parentElement!==sec&&!(grid.contains(st)&&grid.children.length>=5&&grid!==st))grid=grid.parentElement;
+      var card=st;
+      while(card.parentElement&&card.parentElement!==grid&&card.parentElement!==sec)card=card.parentElement;
+      if(sec.contains(st)&&card!==st){
+        /* statistika başqa kartın daxilindədir – kartı da boşalt */
+        card.parentNode.insertBefore(st,card.nextSibling);
+        if(!card.textContent.trim())card.remove();
+      }else if(grid&&grid!==sec&&grid.contains(st)&&st.parentElement===grid){
+        grid.parentNode.insertBefore(st,grid.nextSibling);
+      }else if(!sec.contains(st)){
+        sec.appendChild(st);
+      }
+    }catch(e){}finally{busy=false}
+  }
+  function boot(){
+    fix();
+    try{new MutationObserver(function(){fix()}).observe(D.body,{childList:true,subtree:true})}catch(e){}
+    setTimeout(fix,800);setTimeout(fix,2500);
+  }
+  if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
+})();
+</script>
