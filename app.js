@@ -4601,17 +4601,33 @@ setInterval(wrap,700);wrap();
   }
 
   /* ---------- avtomatik dəyərlər ---------- */
+  /* sətir sayı: head count uğursuz olarsa null qaytarır (0 yox) */
   async function count(t) {
     try {
       var r = await _supabase.from(t).select("*", { count: "exact", head: true });
-      return r && r.count || 0;
-    } catch (e) { return 0; }
+      return r && typeof r.count === "number" ? r.count : null;
+    } catch (e) { return null; }
+  }
+  /* 1000-lik səhifələrlə oxu (Supabase-in max-rows limitinə görə) */
+  async function pagedRows(table, cols, cb) {
+    var size = 1000, from = 0, pages = 0;
+    for (;;) {
+      var r = await _supabase.from(table).select(cols).range(from, from + size - 1);
+      if (!r || r.error || !Array.isArray(r.data)) throw new Error("page-failed");
+      cb(r.data);
+      if (r.data.length < size || ++pages >= 80) break;
+      from += size;
+    }
+  }
+  function lastGood() {
+    try { var c = JSON.parse(localStorage.getItem(CK) || "null"); return c && c.v ? c.v : null; } catch (e) { return null; }
   }
   async function computeAuto(fresh) {
     if (!fresh) {
       try {
         var c = JSON.parse(localStorage.getItem(CK) || "null");
-        if (c && c.v && (c.v.qs > 0 || c.v.users > 0)) {
+        /* keş yalnız sual sayı real olduqda etibarlıdır (0-lı keş təkrar istifadə olunmur) */
+        if (c && c.v && c.v.qs > 0 && c.v.exams > 0) {
           if (Date.now() - c.t >= TTL && !computeAuto.bg) {          /* köhnədirsə: dərhal göstər, arxa fonda yenilə */
             computeAuto.bg = 1;
             setTimeout(function () { computeAuto(true).catch(function () { }).then(function () { computeAuto.bg = 0; }); }, 4000);
@@ -4620,19 +4636,28 @@ setInterval(wrap,700);wrap();
         }
       } catch (e) { }
     }
-    var v = { users: 0, exams: 0, mocks: 0, qs: 0 };
-    v.qs = await count("exam_questions");
+    /* hissə alınmasa, son düzgün dəyər saxlanılır (0-a düşmür) */
+    var prev = lastGood() || {};
+    var v = { users: prev.users || 0, exams: prev.exams || 0, mocks: prev.mocks || 0, qs: prev.qs || 0 };
+    try {
+      var n = 0, ex = {}, sn = {};
+      await pagedRows("exam_questions", "exam_id,category", function (rows) {
+        n += rows.length;
+        rows.forEach(function (r) { ex[r.exam_id] = 1; sn[r.exam_id + "|" + r.category] = 1; });
+      });
+      var hc = await count("exam_questions");
+      var total = Math.max(n, hc || 0);
+      if (total > 0) { v.qs = total; v.exams = Object.keys(ex).length; v.mocks = Object.keys(sn).length; }
+    } catch (e) {
+      var hc2 = await count("exam_questions");
+      if (hc2) v.qs = hc2;
+    }
     try {
       var regs = (await V2.list("regs")).filter(function (r) { return r.status === "approved"; }).length;
-      v.users = Math.max(regs, await count("allowed_students"));
+      var ac = await count("allowed_students");
+      if (regs || ac) v.users = Math.max(regs, ac || 0);
     } catch (e) { }
-    try {
-      var res = await _supabase.from("exam_questions").select("exam_id,category").limit(2e4), ex = {}, sn = {};
-      ((res && res.data) || []).forEach(function (r) { ex[r.exam_id] = 1; sn[r.exam_id + "|" + r.category] = 1; });
-      v.exams = Object.keys(ex).length;
-      v.mocks = Object.keys(sn).length;
-    } catch (e) { }
-    if (v.qs > 0 || v.users > 0) { try { localStorage.setItem(CK, JSON.stringify({ t: Date.now(), v: v })); } catch (e) { } }
+    if (v.qs > 0) { try { localStorage.setItem(CK, JSON.stringify({ t: Date.now(), v: v })); } catch (e) { } }
     return v;
   }
 
@@ -4679,6 +4704,14 @@ setInterval(wrap,700);wrap();
       });
       io.observe(box);
     } else run();
+    /* ehtiyat: animasiya işə düşməsə də son rəqəmlər görünsün */
+    setTimeout(function () {
+      if (!box.isConnected) return;
+      box.querySelectorAll("b[data-n]").forEach(function (b) {
+        var n = +b.getAttribute("data-n"), plus = b.getAttribute("data-p") === "1";
+        b.textContent = fmt(n) + (plus ? "+" : "");
+      });
+    }, 3600);
   }
 
   /* ---------- ana səhifə ---------- */
@@ -4833,7 +4866,7 @@ setInterval(wrap,700);wrap();
     renderEditor($("mod-homestats"));
   }
 
-  window.DQST = { mount: mount, openAdmin: openAdmin, adminInto: renderEditor };
+  window.DQST = { mount: mount, openAdmin: openAdmin, adminInto: renderEditor, compute: computeAuto };
 })();
 ;
 
