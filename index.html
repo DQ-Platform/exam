@@ -5918,7 +5918,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 </style>
 <script src="dq-qapaq.js?v=2"></script>
 <script src="/dq-ceo.js?v=2"></script>
-<script src="app.js?v=48"></script>
+<script src="app.js?v=49"></script>
 <script src="sual-studio.js?v=1"></script>
 <script src="dq-birlesdirme.js?v=5"></script>
 <script src="dq-oxuyucu.js?v=1"></script>
@@ -9345,8 +9345,10 @@ function fix(){pend=false;if(busy)return;busy=true;
   if(bar.previousElementSibling!==g||bar.parentNode!==g.parentNode){g.parentNode.insertBefore(bar,g.nextSibling)}
   paint()}catch(e){}finally{busy=false}}
 function sched(){if(pend)return;pend=true;(W.requestAnimationFrame||setTimeout)(fix)}
+/* kartlar yenidən çəkiləndə boş xana bir an belə görünməsin: .dq-why-grid-lər dərhal (boyadan əvvəl) yoxlanır, findGrid-dən asılı deyil */
+function tidyAll(){try{[].forEach.call(D.querySelectorAll(".dq-why-grid"),tidy)}catch(e){}}
 function refresh(){try{if(W.DQLive&&W.DQLive.refresh)W.DQLive.refresh()}catch(e){}}
-function boot(){sched();refresh();pull();setInterval(pull,60000);[1500,4000,8000].forEach(function(t){setTimeout(pull,t)});
+function boot(){tidyAll();try{new MutationObserver(tidyAll).observe(D.body,{childList:true,subtree:true,characterData:true})}catch(e){}sched();refresh();pull();setInterval(pull,60000);[1500,4000,8000].forEach(function(t){setTimeout(pull,t)});
  try{new MutationObserver(sched).observe(D.body,{childList:true,subtree:true})}catch(e){}
  [400,1200,2500,5000,9000].forEach(function(t){setTimeout(sched,t)});
  setInterval(function(){paint();if(!D.hidden)sched()},1500);
@@ -9357,8 +9359,10 @@ if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boo
 </script>
 <style id="dq-no-ring">
 /* Sağ alt küncdəki sarı irəliləmə halqası (dublikat «yuxarı» düyməsi) və yuxarıdakı yüklənmə zolaqları gizlədilir.
-   Qeyd: admin kartlarındakı div.dqx-top toxunulmur, yalnız button.dqx-top. Sadə «↑» (#dqpro-top) qalır. */
-button.dqx-top,#dqp-bar,#dqpro-prog{display:none!important}
+   Qeyd: qalan yeganə «yuxarı» düyməsi sarı halqalı button.dqx-top-dur; ağ «↑» (#dqpro-top) gizlədilir. */
+#dqpro-top,#dqp-bar,#dqpro-prog{display:none!important}
+button.dqx-top{display:grid!important;place-items:center!important;padding:0!important;line-height:1!important}
+button.dqx-top span{display:grid;place-items:center;width:100%;height:100%;font-size:20px;font-weight:700;line-height:1;text-align:center;transform:translateY(-1px)}
 </style>
 </body>
 </html>
