@@ -8456,6 +8456,231 @@ setInterval(function(){try{syncEd();syncBar();wrapSave()}catch(e){}},1000);
 <script>if(!(window.__dqOff&&window.__dqOff.elan))document.write('<script src="dq-elan.js?v=1"><\/script>')</script>
 <script>if(!(window.__dqOff&&window.__dqOff.qapaq))document.write('<script src="dq-sinaq-qapaq.js?v=1"><\/script>')</script>
 <script>if(!(window.__dqOff&&window.__dqOff.studio))document.write('<script src="dq-elan-studio.js?v=3"><\/script>')</script>
+<script id="dq-gizli-kecid-inline">
+/*!
+ * DQ Platform — gizli keçidlər (v1)
+ *   • «Giriş» yazısına 3 saniyə basılı saxla        → giriş pəncərəsi (Gmail + təsdiq kodu)
+ *   • «Developed by Yunis İmanov» yazısına 3 saniyə → admin giriş
+ * Qaydalar:
+ *   - Qısa toxunuş/klik heç vaxt pozulmur: yalnız 3 saniyə tamam olandan sonra işləyir.
+ *   - Admin artıq daxil olubsa birbaşa admin panel açılır, deyilsə mövcud giriş pəncərəsi (DQAuth) açılır.
+ *   - Heç bir giriş yoxlaması keçilmir, heç bir kod/parol bu faylda yoxdur.
+ * Söndürmək üçün:  window.__dqOff = { gizli: 1 }
+ */
+(function () {
+  'use strict';
+  if (window.__dqGizli || (window.__dqOff && window.__dqOff.gizli)) return;
+  window.__dqGizli = 1;
+
+  var HOLD_MS = 3000;        /* basılı saxlama müddəti */
+  var MOVE_PX = 12;          /* bundan çox sürüşərsə — ləğv (scroll) */
+  var SKIP = '#dqa-ov,#admin-panel,#login-screen,#exam-screen,#dq-cab,#dqx-ov,.dqg-page';
+  var D = document;
+
+  function norm(s) {
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/ı/g, 'i').replace(/ə/g, 'e').replace(/\s+/g, ' ').trim();
+  }
+  function ownText(el) {
+    var s = '';
+    for (var n = el.firstChild; n; n = n.nextSibling) if (n.nodeType === 3) s += n.nodeValue;
+    return norm(s);
+  }
+
+  /* basılan elementdən yuxarı 5 pillə: «giriş» düyməsi / «İmanov» yazısı */
+  function detect(t) {
+    if (!t || !t.closest || t.closest(SKIP)) return null;
+    for (var i = 0, el = t; el && el !== D.body && i < 5; i++, el = el.parentElement) {
+      var ot = ownText(el);
+      if (ot && ot.length < 160 && ot.indexOf('imanov') > -1) return el;
+      var full = norm(el.textContent);
+      if (full === 'giris' && /^(a|button|span|div|li)$/i.test(el.tagName)) return el;
+    }
+    return null;
+  }
+
+  function toast(msg) {
+    try {
+      var t = D.createElement('div');
+      t.textContent = msg;
+      t.setAttribute('role', 'status');
+      t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);max-width:88vw;padding:10px 16px;border-radius:10px;background:#0b1b3a;color:#fff;font:600 14px/1.3 system-ui,sans-serif;z-index:2147483600;box-shadow:0 8px 24px rgba(0,0,0,.35)';
+      (D.body || D.documentElement).appendChild(t);
+      setTimeout(function () { try { t.remove(); } catch (e) {} }, 2600);
+    } catch (e) {}
+  }
+
+  function isAdmin() {
+    try { return !!(window.DQAdminGate && window.DQAdminGate.is()); } catch (e) { return false; }
+  }
+
+  function enter() {
+    try { if (navigator.vibrate) navigator.vibrate(20); } catch (e) {}
+    if (isAdmin() && typeof window.dqGoAdmin === 'function') { window.dqGoAdmin(); return; }
+    if (window.DQAuth && typeof window.DQAuth.open === 'function') { window.DQAuth.open('l'); return; }
+    toast('Giriş pəncərəsi hələ yüklənməyib — səhifəni yeniləyin.');
+  }
+
+  /* ---- basılı saxlama ---- */
+  var timer = 0, sx = 0, sy = 0, armed = null, swallowUntil = 0;
+
+  function cancel() {
+    if (timer) { clearTimeout(timer); timer = 0; }
+    if (armed) { try { armed.classList.remove('dq-gz-hold'); } catch (e) {} armed = null; }
+  }
+
+  var st = D.createElement('style');
+  st.textContent = '.dq-gz-hold{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}';
+  (D.head || D.documentElement).appendChild(st);
+
+  D.addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    cancel();
+    var el = detect(e.target);
+    if (!el) return;
+    armed = el; sx = e.clientX; sy = e.clientY;
+    try { el.classList.add('dq-gz-hold'); } catch (x) {}
+    timer = setTimeout(function () {
+      timer = 0;
+      if (armed) { try { armed.classList.remove('dq-gz-hold'); } catch (x) {} armed = null; }
+      swallowUntil = Date.now() + 900;   /* 3 saniyədən sonrakı buraxma klikini udur */
+      enter();
+    }, HOLD_MS);
+  }, { capture: true, passive: true });
+
+  D.addEventListener('pointermove', function (e) {
+    if (timer && (Math.abs(e.clientX - sx) > MOVE_PX || Math.abs(e.clientY - sy) > MOVE_PX)) cancel();
+  }, { capture: true, passive: true });
+  ['pointerup', 'pointercancel', 'dragstart', 'scroll'].forEach(function (n) {
+    D.addEventListener(n, cancel, { capture: true, passive: true });
+  });
+
+  /* uzun basmada brauzer menyusu/mətn seçimi çıxmasın (yalnız basılı saxlama gedərkən) */
+  D.addEventListener('contextmenu', function (e) {
+    if (armed || Date.now() < swallowUntil) e.preventDefault();
+  }, true);
+
+  /* hold tamamlandıqdan sonra gələn klik düymənin öz əməliyyatını işə salmasın */
+  D.addEventListener('click', function (e) {
+    if (Date.now() < swallowUntil) { swallowUntil = 0; e.preventDefault(); e.stopImmediatePropagation(); }
+  }, true);
+})();
+
+</script>
+<script id="dq-admin-syl-inline">
+/*!
+ * DQ Platform — admin giriş səhifəsi: /adminsyl  (v1)
+ * /adminsyl açılanda (və ya #adminsyl) Gmail + kod pəncərəsi çıxır. Düzgün olanda admin
+ * rejimi aktivləşir və admin panel açılır. Kod/Gmail açıq mətnlə saxlanmır, yalnız SHA-256 yoxlama izi.
+ * Söndürmək üçün: window.__dqOff = { adminsyl: 1 }
+ */
+(function () {
+  'use strict';
+  if (window.__dqAdminSyl || (window.__dqOff && window.__dqOff.adminsyl)) return;
+  window.__dqAdminSyl = 1;
+
+  var D = document, LS = window.localStorage;
+  var HASH = '5b740f8a57132b169981b3fe764f59769eeb73a85642e46758fd00928720d03f';
+  var SALT = 'dqsyl|v1|';
+  var FLAG = 'dq_admin_logged';
+
+  function wanted() {
+    var p = (location.pathname || '').replace(/\/+$/, '').toLowerCase();
+    return /\/adminsyl(\.html)?$/.test(p) || (location.hash || '').toLowerCase() === '#adminsyl' || /[?&]adminsyl(=|&|$)/i.test(location.search || '');
+  }
+  if (!wanted()) return;
+
+  function ls(k, v) {
+    try { if (v === undefined) return LS.getItem(k); if (v === null) LS.removeItem(k); else LS.setItem(k, v); } catch (e) {}
+    return null;
+  }
+
+  function sha256(str) {
+    if (!(window.crypto && crypto.subtle)) return Promise.reject(new Error('nocrypto'));
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)).then(function (b) {
+      return Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
+    });
+  }
+
+  /* ---- admin rejimini aktivləşdir və paneli aç ---- */
+  function activate() {
+    ls(FLAG, 'true');
+    window.__dqAuthed = true;
+    try { history.replaceState(null, '', '/'); } catch (e) {}
+    var tries = 0;
+    (function go() {
+      var p = D.getElementById('admin-panel');
+      if (typeof window.dqGoAdmin === 'function' && p) {
+        try { window.__dqAuthed = true; window.dqGoAdmin(); } catch (e) {}
+        /* tətbiq sonradan başqa ekrana keçirsə, yenidən təsdiqlə */
+        setTimeout(function () { if (!p.classList.contains('active')) try { window.dqGoAdmin(); } catch (e) {} }, 900);
+        setTimeout(function () { if (!p.classList.contains('active')) try { window.dqGoAdmin(); } catch (e) {} }, 2200);
+        return;
+      }
+      if (++tries < 80) setTimeout(go, 250);
+    })();
+  }
+
+  /* artıq admin kimi daxil olubsa, pəncərəsiz keç */
+  if (ls(FLAG) === 'true') {
+    if (D.readyState === 'loading') D.addEventListener('DOMContentLoaded', activate); else activate();
+    return;
+  }
+
+  /* ---- giriş pəncərəsi ---- */
+  var CSS = '#dqsyl{position:fixed;inset:0;z-index:2147483500;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(1200px 600px at 50% -10%,#1b2a5e,#0b1230 70%);font-family:Inter,"Segoe UI",system-ui,Arial,sans-serif;color:#e9eefb}' +
+    '#dqsyl *{box-sizing:border-box}#dqsyl .c{width:100%;max-width:400px;background:#101a3d;border:1px solid #26356f;border-radius:18px;padding:26px 22px;box-shadow:0 30px 60px -20px rgba(0,0,0,.6)}' +
+    '#dqsyl h1{margin:0 0 4px;font-size:21px;font-weight:800;text-align:center}#dqsyl p.s{margin:0 0 18px;text-align:center;color:#9fb0e0;font-size:13.5px}' +
+    '#dqsyl label{display:block;margin:12px 0 6px;font-size:13px;font-weight:600;color:#c7d3f5}' +
+    '#dqsyl input{width:100%;padding:13px 14px;border-radius:11px;border:1px solid #31428a;background:#0b1230;color:#fff;font-size:16px;outline:0}' +
+    '#dqsyl input:focus{border-color:#d4af37;box-shadow:0 0 0 3px rgba(212,175,55,.2)}' +
+    '#dqsyl button.go{width:100%;margin-top:18px;padding:13px;border:0;border-radius:11px;background:#d4af37;color:#1a1400;font-size:16px;font-weight:800;cursor:pointer}' +
+    '#dqsyl button.go[disabled]{opacity:.6;cursor:default}#dqsyl .e{min-height:20px;margin-top:12px;text-align:center;color:#ff8a8a;font-size:13.5px}' +
+    '#dqsyl a.b{display:block;margin-top:6px;text-align:center;color:#9fb0e0;font-size:13px;text-decoration:none}';
+
+  function build() {
+    if (D.getElementById('dqsyl')) return;
+    var st = D.createElement('style'); st.textContent = CSS; (D.head || D.documentElement).appendChild(st);
+    var o = D.createElement('div'); o.id = 'dqsyl'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-modal', 'true');
+    o.innerHTML = '<form class="c" autocomplete="off" novalidate><h1>Admin giriş</h1><p class="s">DQ Platform idarəetmə paneli</p>' +
+      '<label for="dqsyl-m">Gmail</label><input id="dqsyl-m" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ad@gmail.com">' +
+      '<label for="dqsyl-k">Kod</label><input id="dqsyl-k" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="••••••••">' +
+      '<button class="go" type="submit">Daxil ol</button><div class="e" id="dqsyl-e" role="alert"></div><a class="b" href="/">← Ana səhifə</a></form>';
+    (D.body || D.documentElement).appendChild(o);
+    D.documentElement.style.overflow = 'hidden';
+    var f = o.querySelector('form'), m = o.querySelector('#dqsyl-m'), k = o.querySelector('#dqsyl-k'),
+        e = o.querySelector('#dqsyl-e'), b = o.querySelector('button.go');
+    setTimeout(function () { try { m.focus(); } catch (x) {} }, 50);
+
+    f.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var fail; try { fail = JSON.parse(ls('dq_syl_fail') || '{}'); } catch (x) { fail = {}; }
+      var now = Date.now();
+      if (fail.until && now < fail.until) { e.textContent = 'Çox cəhd oldu. ' + Math.ceil((fail.until - now) / 1000) + ' saniyə sonra yenidən yoxlayın.'; return; }
+      var mail = m.value.trim().toLowerCase(), code = k.value.trim();
+      if (!mail || !code) { e.textContent = 'Gmail və kodu yazın.'; return; }
+      b.disabled = true; e.textContent = '';
+      sha256(SALT + mail + '|' + code).then(function (h) {
+        if (h === HASH) {
+          ls('dq_syl_fail', null);
+          o.remove(); D.documentElement.style.overflow = '';
+          activate();
+        } else {
+          var n = (fail.n || 0) + 1;
+          ls('dq_syl_fail', JSON.stringify({ n: n, until: n >= 5 ? now + 60000 : 0 }));
+          e.textContent = n >= 5 ? 'Çox cəhd oldu. 60 saniyə gözləyin.' : 'Gmail və ya kod yanlışdır.';
+          k.value = ''; b.disabled = false;
+        }
+      }).catch(function () {
+        e.textContent = 'Bu səhifə yalnız təhlükəsiz (https) bağlantıda işləyir.'; b.disabled = false;
+      });
+    });
+  }
+
+  if (D.readyState === 'loading') D.addEventListener('DOMContentLoaded', build); else build();
+})();
+
+</script>
 <!-- dq-scroll-pro.js söndürüldü -->
 
 <style id="dq-no-dock">#dqt-dock,#dqt-grip{display:none!important}</style>
