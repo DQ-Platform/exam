@@ -5898,6 +5898,343 @@ function watch(){var h=home();if(!h){setTimeout(watch,500);return}
 watch();
 })();
 </script>
+<script id="dq-stats-live">
+/*!
+ * DQ Platform — Canlı statistika (v1)
+ * 4 göstərici: İstifadəçi / İmtahan / Sınaq / Sual sayı.
+ * Mənbə: Supabase (dq_public_stats RPC varsa o, yoxdursa səhifələmə ilə dəqiq say).
+ * Sinxron: açılışda dərhal keş, arxa planda yeniləmə, realtime (varsa), 1–5 dəq. yoxlama,
+ *          tab qayıdanda / internet bərpa olunanda yenilənmə.
+ */
+(function () {
+  'use strict';
+  if (window.__dqLive) return;
+  window.__dqLive = 1;
+
+  var D = document, W = window, CK = 'dq_stats_cache_v2';
+  var ITEMS = [
+    ['users', 'fa-users', 'İstifadəçi sayı'],
+    ['exams', 'fa-file-pen', 'İmtahan sayı'],
+    ['mocks', 'fa-graduation-cap', 'Sınaq sayı'],
+    ['qs', 'fa-circle-question', 'Sual sayı']
+  ];
+
+  /* ================= məlumat qatı ================= */
+  function num(x) { x = +x; return isFinite(x) && x > 0 ? Math.floor(x) : 0; }
+
+  function headCount(c, table) {
+    return Promise.resolve().then(function () {
+      return c.from(table).select('*', { count: 'exact', head: true });
+    }).then(function (r) {
+      return r && !r.error && typeof r.count === 'number' ? r.count : null;
+    }, function () { return null; });
+  }
+
+  /* 1000-lik səhifələrlə oxu (Supabase-in default max-rows limitinə görə) */
+  function pageAll(c, table, cols, cb) {
+    var size = 1000, from = 0, pages = 0;
+    function next() {
+      return Promise.resolve(c.from(table).select(cols).range(from, from + size - 1)).then(function (r) {
+        if (!r || r.error || !Array.isArray(r.data)) throw new Error('page-failed');
+        cb(r.data);
+        if (r.data.length < size || ++pages >= 60) return;
+        from += size;
+        return next();
+      });
+    }
+    return next();
+  }
+
+  function fetchStats(c, v2, prev) {
+    var out = {
+      users: prev ? prev.users : 0, exams: prev ? prev.exams : 0,
+      mocks: prev ? prev.mocks : 0, qs: prev ? prev.qs : 0
+    };
+    var qOk = false, rpcUsed = false, allowed = null;
+
+    /* 1) sürətli yol: dq_public_stats() RPC (SQL faylı ilə yaradılır) */
+    return Promise.resolve().then(function () { return c.rpc('dq_public_stats'); }).then(function (r) {
+      var d = r && !r.error ? r.data : null;
+      if (typeof d === 'string') { try { d = JSON.parse(d); } catch (e) { d = null; } }
+      if (Array.isArray(d)) d = d[0];
+      if (d && isFinite(+d.qs) && isFinite(+d.exams) && isFinite(+d.mocks)) {
+        out.qs = num(d.qs); out.exams = num(d.exams); out.mocks = num(d.mocks);
+        if (isFinite(+d.users)) allowed = num(d.users);
+        qOk = true; rpcUsed = true;
+      }
+    }, function () {}).then(function () {
+      if (qOk) return;
+      /* 2) ehtiyat yol: exam_questions-u səhifələyib say */
+      var ex = {}, sn = {}, n = 0;
+      return pageAll(c, 'exam_questions', 'exam_id,category', function (rows) {
+        n += rows.length;
+        rows.forEach(function (q) { ex[q.exam_id] = 1; sn[q.exam_id + '|' + q.category] = 1; });
+      }).then(function () {
+        return headCount(c, 'exam_questions');
+      }).then(function (hc) {
+        out.qs = Math.max(n, hc || 0);
+        out.exams = Object.keys(ex).length;
+        out.mocks = Object.keys(sn).length;
+        qOk = true;
+      }, function () {});
+    }).then(function () {
+      if (allowed !== null) return;
+      return headCount(c, 'allowed_students').then(function (hc) {
+        if (hc !== null) { allowed = hc; return; }
+        var m = 0;
+        return pageAll(c, 'allowed_students', '*', function (rows) { m += rows.length; })
+          .then(function () { allowed = m; }, function () {});
+      });
+    }).then(function () {
+      /* istifadəçi = təsdiqlənmiş qeydiyyatlar ilə icazəli tələbələrin böyüyü */
+      var regs = null;
+      return Promise.resolve().then(function () {
+        if (v2 && typeof v2.list === 'function') return v2.list('regs');
+      }).then(function (L) {
+        if (Array.isArray(L)) regs = L.filter(function (x) { return x && x.status === 'approved'; }).length;
+      }, function () {}).then(function () { return regs; });
+    }).then(function (regs) {
+      var uOk = false;
+      if (regs !== null || allowed !== null) { out.users = Math.max(regs || 0, allowed || 0); uOk = true; }
+      if (!qOk && !uOk) throw new Error('sync-failed');
+      return { v: out, rpc: rpcUsed, partial: !(qOk && uOk) };
+    });
+  }
+
+  W.DQLive = { _fetch: fetchStats };
+
+  /* ================= görünüş ================= */
+  if (!D || !D.createElement || D.readyState === undefined) return;
+
+  var CSS =
+    'html body #dq-stats,html body section#dq-stats{display:none!important}' +
+    '@media(min-width:901px){.dqlv-g5{grid-template-columns:repeat(5,minmax(0,1fr))!important}}' +
+    '#dqlv{--g:#e8c56a;--mu:#a9bbe0;position:relative;box-sizing:border-box;width:calc(100% - 28px);max-width:1240px;margin:22px auto 34px;padding:26px 14px 22px;border-radius:26px;color:#fff;overflow:hidden;' +
+    'border:1px solid rgba(120,160,255,.24);background:radial-gradient(120% 170% at 50% -35%,rgba(59,110,210,.38),transparent 62%),linear-gradient(165deg,#10296a,#0a1d4c 78%);' +
+    'box-shadow:0 24px 50px -28px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.08);font-family:inherit}' +
+    '#dqlv *{box-sizing:border-box}' +
+    '#dqlv .lv-g{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}' +
+    '#dqlv .lv-c{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:6px 6px 4px;text-align:center;opacity:0;transform:translateY(14px);' +
+    'transition:opacity .65s cubic-bezier(.22,1,.36,1),transform .65s cubic-bezier(.22,1,.36,1);transition-delay:calc(var(--i,0)*90ms)}' +
+    '#dqlv.in .lv-c{opacity:1;transform:none}' +
+    '#dqlv .lv-c+.lv-c:before{content:"";position:absolute;left:-3px;top:14%;bottom:10%;width:1px;background:linear-gradient(transparent,rgba(232,197,106,.35),transparent)}' +
+    '#dqlv .lv-i{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:20px;color:var(--g);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);box-shadow:0 8px 18px -10px rgba(0,0,0,.6)}' +
+    '#dqlv .lv-n{display:block;min-height:1em;font-size:clamp(24px,3.3vw,34px);font-weight:800;line-height:1;letter-spacing:.2px;color:#fff;font-variant-numeric:tabular-nums;transition:color .4s}' +
+    '#dqlv .lv-n.up{color:var(--g)}' +
+    '#dqlv .lv-l{font-size:13.5px;font-weight:500;color:var(--mu)}' +
+    '#dqlv .lv-st{position:absolute;top:10px;right:14px;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.04em;color:#bfe9d4;background:rgba(52,211,153,.10);border:1px solid rgba(52,211,153,.28)}' +
+    '#dqlv .lv-st b{width:6px;height:6px;border-radius:50%;background:#34d399;animation:dqlvP 2s infinite}' +
+    '#dqlv.off .lv-st{color:#fde1a6;background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.32)}' +
+    '#dqlv.off .lv-st b{background:#f59e0b;animation:none}' +
+    '@keyframes dqlvP{0%{box-shadow:0 0 0 0 rgba(52,211,153,.6)}80%,100%{box-shadow:0 0 0 7px transparent}}' +
+    '#dqlv.sk .lv-n{color:transparent;width:64px;margin:0 auto;border-radius:8px;background:linear-gradient(100deg,rgba(255,255,255,.08) 30%,rgba(255,255,255,.22),rgba(255,255,255,.08) 70%) 0 0/220% 100%;animation:dqlvS 1.2s linear infinite}' +
+    '@keyframes dqlvS{to{background-position:-220% 0}}' +
+    '@media(max-width:700px){#dqlv{padding:30px 8px 18px;border-radius:20px;margin:18px auto 26px}#dqlv .lv-g{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:18px}#dqlv .lv-c:nth-child(3):before{display:none}#dqlv .lv-i{width:46px;height:46px;font-size:18px}}' +
+    '@media(prefers-reduced-motion:reduce){#dqlv *{transition:none!important;animation:none!important}#dqlv .lv-c{opacity:1;transform:none}}';
+
+  var vals = null, shown = { users: 0, exams: 0, mocks: 0, qs: 0 };
+  var box = null, revealed = false, io = null, raf = 0, inflight = null;
+  var lastOk = 0, lastTry = 0, failN = 0, usedRpc = false, rtOn = false, rtTimer = 0;
+
+  function readCache() {
+    try {
+      var j = JSON.parse(localStorage.getItem(CK) || 'null');
+      if (j && j.v) return { users: num(j.v.users), exams: num(j.v.exams), mocks: num(j.v.mocks), qs: num(j.v.qs) };
+    } catch (e) {}
+    return null;
+  }
+  function writeCache(v) { try { localStorage.setItem(CK, JSON.stringify({ t: Date.now(), v: v })); } catch (e) {} }
+
+  function norm(s) {
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/ı/g, 'i').replace(/ə/g, 'e').replace(/\s+/g, ' ').trim();
+  }
+  function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+  function text(n) { return fmt(n) + (n > 0 ? '+' : ''); }
+  function reduced() { try { return matchMedia('(prefers-reduced-motion:reduce)').matches; } catch (e) { return false; } }
+
+  function build() {
+    var s = D.createElement('section');
+    s.id = 'dqlv';
+    s.className = vals ? '' : 'sk';
+    s.setAttribute('aria-label', 'Canlı statistika');
+    s.innerHTML = '<span class="lv-st" role="status"><b></b><span class="lv-t">Canlı</span></span><div class="lv-g">' +
+      ITEMS.map(function (x, i) {
+        return '<div class="lv-c" style="--i:' + i + '"><span class="lv-i"><i class="fa-solid ' + x[1] + '" aria-hidden="true"></i></span>' +
+          '<b class="lv-n" data-k="' + x[0] + '">' + (vals ? '0' : '') + '</b><span class="lv-l">' + x[2] + '</span></div>';
+      }).join('') + '</div>';
+    return s;
+  }
+
+  function anim(el, from, to, dur) {
+    if (reduced() || from === to) { el.textContent = text(to); return; }
+    var t0 = 0;
+    requestAnimationFrame(function step(ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur), e = 1 - Math.pow(1 - p, 4);
+      el.textContent = text(Math.round(from + (to - from) * e));
+      if (p < 1) requestAnimationFrame(step);
+    });
+  }
+
+  function paint(initial) {
+    if (!box || !vals) return;
+    box.classList.remove('sk');
+    ITEMS.forEach(function (x) {
+      var el = box.querySelector('[data-k="' + x[0] + '"]');
+      if (!el) return;
+      var to = vals[x[0]], from = shown[x[0]];
+      anim(el, from, to, initial ? 1400 : 800);
+      if (!initial && to !== from) {
+        el.classList.add('up');
+        setTimeout(function () { el.classList.remove('up'); }, 1600);
+      }
+      shown[x[0]] = to;
+    });
+  }
+
+  function setStatus(ok) {
+    if (!box) return;
+    var t = box.querySelector('.lv-t');
+    box.classList.toggle('off', !ok);
+    if (t) t.textContent = ok ? 'Canlı' : 'Bağlantı yoxdur';
+    if (lastOk) {
+      var d = new Date(lastOk);
+      box.setAttribute('title', 'Son yenilənmə: ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2));
+    }
+  }
+
+  function reveal() {
+    if (!box) return;
+    if (!io) {
+      io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          io.unobserve(e.target);
+          revealed = true;
+          box.classList.add('in');
+          if (vals) { shown = { users: 0, exams: 0, mocks: 0, qs: 0 }; paint(true); }
+        });
+      }, { threshold: 0.2 });
+    }
+    io.observe(box);
+  }
+
+  /* ---------- yerləşdirmə ---------- */
+  function anchor() {
+    var w = D.createTreeWalker(D.body, NodeFilter.SHOW_TEXT, null), t, h = null;
+    while ((t = w.nextNode())) {
+      if (norm(t.nodeValue).indexOf('niye mehz dq platform') !== 0) continue;
+      var p = t.parentElement;
+      if (p && !p.closest('#dqlv') && p.getBoundingClientRect().width) { h = p; break; }
+    }
+    if (!h) return null;
+    var el = h, g = 0;
+    while (el.parentElement && g < 10) {
+      var r = el.getBoundingClientRect();
+      if (el.id === 'v3-home' || el.querySelector('.v3-hero,.v3-ft')) return null;
+      if (r.width >= innerWidth * 0.88 && r.height > 180) return el;
+      el = el.parentElement; g++;
+    }
+    return null;
+  }
+
+  /* köhnə kart gizlədilir; yanında olan kartlar boş sütun qoymasın */
+  function tidyGrid() {
+    var old = D.getElementById('dq-stats');
+    if (!old || !old.parentElement) return;
+    var p = old.parentElement;
+    try { if (getComputedStyle(p).display === 'grid') p.classList.add('dqlv-g5'); } catch (e) {}
+  }
+
+  function mount() {
+    try {
+      if (box && box.isConnected) { tidyGrid(); return; }
+      var a = anchor();
+      if (!a) return;
+      if (!D.getElementById('dqlv-css')) {
+        var st = D.createElement('style'); st.id = 'dqlv-css'; st.textContent = CSS;
+        (D.head || D.documentElement).appendChild(st);
+      }
+      var cached = readCache();
+      if (!vals && cached) vals = cached;
+      box = build();
+      a.insertAdjacentElement('afterend', box);
+      revealed = false;
+      tidyGrid();
+      reveal();
+      setStatus(failN === 0);
+      refresh(true);
+    } catch (e) {}
+  }
+
+  /* ---------- sinxronizasiya ---------- */
+  function client() { try { return typeof _supabase !== 'undefined' && _supabase && _supabase.from ? _supabase : null; } catch (e) { return null; } }
+  function v2() { try { return typeof V2 !== 'undefined' ? V2 : null; } catch (e) { return null; } }
+
+  function refresh(force) {
+    var now = Date.now();
+    if (inflight) return inflight;
+    if (!force && now - lastTry < 10000) return null;
+    var c = client();
+    if (!c) { setTimeout(function () { if (!inflight) refresh(true); }, 1500); return null; }
+    lastTry = now;
+    inflight = fetchStats(c, v2(), vals).then(function (r) {
+      usedRpc = r.rpc;
+      var changed = !vals || ITEMS.some(function (x) { return vals[x[0]] !== r.v[x[0]]; });
+      vals = r.v; lastOk = Date.now(); failN = r.partial ? failN : 0;
+      writeCache(vals);
+      setStatus(true);
+      if (box && revealed) { if (changed) paint(false); } else if (box && !revealed) { /* açılış animasiyası reveal()-da */ }
+      startRealtime(c);
+    }, function () {
+      failN++;
+      setStatus(false);
+    }).then(function () { inflight = null; });
+    return inflight;
+  }
+
+  /* realtime (cədvəllərdə yoxdursa səssiz keçilir) */
+  function startRealtime(c) {
+    if (rtOn || !c.channel) return;
+    rtOn = true;
+    try {
+      var ch = c.channel('dq-live-stats');
+      ['exam_questions', 'allowed_students'].forEach(function (t) {
+        ch.on('postgres_changes', { event: '*', schema: 'public', table: t }, function () {
+          clearTimeout(rtTimer);
+          rtTimer = setTimeout(function () { refresh(true); }, 2000);
+        });
+      });
+      ch.subscribe();
+    } catch (e) { rtOn = false; }
+  }
+
+  function tick() {
+    if (D.hidden) return;
+    if (!(box && box.isConnected)) { mount(); return; }
+    /* RPC varsa hər dəqiqə, yoxdursa (ağır sorğu) 5 dəqiqədən bir */
+    if (Date.now() - lastOk > (usedRpc ? 55000 : 290000)) refresh(false);
+  }
+
+  D.addEventListener('visibilitychange', function () {
+    if (!D.hidden) { setTimeout(function () { mount(); if (Date.now() - lastOk > 20000) refresh(true); }, 300); }
+  });
+  W.addEventListener('online', function () { refresh(true); });
+  W.addEventListener('pageshow', function () { setTimeout(tick, 300); });
+
+  new MutationObserver(function () {
+    if (box && box.isConnected) return;
+    cancelAnimationFrame(raf); raf = requestAnimationFrame(mount);
+  }).observe(D.documentElement, { childList: true, subtree: true });
+
+  setInterval(tick, 5000);
+  W.DQLive.refresh = function () { return refresh(true); };
+  W.DQLive.get = function () { return vals; };
+  if (D.readyState !== 'loading') mount(); else D.addEventListener('DOMContentLoaded', mount);
+})();
+
+</script>
 <script id="dq-fix-foot-guard">
 /* Footer və statistika kartları: yoxdursa və ya gizlidirsə (opacity/display/visibility), avtomatik yaradır və göstərir */
 (function(){"use strict";
@@ -5951,7 +6288,8 @@ function run(){
  if(!ft)ft=makeFooter(h);
  else if(!shown(ft))force(ft,h);
  var st=h.querySelector("#dq-stats");
- if(!st){sTry++;
+ if(!st&&window.__dqLive){}
+ else if(!st){sTry++;
   if(sTry===1){try{if(window.DQST&&DQST.mount)DQST.mount(true)}catch(e){}}
   var h1=home();
   if(h1&&!h1.querySelector("#dq-count")&&window.DQCD&&DQCD.mount&&cdTry<3){cdTry++;try{DQCD.mount()}catch(e){}}
@@ -8708,51 +9046,6 @@ setInterval(sweep,1000);document.addEventListener("DOMContentLoaded",sweep);
 #dq-stats .dqs-grid>*+*{border-left:1px solid rgba(255,255,255,.08)}
 @media(max-width:560px){#dq-stats .dqs-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;row-gap:20px!important}#dq-stats .dqs-grid>*:nth-child(odd){border-left:0}#dq-stats .dqs-grid>*:nth-child(n+3){border-top:1px solid rgba(255,255,255,.08);padding-top:18px!important}#dq-stats .dqs-grid>*:nth-child(2){border-left:1px solid rgba(255,255,255,.08)}}
 </style>
-<script id="dq-stats-js">
-/* Statistika («İstifadəçi/İmtahan/Sınaq/Sual sayı») «Nəticəni təhlil et» kartının altına köçürülür. */
-(function(){"use strict";
-var D=document,n=0,SEC=null;
-function norm(s){return String(s||"").replace(/\u0130/g,"i").replace(/\u0307/g,"").replace(/\u0131/g,"i").replace(/\u0259/g,"e").replace(/\s+/g," ").trim().toLowerCase()}
-function labels(root){var out=[],w=D.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),t;
- while((t=w.nextNode())){var v=norm(t.nodeValue);if(!v||v.length>40)continue;
-  var p=t.parentElement;if(!p||p.closest("#dq-stats"))continue;
-  if(/^(istifadeci|imtahan|sinaq|sual) sayi$/.test(norm(p.textContent))&&out.indexOf(p)<0)out.push(p)}
- return out}
-function lca(a){var el=a[0];while(el&&!a.every(function(x){return el.contains(x)}))el=el.parentElement;return el}
-function find(){
- var root=D.getElementById("v3-home")||D.body;
- var all=labels(root),kinds={},pick=[];
- all.forEach(function(e){var k=norm(e.textContent);if(!kinds[k]){kinds[k]=1;pick.push(e)}});
- if(pick.length<4)return null;
- var C=lca(pick);if(!C)return null;
- var card=C,g=0;
- while(card.parentElement&&card.parentElement.childElementCount<5&&g<7&&card.parentElement.id!=="v3-home"){card=card.parentElement;g++}
- return {card:card,grid:C}}
-function build(){var s=D.createElement("section");s.id="dq-stats";s.innerHTML='<h2 class="dqs-h">DQ Platform rəqəmlərlə</h2>';return s}
-function anchorCard(){
- var root=D.getElementById("v3-home")||D.body,w=D.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),tn,h=null;
- while((tn=w.nextNode())){var v=norm(tn.nodeValue);if(v.indexOf("neticeni tehlil et")===0&&tn.parentElement&&!tn.parentElement.closest("#dq-stats")){h=tn.parentElement;break}}
- if(!h)return null;
- var el=h,g=0,vw=innerWidth;
- while(el.parentElement&&g<9){var r=el.getBoundingClientRect();if(r.width>=vw*.86&&r.height>140&&el.parentElement.id!=="v3-home")break;el=el.parentElement;g++}
- return el&&el.parentElement?el:null}
-function run(){try{
- var f=find();if(!f)return false;
- if(!SEC||!SEC.isConnected){SEC=build()}
- var a=anchorCard();
- if(a){SEC.classList.remove("dqs-foot");if(SEC.previousElementSibling!==a||!SEC.isConnected)a.insertAdjacentElement("afterend",SEC)}
- else if(!SEC.isConnected){
-  if(n<30)return false;
-  SEC.classList.add("dqs-foot");
-  var ft=D.querySelector("#v3-home .v3-ft")||D.querySelector(".v3-ft");
-  if(ft&&ft.parentNode)ft.parentNode.insertBefore(SEC,ft);else (D.getElementById("v3-home")||D.body).appendChild(SEC)}
- var old=SEC.querySelector(".dqs-card");if(old&&old!==f.card)old.remove();
- f.card.classList.add("dqs-card");f.grid.classList.add("dqs-grid");
- SEC.appendChild(f.card);return true}catch(e){return false}}
-function tick(){n++;var ok=run();var d=n<90?800:6000;if(n<400)setTimeout(tick,ok&&n>6?6000:d)}
-if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",tick);else tick();
-})();
-</script>
 <style id="dq-stats-pro-css">
 /* ===== DQ Platform · Professional statistika bloku ===== */
 #dq-stats.dqst{position:relative;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;width:calc(100% - 28px)!important;max-width:1060px!important;margin:26px auto 44px!important;padding:26px 8px 22px!important;border-radius:26px!important;border:1px solid rgba(217,164,65,.30)!important;background:radial-gradient(120% 140% at 50% -20%,rgba(47,99,189,.34),transparent 60%),linear-gradient(165deg,#0f2a63,#081a42 70%)!important;box-shadow:0 24px 50px -26px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.07)!important;overflow:hidden}
