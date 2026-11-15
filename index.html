@@ -9355,5 +9355,10 @@ function boot(){sched();refresh();pull();setInterval(pull,60000);[1500,4000,8000
 if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
 })();
 </script>
+<style id="dq-no-ring">
+/* Sağ alt küncdəki sarı irəliləmə halqası (dublikat «yuxarı» düyməsi) və yuxarıdakı yüklənmə zolaqları gizlədilir.
+   Qeyd: admin kartlarındakı div.dqx-top toxunulmur, yalnız button.dqx-top. Sadə «↑» (#dqpro-top) qalır. */
+button.dqx-top,#dqp-bar,#dqpro-prog{display:none!important}
+</style>
 </body>
 </html>
