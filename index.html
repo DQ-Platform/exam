@@ -4,6 +4,9 @@
 <script id="dq-governor">/* Arxa fonda (gizli tab) tez taymerlər (≤1.5 san) dayanır: CPU/batareya qənaəti. İmtahan/canlı sınaq ekranında heç vaxt dayandırılmır. */
 (function(){try{var si=window.setInterval;
 function critical(){try{var a=document.querySelector(".screen.active");return !!(a&&/exam|live|sinaq|result/i.test(a.id||""))||!!sessionStorage.getItem("dqg_flow")}catch(e){return true}}
+/* LX blokunu təkrar qurma məhdudlaşdırıcısı: guard/repair hər 300 ms qura bilməsin (titrəmənin əsas səbəbi). Gözləmə 0.8s→1.6s→…→30s, kart görünəndə sıfırlanır. */
+window.__dqLxS={t:0,n:0};
+window.__dqLxR=function(r){var G=window.__dqLxS,now=Date.now();if(now-G.t<Math.min(30000,800*Math.pow(2,G.n)))return;G.t=now;G.n++;try{r&&r.removeAttribute("data-id")}catch(e){}try{window.LX&&LX.mount()}catch(e){}};
 window.setInterval=function(fn,ms){var ex=Array.prototype.slice.call(arguments,2);
 if(typeof fn!=="function"||!(ms<=1500))return si.apply(window,arguments);
 return si.call(window,function(){if(document.hidden&&!critical())return;return fn.apply(this,ex)},ms)}}catch(e){}})();
@@ -141,7 +144,7 @@ window.setInterval=function(fn,d){
 })();
 </script>
 <link rel="preload" as="script" href="dq-net.js?v=1">
-<link rel="preload" as="script" href="app.js?v=51">
+<link rel="preload" as="script" href="app.js?v=52">
 <link rel="preload" as="script" href="dq-qapaq.js?v=2">
 <link rel="preload" as="script" href="dq-birlesdirme.js?v=5">
 <link rel="preload" as="script" href="dq-lock.js?v=1">
@@ -5697,7 +5700,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 </style>
 <script src="dq-qapaq.js?v=2"></script>
 <script src="/dq-ceo.js?v=2"></script>
-<script src="app.js?v=51"></script>
+<script src="app.js?v=52"></script>
 <script src="sual-studio.js?v=1"></script>
 <script src="dq-birlesdirme.js?v=5"></script>
 <script src="dq-oxuyucu.js?v=1"></script>
