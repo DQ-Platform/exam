@@ -4632,6 +4632,25 @@ setInterval(wrap,700);wrap();
       v.exams = Object.keys(ex).length;
       v.mocks = Object.keys(sn).length;
     } catch (e) { }
+    /* sual sayı 0 gəlibsə: real suallar dq_v2_store -> v3tests içindədir */
+    if (!(v.qs > 0)) {
+      try {
+        var r3 = await _supabase.from("dq_v2_store").select("ans:data->ans,status:data->>status").eq("collection", "v3tests");
+        var n3 = 0;
+        ((r3 && r3.data) || []).forEach(function (t) {
+          if (!t || t.status === "hidden") return;
+          var a = t.ans;
+          if (typeof a === "string") { try { a = JSON.parse(a); } catch (e) { a = null; } }
+          if (Array.isArray(a)) n3 += a.length;
+        });
+        if (n3 > 0) v.qs = n3;
+      } catch (e) { }
+    }
+    /* server cavab verməyəndə (limit/xəta) gələn 0 əvvəlki real rəqəmi silməsin */
+    try {
+      var pc = JSON.parse(localStorage.getItem(CK) || "null"), pv = (pc && pc.v) || {};
+      KEYS.forEach(function (d) { if (!(v[d.k] > 0) && pv[d.k] > 0) v[d.k] = pv[d.k]; });
+    } catch (e) { }
     if (v.qs > 0 || v.users > 0) { try { localStorage.setItem(CK, JSON.stringify({ t: Date.now(), v: v })); } catch (e) { } }
     return v;
   }
@@ -4833,7 +4852,13 @@ setInterval(wrap,700);wrap();
     renderEditor($("mod-homestats"));
   }
 
-  window.DQST = { mount: mount, openAdmin: openAdmin, adminInto: renderEditor };
+  /* «Niyə məhz DQ Platform?» altındakı sıra da eyni admin ayarlarından oxusun (gizlət / ad / əl ilə dəyər) */
+  async function values() {
+    var cfg = await loadCfg(), auto = await computeAuto(false), o = {};
+    valuesFor(cfg, auto).forEach(function (x) { o[x.d.k] = { n: x.n, label: x.it.label, plus: !!x.it.plus }; });
+    return o;
+  }
+  window.DQST = { mount: mount, openAdmin: openAdmin, adminInto: renderEditor, values: values };
 })();
 ;
 

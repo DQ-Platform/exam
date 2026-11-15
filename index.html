@@ -5918,7 +5918,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 </style>
 <script src="dq-qapaq.js?v=2"></script>
 <script src="/dq-ceo.js?v=2"></script>
-<script src="app.js?v=47"></script>
+<script src="app.js?v=48"></script>
 <script src="sual-studio.js?v=1"></script>
 <script src="dq-birlesdirme.js?v=5"></script>
 <script src="dq-oxuyucu.js?v=1"></script>
@@ -6289,6 +6289,7 @@ watch();
     lastTry = now;
     inflight = fetchStats(c, v2(), vals).then(function (r) {
       usedRpc = r.rpc;
+      if (vals) ITEMS.forEach(function (x) { if (!(r.v[x[0]] > 0) && vals[x[0]] > 0) r.v[x[0]] = vals[x[0]]; });
       var changed = !vals || ITEMS.some(function (x) { return vals[x[0]] !== r.v[x[0]]; });
       vals = r.v; lastOk = Date.now(); failN = r.partial ? failN : 0;
       writeCache(vals);
@@ -6384,7 +6385,9 @@ async function calc(){var v={users:0,exams:0,mocks:0,qs:0};
  try{var res=await _supabase.from("exam_questions").select("exam_id,category").limit(20000),ex={},sn={};
   ((res&&res.data)||[]).forEach(function(q){ex[q.exam_id]=1;sn[q.exam_id+"|"+q.category]=1});
   v.exams=Object.keys(ex).length;v.mocks=Object.keys(sn).length}catch(e){}
- try{localStorage.setItem("dq_stats_cache_v2",JSON.stringify({t:Date.now(),v:v}))}catch(e){}
+ try{var pc=JSON.parse(localStorage.getItem("dq_stats_cache_v2")||"null"),pv=(pc&&pc.v)||{};
+  ["users","exams","mocks","qs"].forEach(function(k){if(!(+v[k]>0)&&+pv[k]>0)v[k]=+pv[k]})}catch(e){}
+ if(v.users||v.exams||v.mocks||v.qs){try{localStorage.setItem("dq_stats_cache_v2",JSON.stringify({t:Date.now(),v:v}))}catch(e){}}
  return v}
 var runs=0;
 function run(){
@@ -9269,26 +9272,37 @@ html body #v3-home #dq-stats.dqst,html body #dqlv{display:none!important}
 #dq-why-stats .w-i{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:16px;color:#f6d57a;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.16),rgba(255,255,255,.03));border:1px solid rgba(217,164,65,.55);box-shadow:0 0 0 4px rgba(217,164,65,.07)}
 #dq-why-stats .w-n{display:block;min-height:1em;font-size:clamp(22px,3.4vw,32px);font-weight:800;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;color:#fff}
 #dq-why-stats .w-l{font-size:11.5px;font-weight:600;letter-spacing:.02em;color:#b9c8ea}
-#dq-why-stats.sk .w-n{color:transparent;width:56px;border-radius:8px;background:linear-gradient(100deg,rgba(255,255,255,.08) 30%,rgba(255,255,255,.22),rgba(255,255,255,.08) 70%) 0 0/220% 100%;animation:dqwhyS 1.2s linear infinite}
+.dq-why-grid>:empty{display:none!important}
+#dq-why-stats .w-n.sk,#dq-why-stats.sk .w-n{color:transparent;width:56px;border-radius:8px;background:linear-gradient(100deg,rgba(255,255,255,.08) 30%,rgba(255,255,255,.22),rgba(255,255,255,.08) 70%) 0 0/220% 100%;animation:dqwhyS 1.2s linear infinite}
 @keyframes dqwhyS{to{background-position:-220% 0}}
 @media(max-width:560px){#dq-why-stats{padding:14px 2px 12px;border-radius:14px}#dq-why-stats .w-i{width:32px;height:32px;font-size:13px}#dq-why-stats .w-l{font-size:10px}}
-@media(prefers-reduced-motion:reduce){#dq-why-stats.sk .w-n{animation:none}}
+@media(prefers-reduced-motion:reduce){#dq-why-stats .w-n.sk,#dq-why-stats.sk .w-n{animation:none}}
 </style>
 <script id="dq-why-stats-fix-js">
-/* Kartları 5 sütuna salır, boş qalan köhnə xananı gizlədir və statistika sırasını kartların altına qoyur.
-   Rəqəmlər saytın öz mənbəyindən (DQLive: istifadəçi/imtahan/sınaq/sual) və ya onun keşindən oxunur; gəlməyincə 0 yox, yüklənmə effekti görünür. */
+/* «Niyə məhz DQ Platform?»: kartlar 5 sütunda, boş (görünməyən məzmunlu) xanalar silinir,
+   statistika sırası kartların altında. Rəqəm 0 gəlibsə göstərilmir: əvvəlki real dəyər və ya yüklənmə effekti qalır. */
 (function(){"use strict";
-var D=document,W=window,RE=/Stabil\s+v[əe]\s+t[əe]hl[üu]k[əe]siz/i,CK="dq_stats_cache_v2";
+var D=document,W=window,RE=/Stabil\s+v[əe]\s+t[əe]hl[üu]k[əe]siz/i,CK2="dq_stats_cache_v2",CK3="dq_stats_cache_v3",GK="dq_why_good_v1";
 var ITEMS=[["users","fa-users","İstifadəçi sayı"],["exams","fa-file-pen","İmtahan sayı"],["mocks","fa-graduation-cap","Sınaq sayı"],["qs","fa-circle-question","Sual sayı"]];
-var bar=null,shown={users:0,exams:0,mocks:0,qs:0},have=false,busy=false,pend=false;
+var bar=null,shown={},have=false,busy=false,pend=false,t0=Date.now();
 function num(x){x=+x;return isFinite(x)&&x>0?Math.floor(x):0}
-function fmt(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g," ")+(n>0?"+":"")}
-function vals(){var v=null;
- try{if(W.DQLive&&W.DQLive.get)v=W.DQLive.get()}catch(e){}
- if(!v){try{var j=JSON.parse(localStorage.getItem(CK)||"null");if(j&&j.v)v=j.v}catch(e){}}
- if(!v)return null;
- var o={users:num(v.users),exams:num(v.exams),mocks:num(v.mocks),qs:num(v.qs)};
- return(o.users||o.exams||o.mocks||o.qs)?o:null}
+function fmt(n,k){var pl=!(CFG&&CFG[k]&&CFG[k].plus===false);return String(n).replace(/\B(?=(\d{3})+(?!\d))/g," ")+(n>0&&pl?"+":"")}
+function rd(k){try{var j=JSON.parse(localStorage.getItem(k)||"null");return j&&j.v?j.v:null}catch(e){return null}}
+function vals(){
+ var src=[],g={};
+ try{if(W.DQLive&&W.DQLive.get){var a=W.DQLive.get();if(a)src.push(a)}}catch(e){}
+ var c3=rd(CK3),c2=rd(CK2);if(c3)src.push(c3);if(c2)src.push(c2);
+ try{g=JSON.parse(localStorage.getItem(GK)||"{}")||{}}catch(e){g={}}
+ src.push(g);
+ var o={},any=false;
+ ITEMS.forEach(function(x){var k=x[0],n=0;for(var i=0;i<src.length&&!n;i++)n=num(src[i]&&src[i][k]);o[k]=n;if(n)any=true});
+ if(any){try{localStorage.setItem(GK,JSON.stringify(o))}catch(e){}}
+ return any?o:null}
+/* görünən məzmun: <style>/<script> mətni sayılmır */
+function hasText(e){var w=D.createTreeWalker(e,NodeFilter.SHOW_TEXT,null),n;
+ while((n=w.nextNode())){var p=n.parentElement;if(p&&/^(STYLE|SCRIPT|NOSCRIPT|TEMPLATE)$/.test(p.tagName))continue;
+  if(/\S/.test(n.nodeValue))return true}return false}
+function hasContent(c){return hasText(c)||!!c.querySelector("img,svg,canvas,video,picture")}
 function findGrid(root){
  var w=D.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),n,leaf=null;
  while((n=w.nextNode())){if(RE.test(n.nodeValue)){leaf=n.parentElement;break}}
@@ -9297,32 +9311,42 @@ function findGrid(root){
   var kids=[].filter.call(p.children,function(c){return c.tagName!=="STYLE"&&c.tagName!=="SCRIPT"&&c.id!=="dq-why-stats"});
   if(kids.length>=4&&!p.querySelector("h1,h2,h3"))return p}
  return null}
-function build(){var s=D.createElement("div");s.id="dq-why-stats";s.className="sk";s.setAttribute("aria-label","Statistika");
- s.innerHTML=ITEMS.map(function(x){return '<div class="w-c"><span class="w-i"><i class="fa-solid '+x[1]+'" aria-hidden="true"></i></span><b class="w-n" data-k="'+x[0]+'"></b><span class="w-l">'+x[2]+'</span></div>'}).join("");
+function build(){var s=D.createElement("div");s.id="dq-why-stats";s.setAttribute("aria-label","Statistika");
+ s.innerHTML=ITEMS.map(function(x){return '<div class="w-c"><span class="w-i"><i class="fa-solid '+x[1]+'" aria-hidden="true"></i></span><b class="w-n sk" data-k="'+x[0]+'"></b><span class="w-l">'+x[2]+'</span></div>'}).join("");
  return s}
-function anim(el,from,to){
+function anim(el,to,delay){
  var red=false;try{red=matchMedia("(prefers-reduced-motion:reduce)").matches}catch(e){}
- if(red||from===to){el.textContent=fmt(to);return}
- var t0=0;requestAnimationFrame(function st(ts){if(!t0)t0=ts;var p=Math.min(1,(ts-t0)/1100),e=1-Math.pow(1-p,4);
-  el.textContent=fmt(Math.round(from+(to-from)*e));if(p<1)requestAnimationFrame(st)})}
+ el.classList.remove("sk");
+ if(red){el.textContent=fmt(to,el.getAttribute("data-k"));return}
+ var from=0,st=0;el.textContent="0";
+ setTimeout(function(){requestAnimationFrame(function step(ts){if(!st)st=ts;var p=Math.min(1,(ts-st)/1100),e=1-Math.pow(1-p,4);
+  el.textContent=fmt(Math.round(from+(to-from)*e),el.getAttribute("data-k"));if(p<1)requestAnimationFrame(step)})},delay)}
+var CFG=null;
+function pull(){try{if(W.DQST&&W.DQST.values)W.DQST.values().then(function(c){CFG=c;paint()},function(){})}catch(e){}}
 function paint(){
- if(!bar||!bar.isConnected)return;var v=vals();if(!v)return;
- bar.classList.remove("sk");
- ITEMS.forEach(function(x){var el=bar.querySelector('[data-k="'+x[0]+'"]');if(!el)return;
-  var to=v[x[0]],from=have?shown[x[0]]:0;if(!have||to!==shown[x[0]])anim(el,from,to);shown[x[0]]=to});
- have=true}
+ if(!bar||!bar.isConnected)return;var v=vals();
+ ITEMS.forEach(function(x,i){var k=x[0],el=bar.querySelector('[data-k="'+k+'"]');if(!el)return;
+  var cell=el.parentNode,c=CFG&&CFG[k];
+  if(CFG){cell.style.display=c?"":"none";if(!c)return;var lb=cell.querySelector(".w-l");if(lb&&lb.textContent!==c.label)lb.textContent=c.label}
+  var to=c&&c.n>0?c.n:(v?v[k]:0);
+  if(to>0){if(shown[k]!==to){if(shown[k]>0){el.classList.remove("sk");el.textContent=fmt(to,k)}else anim(el,to,i*180);shown[k]=to}}
+  else if(!shown[k]){ if(Date.now()-t0>12000){el.classList.remove("sk");el.textContent="—"} else el.classList.add("sk") }})}
+/* boş xanaları gizlət/sil: kart yalnız görünən mətni və ya şəkli varsa kartdır */
+function tidy(g){
+ [].forEach.call(g.children,function(c){
+  if(c.tagName==="STYLE"||c.tagName==="SCRIPT"||c.id==="dq-why-stats")return;
+  var bad=c.id==="dq-stats"||c.id==="dqlv"||!!c.querySelector("#dq-stats,#dqlv")||!hasContent(c);
+  c.classList.toggle("dq-why-card",!bad);c.classList.toggle("dq-why-ghost",bad);
+  if(bad)c.style.setProperty("display","none","important");else if(c.style.display==="none")c.style.removeProperty("display")})}
 function fix(){pend=false;if(busy)return;busy=true;
  try{var h=D.getElementById("v3-home")||D.body,g=findGrid(h);if(!g)return;
-  g.classList.add("dq-why-grid");
-  [].forEach.call(g.children,function(c){if(c.tagName==="STYLE"||c.tagName==="SCRIPT"||c.id==="dq-why-stats")return;
-   var has=(c.textContent||"").replace(/\s+/g,"").length>0&&c.id!=="dq-stats"&&!c.querySelector("#dq-stats");
-   c.classList.toggle("dq-why-card",has);c.classList.toggle("dq-why-ghost",!has)});
+  g.classList.add("dq-why-grid");tidy(g);
   if(!bar)bar=build();
-  if(bar.previousElementSibling!==g||bar.parentNode!==g.parentNode){g.parentNode.insertBefore(bar,g.nextSibling);have=false}
+  if(bar.previousElementSibling!==g||bar.parentNode!==g.parentNode){g.parentNode.insertBefore(bar,g.nextSibling)}
   paint()}catch(e){}finally{busy=false}}
 function sched(){if(pend)return;pend=true;(W.requestAnimationFrame||setTimeout)(fix)}
 function refresh(){try{if(W.DQLive&&W.DQLive.refresh)W.DQLive.refresh()}catch(e){}}
-function boot(){sched();refresh();
+function boot(){sched();refresh();pull();setInterval(pull,60000);[1500,4000,8000].forEach(function(t){setTimeout(pull,t)});
  try{new MutationObserver(sched).observe(D.body,{childList:true,subtree:true})}catch(e){}
  [400,1200,2500,5000,9000].forEach(function(t){setTimeout(sched,t)});
  setInterval(function(){paint();if(!D.hidden)sched()},1500);
