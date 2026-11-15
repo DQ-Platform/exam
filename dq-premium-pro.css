@@ -1,0 +1,78 @@
+/* DQ Platform — Premium layer v1. Mövcud məntiqə toxunmur, yalnız görünüşü yüksəldir. */
+:root{
+  --pm-bg:#060b1a; --pm-surface:#0c1530; --pm-surface-2:#101c3f;
+  --pm-line:rgba(212,175,55,.18); --pm-line-soft:rgba(255,255,255,.07);
+  --pm-gold:#d4af37; --pm-gold-hi:#f3d98b; --pm-gold-lo:#b8902a;
+  --pm-text:#e8edfa; --pm-muted:#93a3c7;
+  --pm-r-lg:20px; --pm-r-md:14px; --pm-r-pill:999px;
+  --pm-shadow:0 18px 50px -20px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.05);
+  --pm-ease:cubic-bezier(.22,.9,.24,1);
+}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body.v3on{background:
+  radial-gradient(900px 480px at 85% -5%,rgba(47,99,189,.22),transparent 60%),
+  radial-gradient(700px 400px at 0% 18%,rgba(212,175,55,.08),transparent 60%),
+  var(--pm-bg)}
+
+/* Başlıq və naviqasiya */
+.v3-hd{background:rgba(8,14,34,.82);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
+  border-bottom:1px solid var(--pm-line);position:sticky;top:0;z-index:50}
+.v3-nav{background:rgba(8,14,34,.9);border-bottom:1px solid var(--pm-line-soft);gap:clamp(14px,2.4vw,30px)}
+.v3-nav a{position:relative;font-weight:600;letter-spacing:.2px;color:var(--pm-muted);padding:6px 0;transition:color .25s}
+.v3-nav a:hover,.v3-nav a.on,.v3-nav a.active{color:var(--pm-gold-hi)}
+.v3-nav a:after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,var(--pm-gold-lo),var(--pm-gold-hi));transform:scaleX(0);transform-origin:left;transition:transform .35s var(--pm-ease)}
+.v3-nav a:hover:after,.v3-nav a.on:after,.v3-nav a.active:after{transform:scaleX(1)}
+
+/* Düymələr: bir əsas (qızıl), bir ikinci dərəcəli (şüşə) */
+.v3-g,.dq-regbtn,.dq-exbtn,.dqn-btn.p{
+  background:linear-gradient(180deg,var(--pm-gold-hi),var(--pm-gold) 55%,var(--pm-gold-lo));
+  color:#1a1405;font-weight:800;border:0;border-radius:var(--pm-r-pill);
+  box-shadow:0 10px 26px -10px rgba(212,175,55,.65),inset 0 1px 0 rgba(255,255,255,.55);
+  transition:transform .3s var(--pm-ease),box-shadow .3s,filter .3s}
+.v3-g:hover,.dq-regbtn:hover,.dq-exbtn:hover,.dqn-btn.p:hover{transform:translateY(-2px);filter:brightness(1.06);
+  box-shadow:0 16px 34px -12px rgba(212,175,55,.75),inset 0 1px 0 rgba(255,255,255,.6)}
+.v3-d,.dqn-btn.g{background:rgba(255,255,255,.06);color:var(--pm-text);border:1px solid var(--pm-line-soft);box-shadow:none}
+.v3-d:hover,.dqn-btn.g:hover{border-color:var(--pm-line);background:rgba(255,255,255,.1)}
+
+/* Kartlar: vahid şüşə üslubu, vahid künc radiusu */
+.v3-cd,.dqn-card,.dq-why-card,.exam-item-card,.nw-card,.nw-side,.v3-c,.v3-hero{
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015)),var(--pm-surface);
+  border:1px solid var(--pm-line-soft);border-radius:var(--pm-r-lg);box-shadow:var(--pm-shadow);color:var(--pm-text)}
+.v3-cd{transition:transform .35s var(--pm-ease),border-color .3s,box-shadow .35s}
+.v3-cd:hover,.dq-why-card:hover{transform:translateY(-4px);border-color:var(--pm-line);
+  box-shadow:0 26px 50px -24px rgba(0,0,0,.8),0 0 0 1px rgba(212,175,55,.12)}
+.v3-cd small,.dqn-body p,.nw-card p{color:var(--pm-muted)}
+.dqn-body h3,.dqn-title,.nw-card h3,.v3-sv h2,.v3-hero h2{color:#fff;letter-spacing:-.01em}
+.dqn-card{border-top:0;border:1px solid var(--pm-line)}
+.dqn-bar{background:rgba(255,255,255,.08)}
+.dqn-bar i{background:linear-gradient(90deg,var(--pm-gold-lo),var(--pm-gold-hi))}
+.dqn-ar{background:rgba(255,255,255,.07);color:var(--pm-gold-hi);box-shadow:none;border:1px solid var(--pm-line-soft)}
+.dqn-ar:hover{background:var(--pm-gold);color:#1a1405}
+.dqn-dot{background:rgba(255,255,255,.18)}.dqn-dot.on{background:var(--pm-gold)}
+.dqn-k,.nw-tg{border:1px solid var(--pm-line);background:rgba(212,175,55,.1);color:var(--pm-gold-hi)}
+.dqn-new{background:linear-gradient(135deg,var(--pm-gold-hi),var(--pm-gold-lo));color:#1a1405}
+
+/* Düzgün tipoqrafik ritm */
+.v3-sv{margin-top:clamp(40px,6vw,72px)}
+.v3-sv h2,.dqn-title{font-weight:800;font-size:clamp(22px,3.6vw,32px)}
+.dqn-sub{background:linear-gradient(90deg,var(--pm-gold-lo),var(--pm-gold-hi))}
+
+/* "Niyə məhz DQ Platform" və canlı statistika: sınıq ghost kartı və üst-üstə düşən mətn */
+.dq-why-ghost{display:none!important}
+.dq-why-grid{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))!important;gap:14px!important}
+.dq-why-card{padding:18px 14px;text-align:center;font-size:13.5px;line-height:1.45;transition:transform .35s var(--pm-ease),border-color .3s}
+#dq-stats,#dq-why-stats,.dq-why-stats{overflow:hidden;border-radius:var(--pm-r-lg);position:relative;isolation:isolate}
+#dq-stats *,#dq-why-stats *{position:relative;max-width:100%;overflow-wrap:anywhere}
+#dq-stats [data-k],#dq-why-stats [data-k]{font-variant-numeric:tabular-nums;font-weight:800;
+  background:linear-gradient(180deg,#fff,var(--pm-gold-hi));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* Alt hissə */
+.v3-ft{background:linear-gradient(180deg,#070d20,#050914);border-top:1px solid var(--pm-line);color:var(--pm-muted)}
+.v3-ft a{color:var(--pm-gold-hi)!important}
+
+/* Əlçatanlıq və hərəkət */
+:focus-visible{outline:2px solid var(--pm-gold-hi);outline-offset:3px;border-radius:8px}
+::selection{background:rgba(212,175,55,.35)}
+@media(max-width:640px){.v3-hd{padding:12px 14px}.dq-why-grid{grid-template-columns:repeat(2,1fr)!important}}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
