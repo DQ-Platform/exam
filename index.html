@@ -9765,5 +9765,71 @@ function boot(){apply();var h=D.getElementById("v3-home");
 if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
 })();
 </script>
+<style id="dq-fen-pro-css">
+/* Fənlər üzrə testlər — professional kart dizaynı */
+[data-dqgrid="fen"]{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:16px!important;overflow:visible!important;transform:none!important;scroll-snap-type:none!important;width:100%!important;max-width:100%!important}
+@media(max-width:820px){html body #v3-home [data-dqgrid="fen"]{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}}
+html body #v3-home [data-dqgrid="fen"]>[data-dqn]{position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:space-between!important;min-height:175px!important;width:auto!important;max-width:none!important;margin:0!important;padding:20px 12px 14px!important;border-radius:20px!important;overflow:hidden!important;color:#fff!important;text-align:center!important;cursor:pointer;background:radial-gradient(120% 100% at 50% 0%,#12306b,#0a1a40)!important;border:1px solid rgba(120,160,255,.28)!important;box-shadow:inset 0 0 30px rgba(80,130,255,.08),0 10px 26px rgba(0,0,0,.35)!important;transition:transform .2s,border-color .2s,box-shadow .2s}
+html body #v3-home [data-dqgrid="fen"]>[data-dqn]:before,html body #v3-home [data-dqgrid="fen"]>[data-dqn]:after{display:none!important}
+html body #v3-home [data-dqgrid="fen"]>[data-dqn]:hover{transform:translateY(-4px)!important;border-color:#f2c14e!important;box-shadow:0 14px 30px rgba(0,0,0,.45),0 0 0 1px #f2c14e!important}
+[data-dqn] .dqn-hide{display:none!important}
+[data-dqn] .dqn-path{display:contents!important}
+[data-dqn] .dqn-btn{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;opacity:0!important;z-index:5!important;cursor:pointer}
+.dqn-face{position:relative;z-index:1;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:space-between;flex:1;width:100%}
+.dqn-ico{width:70px;height:70px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
+.dqn-name{font:700 clamp(16px,2.6vw,19px)/1.25 "Segoe UI",system-ui,sans-serif;margin:10px 0 4px;color:#fff}
+.dqn-meta{font:500 12px/1.4 "Segoe UI",system-ui,sans-serif;color:#a9b6d6}
+.dqn-meta b{color:#f2c14e;font-weight:700}
+.dqn-meta{display:none!important}
+.dqn-name{margin:12px 0 0!important}
+.dqn-go{align-self:flex-end;width:30px;height:30px;border-radius:50%;background:linear-gradient(145deg,#f2c14e,#c8921f);display:grid;place-items:center;margin-top:8px}
+.dqn-go svg{width:14px;height:14px}
+.dqn-cap{display:inline-block;width:34px;height:34px;vertical-align:middle;margin-right:10px}
+@media(prefers-reduced-motion:reduce){[data-dqgrid="fen"]>[data-dqn]{transition:none!important}}
+</style>
+<script id="dq-fen-pro-js">
+(function(){"use strict";var D=document,tm=0,busy=false;
+var ICONS={
+az:'<svg class="dqn-ico" viewBox="0 0 72 72"><rect x="10" y="16" width="52" height="12" rx="3" fill="#2f9fd8"/><rect x="10" y="28" width="52" height="12" fill="#d8344a"/><rect x="10" y="40" width="52" height="12" rx="3" fill="#3aa15a"/><circle cx="34" cy="34" r="4.5" fill="#fff"/><circle cx="35.6" cy="34" r="3.6" fill="#d8344a"/><circle cx="40" cy="34" r="1.4" fill="#fff"/></svg>',
+qa:'<svg class="dqn-ico" viewBox="0 0 72 72" fill="none" stroke="#f2c14e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M36 14v40M24 56h24M16 22h40"/><path d="M16 22 8 40a8 8 0 0 0 16 0l-8-18ZM56 22l-8 18a8 8 0 0 0 16 0l-8-18Z" fill="rgba(242,193,78,.25)"/><circle cx="36" cy="12" r="2.5" fill="#f2c14e"/></svg>',
+inf:'<svg class="dqn-ico" viewBox="0 0 72 72" fill="none"><rect x="14" y="16" width="44" height="30" rx="3" fill="#0d2a66" stroke="#6fb2ff" stroke-width="3"/><path d="M30 26l-6 5 6 5M42 26l6 5-6 5M37 24l-2 14" stroke="#9fd0ff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 52h56l-5 5H13l-5-5Z" fill="#6fb2ff"/></svg>',
+mq:'<svg class="dqn-ico" viewBox="0 0 72 72" fill="none"><path d="M36 14c-5-5-15-3-17 5-6 1-9 8-5 13-3 5 0 12 6 13 2 6 9 8 13 4 4 4 11 2 13-4 6-1 9-8 6-13 4-5 1-12-5-13-2-8-12-10-17-5Z" fill="#7fb4ff" stroke="#cfe3ff" stroke-width="2"/><path d="M36 18v34M26 28c4 0 6 3 10 3M46 28c-4 0-6 3-10 3M26 42c4 0 6-3 10-3M46 42c-4 0-6-3-10-3" stroke="#2a5cb8" stroke-width="2" stroke-linecap="round"/></svg>',
+gen:'<svg class="dqn-ico" viewBox="0 0 72 72" fill="none" stroke="#f2c14e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18h22a6 6 0 0 1 6 6v30a6 6 0 0 0-6-6H14V18ZM58 18H36"/><path d="M58 18v30H42"/></svg>'};
+var ARROW='<span class="dqn-go"><svg viewBox="0 0 16 16" fill="none" stroke="#1a1204" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
+var CAP='<svg class="dqn-cap" viewBox="0 0 48 48" fill="none"><path d="M24 8 3 18l21 10 21-10L24 8Z" fill="#f2c14e"/><path d="M11 24v9c0 3 6 6 13 6s13-3 13-6v-9l-13 6-13-6Z" fill="#c8921f"/><path d="M43 19v12" stroke="#f2c14e" stroke-width="2.5" stroke-linecap="round"/></svg>';
+function norm(s){return String(s||"").replace(/\s+/g," ").trim()}
+function kind(t){t=t.toLowerCase();if(t.indexOf("azərbaycan")>-1)return"az";if(t.indexOf("qanun")>-1)return"qa";if(t.indexOf("informatika")>-1)return"inf";if(t.indexOf("məntiq")>-1)return"mq";return"gen"}
+function origText(card){var s="";[].forEach.call(card.childNodes,function(n){if(n.nodeType===1&&n.classList.contains("dqn-face"))return;s+=" "+(n.textContent||"")});return norm(s)}
+function title(card,txt){var t=txt.replace(/\d+[.,]?\d*\s*AZN/ig,"").replace(/Pulsuz/ig,"").replace(/\d+\s*sual/ig,"").replace(/\d+\s*d[əe]q/ig,"").replace(/FƏNN/ig,"").replace(/Testə keç/ig,"").replace(/[→←]/g,"");return norm(t)}
+function build(card){
+ var txt=origText(card),nm=title(card,txt),k=kind(txt);
+ var btn=card.querySelector("button,a");
+ /* gizlət: düymə yolu istisna olmaqla bütün orijinal uşaqlar */
+ var path=[];if(btn){for(var e=btn;e&&e!==card;e=e.parentElement)path.push(e)}
+ function mark(parent){[].forEach.call(parent.children,function(c){if(c.classList.contains("dqn-face"))return;if(path.indexOf(c)>-1){if(c===btn)c.classList.add("dqn-btn");else{c.classList.add("dqn-path");mark(c)}}else c.classList.add("dqn-hide")})}
+ mark(card);
+ var f=D.createElement("div");f.className="dqn-face";f.innerHTML=ICONS[k]+'<div><div class="dqn-name"></div><div class="dqn-meta"></div></div>'+ARROW;
+ card.insertBefore(f,card.firstChild);card.setAttribute("data-dqn","1");
+ /* alt-düymənin rəngli fonu/yazısı görünməsin */
+ return f}
+function sync(card){var f=card.querySelector(":scope>.dqn-face");if(!f)return;var txt=origText(card);
+ var nm=title(card,txt),m1=/(\d+)\s*sual/i.exec(txt),m2=/(\d+)\s*d[əe]q/i.exec(txt),pr=/(\d+[.,]?\d*\s*AZN|Pulsuz)/i.exec(txt);
+ var n=f.querySelector(".dqn-name");if(n.textContent!==nm)n.textContent=nm;
+ var parts=[];if(m1)parts.push(m1[1]+" sual");if(m2)parts.push(m2[1]+" dəq");
+ var html=parts.join(" · ");if(pr)html+=(html?" · ":"")+"<b>"+pr[1]+"</b>";
+ var mt=f.querySelector(".dqn-meta");if(mt.innerHTML!==html)mt.innerHTML=html}
+function head(){var h=D.getElementById("v3-home");if(!h)return;var w=D.createTreeWalker(h,NodeFilter.SHOW_TEXT,null),n;
+ while((n=w.nextNode())){var v=norm(n.nodeValue);
+  if(v==="Fənlər üzrə testlər"){var el=n.parentElement;if(el&&!el.querySelector(".dqn-cap"))el.insertAdjacentHTML("afterbegin",CAP)}
+  else if(/^Fənni seç, bilik səviyyəni yoxla və hazırlığını gücləndir!?$/.test(v)){n.nodeValue="Fənni seç, bilik səviyyəni yoxla və hazırlığını gücləndir"}}}
+function run(){tm=0;if(busy)return;busy=true;try{
+ var g=D.querySelector('[data-dqgrid="fen"]');if(g){[].forEach.call(g.children,function(c){if(!/^(STYLE|SCRIPT)$/.test(c.tagName)){if(!c.hasAttribute("data-dqn")&&c.querySelector("button,a"))build(c);sync(c)}})}
+ head()}catch(e){}finally{busy=false}}
+function sched(){if(!tm)tm=setTimeout(run,300)}
+function boot(){run();var h=D.getElementById("v3-home");if(h)try{new MutationObserver(function(m){if(!busy)sched()}).observe(h,{childList:true,subtree:true,characterData:true})}catch(e){}
+ [900,2200,5000].forEach(function(t){setTimeout(run,t)})}
+if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
+})();
+</script>
 </body>
 </html>
