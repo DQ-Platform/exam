@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<script id="dq-build-reset">/* Yeni versiya ilk dəfə açılanda köhnə servis-işçi və keşi təmizləyib səhifəni bir dəfə yeniləyir */
+(function(){var B="20261116b";try{if(localStorage.getItem("dq_build")===B)return;localStorage.setItem("dq_build",B);
+ var done=function(){try{location.reload()}catch(e){}};
+ var a=navigator.serviceWorker&&navigator.serviceWorker.getRegistrations?navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister()}))}):Promise.resolve();
+ a.then(function(){return window.caches?caches.keys().then(function(k){return Promise.all(k.map(function(n){return caches.delete(n)}))}):0}).then(done,done);
+ setTimeout(done,3000)}catch(e){}})();
+</script>
 <script id="dq-scroll-rescue">
 /* DQ sürüşmə qoruyucusu: heç bir skript səhifənin şaquli sürüşməsini həmişəlik blokalaya bilməsin. */
 (function(){"use strict";if(window.__dqRescue)return;window.__dqRescue=1;
