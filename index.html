@@ -9381,15 +9381,12 @@ button.dqx-top{display:grid!important;place-items:center!important;padding:0!imp
 button.dqx-top span{display:grid;place-items:center;width:100%;height:100%;font-size:20px;font-weight:700;line-height:1;text-align:center;transform:translateY(-1px)}
 </style>
 <style id="dq-perf-css">
-/* Yüngül rejim (telefon / zəif cihaz): sonsuz bəzək animasiyaları, blur və will-change söndürülür → səhifə donmur, sürüşmə "plavnı" olur.
+/* Yüngül rejim (telefon / zəif cihaz): sonsuz bəzək animasiyaları, blur və will-change söndürülür.
    Yükləmə ekranı, skeletlər, fırlanan göstəricilər və taymerlər istisnadır. */
 html.dq-lite *:not(#dq-splash):not(#dq-splash *):not([class*="sk"]):not([class*="spin"]):not([class*="load"]):not([class*="tm"]):not([class*="timer"]):not([class*="dqsp"]){animation-iteration-count:1!important}
 html.dq-lite *,html.dq-lite *:before,html.dq-lite *:after{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;will-change:auto!important}
 html.dq-lite{scroll-behavior:auto!important}
 html.dq-lite .dqx-glow,html.dq-lite .dqx-cv,html.dq-lite .dqe-aur,html.dq-lite #dqx-glow{display:none!important}
-/* ekrandan kənar bölmələr çəkilmir */
-html.dq-lite #v3-home>section,html.dq-lite #v3-home>div:not([id^="dq-count"]):not(#lxp-ban){content-visibility:auto;contain-intrinsic-size:auto 420px}
-img{content-visibility:auto}
 </style>
 <script id="dq-perf-js">
 (function(){"use strict";var D=document,H=D.documentElement;
@@ -9405,5 +9402,49 @@ addEventListener("load",function(){setTimeout(lazy,1500)});
 })();
 </script>
 <style id="dq-perf-scroll">html.dq-scr *,html.dq-scr *:before,html.dq-scr *:after{animation-play-state:paused!important}</style>
+<style id="dq-mfix-css">
+/* Telefon düzülüşü: kartlar oxunaqlı, bərabər və üst-üstə düşmədən */
+html,body{max-width:100%;overflow-x:clip}
+#v3-home{overflow-x:clip}
+@media(max-width:600px){
+ html body #v3-home [data-dqgrid="fen"]{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;overflow:visible!important;transform:none!important;scroll-snap-type:none!important;width:100%!important;max-width:100%!important}
+ html body #v3-home [data-dqgrid="fen"]>*{width:auto!important;min-width:0!important;max-width:none!important;flex:none!important;margin:0!important;transform:none!important}
+ html body #v3-home [data-dqgrid="fen"]>*:last-child:nth-child(odd){grid-column:auto!important}
+ html body #v3-home .dq-why-grid.dq-why-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+ html body #v3-home .dq-why-grid>.dq-why-card{padding:14px 10px!important;min-height:96px!important;font-size:12.5px!important;line-height:1.4!important}
+ html body #v3-home .dq-why-grid>.dq-why-card[data-odd]{grid-column:1/-1!important}
+}
+[data-dqgrid="fen"] [data-decor]{pointer-events:none!important;z-index:0!important}
+[data-dqgrid="fen"] [data-lift]{position:relative;z-index:1}
+</style>
+<script id="dq-mfix-js">
+(function(){"use strict";var D=document,tm=0,busy=false;
+function find(txt){var h=D.getElementById("v3-home");if(!h)return null;var w=D.createTreeWalker(h,NodeFilter.SHOW_TEXT,null),n;
+ while((n=w.nextNode())){if(n.nodeValue.replace(/\s+/g," ").trim()===txt)return n.parentElement}return null}
+function cards(g){var k=[].filter.call(g.children,function(c){return c.tagName!=="STYLE"&&c.tagName!=="SCRIPT"});return k}
+function gridFor(head){
+ for(var e=head,up=0;e&&up<6;e=e.parentElement,up++){
+  var q=e.querySelectorAll("*"),best=null;
+  for(var i=0;i<q.length&&i<400;i++){var c=cards(q[i]);
+   if(c.length>=3&&c.length<=8&&c.every(function(x){return x.querySelector("button,a")})&&!q[i].contains(head)){best=q[i];break}}
+  if(best)return best}
+ return null}
+function decorate(g){
+ [].forEach.call(g.children,function(card){if(card.getAttribute("data-dqd"))return;card.setAttribute("data-dqd","1");
+  [].forEach.call(card.querySelectorAll("*"),function(el,i){if(i>80)return;var cs=getComputedStyle(el),txt=/\S/.test(el.textContent||"");
+   if(cs.position==="absolute"&&(!txt||el.tagName==="svg"||el.tagName==="IMG"||el.tagName==="I")&&!el.closest("button"))el.setAttribute("data-decor","1");
+   else if(cs.position==="static"&&txt&&el.children.length===0)el.setAttribute("data-lift","1")})})}
+function odd(){[].forEach.call(D.querySelectorAll(".dq-why-grid"),function(g){
+ var v=[].filter.call(g.children,function(c){return c.classList.contains("dq-why-card")&&c.style.display!=="none"});
+ v.forEach(function(c){c.removeAttribute("data-odd")});if(v.length%2&&v.length)v[v.length-1].setAttribute("data-odd","1")})}
+function run(){tm=0;if(busy)return;busy=true;try{
+ var h=find("Fənlər üzrə testlər");if(h){var g=D.querySelector('[data-dqgrid="fen"]');if(!g||!g.isConnected){g=gridFor(h);if(g)g.setAttribute("data-dqgrid","fen")}if(g)decorate(g)}
+ odd()}catch(e){}finally{busy=false}}
+function sched(){if(!tm)tm=setTimeout(run,250)}
+function boot(){run();var h=D.getElementById("v3-home");if(h)try{new MutationObserver(sched).observe(h,{childList:true,subtree:true})}catch(e){}
+ [800,2000,4500].forEach(function(t){setTimeout(run,t)})}
+if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
+})();
+</script>
 </body>
 </html>
