@@ -9799,13 +9799,17 @@ html body #v3-home [data-dqfen]>[data-dqn]:hover{transform:translateY(-4px)!impo
 @keyframes dqGlowB{0%,100%{filter:drop-shadow(0 6px 10px rgba(0,0,0,.45)) drop-shadow(0 0 0 rgba(111,178,255,0))}50%{filter:drop-shadow(0 8px 12px rgba(0,0,0,.4)) drop-shadow(0 0 14px rgba(111,178,255,.8))}}
 .dqn-ico{transition:scale .25s ease;will-change:transform}
 [data-dqn]:hover .dqn-ico{scale:1.14}
-.dqn-ico.k-az{transform-origin:20% 55%;animation:dqWave 3.2s ease-in-out infinite}
-.dqn-ico.k-qa{transform-origin:50% 18%;animation:dqTilt 3.4s ease-in-out infinite,dqGlowG 3.4s ease-in-out infinite}
-.dqn-ico.k-inf{animation:dqFloat 3.6s ease-in-out infinite -1s,dqGlowB 3.6s ease-in-out infinite}
-.dqn-ico.k-inf path:nth-of-type(1){animation:dqBlink 1.6s ease-in-out infinite}
-.dqn-ico.k-mq{animation:dqBeat 2.8s ease-in-out infinite,dqGlowB 2.8s ease-in-out infinite -.6s}
-@media(prefers-reduced-motion:reduce){.dqn-ico,.dqn-ico *{animation:none!important;transition:none!important}}
-
+html body #v3-home .dqn-ico.k-az{transform-origin:20% 55%;animation:dqWave 3.2s ease-in-out infinite!important}
+html body #v3-home .dqn-ico.k-qa{transform-origin:50% 18%;animation:dqTilt 3.4s ease-in-out infinite,dqGlowG 3.4s ease-in-out infinite!important}
+html body #v3-home .dqn-ico.k-inf{animation:dqFloat 3.6s ease-in-out infinite -1s,dqGlowB 3.6s ease-in-out infinite!important}
+html body #v3-home .dqn-ico.k-inf path:nth-of-type(1){animation:dqBlink 1.6s ease-in-out infinite!important}
+html body #v3-home .dqn-ico.k-mq{animation:dqBeat 2.8s ease-in-out infinite,dqGlowB 2.8s ease-in-out infinite -.6s!important}
+/* "animasiyanı azalt" olan cihazlarda yalnız yumşaq parıltı (hərəkətsiz) */
+@media(prefers-reduced-motion:reduce){
+html body #v3-home .dqn-ico.k-az,html body #v3-home .dqn-ico.k-qa{transform:none;animation:dqGlowG 3.4s ease-in-out infinite!important}
+html body #v3-home .dqn-ico.k-inf,html body #v3-home .dqn-ico.k-mq{transform:none;animation:dqGlowB 3.2s ease-in-out infinite!important}
+html body #v3-home .dqn-ico.k-inf path:nth-of-type(1){animation:none!important}
+}
 </style>
 <script id="dq-fen-pro-js">
 (function(){"use strict";var D=document,tm=0,busy=false;
