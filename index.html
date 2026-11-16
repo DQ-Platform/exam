@@ -9786,14 +9786,31 @@ html body #v3-home [data-dqfen]>[data-dqn]:hover{transform:translateY(-4px)!impo
 .dqn-go svg{width:14px;height:14px}
 .dqn-cap{display:inline-block;width:34px;height:34px;vertical-align:middle;margin-right:10px}
 @media(prefers-reduced-motion:reduce){[data-dqfen]>[data-dqn]{transition:none!important}}
+/* canlı ikonlar */
+@keyframes dqFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes dqWave{0%,100%{transform:translateY(0) skewY(0) rotate(0)}25%{transform:translateY(-4px) skewY(-4deg) rotate(-2deg)}75%{transform:translateY(-4px) skewY(4deg) rotate(2deg)}}
+@keyframes dqTilt{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+@keyframes dqBeat{0%,100%{transform:scale(1)}15%{transform:scale(1.09)}30%{transform:scale(1)}45%{transform:scale(1.06)}60%{transform:scale(1)}}
+@keyframes dqBlink{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes dqGlowG{0%,100%{filter:drop-shadow(0 6px 10px rgba(0,0,0,.45)) drop-shadow(0 0 0 rgba(242,193,78,0))}50%{filter:drop-shadow(0 8px 12px rgba(0,0,0,.4)) drop-shadow(0 0 14px rgba(242,193,78,.7))}}
+@keyframes dqGlowB{0%,100%{filter:drop-shadow(0 6px 10px rgba(0,0,0,.45)) drop-shadow(0 0 0 rgba(111,178,255,0))}50%{filter:drop-shadow(0 8px 12px rgba(0,0,0,.4)) drop-shadow(0 0 14px rgba(111,178,255,.8))}}
+.dqn-ico{transition:scale .25s ease;will-change:transform}
+[data-dqn]:hover .dqn-ico{scale:1.14}
+.dqn-ico.k-az{transform-origin:20% 55%;animation:dqWave 3.2s ease-in-out infinite}
+.dqn-ico.k-qa{transform-origin:50% 18%;animation:dqTilt 3.4s ease-in-out infinite,dqGlowG 3.4s ease-in-out infinite}
+.dqn-ico.k-inf{animation:dqFloat 3.6s ease-in-out infinite -1s,dqGlowB 3.6s ease-in-out infinite}
+.dqn-ico.k-inf path:nth-of-type(1){animation:dqBlink 1.6s ease-in-out infinite}
+.dqn-ico.k-mq{animation:dqBeat 2.8s ease-in-out infinite,dqGlowB 2.8s ease-in-out infinite -.6s}
+@media(prefers-reduced-motion:reduce){.dqn-ico,.dqn-ico *{animation:none!important;transition:none!important}}
+
 </style>
 <script id="dq-fen-pro-js">
 (function(){"use strict";var D=document,tm=0,busy=false;
 var ICONS={
-az:'<svg class="dqn-ico" viewBox="0 0 72 72"><rect x="10" y="16" width="52" height="12" rx="3" fill="#2f9fd8"/><rect x="10" y="28" width="52" height="12" fill="#d8344a"/><rect x="10" y="40" width="52" height="12" rx="3" fill="#3aa15a"/><circle cx="34" cy="34" r="4.5" fill="#fff"/><circle cx="35.6" cy="34" r="3.6" fill="#d8344a"/><circle cx="40" cy="34" r="1.4" fill="#fff"/></svg>',
-qa:'<svg class="dqn-ico" viewBox="0 0 72 72" fill="none" stroke="#f2c14e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M36 14v40M24 56h24M16 22h40"/><path d="M16 22 8 40a8 8 0 0 0 16 0l-8-18ZM56 22l-8 18a8 8 0 0 0 16 0l-8-18Z" fill="rgba(242,193,78,.25)"/><circle cx="36" cy="12" r="2.5" fill="#f2c14e"/></svg>',
-inf:'<svg class="dqn-ico" viewBox="0 0 72 72" fill="none"><rect x="14" y="16" width="44" height="30" rx="3" fill="#0d2a66" stroke="#6fb2ff" stroke-width="3"/><path d="M30 26l-6 5 6 5M42 26l6 5-6 5M37 24l-2 14" stroke="#9fd0ff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 52h56l-5 5H13l-5-5Z" fill="#6fb2ff"/></svg>',
-mq:'<svg class="dqn-ico" viewBox="0 0 72 72" fill="none"><path d="M36 14c-5-5-15-3-17 5-6 1-9 8-5 13-3 5 0 12 6 13 2 6 9 8 13 4 4 4 11 2 13-4 6-1 9-8 6-13 4-5 1-12-5-13-2-8-12-10-17-5Z" fill="#7fb4ff" stroke="#cfe3ff" stroke-width="2"/><path d="M36 18v34M26 28c4 0 6 3 10 3M46 28c-4 0-6 3-10 3M26 42c4 0 6-3 10-3M46 42c-4 0-6-3-10-3" stroke="#2a5cb8" stroke-width="2" stroke-linecap="round"/></svg>',
+az:'<svg class="dqn-ico k-az" viewBox="0 0 72 72"><rect x="10" y="16" width="52" height="12" rx="3" fill="#2f9fd8"/><rect x="10" y="28" width="52" height="12" fill="#d8344a"/><rect x="10" y="40" width="52" height="12" rx="3" fill="#3aa15a"/><circle cx="34" cy="34" r="4.5" fill="#fff"/><circle cx="35.6" cy="34" r="3.6" fill="#d8344a"/><circle cx="40" cy="34" r="1.4" fill="#fff"/></svg>',
+qa:'<svg class="dqn-ico k-qa" viewBox="0 0 72 72" fill="none" stroke="#f2c14e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M36 14v40M24 56h24M16 22h40"/><path d="M16 22 8 40a8 8 0 0 0 16 0l-8-18ZM56 22l-8 18a8 8 0 0 0 16 0l-8-18Z" fill="rgba(242,193,78,.25)"/><circle cx="36" cy="12" r="2.5" fill="#f2c14e"/></svg>',
+inf:'<svg class="dqn-ico k-inf" viewBox="0 0 72 72" fill="none"><rect x="14" y="16" width="44" height="30" rx="3" fill="#0d2a66" stroke="#6fb2ff" stroke-width="3"/><path d="M30 26l-6 5 6 5M42 26l6 5-6 5M37 24l-2 14" stroke="#9fd0ff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 52h56l-5 5H13l-5-5Z" fill="#6fb2ff"/></svg>',
+mq:'<svg class="dqn-ico k-mq" viewBox="0 0 72 72" fill="none"><path d="M36 14c-5-5-15-3-17 5-6 1-9 8-5 13-3 5 0 12 6 13 2 6 9 8 13 4 4 4 11 2 13-4 6-1 9-8 6-13 4-5 1-12-5-13-2-8-12-10-17-5Z" fill="#7fb4ff" stroke="#cfe3ff" stroke-width="2"/><path d="M36 18v34M26 28c4 0 6 3 10 3M46 28c-4 0-6 3-10 3M26 42c4 0 6-3 10-3M46 42c-4 0-6-3-10-3" stroke="#2a5cb8" stroke-width="2" stroke-linecap="round"/></svg>',
 gen:'<svg class="dqn-ico" viewBox="0 0 72 72" fill="none" stroke="#f2c14e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18h22a6 6 0 0 1 6 6v30a6 6 0 0 0-6-6H14V18ZM58 18H36"/><path d="M58 18v30H42"/></svg>'};
 var ARROW='<span class="dqn-go"><svg viewBox="0 0 16 16" fill="none" stroke="#1a1204" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>';
 var CAP='<svg class="dqn-cap" viewBox="0 0 48 48" fill="none"><path d="M24 8 3 18l21 10 21-10L24 8Z" fill="#f2c14e"/><path d="M11 24v9c0 3 6 6 13 6s13-3 13-6v-9l-13 6-13-6Z" fill="#c8921f"/><path d="M43 19v12" stroke="#f2c14e" stroke-width="2.5" stroke-linecap="round"/></svg>';
