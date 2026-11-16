@@ -9769,15 +9769,15 @@ if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boo
 /* Fənlər üzrə testlər — professional kart dizaynı */
 html body #v3-home [data-dqfen]{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:16px!important;overflow:visible!important;transform:none!important;scroll-snap-type:none!important;width:100%!important;max-width:100%!important}
 @media(max-width:820px){html body #v3-home [data-dqfen]{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}}
-html body #v3-home [data-dqfen]>[data-dqn]{position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:space-between!important;min-height:175px!important;width:auto!important;max-width:none!important;margin:0!important;padding:20px 12px 14px!important;border-radius:20px!important;overflow:hidden!important;color:#fff!important;text-align:center!important;cursor:pointer;background:radial-gradient(120% 100% at 50% 0%,#12306b,#0a1a40)!important;border:1px solid rgba(120,160,255,.28)!important;box-shadow:inset 0 0 30px rgba(80,130,255,.08),0 10px 26px rgba(0,0,0,.35)!important;transition:transform .2s,border-color .2s,box-shadow .2s}
+html body #v3-home [data-dqfen]>[data-dqn]{position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:space-between!important;min-height:210px!important;width:auto!important;max-width:none!important;margin:0!important;padding:20px 12px 14px!important;border-radius:20px!important;overflow:hidden!important;color:#fff!important;text-align:center!important;cursor:pointer;background:radial-gradient(130% 100% at 50% 0%,#1f4fb0,#0b1c4a 75%)!important;border:1px solid rgba(140,180,255,.5)!important;box-shadow:inset 0 0 40px rgba(90,140,255,.18),0 0 22px rgba(70,120,255,.18),0 10px 26px rgba(0,0,0,.4)!important;transition:transform .2s,border-color .2s,box-shadow .2s}
 html body #v3-home [data-dqfen]>[data-dqn]:before,html body #v3-home [data-dqfen]>[data-dqn]:after{display:none!important}
 html body #v3-home [data-dqfen]>[data-dqn]:hover{transform:translateY(-4px)!important;border-color:#f2c14e!important;box-shadow:0 14px 30px rgba(0,0,0,.45),0 0 0 1px #f2c14e!important}
 [data-dqn] .dqn-hide{display:none!important}
 [data-dqn] .dqn-path{display:contents!important}
 [data-dqn] .dqn-btn{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;opacity:0!important;z-index:5!important;cursor:pointer}
 .dqn-face{position:relative;z-index:1;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:space-between;flex:1;width:100%}
-.dqn-ico{width:70px;height:70px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
-.dqn-name{font:700 clamp(16px,2.6vw,19px)/1.25 "Segoe UI",system-ui,sans-serif;margin:10px 0 4px;color:#fff}
+.dqn-ico{width:92px;height:92px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
+.dqn-name{font:700 clamp(17px,2.8vw,21px)/1.25 "Segoe UI",system-ui,sans-serif;margin:10px 0 4px;color:#fff}
 .dqn-meta{font:500 12px/1.4 "Segoe UI",system-ui,sans-serif;color:#a9b6d6}
 .dqn-meta b{color:#f2c14e;font-weight:700}
 .dqn-meta{display:none!important}
@@ -9786,6 +9786,9 @@ html body #v3-home [data-dqfen]>[data-dqn]:hover{transform:translateY(-4px)!impo
 .dqn-go svg{width:14px;height:14px}
 .dqn-cap{display:inline-block;width:34px;height:34px;vertical-align:middle;margin-right:10px}
 @media(prefers-reduced-motion:reduce){[data-dqfen]>[data-dqn]{transition:none!important}}
+
+[data-dqfen]>[data-k="az"]{order:1}[data-dqfen]>[data-k="qa"]{order:2}[data-dqfen]>[data-k="inf"]{order:3}[data-dqfen]>[data-k="mq"]{order:4}
+@media(max-width:820px){.dqn-ico{width:78px;height:78px}html body #v3-home [data-dqfen]>[data-dqn]{min-height:185px!important}}
 /* canlı ikonlar */
 @keyframes dqFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes dqWave{0%,100%{transform:translateY(0) skewY(0) rotate(0)}25%{transform:translateY(-4px) skewY(-4deg) rotate(-2deg)}75%{transform:translateY(-4px) skewY(4deg) rotate(2deg)}}
@@ -9826,7 +9829,7 @@ function build(card){
  function mark(parent){[].forEach.call(parent.children,function(c){if(c.classList.contains("dqn-face"))return;if(path.indexOf(c)>-1){if(c===btn)c.classList.add("dqn-btn");else{c.classList.add("dqn-path");mark(c)}}else c.classList.add("dqn-hide")})}
  mark(card);
  var f=D.createElement("div");f.className="dqn-face";f.innerHTML=ICONS[k]+'<div><div class="dqn-name"></div><div class="dqn-meta"></div></div>'+ARROW;
- card.insertBefore(f,card.firstChild);card.setAttribute("data-dqn","1");
+ card.insertBefore(f,card.firstChild);card.setAttribute("data-dqn","1");card.setAttribute("data-k",k);
  /* alt-düymənin rəngli fonu/yazısı görünməsin */
  return f}
 function sync(card){var f=card.querySelector(":scope>.dqn-face");if(!f)return;var txt=origText(card);
