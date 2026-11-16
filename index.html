@@ -6407,7 +6407,7 @@ function run(){
  if(!ft)ft=makeFooter(h);
  else if(!shown(ft))force(ft,h);
  var st=h.querySelector("#dq-stats");
- if(!st&&window.__dqLive){}
+ if(window.__dqLive||D.getElementById("dq-why-stats")){}
  else if(!st){sTry++;
   if(sTry===1){try{if(window.DQST&&DQST.mount)DQST.mount(true)}catch(e){}}
   var h1=home();
@@ -9377,6 +9377,77 @@ function boot(){tidyAll();
  setInterval(function(){if(D.hidden)return;if(!placed())sched();else paint()},3000);
  setInterval(function(){if(!D.hidden)refresh()},60000);
  D.addEventListener("visibilitychange",function(){if(!D.hidden){refresh();if(!placed())sched()}})}
+if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
+})();
+</script>
+<script id="dq-stable-guard">
+/* STABİLLİK QORUYUCUSU: köhnə #dq-stats kartı (DQST.mount / foot-guard / heal tərəfindən yaradılan) artıq gizlədilmir, DOM-dan TAM silinir.
+   Beləliklə «gizlət ↔ göstər» davası və hər 3 san-dən bir olan aşağı-yuxarı sıçrayış mümkün deyil. */
+(function(){"use strict";
+var D=document,raf=0;
+function ready(){return !!D.getElementById("dq-why-stats")}
+function kill(){raf=0;
+ try{
+  var o=D.getElementById("dq-stats");
+  while(o){
+   var p=o.parentElement;o.remove();
+   if(p&&p.parentElement&&p.id!=="v3-home"&&!p.children.length&&!/\S/.test(p.textContent||"")&&p.parentElement.classList.contains("dq-why-grid"))p.remove();
+   o=D.getElementById("dq-stats")}
+ }catch(e){}}
+function sched(){if(!raf&&ready())raf=requestAnimationFrame(kill)}
+function patch(){
+ var S=window.DQST;if(!S||S.__stable||typeof S.mount!=="function")return false;
+ var m=S.mount;S.mount=function(){if(ready())return;return m.apply(this,arguments)};S.__stable=1;return true}
+function boot(){
+ patch();var n=0,iv=setInterval(function(){if(patch()||++n>60)clearInterval(iv)},500);
+ try{new MutationObserver(function(){if(D.getElementById("dq-stats"))sched()}).observe(D.body,{childList:true,subtree:true})}catch(e){}
+ setInterval(function(){if(!D.hidden)sched()},2000);kill()}
+if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
+})();
+</script>
+<style id="dq-stable-css">
+/* Sətir yerində qalır: scroll-anchoring və layout sıçrayışları söndürülür, statistika sırası öz yerini rezerv edir */
+#v3-home,.dq-why-grid,#dq-why-stats{overflow-anchor:none}
+#dq-why-stats{flex:none}
+.dq-why-grid>.dq-why-ghost,.dq-why-grid>:empty{display:none!important}
+</style>
+<style id="dq-fen-cover-css">
+/* «Fənlər üzrə testlər»: hər kartın yuxarısında professional qapaq şəkli */
+[data-dqgrid="fen"]>[data-dqcv]{position:relative!important;overflow:hidden!important;padding-top:132px!important}
+[data-dqgrid="fen"]>[data-dqcv]>.dqcv{position:absolute;left:0;right:0;top:0;height:112px;z-index:0;overflow:hidden;pointer-events:none;border-radius:inherit;border-bottom-left-radius:0;border-bottom-right-radius:0}
+.dqcv svg,.dqcv img{position:absolute;inset:0;width:100%;height:100%;display:block}
+.dqcv img{object-fit:cover}
+.dqcv:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,16,44,0) 35%,rgba(6,16,44,.78));box-shadow:inset 0 -1px 0 rgba(255,255,255,.12)}
+.dqcv i{position:absolute;left:14px;bottom:10px;z-index:2;font:800 11px/1 inherit;font-style:normal;letter-spacing:.14em;text-transform:uppercase;color:#f6d57a;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+[data-dqgrid="fen"]>[data-dqcv]>*:not(.dqcv){position:relative;z-index:1}
+@media(max-width:600px){[data-dqgrid="fen"]>[data-dqcv]{padding-top:104px!important}.dqcv{height:86px!important}.dqcv i{font-size:9.5px;left:10px;bottom:8px}}
+</style>
+<script id="dq-fen-cover-js">
+/* Qapaq şəkilləri: əvvəl admin-in yüklədiyi şəkil (window.DQFenCovers və ya localStorage "dq_fen_covers": {mentiq:url,...}), yoxdursa daxili vektor qapaq. */
+(function(){"use strict";var D=document,tm=0;
+function key(t){t=String(t||"").toLowerCase().replace(/ə/g,"e").replace(/ı/g,"i").replace(/ü/g,"u").replace(/ö/g,"o").replace(/ş/g,"s").replace(/ç/g,"c").replace(/ğ/g,"g");
+ if(/mentiq/.test(t))return"mentiq";if(/informatika/.test(t))return"informatika";if(/azerbaycan/.test(t))return"dil";if(/qanunvericilik/.test(t))return"qanun";return"x"}
+var TH={mentiq:["#1d4ed8","#0b1d52","Məntiq"],informatika:["#d9a441","#3a2605","İnformatika"],dil:["#10b981","#032a24","Azərbaycan dili"],qanun:["#7c3aed","#1a0f45","Qanunvericilik"],x:["#3b82f6","#0b1d52","Fənn"]};
+var ART={
+mentiq:'<circle cx="250" cy="52" r="46" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="2"/><circle cx="250" cy="52" r="30" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="2"/><circle cx="250" cy="52" r="14" fill="#fff" fill-opacity=".35"/><path d="M40 78l40-26 36 18 48-40" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="2.5" stroke-linecap="round"/><g fill="#fff" fill-opacity=".6"><circle cx="40" cy="78" r="4"/><circle cx="80" cy="52" r="4"/><circle cx="116" cy="70" r="4"/><circle cx="164" cy="30" r="4"/></g>',
+informatika:'<rect x="190" y="18" width="110" height="68" rx="8" fill="#fff" fill-opacity=".14" stroke="#fff" stroke-opacity=".4" stroke-width="2"/><path d="M222 42l-14 12 14 12M268 42l14 12-14 12M251 38l-8 32" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M30 30h60M30 48h96M30 66h44" stroke="#fff" stroke-opacity=".25" stroke-width="4" stroke-linecap="round"/>',
+dil:'<path d="M250 30c-18-12-42-14-66-8v60c24-6 48-4 66 8 18-12 42-14 66-8V22c-24-6-48-4-66 8zM250 30v60" fill="#fff" fill-opacity=".14" stroke="#fff" stroke-opacity=".5" stroke-width="2.5" stroke-linejoin="round"/><path d="M200 40c14-3 28-2 40 3M200 54c14-3 28-2 40 3M262 43c12-5 26-6 40-3M262 57c12-5 26-6 40-3" stroke="#fff" stroke-opacity=".3" stroke-width="2" fill="none" stroke-linecap="round"/><text x="36" y="76" font-size="46" font-weight="800" fill="#fff" fill-opacity=".16" font-family="serif">Əə</text>',
+qanun:'<path d="M250 18v70M222 88h56M250 26l-52 12M250 26l52 12" stroke="#fff" stroke-opacity=".6" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M198 38l-22 34h44zM302 38l-22 34h44z" fill="#fff" fill-opacity=".16" stroke="#fff" stroke-opacity=".5" stroke-width="2" stroke-linejoin="round"/><path d="M176 72a22 9 0 0 0 44 0M280 72a22 9 0 0 0 44 0" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="2"/><text x="36" y="78" font-size="44" font-weight="800" fill="#fff" fill-opacity=".14" font-family="serif">§</text>',
+x:'<circle cx="250" cy="52" r="34" fill="#fff" fill-opacity=".15"/>'};
+function covers(){var m={};try{m=JSON.parse(localStorage.getItem("dq_fen_covers")||"{}")||{}}catch(e){}
+ try{var w=window.DQFenCovers;if(w)for(var k in w)m[k]=w[k]}catch(e){}return m}
+function esc(x){return String(x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function make(k,label,url,id){var t=TH[k]||TH.x,e=D.createElement("div");e.className="dqcv";e.setAttribute("aria-hidden","true");
+ if(url){e.innerHTML='<img alt="" loading="lazy" decoding="async" src="'+esc(url)+'"><i>'+esc(label)+'</i>';return e}
+ e.innerHTML='<svg viewBox="0 0 340 112" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="dqg'+id+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+t[0]+'"/><stop offset="1" stop-color="'+t[1]+'"/></linearGradient><pattern id="dqp'+id+'" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M22 0H0V22" fill="none" stroke="#fff" stroke-opacity=".06"/></pattern></defs><rect width="340" height="112" fill="url(#dqg'+id+')"/><rect width="340" height="112" fill="url(#dqp'+id+')"/>'+(ART[k]||ART.x)+'</svg><i>'+esc(label)+'</i>';return e}
+function run(){tm=0;try{var g=D.querySelector('[data-dqgrid="fen"]');if(!g)return;var m=covers(),n=0;
+ [].forEach.call(g.children,function(c){if(c.tagName==="STYLE"||c.tagName==="SCRIPT"||c.hasAttribute("data-dqcv"))return;
+  var k=key(c.textContent),t=TH[k]||TH.x;n++;
+  c.setAttribute("data-dqcv",k);c.insertBefore(make(k,t[2],m[k],k+n+Math.floor(Math.random()*1e4)),c.firstChild)})}catch(e){}}
+function sched(){if(!tm)tm=setTimeout(run,120)}
+function boot(){run();var h=D.getElementById("v3-home");
+ if(h)try{new MutationObserver(function(r){for(var i=0;i<r.length;i++){var t=r[i].target;if(!(t.closest&&t.closest(".dqcv"))){sched();return}}}).observe(h,{childList:true,subtree:true})}catch(e){}
+ [600,1500,3000,6000].forEach(function(t){setTimeout(run,t)})}
 if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
 })();
 </script>
