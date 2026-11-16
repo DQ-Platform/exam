@@ -9446,5 +9446,53 @@ function boot(){run();var h=D.getElementById("v3-home");if(h)try{new MutationObs
 if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
 })();
 </script>
+<style id="dq-duo-fix-css">
+/* Yeniliklər | Aktiv sınaqlar: həmişə yan-yana (dar ekranda alt-alta), sürüşən slaydlar səbəbindən aşağıdakı bölmələr atılmır */
+[data-dqduo]{display:grid!important;grid-template-columns:minmax(0,1fr);gap:20px;width:100%;max-width:100%;margin:18px 0 8px!important;padding:0!important;align-items:stretch;overflow-anchor:none}
+@media(min-width:900px){[data-dqduo]{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:899px){[data-dqduo]>[data-dqp="ex"]{order:-1}}
+[data-dqduo]>[data-dqp]{width:auto!important;max-width:none!important;min-width:0!important;margin:0!important;height:auto;box-sizing:border-box}
+[data-dqduo]>[data-dqp]{overflow-anchor:none}
+.dq-why-grid{overflow-anchor:none}
+</style>
+<script id="dq-duo-fix-js">
+(function(){"use strict";var D=document,W=window,tm=0,busy=false,PN=null,PE=null,mn=0,me=0;
+var TN="Yeniliklər",HN="Ən son xəbərlər",TE="Aktiv sınaqlar və mövzu testləri",HE="Sınağa qoşul";
+function norm(s){return String(s||"").replace(/\s+/g," ").trim()}
+function findHead(txt,hint){var root=D.getElementById("v3-home")||D.body,w=D.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),n;
+ while((n=w.nextNode())){if(norm(n.nodeValue)!==txt)continue;var el=n.parentElement;if(!el)continue;
+  var par=el.parentElement||el;if(norm(par.textContent).indexOf(hint)<0)continue;return el}
+ return null}
+function top(h,other){var e=h;while(e.parentElement&&!e.parentElement.contains(other))e=e.parentElement;return e}
+function okPair(){return PN&&PE&&PN.isConnected&&PE.isConnected&&PN.parentElement&&PN.parentElement===PE.parentElement&&PN.parentElement.hasAttribute("data-dqduo")}
+function clean(){[].forEach.call(D.querySelectorAll('[data-dqmine]'),function(w){if(!w.querySelector("[data-dqp]"))w.remove()})}
+function apply(){tm=0;if(busy)return;busy=true;try{
+ if(okPair()){ratchet();return}
+ var hn=findHead(TN,HN),he=findHead(TE,HE);if(!hn||!he)return;
+ var pn=top(hn,he),pe=top(he,hn);if(!pn||!pe||pn.parentElement!==pe.parentElement)return;
+ var tx=pn.textContent+" "+pe.textContent;if(/Fənlər üzrə testlər|Niyə məhz/.test(tx))return;
+ var par=pn.parentElement,kids=[].filter.call(par.children,function(c){return !/^(STYLE|SCRIPT)$/.test(c.tagName)});
+ var wrap;
+ if(par.hasAttribute("data-dqduo"))wrap=par;
+ else if(kids.length===2&&par.id!=="v3-home"&&par.tagName!=="BODY")wrap=par;
+ else{wrap=D.createElement("div");wrap.setAttribute("data-dqmine","1");par.insertBefore(wrap,(pn.compareDocumentPosition(pe)&4)?pn:pe)}
+ wrap.setAttribute("data-dqduo","1");pn.setAttribute("data-dqp","news");pe.setAttribute("data-dqp","ex");
+ if(pn.parentElement!==wrap)wrap.appendChild(pn);if(pe.parentElement!==wrap)wrap.appendChild(pe);
+ if(pn.compareDocumentPosition(pe)&2)wrap.insertBefore(pn,pe);
+ PN=pn;PE=pe;mn=me=0;clean();ratchet()
+}catch(e){}finally{busy=false}}
+/* hündürlük yalnız artır, heç vaxt azalmır → slayd dəyişəndə aşağıdakı bölmələr yuxarı-aşağı atılmır */
+function ratchet(){if(!PN||!PE)return;var a=PN.offsetHeight,b=PE.offsetHeight;
+ if(a>mn&&a<1100){mn=a;PN.style.minHeight=mn+"px"}
+ if(b>me&&b<1100){me=b;PE.style.minHeight=me+"px"}}
+function sched(){if(!tm)tm=setTimeout(apply,200)}
+var rt=0;W.addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(function(){mn=me=0;if(PN)PN.style.minHeight="";if(PE)PE.style.minHeight="";sched()},350)},{passive:true});
+function boot(){apply();var h=D.getElementById("v3-home");
+ if(h)try{new MutationObserver(function(){if(!okPair())sched()}).observe(h,{childList:true,subtree:true})}catch(e){}
+ [500,1500,3000,6000,10000].forEach(function(t){setTimeout(sched,t)});
+ setInterval(function(){if(D.hidden)return;if(okPair())ratchet();else sched()},1500)}
+if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
+})();
+</script>
 </body>
 </html>
