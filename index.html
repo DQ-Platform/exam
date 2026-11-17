@@ -9789,6 +9789,7 @@ html body #v3-home [data-dqfen]>[data-dqn]:hover{transform:translateY(-4px)!impo
 
 [data-dqfen]>[data-k="az"]{order:1}[data-dqfen]>[data-k="qa"]{order:2}[data-dqfen]>[data-k="inf"]{order:3}[data-dqfen]>[data-k="mq"]{order:4}
 @media(max-width:820px){.dqn-ico{width:78px;height:78px}html body #v3-home [data-dqfen]>[data-dqn]{min-height:185px!important}}
+.dqn-news{display:inline-block;width:34px;height:34px;vertical-align:middle;margin-right:10px;overflow:visible}
 /* canlı ikonlar */
 @keyframes dqFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes dqWave{0%,100%{transform:translateY(0) skewY(0) rotate(0)}25%{transform:translateY(-4px) skewY(-4deg) rotate(-2deg)}75%{transform:translateY(-4px) skewY(4deg) rotate(2deg)}}
@@ -9833,7 +9834,7 @@ function build(card){
  function mark(parent){[].forEach.call(parent.children,function(c){if(c.classList.contains("dqn-face"))return;if(path.indexOf(c)>-1){if(c===btn)c.classList.add("dqn-btn");else{c.classList.add("dqn-path");mark(c)}}else c.classList.add("dqn-hide")})}
  mark(card);
  var f=D.createElement("div");f.className="dqn-face";f.innerHTML=ICONS[k]+'<div><div class="dqn-name"></div><div class="dqn-meta"></div></div>'+ARROW;
- card.insertBefore(f,card.firstChild);card.setAttribute("data-dqn","1");card.setAttribute("data-k",k);
+ card.insertBefore(f,card.firstChild);live(f.firstChild,k);card.setAttribute("data-dqn","1");card.setAttribute("data-k",k);
  /* alt-düymənin rəngli fonu/yazısı görünməsin */
  return f}
 function sync(card){var f=card.querySelector(":scope>.dqn-face");if(!f)return;var txt=origText(card);
@@ -9845,6 +9846,7 @@ function sync(card){var f=card.querySelector(":scope>.dqn-face");if(!f)return;va
 function head(){var h=D.getElementById("v3-home");if(!h)return;var w=D.createTreeWalker(h,NodeFilter.SHOW_TEXT,null),n;
  while((n=w.nextNode())){var v=norm(n.nodeValue);
   if(v==="Fənlər üzrə testlər"){var el=n.parentElement;if(el&&!el.querySelector(".dqn-cap"))el.insertAdjacentHTML("afterbegin",CAP)}
+  else if(v==="Yeniliklər"){var el2=n.parentElement;if(el2&&/Ən son xəbərlər/.test((el2.parentElement||{}).textContent||"")&&!el2.querySelector(".dqn-news"))el2.insertAdjacentHTML("afterbegin",NEWS)}
   else if(/^Fənni seç, bilik səviyyəni yoxla və hazırlığını gücləndir!?$/.test(v)){n.nodeValue="Fənni seç, bilik səviyyəni yoxla və hazırlığını gücləndir"}}}
 function okCard(c){return !/^(STYLE|SCRIPT)$/.test(c.tagName)&&c.querySelector&&c.querySelector("button,a")&&kind(origText(c))!=="gen"}
 function findHead(h){var w=D.createTreeWalker(h,NodeFilter.SHOW_TEXT,null),n;while((n=w.nextNode())){if(norm(n.nodeValue)==="Fənlər üzrə testlər")return n.parentElement}return null}
@@ -9858,9 +9860,39 @@ function findGrid(){var h=D.getElementById("v3-home");if(!h)return null;
  var hd=findHead(h);if(!hd)return null;
  for(var c=hd.parentElement,up=0;c&&c!==h&&up<7;c=c.parentElement,up++){var g=groupIn(c);if(g)return g}
  return null}
+
+var NEWS='<svg class="dqn-news" viewBox="0 0 48 48" fill="none"><path d="M8 20v8a2 2 0 0 0 2 2h6l14 8V10l-14 8h-6a2 2 0 0 0-2 2Z" fill="#f2c14e"/><path d="M14 30l2 9h5l-2-9" fill="#c8921f"/><path class="w1" d="M35 18a8 8 0 0 1 0 12" stroke="#f2c14e" stroke-width="3" stroke-linecap="round"/><path class="w2" d="M40 13a15 15 0 0 1 0 22" stroke="#f2c14e" stroke-width="3" stroke-linecap="round"/></svg>';
+var RM=false;try{RM=matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){}
+var GG=["drop-shadow(0 6px 10px rgba(0,0,0,.45)) drop-shadow(0 0 0 rgba(242,193,78,0))","drop-shadow(0 8px 12px rgba(0,0,0,.4)) drop-shadow(0 0 14px rgba(242,193,78,.75))"];
+var GB=["drop-shadow(0 6px 10px rgba(0,0,0,.45)) drop-shadow(0 0 0 rgba(111,178,255,0))","drop-shadow(0 8px 12px rgba(0,0,0,.4)) drop-shadow(0 0 14px rgba(111,178,255,.85))"];
+function an(el,kf,d,delay){try{return el.animate(kf,{duration:d,iterations:Infinity,easing:"ease-in-out",delay:delay||0})}catch(e){}}
+function glow(el,g,d,delay){an(el,[{filter:g[0]},{filter:g[1]},{filter:g[0]}],d,delay)}
+function live(svg,k){if(!svg||svg._dqa||!svg.animate)return;svg._dqa=1;
+ if(k==="az"){svg.style.transformOrigin="20% 55%";if(!RM)an(svg,[{transform:"translateY(0) skewY(0deg) rotate(0deg)"},{transform:"translateY(-4px) skewY(-4deg) rotate(-2deg)"},{transform:"translateY(0) skewY(0deg) rotate(0deg)"},{transform:"translateY(-4px) skewY(4deg) rotate(2deg)"},{transform:"translateY(0) skewY(0deg) rotate(0deg)"}],3200);glow(svg,GG,3200)}
+ else if(k==="qa"){svg.style.transformOrigin="50% 18%";if(!RM)an(svg,[{transform:"rotate(-7deg)"},{transform:"rotate(7deg)"},{transform:"rotate(-7deg)"}],3400);glow(svg,GG,3400)}
+ else if(k==="inf"){if(!RM)an(svg,[{transform:"translateY(0)"},{transform:"translateY(-6px)"},{transform:"translateY(0)"}],3600,-1000);glow(svg,GB,3600);var pa=svg.querySelector("path");if(pa&&!RM)an(pa,[{opacity:.25},{opacity:1},{opacity:.25}],1600)}
+ else if(k==="mq"){if(!RM)an(svg,[{transform:"scale(1)"},{transform:"scale(1.09)",offset:.15},{transform:"scale(1)",offset:.3},{transform:"scale(1.06)",offset:.45},{transform:"scale(1)",offset:.6},{transform:"scale(1)"}],2800);glow(svg,GB,2800,-600)}}
+function liveNews(svg){if(!svg||svg._dqa||!svg.animate)return;svg._dqa=1;svg.style.transformOrigin="30% 60%";
+ if(!RM)an(svg,[{transform:"rotate(-9deg)"},{transform:"rotate(7deg)"},{transform:"rotate(-9deg)"}],1800);
+ var a=svg.querySelector(".w1"),b=svg.querySelector(".w2");
+ if(a)an(a,[{opacity:.15},{opacity:1},{opacity:.15}],1400);if(b)an(b,[{opacity:.1},{opacity:1},{opacity:.1}],1400,-700)}
+function num(el){var m=/^(\d+)(\+?)$/.exec(norm(el.textContent));return m?{n:+m[1],s:m[2]}:null}
+function count(el,from,to,suf){if(el._dqr)cancelAnimationFrame(el._dqr);el._dqm=1;var t0=null,d=1700;
+ function f(t){if(t0===null)t0=t;var x=Math.min(1,(t-t0)/d),e=1-Math.pow(1-x,3);el.textContent=Math.round(from+(to-from)*e)+suf;
+  if(x<1)el._dqr=requestAnimationFrame(f);else{el._dqr=0;el._dqm=0;el.setAttribute("data-dq-done",el.textContent)}}
+ el._dqr=requestAnimationFrame(f)}
+function counters(){var h=D.getElementById("v3-home");if(!h)return;var w=D.createTreeWalker(h,NodeFilter.SHOW_TEXT,null),n,labs=[];
+ while((n=w.nextNode())){var v=norm(n.nodeValue);if(v==="İstifadəçi sayı"||v==="İmtahan sayı"||v==="Sınaq sayı"||v==="Sual sayı")labs.push(n.parentElement)}
+ labs.forEach(function(L){var N=L.previousElementSibling;if(!N||!num(N)){var up=L.parentElement;N=null;if(up){var cs=up.querySelectorAll("*");for(var i=0;i<cs.length;i++){if(cs[i]!==L&&!cs[i].children.length&&num(cs[i])){N=cs[i];break}}}}
+  if(!N||N._dqm)return;var cur=norm(N.textContent);if(cur===N.getAttribute("data-dq-done"))return;var o=num(N);if(!o)return;
+  if(RM){N.setAttribute("data-dq-done",cur);return}
+  if(o.n===0){N.setAttribute("data-dq-done",cur);return}
+  N.setAttribute("data-dq-done","x");N.textContent="0"+o.s;
+  var go=function(){count(N,0,o.n,o.s)};
+  if("IntersectionObserver" in window){var io=new IntersectionObserver(function(es){if(es[0].isIntersecting){io.disconnect();go()}},{threshold:.4});io.observe(N)}else go()})}
 function run(){tm=0;if(busy)return;busy=true;try{
  var g=findGrid();if(g){g.setAttribute("data-dqfen","1");[].forEach.call(g.children,function(c){if(!okCard(c)&&!c.hasAttribute("data-dqn"))return;if(!c.hasAttribute("data-dqn"))build(c);sync(c)})}
- head()}catch(e){}finally{busy=false}}
+ head();D.querySelectorAll("#v3-home .dqn-news").forEach(liveNews);counters()}catch(e){}finally{busy=false}}
 function sched(){if(!tm)tm=setTimeout(run,300)}
 function boot(){run();var h=D.getElementById("v3-home");if(h)try{new MutationObserver(function(m){if(!busy)sched()}).observe(h,{childList:true,subtree:true,characterData:true})}catch(e){}
  [900,2200,5000].forEach(function(t){setTimeout(run,t)})}
