@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>DQ Platform — PDF studiyası</title>
+<style>
+:root{--bg:#050a1a;--card:#0b1c4a;--line:rgba(140,180,255,.35);--gold:#f2c14e;--gold2:#c8921f;--muted:#a9b6d6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:inherit}
+body{margin:0;min-height:100vh;background:radial-gradient(120% 70% at 50% 0%,#14307a,var(--bg) 62%);color:#fff;font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:16px}
+.wrap{max-width:620px;margin:0 auto}
+h1{margin:6px 0 2px;font-size:23px}h1 span{color:var(--gold)}
+.lead{margin:0 0 14px;color:var(--muted);font-size:14px}
+.cd{background:linear-gradient(160deg,#12306b,var(--card));border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.cd h2{margin:0 0 10px;font-size:16px;color:var(--gold)}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input[type=text],input[type=password],input[type=number],input[type=url]{width:100%;background:#10275f;color:#fff;border:1px solid #3a56a0;border-radius:12px;padding:11px;font:inherit}
+input:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button,.btn{font:inherit;cursor:pointer;border-radius:12px;padding:12px 16px;border:1px solid #6b7fb0;background:none;color:#fff;font-weight:600;text-decoration:none;display:inline-block;text-align:center}
+.pri{background:linear-gradient(145deg,var(--gold),var(--gold2));border:0;color:#1a1204;font-weight:700;width:100%;margin-top:14px}
+button[disabled]{opacity:.55;cursor:not-allowed}
+.drop{display:block;border:2px dashed #5b78c7;border-radius:16px;padding:22px 12px;text-align:center;cursor:pointer;color:var(--muted);background:rgba(16,39,95,.5)}
+.drop.on,.drop:hover{border-color:var(--gold);color:#fff}.drop input{display:none}.drop b{color:#fff;display:block;font-size:16px;margin-bottom:4px}
+#fname{color:#fff;margin-top:8px;word-break:break-all;font-size:14px}
+.msg{min-height:18px;margin-top:8px;font-size:13px}.msg.er{color:#ff9b9b}.msg.ok{color:#6ee7a0}
+.presets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ps{padding:8px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px}.ps canvas{width:100%;height:auto;border-radius:6px;border:1px solid rgba(255,255,255,.2)}.ps.on{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}.seg label{margin:0;border:1px solid #6b7fb0;border-radius:12px;padding:11px;text-align:center;color:#fff;cursor:pointer;font-weight:600}.seg input{position:absolute;opacity:0;pointer-events:none}.seg input:checked+span{color:var(--gold)}.seg label:has(input:checked){border-color:var(--gold);background:rgba(242,193,78,.12)}.seg label:has(input:focus-visible){outline:2px solid var(--gold)}
+.chk{display:flex;gap:10px;align-items:center;margin:8px 0;color:#fff;font-size:14px}.chk input{width:18px;height:18px}
+input[type=range]{width:100%;accent-color:var(--gold)}
+.pvw{display:flex;justify-content:center}canvas#cv{width:min(100%,360px);height:auto;border-radius:8px;border:1px solid rgba(255,255,255,.25);box-shadow:0 10px 30px rgba(0,0,0,.5);background:#fff}
+progress{width:100%;height:10px;accent-color:var(--gold)}#pbox{margin-top:12px}#pbox[hidden],#result[hidden],#hashbox[hidden]{display:none}
+.hash{word-break:break-all;background:#071238;border:1px dashed #3a56a0;border-radius:10px;padding:8px;font:12px/1.4 ui-monospace,monospace;color:#cfe0ff}
+.li{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid rgba(255,255,255,.1)}.li:first-child{border-top:0}
+.th{width:44px;height:62px;object-fit:cover;border-radius:5px;border:1px solid rgba(255,255,255,.25);flex:none;background:#10275f}.th[hidden]{display:block;visibility:hidden}
+.lf{flex:1;min-width:0}.lt{font-weight:700;word-break:break-word}.lm{font-size:12px;color:var(--muted)}.la{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.sm{padding:7px 12px;font-size:13px;border-radius:9px}.dg{border-color:#c46a6a;color:#ffb4b4}
+.muted{color:var(--muted);font-size:14px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}.top a{color:var(--muted);font-size:13px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="top"><h1>📄 <span>PDF</span> studiyası</h1><a href="/">← Ana səhifə</a></div>
+
+ <section id="gate" class="cd">
+  <p class="lead">Admin girişi. PIN «Elan idarəetməsi» ilə eynidir.</p>
+  <form id="f-setup" hidden autocomplete="off" novalidate>
+   <p class="lead">İlk giriş: PIN təyin edin (ən azı 6 simvol).</p>
+   <label for="p1">Yeni PIN</label><input id="p1" type="password" autocomplete="new-password">
+   <label for="p2">PIN təkrar</label><input id="p2" type="password" autocomplete="new-password">
+   <button class="pri" type="submit">PIN-i təyin et</button><div class="msg" id="m-setup" role="alert"></div>
+   <div id="hashbox" hidden><p class="lead">Başqa cihazlarda da işləməsi üçün bu sətri faylda <b>PIN_HASH</b> dəyişəninə yapışdırın:</p><div class="hash" id="hashval"></div>
+    <button id="copyhash" type="button" style="margin-top:8px">Kopyala</button> <button id="go1" class="pri" type="button">Davam et</button></div>
+  </form>
+  <form id="f-login" hidden autocomplete="off" novalidate>
+   <label for="pin">PIN</label><input id="pin" type="password" autocomplete="current-password">
+   <button class="pri" type="submit">Daxil ol</button><div class="msg" id="m-login" role="alert"></div>
+  </form>
+ </section>
+
+ <div id="app" hidden>
+  <p class="lead">PDF yükləyin, qapaq şəkli yaradın və daimi baxış linki alın.</p>
+
+  <section class="cd"><h2>1. PDF faylı</h2>
+   <label class="drop" id="drop" for="file"><b>PDF seçin və ya buraya atın</b>maks. 30 MB<input id="file" type="file" accept="application/pdf,.pdf"></label>
+   <div id="fname"></div><div class="msg" id="m-file" role="status"></div>
+  </section>
+
+  <section class="cd"><h2>2. Qapaq məlumatları</h2>
+   <label for="title">Başlıq</label><input id="title" type="text" maxlength="90" placeholder="Sınaq 1">
+   <div class="row"><div><label for="sub">Alt başlıq / kateqoriya</label><input id="sub" type="text" maxlength="60" placeholder="BA kateqoriyası"></div>
+   <div><label for="count">Sual sayı</label><input id="count" type="number" min="0" max="999" placeholder="80"></div></div>
+   <label for="label">Üst etiket</label><input id="label" type="text" maxlength="50" value="DQPLATFORM · SINAQ MATERİALI">
+   <div class="row"><div><label for="phone">Telefon</label><input id="phone" type="text" maxlength="30" value="0504305162"></div>
+   <div><label for="byline">İmza</label><input id="byline" type="text" maxlength="40" value="By Yunis İmanov"></div></div>
+   <label for="brand">Brend sətri</label><input id="brand" type="text" maxlength="50" value="DQplatform | Dövlət Qulluğu">
+  </section>
+
+  <section class="cd"><h2>3. Fon dizaynı</h2><div class="presets" id="presets"></div></section>
+
+  <section class="cd"><h2>4. Su nişanı</h2>
+   <div class="seg" role="radiogroup" aria-label="Su nişanı">
+    <label><input type="radio" name="wm" id="wm1" checked><span>Əlavə et</span></label>
+    <label><input type="radio" name="wm" id="wm0"><span>Əlavə etmə</span></label></div>
+   <div id="wmbox">
+    <div class="row"><div><label for="wmt1">Əsas yazı</label><input id="wmt1" type="text" maxlength="30" value="DQplatform"></div>
+    <div><label for="wmt2">Alt yazı</label><input id="wmt2" type="text" maxlength="40" value="By Yunis İmanov"></div></div>
+    <label for="wmop">Şəffaflıq: <b id="wmopv">12%</b></label><input id="wmop" type="range" min="5" max="35" value="12">
+    <div class="chk"><input type="checkbox" id="wmc" checked><label for="wmc" style="margin:0;color:#fff">Qapaq şəklində göstər</label></div>
+    <div class="chk"><input type="checkbox" id="wmp" checked><label for="wmp" style="margin:0;color:#fff">PDF-in bütün səhifələrinə əlavə et</label></div>
+   </div>
+  </section>
+
+  <section class="cd"><h2>Qapaq önbaxışı</h2>
+   <div class="pvw"><canvas id="cv" aria-label="Qapaq önbaxışı"></canvas></div>
+   <button id="dlcover" type="button" style="width:100%;margin-top:12px">⬇ Qapaq şəklini yüklə (PNG)</button>
+  </section>
+
+  <section class="cd"><h2>5. Yayımla</h2>
+   <button id="pub" class="pri" type="button" disabled style="margin-top:0">PDF-i yayımla və link al</button>
+   <div id="pbox" hidden><progress id="prog" max="100" value="0"></progress><div class="muted" id="pgt"></div></div>
+   <div class="msg" id="m-pub" role="alert"></div>
+   <div id="result" hidden>
+    <label for="link">Daimi link</label><input id="link" type="url" readonly>
+    <div class="row" style="margin-top:10px"><button id="copylink" type="button">⧉ Kopyala</button><a id="open" class="btn" href="#" target="_blank" rel="noopener">Aç ↗</a></div>
+   </div>
+  </section>
+
+  <section class="cd"><h2>Yayımlananlar</h2><div id="list"><p class="muted">Yüklənir…</p></div></section>
+  <button id="lock" type="button" style="width:100%;margin:6px 0 26px">Çıxış</button>
+ </div>
+</div>
+<script>
+var SU="https://cpzwliqlgaplroscvduo.supabase.co",SK="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF",TB="/rest/v1/dq_v2_store";
+var COLD="pdfdocs",COLC="pdfchunks",COLV="pdfcovers",CHUNK=450000;
+var D=document,W=window;
+function $(i){return D.getElementById(i)}
+function norm(s){return String(s==null?"":s).replace(/\s+/g," ").trim()}
+function req(method,path,body,ms){return new Promise(function(ok){var done=0,ac=W.AbortController?new AbortController():null,t=setTimeout(function(){if(!done){done=1;try{ac&&ac.abort()}catch(e){}ok({ok:false,status:0,err:"timeout"})}},ms||20000);
+ fetch(SU+TB+path,{method:method,headers:{apikey:SK,Authorization:"Bearer "+SK,"Content-Type":"application/json",Prefer:"return=representation"},body:body?JSON.stringify(body):undefined,signal:ac?ac.signal:undefined}).then(function(r){return r.text().then(function(tx){if(done)return;done=1;clearTimeout(t);var j=null;try{j=tx?JSON.parse(tx):null}catch(e){}ok({ok:r.ok,status:r.status,json:j})})},function(e){if(done)return;done=1;clearTimeout(t);ok({ok:false,status:0,err:String(e&&e.message||e)})})})}
+function newId(){var al="abcdefghjkmnpqrstuvwxyz23456789",a=new Uint8Array(10),s="";crypto.getRandomValues(a);for(var i=0;i<a.length;i++)s+=al.charAt(a[i]%al.length);return s}
+function toB64(u8){var s="",C=0x8000;for(var i=0;i<u8.length;i+=C)s+=String.fromCharCode.apply(null,u8.subarray(i,i+C));return btoa(s)}
+function fromB64(b){var s=atob(b),u=new Uint8Array(s.length);for(var i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u}
+function loadScript(url){return new Promise(function(ok,no){var s=D.createElement("script");s.src=url;s.async=true;s.onload=ok;s.onerror=function(){no(new Error("Kitabxana yüklənmədi: "+url))};D.head.appendChild(s)})}
+var _libs={};
+function lib(name){if(_libs[name])return _libs[name];var urls={pdflib:["https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js",function(){return W.PDFLib}],pdfjs:["https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",function(){var p=W.pdfjsLib;if(p&&p.GlobalWorkerOptions&&!p.GlobalWorkerOptions.workerSrc)p.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";return p}]}[name];
+ return _libs[name]=(urls[1]()?Promise.resolve(urls[1]()):loadScript(urls[0]).then(function(){return urls[1]()})).catch(function(e){delete _libs[name];throw e})}
+function fmtSize(n){return n>=1048576?(n/1048576).toFixed(1)+" MB":Math.max(1,Math.round(n/1024))+" KB"}
+function fmtDate(t){try{return new Date(t).toLocaleDateString("az-AZ",{day:"2-digit",month:"2-digit",year:"numeric"})}catch(e){return""}}
+function copyText(t,btn,label){function done(){if(btn){var o=label||btn.textContent;btn.textContent="Kopyalandı ✓";setTimeout(function(){btn.textContent=o},1800)}}
+ try{navigator.clipboard.writeText(t).then(done,function(){prompt("Kopyalayın:",t)})}catch(e){prompt("Kopyalayın:",t)}}
+function viewerUrl(id){return new URL("pdf.html?id="+encodeURIComponent(id),location.href).href}
+function q(s){return encodeURIComponent(s)}
+
+(function(){"use strict";
+/* ---------- PIN (elan-idareetme ilə eyni açar) ---------- */
+var PIN_HASH="";/* PIN təyin edəndən sonra ekranda göstərilən sətri bura yapışdırın */
+var SKP="dq_elan_pin",SSO="dq_elan_ok",SFK="dq_elan_fail";
+function sha(s){var u=new TextEncoder().encode("dq-elan|"+s);return crypto.subtle.digest("SHA-256",u).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return("0"+x.toString(16)).slice(-2)}).join("")})}
+function stored(){try{return PIN_HASH||localStorage.getItem(SKP)||""}catch(e){return PIN_HASH}}
+function showG(id){["f-setup","f-login"].forEach(function(x){$(x).hidden=x!==id});var f=D.querySelector("#"+id+" input");if(f)f.focus()}
+function unlock(){try{sessionStorage.setItem(SSO,"1")}catch(e){}$("gate").hidden=true;$("app").hidden=false;boot()}
+function gate(){if(!(W.crypto&&crypto.subtle)){showG("f-login");$("m-login").className="msg er";$("m-login").textContent="Bu səhifə yalnız təhlükəsiz (https) ünvanda işləyir.";$("pin").disabled=true;return}
+ if(!stored()){showG("f-setup");return}var ok="";try{ok=sessionStorage.getItem(SSO)}catch(e){}if(ok==="1")unlock();else showG("f-login")}
+$("f-setup").addEventListener("submit",function(e){e.preventDefault();var a=$("p1").value,b=$("p2").value,m=$("m-setup");m.className="msg er";if(a.length<6){m.textContent="PIN ən azı 6 simvol olmalıdır.";return}if(a!==b){m.textContent="PIN-lər üst-üstə düşmür.";return}
+ sha(a).then(function(h){try{localStorage.setItem(SKP,h)}catch(x){}$("hashval").textContent=h;$("hashbox").hidden=false;m.className="msg ok";m.textContent="PIN təyin edildi ✓";[].forEach.call(D.querySelectorAll("#f-setup input,#f-setup button[type=submit]"),function(x){x.disabled=true})})});
+$("copyhash").onclick=function(){copyText($("hashval").textContent,$("copyhash"))};$("go1").onclick=unlock;
+$("f-login").addEventListener("submit",function(e){e.preventDefault();var m=$("m-login"),now=Date.now(),f={n:0,t:0};try{f=JSON.parse(localStorage.getItem(SFK)||"null")||f}catch(x){}
+ if(!$("pin").value){m.className="msg er";m.textContent="PIN yazın.";return}if(f.t>now){m.className="msg er";m.textContent="Çox cəhd. "+Math.ceil((f.t-now)/1000)+" san. gözləyin.";return}
+ sha($("pin").value).then(function(h){if(h===stored()){try{localStorage.removeItem(SFK)}catch(x){}unlock()}else{f.n=(f.n||0)+1;if(f.n>=5){f.t=now+60000;f.n=0}try{localStorage.setItem(SFK,JSON.stringify(f))}catch(x){}m.className="msg er";m.textContent="PIN yanlışdır.";$("pin").value="";$("pin").focus()}})});
+
+/* ---------- qapaq rəsmi ---------- */
+var CW=1200,CH=1697,SERIF='Georgia,"Times New Roman","DejaVu Serif",serif',SANS='system-ui,"Segoe UI",Roboto,Arial,sans-serif';
+var PRESETS={
+ klassik:{name:"Klassik",bg:["#fffdf6","#f3ebd6"],ink:"#0f1f4d",accent:"#b8923a",muted:"#6b6a60",wm:"#0f1f4d",e1:"#1b3f94",e2:"#0b1c4a",et:"#f2c14e",pat:.035},
+ tund:{name:"Tünd göy",bg:["#14327a","#050a1a"],ink:"#ffffff",accent:"#f2c14e",muted:"#a9b6d6",wm:"#ffffff",e1:"#f7d070",e2:"#c8921f",et:"#0b1c4a",pat:.05},
+ qizili:{name:"Qızılı",bg:["#fff6dc","#e8c36a"],ink:"#0b1c4a",accent:"#7a5a12",muted:"#5b4a1f",wm:"#0b1c4a",e1:"#1b3f94",e2:"#0b1c4a",et:"#f2c14e",pat:.05}};
+function hexA(h,a){var n=parseInt(h.slice(1),16);return"rgba("+(n>>16&255)+","+(n>>8&255)+","+(n&255)+","+a+")"}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+function spaced(c,t,cx,y,sp){var ws=[],w=0,i;for(i=0;i<t.length;i++){var m=c.measureText(t.charAt(i)).width;ws.push(m);w+=m+sp}w-=sp;var x=cx-w/2;c.textAlign="left";for(i=0;i<t.length;i++){c.fillText(t.charAt(i),x,y);x+=ws[i]+sp}}
+function wrap(c,t,maxW){var words=t.split(" "),lines=[],cur="";words.forEach(function(w){var test=cur?cur+" "+w:w;if(c.measureText(test).width<=maxW||!cur)cur=test;else{lines.push(cur);cur=w}});if(cur)lines.push(cur);return lines}
+function fit(c,t,maxW,from,to,maxL,fontFn){for(var s=from;s>=to;s-=2){c.font=fontFn(s);var L=wrap(c,t,maxW);if(L.length<=maxL&&L.every(function(l){return c.measureText(l).width<=maxW}))return{s:s,L:L}}c.font=fontFn(to);return{s:to,L:wrap(c,t,maxW)}}
+function drawWm(c,cx,cy,w,color,k){c.save();c.translate(cx,cy);c.rotate(-35*Math.PI/180);c.globalAlpha=w.op;c.fillStyle=color;c.strokeStyle=color;c.textAlign="center";c.textBaseline="middle";
+ c.lineWidth=10*k;c.beginPath();c.arc(0,-8*k,330*k,0,Math.PI*2);c.stroke();c.lineWidth=3*k;c.beginPath();c.arc(0,-8*k,300*k,0,Math.PI*2);c.stroke();
+ var s1=230*k;c.font="italic 700 "+s1+"px "+SERIF;while(c.measureText(w.t1).width>1250*k&&s1>40){s1-=6;c.font="italic 700 "+s1+"px "+SERIF}c.fillText(w.t1,0,-8*k);
+ var s2=84*k;c.font="italic 700 "+s2+"px "+SERIF;while(c.measureText(w.t2).width>1000*k&&s2>20){s2-=4;c.font="italic 700 "+s2+"px "+SERIF}c.fillText(w.t2,0,150*k);c.restore()}
+function drawCover(cv,o,sc){var p=PRESETS[o.preset]||PRESETS.klassik;cv.width=Math.round(CW*sc);cv.height=Math.round(CH*sc);var c=cv.getContext("2d");c.setTransform(sc,0,0,sc,0,0);c.clearRect(0,0,CW,CH);
+ var g=c.createLinearGradient(0,0,CW*.35,CH);g.addColorStop(0,p.bg[0]);g.addColorStop(1,p.bg[1]);c.fillStyle=g;c.fillRect(0,0,CW,CH);
+ var rg=c.createRadialGradient(CW/2,540,30,CW/2,540,720);rg.addColorStop(0,hexA(p.accent,.2));rg.addColorStop(1,hexA(p.accent,0));c.fillStyle=rg;c.fillRect(0,0,CW,CH);
+ c.save();c.strokeStyle=hexA(p.ink,p.pat);c.lineWidth=2;for(var x=-CH;x<CW;x+=34){c.beginPath();c.moveTo(x,0);c.lineTo(x+CH,CH);c.stroke()}c.restore();
+ c.save();c.strokeStyle=hexA(p.accent,.24);c.lineWidth=3;for(var r=420;r<=1160;r+=60){c.beginPath();c.arc(CW/2,CH+260,r,Math.PI,2*Math.PI);c.stroke()}for(r=200;r<=520;r+=60){c.beginPath();c.arc(0,0,r,0,Math.PI/2);c.stroke();c.beginPath();c.arc(CW,0,r,Math.PI/2,Math.PI);c.stroke()}c.restore();
+ c.strokeStyle=p.accent;c.lineWidth=4;rr(c,34,34,CW-68,CH-68,10);c.stroke();c.strokeStyle=hexA(p.ink,.5);c.lineWidth=1.5;rr(c,50,50,CW-100,CH-100,6);c.stroke();
+ if(o.wm.on&&o.wm.cover)drawWm(c,CW/2,CH*.56,o.wm,p.wm,1);
+ var M=96,y=150;c.textBaseline="alphabetic";c.fillStyle=p.ink;
+ c.font="700 26px "+SERIF;c.textAlign="left";c.fillText(o.phone,M,y);c.textAlign="right";c.font="italic 700 26px "+SERIF;c.fillText(o.byline,CW-M,y);
+ var f=fit(c,o.brand||" ",CW-2*M-2*230,46,26,1,function(s){return"italic 700 "+s+"px "+SERIF});c.font="italic 700 "+f.s+"px "+SERIF;c.textAlign="center";c.fillText(f.L[0],CW/2,y+2);
+ c.fillStyle=p.ink;c.fillRect(M,y+28,CW-2*M,5);c.fillStyle=hexA(p.accent,.9);c.fillRect(M,y+40,CW-2*M,2);
+ var cx=CW/2,cy=520,R=150,i;c.fillStyle=p.accent;for(i=0;i<40;i++){var a=i/40*Math.PI*2;c.beginPath();c.arc(cx+Math.cos(a)*(R+40),cy+Math.sin(a)*(R+40),i%5===0?6:3.5,0,Math.PI*2);c.fill()}
+ c.strokeStyle=p.accent;c.lineWidth=8;c.beginPath();c.arc(cx,cy,R+14,0,Math.PI*2);c.stroke();
+ var eg=c.createLinearGradient(cx-R,cy-R,cx+R,cy+R);eg.addColorStop(0,p.e1);eg.addColorStop(1,p.e2);c.fillStyle=eg;c.beginPath();c.arc(cx,cy,R,0,Math.PI*2);c.fill();
+ c.strokeStyle=hexA(p.et,.7);c.lineWidth=3;c.beginPath();c.arc(cx,cy,R-16,0,Math.PI*2);c.stroke();
+ c.fillStyle=p.et;c.textAlign="center";c.textBaseline="middle";c.font="italic 700 122px "+SERIF;c.fillText("DQ",cx,cy-6);c.font="700 30px "+SANS;c.fillText("★ ★ ★",cx,cy+78);c.textBaseline="alphabetic";
+ c.fillStyle=p.accent;c.font="700 26px "+SANS;spaced(c,o.label||"",CW/2,790,8);
+ var title=[o.title,o.sub].filter(Boolean).join(" · ")||"Başlıq";var t=fit(c,title,CW-2*M-40,108,56,3,function(s){return"700 "+s+"px "+SERIF});
+ c.fillStyle=p.ink;c.textAlign="center";c.font="700 "+t.s+"px "+SERIF;var ty=890;t.L.forEach(function(l,k){c.fillText(l,CW/2,ty+k*t.s*1.18)});var ey=ty+(t.L.length-1)*t.s*1.18;
+ var info=[];if(+o.count>0)info.push(o.count+" sual");if(+o.pages>0)info.push(o.pages+" səhifə");
+ if(info.length){c.fillStyle=p.muted;c.font="500 36px "+SANS;c.fillText(info.join("  ·  "),CW/2,ey+78)}
+ c.fillStyle=p.accent;c.fillRect(CW/2-120,ey+(info.length?118:60),240,4);
+ c.fillStyle=p.muted;c.font="italic 30px "+SERIF;c.fillText("Dövlət qulluğuna hazırlıq üçün peşəkar sınaq materialı",CW/2,1390);
+ c.fillStyle=hexA(p.accent,.95);c.fillRect(M,1588,CW-2*M,3);c.fillStyle=p.muted;c.font="italic 700 26px "+SERIF;c.textAlign="left";c.fillText("DQplatform",M,1642);c.textAlign="right";c.fillText(o.byline,CW-M,1642);
+ if(+o.pages>0){c.textAlign="center";c.font="700 22px "+SANS;c.fillStyle=p.ink;c.fillText("Səhifə sayı: "+o.pages,CW/2,1642)}}
+function wmPng(w){var cv=D.createElement("canvas");cv.width=cv.height=1800;var c=cv.getContext("2d");drawWm(c,900,900,w,"#0f1f4d",1.3);return new Promise(function(ok){cv.toBlob(function(b){b.arrayBuffer().then(function(a){ok(new Uint8Array(a))})},"image/png")})}
+
+/* ---------- vəziyyət və interfeys ---------- */
+var S={file:null,bytes:null,pages:0,preset:"klassik"};
+function wmOpts(){return{on:$("wm1").checked,t1:norm($("wmt1").value)||"DQplatform",t2:norm($("wmt2").value),op:(+$("wmop").value)/100,cover:$("wmc").checked,pdf:$("wmp").checked}}
+function opts(){return{title:norm($("title").value),sub:norm($("sub").value),count:norm($("count").value),pages:S.pages,phone:norm($("phone").value),brand:norm($("brand").value),byline:norm($("byline").value),label:norm($("label").value),preset:S.preset,wm:wmOpts()}}
+var pt=0;function preview(){clearTimeout(pt);pt=setTimeout(function(){var o=opts();drawCover($("cv"),o,.5);[].forEach.call(D.querySelectorAll(".ps canvas"),function(cv){var o2=Object.assign({},o,{preset:cv.dataset.p});drawCover(cv,o2,.16)})},60)}
+function say(id,t,cls){var e=$(id);e.className="msg"+(cls?" "+cls:"");e.textContent=t||""}
+function failMsg(r){return r.status===401||r.status===403?"Server yazmağa icazə vermədi (status "+r.status+"). Supabase-də dq_v2_store üçün yazma icazəsi lazımdır.":"Server xətası (status "+(r.status||"şəbəkə")+(r.err?": "+r.err:"")+")"}
+function pick(f){say("m-file","");if(!f)return;if(!/\.pdf$/i.test(f.name)&&f.type!=="application/pdf"){say("m-file","Yalnız PDF faylı seçin.","er");return}
+ if(f.size>30*1048576){say("m-file","Fayl çox böyükdür (maks. 30 MB).","er");return}
+ say("m-file","Oxunur…");f.arrayBuffer().then(function(ab){return lib("pdflib").then(function(L){var u8=new Uint8Array(ab);return L.PDFDocument.load(u8,{ignoreEncryption:true,updateMetadata:false}).then(function(doc){S.file=f;S.bytes=u8;S.pages=doc.getPageCount();
+  $("fname").textContent=f.name+" • "+fmtSize(f.size)+" • "+S.pages+" səhifə";if(!norm($("title").value))$("title").value=f.name.replace(/\.pdf$/i,"");$("pub").disabled=false;say("m-file","Fayl hazırdır ✓","ok");preview()})})}).catch(function(e){S.file=null;S.bytes=null;$("pub").disabled=true;say("m-file","PDF oxunmadı: "+(e&&e.message||e),"er")})}
+function prog(p,t){$("pbox").hidden=p==null;if(p!=null){$("prog").value=p;$("pgt").textContent=t||""}}
+function cleanup(sid){return req("DELETE","?collection=eq."+COLC+"&data->>sid=eq."+q(sid))}
+function publish(){if(!S.bytes)return;var o=opts(),sid=newId(),btn=$("pub");btn.disabled=true;$("result").hidden=true;say("m-pub","");prog(2,"PDF hazırlanır…");var bytes=S.bytes;
+ var stamp=o.wm.on&&o.wm.pdf?Promise.all([lib("pdflib"),wmPng(o.wm)]).then(function(rs){var L=rs[0];return L.PDFDocument.load(S.bytes,{ignoreEncryption:true,updateMetadata:false}).then(function(doc){return doc.embedPng(rs[1]).then(function(img){doc.getPages().forEach(function(pg){var s=pg.getSize(),sz=Math.min(s.width,s.height)*1.2;pg.drawImage(img,{x:(s.width-sz)/2,y:(s.height-sz)/2,width:sz,height:sz})});return doc.save()})})}):Promise.resolve(S.bytes);
+ stamp.then(function(b){bytes=b;var n=Math.ceil(bytes.length/CHUNK),i=0;prog(8,"Yüklənir 0 / "+n);
+  function up(){if(i>=n)return Promise.resolve();var part=bytes.subarray(i*CHUNK,(i+1)*CHUNK);return req("POST","",{collection:COLC,data:{sid:sid,i:i,b64:toB64(part)}},60000).then(function(r){if(!r.ok)throw {r:r};i++;prog(8+i/n*84,"Yüklənir "+i+" / "+n);return up()})}
+  return up().then(function(){var cv=D.createElement("canvas");drawCover(cv,o,.6);var img=cv.toDataURL("image/jpeg",.86);prog(95,"Qapaq yazılır…");
+   return req("POST","",{collection:COLV,data:{sid:sid,img:img}},40000).then(function(r){if(!r.ok)throw {r:r};return req("POST","",{collection:COLD,data:{sid:sid,title:o.title||S.file.name.replace(/\.pdf$/i,""),sub:o.sub,pages:S.pages,size:bytes.length,chunks:n,wm:!!(o.wm.on&&o.wm.pdf),preset:o.preset,views:0,created:Date.now()}})}).then(function(r){if(!r.ok)throw {r:r};prog(100,"Hazırdır ✓");return sid})})})
+  .then(function(sid){var url=viewerUrl(sid);$("link").value=url;$("open").href=url;$("result").hidden=false;btn.disabled=false;setTimeout(function(){prog(null)},900);loadList()})
+  .catch(function(e){prog(null);btn.disabled=false;var r=e&&e.r;say("m-pub",r?failMsg(r):"Xəta: "+(e&&e.message||e),"er");cleanup(sid)})}
+function downloadCover(){var cv=D.createElement("canvas");drawCover(cv,opts(),1);cv.toBlob(function(b){var a=D.createElement("a");a.href=URL.createObjectURL(b);a.download=((norm($("title").value)||"qapaq").replace(/[\\/:*?"<>|]+/g,"_"))+"-qapaq.png";D.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500)},"image/png")}
+function loadList(){var box=$("list");req("GET","?select=id,data&collection=eq."+COLD+"&order=id.desc&limit=60").then(function(r){box.textContent="";if(!r.ok||!Array.isArray(r.json)){box.appendChild(mk("p","muted","Siyahı yüklənmədi (status "+(r.status||"şəbəkə")+")."));return}
+ if(!r.json.length){box.appendChild(mk("p","muted","Hələ heç nə yayımlanmayıb."));return}
+ r.json.forEach(function(row){var d=row.data||{},it=mk("div","li"),th=mk("img","th");th.alt="";th.width=44;th.height=62;th.hidden=true;var inf=mk("div","lf"),t=mk("div","lt",d.title||"(adsız)"),m=mk("div","lm",(d.pages?d.pages+" səhif • ":"")+fmtSize(d.size||0)+" • 👁 "+(+d.views||0)+" • "+fmtDate(d.created));m.textContent=(d.pages?d.pages+" səhifə • ":"")+fmtSize(d.size||0)+" • 👁 "+(+d.views||0)+" • "+fmtDate(d.created);
+  var ac=mk("div","la"),cp=mk("button","sm","Kopyala"),op=mk("a","sm btn","Aç"),del=mk("button","sm dg","Sil");cp.type="button";del.type="button";var u=viewerUrl(d.sid);op.href=u;op.target="_blank";op.rel="noopener";
+  cp.onclick=function(){copyText(u,cp,"Kopyala")};del.onclick=function(){if(!confirm("«"+(d.title||"fayl")+"» silinsin? Link də işləməyəcək."))return;del.disabled=true;del.textContent="…";
+   Promise.all([cleanup(d.sid),req("DELETE","?collection=eq."+COLV+"&data->>sid=eq."+q(d.sid))]).then(function(){return req("DELETE","?id=eq."+q(row.id))}).then(function(x){if(x.ok)loadList();else{del.disabled=false;del.textContent="Sil";alert(failMsg(x))}})};
+  ac.appendChild(cp);ac.appendChild(op);ac.appendChild(del);inf.appendChild(t);inf.appendChild(m);inf.appendChild(ac);it.appendChild(th);it.appendChild(inf);box.appendChild(it);
+  req("GET","?select=data&collection=eq."+COLV+"&data->>sid=eq."+q(d.sid)+"&limit=1").then(function(c){var cd=c.ok&&c.json&&c.json[0]&&c.json[0].data;if(cd&&/^data:image\//.test(cd.img||"")){th.src=cd.img;th.hidden=false}})})})}
+function mk(tag,cls,txt){var e=D.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+var booted=false;
+function boot(){if(booted)return;booted=true;
+ var ps=$("presets");Object.keys(PRESETS).forEach(function(k,ix){var b=mk("button","ps"+(ix===0?" on":""));b.type="button";b.setAttribute("aria-label",PRESETS[k].name+" dizayn");var cv=D.createElement("canvas");cv.dataset.p=k;b.appendChild(cv);b.appendChild(mk("span",null,PRESETS[k].name));b.onclick=function(){S.preset=k;[].forEach.call(ps.children,function(x){x.classList.toggle("on",x===b)});preview()};ps.appendChild(b)});
+ ["title","sub","count","phone","brand","byline","label","wmt1","wmt2"].forEach(function(id){$(id).addEventListener("input",preview)});
+ ["wm1","wm0","wmc","wmp"].forEach(function(id){$(id).addEventListener("change",function(){$("wmbox").hidden=!$("wm1").checked;preview()})});
+ $("wmop").addEventListener("input",function(){$("wmopv").textContent=this.value+"%";preview()});
+ $("file").addEventListener("change",function(){pick(this.files[0])});
+ var dz=$("drop");["dragenter","dragover"].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.add("on")})});["dragleave","drop"].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.remove("on")})});dz.addEventListener("drop",function(e){if(e.dataTransfer.files[0])pick(e.dataTransfer.files[0])});
+ $("pub").onclick=publish;$("dlcover").onclick=downloadCover;$("copylink").onclick=function(){copyText($("link").value,$("copylink"))};
+ $("lock").onclick=function(){try{sessionStorage.removeItem(SSO)}catch(e){}location.reload()};
+ preview();loadList()}
+if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",gate);else gate();
+})();
+
+</script>
+</body>
+</html>
