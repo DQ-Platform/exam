@@ -2996,6 +2996,8 @@ window.scrollTo({top:0,behavior:"smooth"})};</script>
 <div class="admin-nav-card" onclick="V2.open();V2.go('res')"><span class="icon">💬</span> Təəssüratlar (Təsdiq)</div>
 <div class="admin-nav-card" onclick="window.DQCD&&DQCD.openAdmin()" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">⏳</span> Sayğac</div>
 <div class="admin-nav-card" onclick="PPU.open()" style="background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff"><span class="icon">📥</span> Peşəkar PDF Sınaq Yükləyici</div>
+<div class="admin-nav-card" onclick="window.open('pdf-studio.html','_blank','noopener')" style="background:linear-gradient(135deg,#0b1c4a,#c8921f);color:#fff"><span class="icon">📄</span> PDF Studiya (daimi link + qapaq)</div>
+<div class="admin-nav-card" onclick="window.open('fon-temizle.html','_blank','noopener')" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">🧼</span> PDF/Şəkil fon təmizləyici</div>
 <div class="admin-nav-card" onclick="window.DQST&&DQST.openAdmin()" style="background:linear-gradient(135deg,#0a2f7a,#2f63bd);color:#fff"><span class="icon">📊</span> Ana Səhifə Statistikası</div>
 <div class="admin-nav-card" onclick="window.GZL&&GZL.open()" style="background:linear-gradient(135deg,#475569,#0f172a);color:#fff"><span class="icon">🙈</span> Gizləmə</div>
 <div class="admin-nav-card" onclick="window.PRT&&PRT.open()" style="background:linear-gradient(135deg,#0b2a6f,#2f63bd);color:#fff"><span class="icon">🧭</span> Portal idarəsi</div>
@@ -10033,7 +10035,7 @@ var NEWS=[],RULEMAP={};
 function titleOf(d){var ks=["title","name","headline","ad","basliq","başlıq","mövzu","subject"];for(var i=0;i<ks.length;i++)if(typeof d[ks[i]]==="string"&&norm(d[ks[i]]))return norm(d[ks[i]]);var best="";for(var k in d)if(typeof d[k]==="string"){var s=norm(d[k]);if(s.length<=140&&s.length>best.length&&/[a-zəıöüçşğ]/i.test(s)&&!/^(https?:|data:)/.test(s))best=s}return best||"(başlıqsız)"}
 function strs(d){var o=[],t=titleOf(d);if(t)o.push(t);for(var k in d)if(typeof d[k]==="string"){var s=norm(d[k]);if(s.length>=8&&s.length<=220&&/[a-zəıöüçşğ]/i.test(s)&&!/^(https?:|data:|\/)/.test(s)&&o.indexOf(s)<0)o.push(s)}return o}
 function uniqueKeys(row){var all={};NEWS.forEach(function(n){var seen={};strs(n.data||{}).forEach(function(s){var k=nk(s);if(!seen[k]){seen[k]=1;all[k]=(all[k]||0)+1}})});var out=[];strs(row.data||{}).forEach(function(s){if(all[nk(s)]===1&&out.length<6)out.push(s)});return out}
-function css(){if(D.getElementById("dqx-css"))return;var s=D.createElement("style");s.id="dqx-css";s.textContent=
+function css(){if(D.getElementById("dqxe-css"))return;var s=D.createElement("style");s.id="dqxe-css";s.textContent=
 ".dqx-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}"+
 "#dqx-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#0b1c4a;color:#fff;border:1px solid #f2c14e;border-radius:12px;padding:10px 16px;font:600 14px system-ui,sans-serif;z-index:100090;opacity:0;pointer-events:none;transition:.25s}#dqx-toast.on{opacity:1;transform:translateX(-50%)}"+
 "#dqx-fab{position:fixed;right:14px;bottom:96px;z-index:100050;display:none;background:linear-gradient(145deg,#f2c14e,#c8921f);color:#1a1204;border:0;border-radius:999px;padding:11px 16px;font:700 14px system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.45);cursor:pointer}#dqx-fab.on{display:block}"+
@@ -10109,5 +10111,11 @@ W.DQElanX={reload:loadRules,rules:function(){return R.slice()},open:openModal,ru
 if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boot();
 })();
 </script>
+<style id="dq-admin-enter-fix">
+/* Admin panel: yarımçıq (solğun, qruplaşmamış) görünüş olmasın — qruplar hazır olanda bir dəfəyə görünür */
+#admin-panel.screen.active{animation:none!important;opacity:1!important;transform:none!important}
+#admin-panel.screen.active .admin-nav-grid:not(.dqap-on){visibility:hidden;min-height:70vh;animation:dqAdminShow 0s linear 1.6s forwards}
+@keyframes dqAdminShow{to{visibility:visible}}
+</style>
 </body>
 </html>
