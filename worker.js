@@ -37,15 +37,20 @@ const CORS = {
 async function findNews(id) {
   id = String(id || '').trim();
   if (!id || id.length > 80) return null;
-  const q = /^\d+$/.test(id)
-    ? `or=(data->>slug.eq.${id},id.eq.${id})`
-    : `data->>slug=eq.${encodeURIComponent(id)}`;
-  try {
-    const r = await fetch(`${SB}/rest/v1/dq_v2_store?select=id,data&collection=eq.news&${q}&limit=1`, { headers: { apikey: KEY } });
-    if (!r.ok) return null;
-    const rows = await r.json();
-    return rows[0] ? { ...rows[0].data, _id: rows[0].id } : null;
-  } catch (e) { return null; }
+  const e = encodeURIComponent(id);
+  // slug, sonra data içindəki id/nid/key, rəqəmdirsə sətrin öz id-si
+  const qs = /^\d+$/.test(id)
+    ? [`or=(data->>slug.eq.${id},id.eq.${id})`]
+    : [`data->>slug=eq.${e}`, `data->>id=eq.${e}`, `data->>nid=eq.${e}`, `data->>key=eq.${e}`];
+  for (const q of qs) {
+    try {
+      const r = await fetch(`${SB}/rest/v1/dq_v2_store?select=id,data&collection=eq.news&${q}&limit=1`, { headers: { apikey: KEY } });
+      if (!r.ok) continue;
+      const rows = await r.json();
+      if (rows[0]) return { ...rows[0].data, _id: rows[0].id };
+    } catch (err) {}
+  }
+  return null;
 }
 const sb = (env, q, init = {}) => {
   const url = env.SUPABASE_URL || SB, key = env.SUPABASE_KEY || KEY;
