@@ -10117,5 +10117,10 @@ if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boo
 #admin-panel.screen.active .admin-nav-grid:not(.dqap-on){visibility:hidden;min-height:70vh;animation:dqAdminShow 0s linear 1.6s forwards}
 @keyframes dqAdminShow{to{visibility:visible}}
 </style>
+<style id="dq-admin-card-fix">
+/* Admin panel açılanda ağ kart həmişə görünsün (v3on ana səhifə rejimində konteyner gizlənirdi) */
+body .container:has(> #admin-panel.active),body.v3on .container:has(> #admin-panel.active){display:block!important;background:#fff!important;color:#12285e;opacity:1!important;visibility:visible!important;border-top:4px solid var(--accent-gold,#d9a441)!important;position:relative;z-index:5}
+#admin-panel.active .admin-nav-card,#admin-panel.active .dqap-g{opacity:1!important}
+</style>
 </body>
 </html>

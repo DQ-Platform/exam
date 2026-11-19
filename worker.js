@@ -38,17 +38,16 @@ async function findNews(id) {
   id = String(id || '').trim();
   if (!id || id.length > 80) return null;
   const e = encodeURIComponent(id);
-  // slug, sonra data içindəki id/nid/key, rəqəmdirsə sətrin öz id-si
-  const qs = /^\d+$/.test(id)
-    ? [`or=(data->>slug.eq.${id},id.eq.${id})`]
-    : [`data->>slug=eq.${e}`, `data->>id=eq.${e}`, `data->>nid=eq.${e}`, `data->>key=eq.${e}`];
-  for (const q of qs) {
+  // Xəbər linkindəki id slug, data.id, data.nid və ya sətrin öz nömrəsi ola bilər — hamısı yoxlanılır
+  const tries = [`data->>slug=eq.${e}`, `data->>id=eq.${e}`, `data->>nid=eq.${e}`];
+  if (/^\d+$/.test(id)) tries.push(`id=eq.${id}`);
+  for (const q of tries) {
     try {
       const r = await fetch(`${SB}/rest/v1/dq_v2_store?select=id,data&collection=eq.news&${q}&limit=1`, { headers: { apikey: KEY } });
       if (!r.ok) continue;
       const rows = await r.json();
       if (rows[0]) return { ...rows[0].data, _id: rows[0].id };
-    } catch (err) {}
+    } catch (x) {}
   }
   return null;
 }
@@ -168,7 +167,7 @@ export default {
       let fb;
       try { const r = await fetch(FALLBACK.url, { method: 'HEAD' }); fb = { status: r.status, type: r.headers.get('content-type'), bytes: r.headers.get('content-length') }; } catch (e) { fb = String(e); }
       return new Response(JSON.stringify({
-        worker: 'v4', found: !!n, title: n && n.title, slug: n && n.slug, id: n && n._id,
+        worker: 'v5', found: !!n, title: n && n.title, slug: n && n.slug, id: n && n._id,
         hasImg: !!(n && n.img), hasOg: !!(n && n.og),
         chosen: pick ? { type: pick.type, bytes: pick.bytes.length, w: pick.w, h: pick.h } : 'fallback',
         fallback: fb
@@ -206,7 +205,7 @@ export default {
       const n = await findNews(id);
       if (!n) return Response.redirect(SITE + '/?go=news', 302);
 
-      const key = n.slug || n._id;
+      const key = n.slug || n.id || n._id;
       const title = clean(n.title, 90) || 'DQPlatform';
       const desc = clean(n.sum || n.body, 200) || 'DQPlatform — dövlət qulluğu imtahanlarına hazırlıq platforması';
       const page = `${SITE}/news?id=${encodeURIComponent(key)}`;
