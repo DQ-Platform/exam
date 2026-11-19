@@ -207,16 +207,26 @@ function sys(){return !!(mq&&mq.matches)}
 function norm(s){return s&&(s.mode==="light"||s.mode==="dark")?s.mode:(s&&s.dark?"dark":"auto")}
 function resolve(m){return m==="dark"?1:m==="light"?0:(sys()?1:0)}
 function read(){var s={dark:0,br:100,eye:0,warm:50};try{Object.assign(s,JSON.parse(localStorage.getItem(K)||"{}")||{})}catch(e){}s.br=Math.max(40,Math.min(100,+s.br||100));return s}
+function examOn(){try{return !!document.querySelector("#exam-screen.active,#tlx-run.open,.tv2-ov.on")}catch(e){return false}}
+var lastEx=null;
 function paint(){
- var s=read(),dark=resolve(norm(s)),f=[];
+ var s=read(),ex=examOn(),dark=ex?0:resolve(norm(s)),f=[];
+ lastEx=ex;
  H.classList.toggle("dq13-dark",!!dark);
+ H.classList.toggle("dq-exam-light",ex);
  if(dark)f.push("invert(1) hue-rotate(180deg)");
- if(s.eye)f.push("sepia("+(.12+s.warm/100*.5).toFixed(2)+") saturate(.92)");
- if(+s.br!==100)f.push("brightness("+s.br/100+")");
+ if(!ex){
+  if(s.eye)f.push("sepia("+(.12+s.warm/100*.5).toFixed(2)+") saturate(.92)");
+  if(+s.br!==100)f.push("brightness("+s.br/100+")");
+ }
  H.style.filter=f.join(" ");
  try{var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",dark?"#b0d5ff":"#0a2f7a")}catch(e){}
 }
 paint();
+/* Sınaq ekranı açılıb-bağlananda rejimi dərhal yenilə (yanıb-sönmə olmasın) */
+(function(){var raf=0;function chk(){raf=0;if(examOn()!==lastEx)paint()}
+ function arm(){try{new MutationObserver(function(){if(!raf)raf=requestAnimationFrame(chk)}).observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"]})}catch(e){}}
+ if(document.body)arm();else document.addEventListener("DOMContentLoaded",arm)})();
 try{mq&&(mq.addEventListener?mq.addEventListener("change",paint):mq.addListener&&mq.addListener(paint))}catch(e){}
 window.DQTheme={norm:norm,resolve:resolve,sys:sys,paint:paint};
 })();
@@ -378,6 +388,8 @@ function go(u,n){return fetch(u,{headers:{apikey:K}}).then(function(r){if(r.stat
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a2f7a">
+<meta name="color-scheme" content="light only">
+<style id="dq-exam-light">:root{color-scheme:light only}html.dq-exam-light,html.dq-exam-light body{filter:none!important;background-color:#fff}html.dq-exam-light #exam-screen,html.dq-exam-light #exam-screen *{color-scheme:light}</style>
 <meta name="application-name" content="DQ Platform">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
