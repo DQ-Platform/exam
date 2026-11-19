@@ -10190,5 +10190,49 @@ setTimeout(function(){try{push(true)}catch(e){}},2500);
 window.DQResume={push:push,snap:snap};
 })();
 </script>
+<style id="dq-admin-white-final">
+/* Admin panel və Nəticə hesabatı HƏMİŞƏ ağ, tam ekran vərəqdir: göy fon və arxadakı səhifə heç vaxt görünməsin (son söz — digər qaydalardan yüksək üstünlük) */
+html body #admin-panel#admin-panel.screen.active,html body #result-screen#result-screen.screen.active{position:fixed!important;top:0!important;right:0!important;bottom:0!important;left:0!important;inset:0!important;width:auto!important;height:auto!important;max-height:none!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#fff!important;background-image:none!important;opacity:1!important;visibility:visible!important;transform:none!important;filter:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;box-sizing:border-box!important;color-scheme:light}
+html body #admin-panel#admin-panel.screen.active{z-index:2147482000!important;color:#12285e!important}
+html body #result-screen#result-screen.screen.active{z-index:2147481000!important;color:#111827!important;padding:max(14px,env(safe-area-inset-top)) 14px calc(40px + env(safe-area-inset-bottom))!important}
+html body #admin-panel#admin-panel.screen.active::before,html body #admin-panel#admin-panel.screen.active::after,html body #result-screen#result-screen.screen.active::before,html body #result-screen#result-screen.screen.active::after{display:none!important}
+</style>
+<script id="dq-admin-white-final-js">
+/* CSS-i inline !important ilə də möhkəmləndirir və «position:fixed»-i pozan ata elementlərin (transform/filter/contain) təsirini söndürür */
+(function(){"use strict";
+if(window.__dqAdminWhite)return;window.__dqAdminWhite=1;
+var CFG={"admin-panel":{z:"2147482000",c:"#12285e"},"result-screen":{z:"2147481000",c:"#111827"}};
+var BASE=[["position","fixed"],["top","0"],["right","0"],["bottom","0"],["left","0"],["width","auto"],["height","auto"],["max-height","none"],["margin","0"],["border","0"],["border-radius","0"],["background","#fff"],["background-image","none"],["opacity","1"],["transform","none"],["filter","none"],["overflow-y","auto"]];
+var ST={};
+function bad(cs){try{
+ if(cs.transform&&cs.transform!=="none")return true;
+ if(cs.filter&&cs.filter!=="none")return true;
+ var bf=cs.backdropFilter||cs.webkitBackdropFilter;if(bf&&bf!=="none")return true;
+ if(cs.perspective&&cs.perspective!=="none")return true;
+ if(/layout|paint|strict|content/.test(cs.contain||""))return true;
+ if(/transform|filter|perspective/.test(cs.willChange||""))return true;
+}catch(e){}return false}
+function on(p,id){
+ var c=CFG[id],st=ST[id]||(ST[id]={applied:false,saved:[]});
+ BASE.forEach(function(x){p.style.setProperty(x[0],x[1],"important")});
+ p.style.setProperty("z-index",c.z,"important");p.style.setProperty("color",c.c,"important");
+ if(st.applied)return;st.applied=true;
+ for(var el=p.parentElement;el;el=el.parentElement){
+  if(!bad(getComputedStyle(el)))continue;
+  var o={el:el,v:{}};
+  ["transform","filter","backdrop-filter","-webkit-backdrop-filter","contain","will-change","perspective"].forEach(function(k){o.v[k]=[el.style.getPropertyValue(k),el.style.getPropertyPriority(k)];el.style.setProperty(k,k==="will-change"?"auto":"none","important")});
+  st.saved.push(o)}}
+function off(p,id){
+ var st=ST[id];if(!st||!st.applied)return;st.applied=false;
+ BASE.forEach(function(x){p.style.removeProperty(x[0])});p.style.removeProperty("z-index");p.style.removeProperty("color");
+ st.saved.forEach(function(o){for(var k in o.v){if(o.v[k][0])o.el.style.setProperty(k,o.v[k][0],o.v[k][1]);else o.el.style.removeProperty(k)}});
+ st.saved=[]}
+function tick(){for(var id in CFG){var p=document.getElementById(id);if(!p)continue;
+ if(p.classList.contains("active"))on(p,id);else off(p,id)}}
+setInterval(tick,350);
+document.addEventListener("click",function(){setTimeout(tick,60)},true);
+setTimeout(tick,500);
+})();
+</script>
 </body>
 </html>
