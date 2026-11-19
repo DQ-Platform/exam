@@ -134,6 +134,7 @@ h2{font-size:11.5px;margin-bottom:11px}
 <div class="who"><div class="av" id="av">?</div><div><b id="nm"></b><small id="fn"></small></div></div>
 <h2>Sizə icazə verilmiş sınaqlar</h2>
 <div class="grid" id="grid"></div>
+<p style="margin:18px 0 0;text-align:center;font-size:10.5px;color:#4f6396">giris v20261120</p>
 </section>
 </main>
 <div class="ov" id="ov"><div class="md" role="dialog" aria-modal="true"><h4>İmtahanı başlat</h4><div class="nm" id="mn"></div>
@@ -229,9 +230,13 @@ function snapKey(it){return(S.fin+"_"+it.exam+"_"+it.cat).replace(/[^A-Z0-9_]/gi
 function validSnap(it,d){if(!d||!d.keys||!d.keys.dq_exam_state||!d.keys.dq_exam_end_time)return false;
 try{var st=JSON.parse(d.keys.dq_exam_state);if(String(st.fin).toUpperCase()!==S.fin||String(st.examId)!==String(it.exam)||String(st.userGroup||"BA").toUpperCase()!==it.cat)return false}catch(e){return false}
 var rk="dqg_run:"+S.fin+":"+it.exam+":"+it.cat,sv=+d.keys[rk],run=getRun(it);if(sv&&run&&Math.abs(sv-run)>120000)return false;return true}
-function loadSnaps(){var ps=S.items.filter(function(it){return!S.done[pkey(it)]&&getRun(it)&&!hasLocal(it)}).map(function(it){
+function loadSnaps(){var ps=S.items.filter(function(it){return!S.done[pkey(it)]&&!hasLocal(it)}).map(function(it){
 var q=api("dq_v2_store?select=data&collection=eq.exam_resume&data->>k=eq."+encodeURIComponent(snapKey(it))+"&limit=20").then(function(rows){var best=null;
-(rows||[]).forEach(function(r){var d=r&&r.data;if(d&&(!best||(+d.t||0)>(+best.t||0)))best=d});if(validSnap(it,best))S.snap[pkey(it)]=best}).catch(function(){});
+(rows||[]).forEach(function(r){var d=r&&r.data;if(d&&(!best||(+d.t||0)>(+best.t||0)))best=d});if(validSnap(it,best)){S.snap[pkey(it)]=best;
+/* başqa cihaz: serverdə başlama vaxtı yoxdursa, yedəkdən hesablanır (bitiş vaxtı − müddət) → taymer sıfırlanmır, «Başla» çıxmır */
+if(!getRun(it)){var rk="dqg_run:"+S.fin+":"+it.exam+":"+it.cat,tm=function(v){v=String(v==null?"":v).trim();return/^\d+$/.test(v)?+v:Date.parse(v)},
+st0=+best.keys[rk]||0,en=tm(best.keys.dq_exam_end_time),run0=st0||(en?en-DUR*60000:0);
+if(run0&&run0+DUR*60000>Date.now())S.prog[pkey(it)]=run0}}}).catch(function(){});
 return Promise.race([q,new Promise(function(ok){setTimeout(ok,6000)})])});return Promise.all(ps)}
 function restoreSnap(it){var sn=S.snap&&S.snap[pkey(it)];if(!sn)return;try{for(var k in sn.keys)if(sn.keys[k]!=null)localStorage.setItem(k,sn.keys[k])}catch(e){}}
 /* ---- başqa cihazdan / təmizlənmiş yaddaşdan davam: serverdəki başlama vaxtı bu cihaza yazılır ki, taymer sıfırlanmasın ---- */

@@ -504,7 +504,7 @@ a{color:inherit}
       go.disabled = true; go.textContent = 'Yoxlanılır…';
       var allowed = false, u = null;
       try { allowed = await Data.inAllowed(code); } catch (e) {}
-      if (allowed) { location.href = 'giris.html?kod=' + encodeURIComponent(code); return; }
+      if (allowed) { location.href = 'giris.html?kod=' + encodeURIComponent(code) + '&v=20261120'; return; }
       try { u = await Data.findUser(code); } catch (e) {}
       go.disabled = false; go.textContent = 'Davam et';
       if (!u) { err.textContent = 'Bu iş nömrəsi tapılmadı. Nömrəni dəqiq yazın və ya qeydiyyatdan keçin.'; return; }
@@ -881,6 +881,38 @@ a{color:inherit}
       openList();
     }, true);
   }
+
+  /* «Başladığınız cihazdan davam edin» kilidli düyməsi (köhnə giriş səhifəsi) → həmişə «Davam et».
+     Bu düymə iş nömrəsi ilə təmiz giris.html-ə aparır, orada qalan vaxt və cavablar bərpa olunur. */
+  (function fixLocked() {
+    function finOf() {
+      var m = /is nomresi:\s*([a-z0-9]{4,12})/.exec(norm(document.body ? document.body.innerText : ''));
+      return m ? m[1].toUpperCase() : '';
+    }
+    function goResume(b) {
+      var fin = finOf();
+      var u = 'giris.html?' + (fin ? 'kod=' + encodeURIComponent(fin) + '&' : '') + 'v=20261120';
+      location.href = u;
+    }
+    setInterval(function () {
+      var bs = document.querySelectorAll('button');
+      for (var i = 0; i < bs.length; i++) {
+        var b = bs[i];
+        if (!/basladiginiz cihazdan davam/.test(norm(b.textContent)) && !b.__dqfix) continue;
+        if (!b.__dqfix) b.__dqfix = true;
+        if (/basladiginiz cihazdan davam/.test(norm(b.textContent))) b.textContent = 'Davam et';
+        b.disabled = false; b.classList.remove('lock');
+        b.style.setProperty('opacity', '1', 'important'); b.style.setProperty('cursor', 'pointer', 'important');
+        b.style.setProperty('background', 'linear-gradient(180deg,#f3d98b,#c9a24b)', 'important');
+        b.style.setProperty('color', '#0a1a3a', 'important');
+      }
+    }, 250);
+    document.addEventListener('click', function (e) {
+      var b = e.target && e.target.closest && e.target.closest('button');
+      if (!b || !b.__dqfix) return;
+      e.preventDefault(); e.stopImmediatePropagation(); goResume(b);
+    }, true);
+  })();
 
   /* Esc: əvvəl pəncərəni, sonra siyahını bağlayır */
   document.addEventListener('keydown', function (e) {
