@@ -189,6 +189,15 @@ else if(!q.has("giris")){var o=JSON.parse(ss.getItem(K)||"null");if(o&&o.s&&Date
 <script id="dqg-iso">/* Giriş linki (?giris=1) təmiz giris.html səhifəsinə yönləndirilir: iş nömrəsi yazılan səhifədə index.html-in 50-yə yaxın skripti işləmir (klaviatura/fokus problemi olmur).
    İstisna: giris.html-dən təhvil (≤60 san) və ya imtahan axını (dqg_flow) — onda index.html açılır. giris.html tapılmasa köhnə qaydada davam edir. */
 try{var qI=new URLSearchParams(location.search),ssI=window.sessionStorage;
+/* YENİLƏMƏ ZAMANI İMTAHAN İTMƏSİN: bu cihazda bu linkə uyğun aktiv (vaxtı bitməyən) imtahan varsa, giris.html-ə atmırıq —
+   giris.html-dən keçiddəki kimi təzə «təhvil» yazılır və imtahan qaldığı yerdən davam edir. */
+if(qI.get("giris")==="1"){try{
+ var stI=JSON.parse(localStorage.getItem("dq_exam_state")||"null"),enI=localStorage.getItem("dq_exam_end_time");
+ if(stI&&stI.fin&&stI.examId!=null&&enI){
+  var enT=/^\d+$/.test(String(enI).trim())?+enI:Date.parse(enI),sqI=(qI.get("sinaq")||"").replace(/\D/g,""),ctI=(qI.get("qrup")||"").toUpperCase().split(/[,;\s]+/).filter(Boolean),gI=String(stI.userGroup||"BA").toUpperCase();
+  if((isNaN(enT)||enT>Date.now())&&(!sqI||sqI===String(stI.examId))&&(!ctI.length||ctI.indexOf(gI)>-1))
+   ssI.setItem("dqg_handoff",JSON.stringify({fin:String(stI.fin).toUpperCase(),exam:String(stI.examId),cat:gI,ts:Date.now()}))}
+}catch(e){}}
 if(qI.get("giris")==="1"&&!ssI.getItem("dqg_flow")){
  var hoI=null;try{hoI=JSON.parse(ssI.getItem("dqg_handoff")||"null")}catch(e){}
  if(!(hoI&&Date.now()-(+hoI.ts||0)<60000)){

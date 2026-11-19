@@ -171,7 +171,9 @@ cols={name:pick(r,/^(student_?name|full_?name|name|ad)/i,"student_name"),fin:pic
 function pkey(it){return it.exam+"|"+it.cat}
 function getRun(it){var l=0;try{l=+localStorage.getItem("dqg_run:"+S.fin+":"+it.exam+":"+it.cat)||0}catch(e){}var sv=+(S.prog&&S.prog[pkey(it)])||0;return l&&sv?Math.min(l,sv):(l||sv)}
 function hasLocal(it){try{var st=JSON.parse(localStorage.getItem("dq_exam_state")||"null");
-return!!(st&&localStorage.getItem("dq_exam_end_time")&&String(st.fin).toUpperCase()===S.fin&&String(st.examId)===String(it.exam)&&String(st.userGroup||"BA").toUpperCase()===it.cat)}catch(e){return false}}
+if(!(st&&localStorage.getItem("dq_exam_end_time")&&String(st.fin).toUpperCase()===S.fin&&String(st.examId)===String(it.exam)))return false;
+/* qrup uyğun gəlir və ya bu sınaq üçün bu cihazda başlama qeydi var → başladığı cihazdır */
+return String(st.userGroup||"BA").toUpperCase()===it.cat||!!(+localStorage.getItem("dqg_run:"+S.fin+":"+it.exam+":"+it.cat))}catch(e){return false}}
 function state(it){var now=Date.now(),run=getRun(it),loc=hasLocal(it),left=run?DUR*60000-(now-run):0;
 if(S.done[pkey(it)])return{k:"ok",pl:"Tamamlanıb",st:"Tamamlanıb",btn:"Nəticəyə bax",act:"cab"};
 if(it.start&&it.start.getTime()>now&&!run)return{k:"wt",pl:"Gözləyir",st:"Başlama vaxtı: "+fmtDT(it.start),btn:"Hələ açılmayıb",lock:1};
@@ -183,7 +185,7 @@ if(sn)return{k:"rn",pl:"Davam edir",st:"Davam edir: "+fmtLeft(left),run:1,btn:"Q
 return{k:"rn",pl:"Davam edir",st:"Davam edir: "+fmtLeft(left),run:1,btn:"Davam et",act:"resume",note:"Bu cihazda əvvəlki cavablar tapılmadı. İmtahan qalan vaxtla ("+fmtLeft(left)+") davam edəcək."}}
 return{k:"rd",pl:"Hazırdır",st:"Başlanmayıb",btn:"Başla",act:"start"}}
 /* ---- giriş ---- */
-function showErr(t,code){var e=$("err");e.textContent=t;e.style.display="block";var a=$("wa");
+function showErr(t,code){try{sessionStorage.removeItem("dqg_fin")}catch(x){}var e=$("err");e.textContent=t;e.style.display="block";var a=$("wa");
 if(code){a.href="https://wa.me/"+WA+"?text="+encodeURIComponent("Salam, DQ Platform-da iştirak icazəsi almaq istəyirəm.\nİş nömrəsi: "+code);a.style.display="block"}else a.style.display="none"}
 function login(e){if(e)e.preventDefault();
 var fin=codeOf($("fin").value);$("fin").value=fin;$("err").style.display="none";$("wa").style.display="none";
@@ -209,7 +211,7 @@ S={fin:fin,name:name,items:items,prog:prog,done:done,snap:{}};return loadSnaps()
 }).catch(function(err){showErr("Bağlantı xətası: "+(err&&err.message?err.message:err)+". İnterneti yoxlayıb yenidən cəhd edin.")})
 .then(function(){b.disabled=false;b.textContent="Daxil ol"})}
 /* ---- kartlar ---- */
-function render(){$("vLogin").hidden=true;$("vList").hidden=false;$("out").hidden=false;
+function render(){try{sessionStorage.setItem("dqg_fin",S.fin)}catch(x){}$("vLogin").hidden=true;$("vList").hidden=false;$("out").hidden=false;
 $("nm").textContent=S.name||"İştirakçı";$("fn").textContent="İŞ NÖMRƏSİ: "+S.fin;$("av").textContent=(S.name||S.fin).trim().charAt(0).toUpperCase();
 S.items.sort(function(a,b){function w(it){return S.done[pkey(it)]?1:0}return w(a)-w(b)||(isHint(a)?0:1)-(isHint(b)?0:1)||a.exam-b.exam||catRank(a)-catRank(b)||a.cat.localeCompare(b.cat)});
 $("grid").innerHTML=S.items.map(function(it,i){return'<div class="ex'+(isHint(it)?" hint":"")+'" data-i="'+i+'"><div class="bd"><div class="tp"><span class="cg">'+esc(it.cat)+'</span>'+(isHint(it)?'<span class="lk">Linkdəki sınaq</span>':"")+'<span class="pl" data-pl></span></div>'+
@@ -249,7 +251,7 @@ function closeDlg(){$("ov").classList.remove("on");pending=null}
 $("no").addEventListener("click",closeDlg);
 $("ov").addEventListener("click",function(e){if(e.target===this)closeDlg()});
 $("yes").addEventListener("click",function(){var it=pending;closeDlg();if(it)go(it)});
-$("out").addEventListener("click",function(){S=null;clearInterval(tick);$("vList").hidden=true;$("out").hidden=true;$("vLogin").hidden=false;$("fin").value="";$("err").style.display="none";$("wa").style.display="none"});
+$("out").addEventListener("click",function(){try{sessionStorage.removeItem("dqg_fin")}catch(x){}S=null;clearInterval(tick);$("vList").hidden=true;$("out").hidden=true;$("vLogin").hidden=false;$("fin").value="";$("err").style.display="none";$("wa").style.display="none"});
 /* ---- giriş sahəsi: yazı zamanı mətnə toxunulmur (telefon klaviaturası üçün) ---- */
 $("f").addEventListener("submit",login);
 $("fin").addEventListener("input",function(e){if(e.isComposing)return;if(this.value.length>12)this.value=codeOf(this.value)});
@@ -261,6 +263,10 @@ inp.addEventListener("blur",function(){if(!tapAt||Date.now()-tapAt>3000||tries>=
 if(hintExam){var c=$("ctx");c.textContent="Sınaq "+hintExam.replace(/[^0-9]/g,"")+(hintCats.length?" · "+hintCats.join(", ").replace(/[^A-Z, ]/g,"")+" qrupları":"");c.hidden=false}
 try{if(!matchMedia("(pointer:coarse)").matches)$("fin").focus()}catch(e){}
 window.addEventListener("pageshow",function(e){if(e.persisted)$("ld").classList.remove("on")});
+/* səhifə yenilənəndə siyahı yoxa çıxmasın: ?kod=XXXXXXX və ya bu sessiyada daxil olunmuş iş nömrəsi ilə avtomatik giriş */
+(function(){var k=Q.get("kod")||"",sv="";try{sv=sessionStorage.getItem("dqg_fin")||""}catch(x){}
+var c=codeOf(k||sv);if(k){try{var u=new URL(location.href);u.searchParams.delete("kod");history.replaceState(null,"",u.pathname+u.search+u.hash)}catch(x){}}
+if(c){$("fin").value=c;login()}})();
 })();
 </script>
 </body>

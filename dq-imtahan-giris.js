@@ -279,6 +279,21 @@
         return out;
       } catch (e) { return cache; }
     },
+    /* Resepşn (admin) icazə verib: allowed_students cədvəlində bu iş nömrəsi varmı? */
+    async inAllowed(code) {
+      try {
+        var col = 'fin';
+        try {
+          var r0 = await sbFetch('allowed_students?select=*&limit=1', {}, 5000);
+          var a0 = r0.ok ? await r0.json() : [];
+          if (a0 && a0[0]) for (var k in a0[0]) if (/fin|code|kod|is_?nom/i.test(k)) { col = k; break; }
+        } catch (e) {}
+        var r = await sbFetch('allowed_students?select=' + encodeURIComponent(col) + '&' + encodeURIComponent(col) + '=eq.' + encodeURIComponent(code) + '&limit=1', {}, 6000);
+        if (!r.ok) return false;
+        var a = await r.json();
+        return !!(a && a.length);
+      } catch (e) { return false; }
+    },
     async uniqueCode() {
       var all = ls(CFG.storageUsers, {}), c, i;
       for (i = 0; i < 6; i++) {
@@ -310,7 +325,10 @@ a{color:inherit}
 .lg{width:36px;height:36px;border:1.5px solid #c9a24a;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#f3d47a;font:700 13px Georgia,serif}
 .brand b{display:block;color:#f3d47a;font-size:16px;line-height:1.1}
 .brand small{color:#9fb0d6;font-size:10px;letter-spacing:.12em}
-.x{border:1px solid #c9a24a;color:#f3d47a;background:transparent;border-radius:10px;padding:7px 14px;font-size:13px}
+.top{flex-wrap:wrap;gap:8px}
+.acts{display:flex;align-items:center;gap:8px;margin-left:auto}
+.x{border:1px solid #c9a24a;color:#f3d47a;background:transparent;border-radius:10px;padding:7px 14px;font-size:13px;white-space:nowrap}
+.x.fill{background:rgba(201,162,75,.14);font-weight:700}
 .wrap{max-width:820px;margin:0 auto;padding:16px 14px 40px}
 .user{display:flex;align-items:center;gap:12px;margin:6px 0 14px}
 .av{width:46px;height:46px;border-radius:50%;background:linear-gradient(180deg,#f3d47a,#d4a73c);color:#13203f;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center;flex:none}
@@ -457,8 +475,44 @@ a{color:inherit}
   var shown = [];
   function onPageClick(ev) {
     if (ev.target.closest('[data-x]')) return closeList();
+    if (ev.target.closest('[data-code]')) return openCodeLogin();
     var b = ev.target.closest('[data-i]');
     if (b) onStartTap(shown[+b.getAttribute('data-i')]);
+  }
+
+  /* «İş nömrəsi ilə davam et»: resepşndə icazə verilmiş istifadəçi → giris.html (öz sınaqları); qeydiyyatlı istifadəçi → siyahı */
+  function pullCode(v) {
+    var raw = String(v || '').toUpperCase(), plain = raw.replace(/[^A-Z0-9]/g, '');
+    if (plain.length <= 7) return plain;
+    var t = (raw.match(/[A-Z0-9]{7}/g) || []).filter(function (x) { return /\d/.test(x) && /[A-Z]/.test(x); });
+    return t[0] || plain.slice(0, 7);
+  }
+  function openCodeLogin() {
+    var m = modal('<h3>İş nömrəsi ilə davam et</h3><div class="note">İş nömrənizi yazın. Resepşndə sizə icazə verilmiş sınaqlar açılacaq.</div>' +
+      '<label class="lbl" for="cd">Şəxsi iş nömrəsi</label>' +
+      '<input class="in code" id="cd" maxlength="40" placeholder="İş nömrəsi" autocomplete="off" autocapitalize="characters" spellcheck="false">' +
+      '<div class="err" id="err" role="alert"></div>' +
+      '<div class="row"><button class="ghost" type="button" data-c>Ləğv et</button><button class="navy" type="button" data-n>Davam et</button></div>');
+    var q = function (s) { return m.box.querySelector(s); }, inp = q('#cd'), err = q('#err'), go = q('[data-n]');
+    inp.oninput = function () { if (inp.value.length > 7) inp.value = pullCode(inp.value); else inp.value = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); };
+    inp.onkeydown = function (e) { if (e.key === 'Enter') go.click(); };
+    q('[data-c]').onclick = m.close;
+    go.onclick = async function () {
+      var code = pullCode(inp.value);
+      err.textContent = '';
+      if (code.length < 4) { err.textContent = 'İş nömrəsini düzgün yazın.'; return; }
+      go.disabled = true; go.textContent = 'Yoxlanılır…';
+      var allowed = false, u = null;
+      try { allowed = await Data.inAllowed(code); } catch (e) {}
+      if (allowed) { location.href = 'giris.html?kod=' + encodeURIComponent(code); return; }
+      try { u = await Data.findUser(code); } catch (e) {}
+      go.disabled = false; go.textContent = 'Davam et';
+      if (!u) { err.textContent = 'Bu iş nömrəsi tapılmadı. Nömrəni dəqiq yazın və ya qeydiyyatdan keçin.'; return; }
+      lsSet(CFG.storageSession, u);
+      m.close();
+      openList();
+    };
+    setTimeout(function () { try { inp.focus(); } catch (e) {} }, 80);
   }
 
   async function openList() {
@@ -470,7 +524,7 @@ a{color:inherit}
     pageEl.hidden = false;
     pageEl.innerHTML =
       '<div class="top"><div class="logo"><div class="lg">DQ</div><div class="brand"><b>DQ Platform</b><small>DÖVLƏT QULLUĞU SINAQ İMTAHANI</small></div></div>' +
-      '<button class="x" data-x type="button">Çıxış</button></div>' +
+      '<div class="acts"><button class="x fill" data-code type="button">İş nömrəsi ilə davam et</button><button class="x" data-x type="button">Çıxış</button></div></div>' +
       '<div class="wrap"><div class="user"' + (u ? '' : ' hidden') + '>' + (u ? userHead(u) : '') + '</div>' +
       '<div class="h">Sınaqlar</div><div class="grid"><div class="empty dark">Yüklənir…</div></div></div>';
     sync();
