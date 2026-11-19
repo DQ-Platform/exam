@@ -178,6 +178,8 @@ if(it.start&&it.start.getTime()>now&&!run)return{k:"wt",pl:"Gözləyir",st:"Baş
 if(run&&left<=0){if(loc)return{k:"er",pl:"Vaxt bitib",st:"Vaxt bitib",btn:"Nəticəni göndər",act:"go"};
 return{k:"er",pl:"Vaxt bitib",st:"Vaxt bitib",btn:"Vaxt bitib",lock:1,note:"Bu sınaq üçün ayrılan "+DUR+" dəqiqə bitib. Yenidən iştirak üçün administrasiya ilə əlaqə saxlayın."}}
 if(run){if(loc)return{k:"rn",pl:"Davam edir",st:"Davam edir: "+fmtLeft(left),run:1,btn:"Davam et",act:"go"};
+var sn=S.snap&&S.snap[pkey(it)];
+if(sn)return{k:"rn",pl:"Davam edir",st:"Davam edir: "+fmtLeft(left),run:1,btn:"Qaldığım yerdən davam et",act:"resume",note:"Cavablarınız və sual nömrəniz bərpa olunacaq (son saxlama: "+fmtDT(new Date(sn.t)).split(", ")[1]+"). Qalan vaxt davam edir."};
 return{k:"rn",pl:"Davam edir",st:"Davam edir: "+fmtLeft(left),run:1,btn:"Davam et",act:"resume",note:"Bu cihazda əvvəlki cavablar tapılmadı. İmtahan qalan vaxtla ("+fmtLeft(left)+") davam edəcək."}}
 return{k:"rd",pl:"Hazırdır",st:"Başlanmayıb",btn:"Başla",act:"start"}}
 /* ---- giriş ---- */
@@ -203,7 +205,7 @@ if(!items.length)return showErr("“"+fin+"” nömrəsi üzrə icazə tapılmad
 return api("exam_results?select=exam_no,category&fin=eq."+encodeURIComponent(fin)).catch(function(){return[]}).then(function(rr){
 var done={};(rr||[]).forEach(function(x){done[String(x.exam_no)+"|"+String(x.category).toUpperCase()]=1});
 items.sort(function(a,b){return(isHint(a)?0:1)-(isHint(b)?0:1)||a.exam-b.exam||catRank(a)-catRank(b)||a.cat.localeCompare(b.cat)});
-S={fin:fin,name:name,items:items,prog:prog,done:done};render()})})
+S={fin:fin,name:name,items:items,prog:prog,done:done,snap:{}};return loadSnaps().then(render,render)})})
 }).catch(function(err){showErr("Bağlantı xətası: "+(err&&err.message?err.message:err)+". İnterneti yoxlayıb yenidən cəhd edin.")})
 .then(function(){b.disabled=false;b.textContent="Daxil ol"})}
 /* ---- kartlar ---- */
@@ -220,6 +222,16 @@ pl=c.querySelector("[data-pl]"),st=c.querySelector("[data-st]"),b=c.querySelecto
 pl.className="pl "+s.k;pl.textContent=s.pl;st.className="st"+(s.run?" run":"");st.textContent=s.st;
 b.textContent=s.btn;b.disabled=!!s.lock;b.className="btn"+(s.lock?" lock":"");b.dataset.act=s.act||"";
 nt.hidden=!s.note;nt.textContent=s.note||""})}
+/* ---- gedişat yedəyi (dq_v2_store / exam_resume): cavablar yeni cihaza qaytarılır ---- */
+function snapKey(it){return(S.fin+"_"+it.exam+"_"+it.cat).replace(/[^A-Z0-9_]/gi,"")}
+function validSnap(it,d){if(!d||!d.keys||!d.keys.dq_exam_state||!d.keys.dq_exam_end_time)return false;
+try{var st=JSON.parse(d.keys.dq_exam_state);if(String(st.fin).toUpperCase()!==S.fin||String(st.examId)!==String(it.exam)||String(st.userGroup||"BA").toUpperCase()!==it.cat)return false}catch(e){return false}
+var rk="dqg_run:"+S.fin+":"+it.exam+":"+it.cat,sv=+d.keys[rk],run=getRun(it);if(sv&&run&&Math.abs(sv-run)>120000)return false;return true}
+function loadSnaps(){var ps=S.items.filter(function(it){return!S.done[pkey(it)]&&getRun(it)&&!hasLocal(it)}).map(function(it){
+var q=api("dq_v2_store?select=data&collection=eq.exam_resume&data->>k=eq."+encodeURIComponent(snapKey(it))+"&limit=20").then(function(rows){var best=null;
+(rows||[]).forEach(function(r){var d=r&&r.data;if(d&&(!best||(+d.t||0)>(+best.t||0)))best=d});if(validSnap(it,best))S.snap[pkey(it)]=best}).catch(function(){});
+return Promise.race([q,new Promise(function(ok){setTimeout(ok,6000)})])});return Promise.all(ps)}
+function restoreSnap(it){var sn=S.snap&&S.snap[pkey(it)];if(!sn)return;try{for(var k in sn.keys)if(sn.keys[k]!=null)localStorage.setItem(k,sn.keys[k])}catch(e){}}
 /* ---- başqa cihazdan / təmizlənmiş yaddaşdan davam: serverdəki başlama vaxtı bu cihaza yazılır ki, taymer sıfırlanmasın ---- */
 function seedRun(it){try{var k="dqg_run:"+S.fin+":"+it.exam+":"+it.cat,run=getRun(it);if(run&&!(+localStorage.getItem(k)>0))localStorage.setItem(k,String(run))}catch(e){}}
 /* ---- imtahana keçid: iş nömrəsi təkrar soruşulmur ---- */
@@ -232,7 +244,7 @@ location.assign("./?"+p.toString())}
 $("grid").addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-btn]");if(!b||b.disabled||!S)return;
 var it=S.items[+b.closest(".ex").dataset.i],a=b.dataset.act;
 if(a==="start"){pending=it;$("mn").textContent="Dövlət Qulluğu "+it.cat+" · Sınaq "+it.exam;$("ov").classList.add("on")}
-else if(a==="go")go(it);else if(a==="resume"){seedRun(it);go(it)}else if(a==="cab")go(null)});
+else if(a==="go")go(it);else if(a==="resume"){restoreSnap(it);seedRun(it);go(it)}else if(a==="cab")go(null)});
 function closeDlg(){$("ov").classList.remove("on");pending=null}
 $("no").addEventListener("click",closeDlg);
 $("ov").addEventListener("click",function(e){if(e.target===this)closeDlg()});

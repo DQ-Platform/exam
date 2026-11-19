@@ -10139,5 +10139,47 @@ body .container:has(> #admin-panel.active){display:block!important;visibility:vi
 #admin-panel.active .admin-nav-card:not([style*="background"]){background:#eef3fc!important;color:#12285e!important;border:1px solid #cfdbf3!important;opacity:1!important}
 #admin-panel.active .admin-nav-card,#admin-panel.active .dqap-g{opacity:1!important}
 </style>
+<script id="dq-resume-sync">/* DQ Resume — imtahan gedişatını (cavablar, vaxt, cari sual) serverə yedəkləyir ki, istifadəçi başqa cihaz/brauzerdən qaldığı yerdən davam edə bilsin.
+   Format-agnostikdir: dq_exam* və dqg_run:* açarlarını olduğu kimi köçürür. giris.html onları yeni cihazda geri yazır. */
+(function(){"use strict";
+if(window.__dqResume)return;window.__dqResume=1;
+var SU="https://cpzwliqlgaplroscvduo.supabase.co",SK="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF",COL="exam_resume",L;
+try{L=window.localStorage}catch(e){return}
+var rowId=null,lastSig="",lastKey="",busy=false,queued=false,tm=0;
+function hdr(){return{apikey:SK,Authorization:"Bearer "+SK,"Content-Type":"application/json"}}
+function snap(){
+ var raw=L.getItem("dq_exam_state"),end=L.getItem("dq_exam_end_time");
+ if(!raw||!end)return null;
+ var st;try{st=JSON.parse(raw)}catch(e){return null}
+ if(!st||!st.fin||st.examId==null)return null;
+ var fin=String(st.fin).toUpperCase(),ex=String(st.examId),cat=String(st.userGroup||"BA").toUpperCase(),own="dqg_run:"+fin+":"+ex+":"+cat,keys={},i,k;
+ for(i=0;i<L.length;i++){k=L.key(i);if(!k)continue;
+  if(k.indexOf("dq_exam")===0||k===own)keys[k]=L.getItem(k)}
+ return{id:(fin+"_"+ex+"_"+cat).replace(/[^A-Z0-9_]/gi,""),fin:fin,exam:ex,cat:cat,keys:keys}}
+function find(id){return fetch(SU+"/rest/v1/dq_v2_store?select=id&collection=eq."+COL+"&data->>k=eq."+encodeURIComponent(id)+"&order=id.desc&limit=1",{headers:hdr(),cache:"no-store"})
+ .then(function(r){return r.ok?r.json():[]}).then(function(a){return a&&a[0]?a[0].id:null})}
+function write(body){
+ if(rowId)return fetch(SU+"/rest/v1/dq_v2_store?id=eq."+rowId,{method:"PATCH",headers:hdr(),body:JSON.stringify({data:body}),keepalive:true}).then(function(r){return r.ok});
+ return fetch(SU+"/rest/v1/dq_v2_store",{method:"POST",headers:Object.assign({Prefer:"return=representation"},hdr()),body:JSON.stringify({collection:COL,data:body}),keepalive:true})
+  .then(function(r){return r.ok?r.json().then(function(a){rowId=a&&a[0]&&a[0].id||null;return true}):false})}
+function push(force){
+ var s=snap();if(!s)return;
+ var sig=JSON.stringify(s.keys);
+ if(!force&&sig===lastSig&&s.id===lastKey)return;
+ if(busy){queued=true;return}
+ busy=true;
+ var body={k:s.id,fin:s.fin,exam:s.exam,cat:s.cat,keys:s.keys,t:Date.now()};
+ var p=(rowId&&lastKey===s.id)?Promise.resolve():(rowId=null,find(s.id).then(function(i){rowId=i}));
+ p.then(function(){return write(body)}).then(function(ok){if(ok){lastSig=sig;lastKey=s.id}}).catch(function(){})
+  .then(function(){busy=false;if(queued){queued=false;push()}})}
+function soon(){clearTimeout(tm);tm=setTimeout(push,1200)}
+setInterval(function(){try{push()}catch(e){}},5000);
+document.addEventListener("click",soon,true);document.addEventListener("change",soon,true);
+document.addEventListener("visibilitychange",function(){if(document.hidden)try{push()}catch(e){}});
+window.addEventListener("pagehide",function(){try{push()}catch(e){}});
+setTimeout(function(){try{push(true)}catch(e){}},2500);
+window.DQResume={push:push,snap:snap};
+})();
+</script>
 </body>
 </html>
