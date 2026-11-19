@@ -10118,8 +10118,13 @@ if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",boot);else boo
 @keyframes dqAdminShow{to{visibility:visible}}
 </style>
 <style id="dq-admin-card-fix">
-/* Admin panel açılanda ağ kart həmişə görünsün (v3on ana səhifə rejimində konteyner gizlənirdi) */
-body .container:has(> #admin-panel.active),body.v3on .container:has(> #admin-panel.active){display:block!important;background:#fff!important;color:#12285e;opacity:1!important;visibility:visible!important;border-top:4px solid var(--accent-gold,#d9a441)!important;position:relative;z-index:5}
+/* Admin panel: öz ağ vərəqi. Arxadakı ana səhifə, bulanıq təbəqələr və mavi fon heç vaxt görünməsin */
+body .container:has(> #admin-panel.active){display:block!important;visibility:visible!important;opacity:1!important}
+#admin-panel.screen.active{position:fixed!important;inset:0!important;z-index:2147482000!important;width:auto!important;max-width:none!important;margin:0!important;border:0!important;border-radius:0!important;
+ background:#fff!important;background-image:none!important;color:#12285e!important;opacity:1!important;filter:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;transform:none!important;
+ overflow-y:auto!important;-webkit-overflow-scrolling:touch;box-sizing:border-box!important;padding:max(12px,env(safe-area-inset-top)) 14px calc(96px + env(safe-area-inset-bottom))!important}
+#admin-panel.screen.active::before,#admin-panel.screen.active::after{display:none!important}
+#admin-panel.active .admin-nav-card:not([style*="background"]){background:#eef3fc!important;color:#12285e!important;border:1px solid #cfdbf3!important;opacity:1!important}
 #admin-panel.active .admin-nav-card,#admin-panel.active .dqap-g{opacity:1!important}
 </style>
 </body>
