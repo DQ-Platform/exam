@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1d44">
 <meta name="robots" content="noindex">
+<style>html.auto #vLogin{display:none!important}</style>
+<script>try{var _q=new URLSearchParams(location.search);if(_q.get("kod")||_q.get("auto")==="1"||sessionStorage.getItem("dqg_fin"))document.documentElement.classList.add("auto")}catch(e){}</script>
 <title>DQ Platform — Kabinetə giriş</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -134,13 +136,14 @@ h2{font-size:11.5px;margin-bottom:11px}
 <div class="who"><div class="av" id="av">?</div><div><b id="nm"></b><small id="fn"></small></div></div>
 <h2>Sizə icazə verilmiş sınaqlar</h2>
 <div class="grid" id="grid"></div>
-<p style="margin:18px 0 0;text-align:center;font-size:10.5px;color:#4f6396">giris v20261121</p>
+<p style="margin:18px 0 0;text-align:center;font-size:10.5px;color:#4f6396">giris v20261122</p>
 </section>
 </main>
 <div class="ov" id="ov"><div class="md" role="dialog" aria-modal="true"><h4>İmtahanı başlat</h4><div class="nm" id="mn"></div>
 <p>Təsdiq edirəm düyməsini basdıqdan sonra imtahan başlayacaq və imtahanı dayandırmaq, yenidən başlatmaq mümkün olmayacaq. Razısınız?</p>
 <div class="bt"><button type="button" class="no" id="no">Xeyr</button><button type="button" class="yes" id="yes">Bəli</button></div></div></div>
-<div class="ld" id="ld"><div class="sp"></div><div>İmtahana keçid edilir…</div></div>
+<div class="ov" id="rv"><div class="md" style="max-width:520px"><h4>Sınaq nəticəsi</h4><div class="nm" id="rvN"></div><div id="rvB" style="color:#d5def5;font-size:14px;line-height:1.6"></div><div class="bt"><button type="button" class="no" id="rvC">Bağla</button></div></div></div>
+<div class="ld" id="ld"><div class="sp"></div><div id="ldt">İmtahana keçid edilir…</div></div>
 <script>
 (function(){"use strict";
 var SU="https://cpzwliqlgaplroscvduo.supabase.co",SK="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF",T="allowed_students",WA="994504305162",QCOUNT=100,DUR=180;
@@ -176,20 +179,20 @@ if(!(st&&localStorage.getItem("dq_exam_end_time")&&String(st.fin).toUpperCase()=
 /* qrup uyğun gəlir və ya bu sınaq üçün bu cihazda başlama qeydi var → başladığı cihazdır */
 return String(st.userGroup||"BA").toUpperCase()===it.cat||!!(+localStorage.getItem("dqg_run:"+S.fin+":"+it.exam+":"+it.cat))}catch(e){return false}}
 function state(it){var now=Date.now(),run=getRun(it),loc=hasLocal(it),left=run?DUR*60000-(now-run):0;
-if(S.done[pkey(it)])return{k:"ok",pl:"Tamamlanıb",st:"Tamamlanıb",btn:"Nəticəyə bax",act:"cab"};
+if(S.done[pkey(it)])return{k:"ok",pl:"Tamamlanıb",st:"Tamamlanıb",btn:"Nəticəyə bax",act:"res"};
 if(it.start&&it.start.getTime()>now&&!run)return{k:"wt",pl:"Gözləyir",st:"Başlama vaxtı: "+fmtDT(it.start),btn:"Hələ açılmayıb",lock:1};
 if(run&&left<=0){if(loc)return{k:"er",pl:"Vaxt bitib",st:"Vaxt bitib",btn:"Nəticəni göndər",act:"go"};
 /* vaxt bitib, nəticə hələ göndərilməyib: tələbə nəticəni görə bilməlidir */
 var sn0=S.snap&&S.snap[pkey(it)];
 if(sn0)return{k:"er",pl:"Vaxt bitib",st:"Vaxt bitib",btn:"Nəticəni göndər və gör",act:"resume",note:"Cavablarınız yedəkdən bərpa olunacaq, nəticə hesablanıb göstəriləcək (son saxlama: "+fmtDT(new Date(sn0.t)).split(", ")[1]+")."};
-return{k:"er",pl:"Vaxt bitib",st:"Vaxt bitib",btn:"Nəticəyə bax",act:"cab",note:"Bu sınaq üçün ayrılan "+DUR+" dəqiqə bitib. Nəticə hazırdırsa kabinetdə görünəcək. Görünmürsə administrasiya ilə əlaqə saxlayın."}}
+return{k:"er",pl:"Vaxt bitib",st:"Vaxt bitib",btn:"Nəticəyə bax",act:"res",note:"Bu sınaq üçün ayrılan "+DUR+" dəqiqə bitib. Nəticə hazırdırsa açılacaq. Tapılmasa administrasiya ilə əlaqə saxlayın."}}
 if(run){if(loc)return{k:"rn",pl:"Davam edir",st:"Davam edir: "+fmtLeft(left),run:1,btn:"Davam et",act:"go"};
 var sn=S.snap&&S.snap[pkey(it)];
 if(sn)return{k:"rn",pl:"Davam edir",st:"Davam edir: "+fmtLeft(left),run:1,btn:"Qaldığım yerdən davam et",act:"resume",note:"Cavablarınız və sual nömrəniz bərpa olunacaq (son saxlama: "+fmtDT(new Date(sn.t)).split(", ")[1]+"). Qalan vaxt davam edir."};
 return{k:"rn",pl:"Davam edir",st:"Davam edir: "+fmtLeft(left),run:1,btn:"Davam et",act:"resume",note:"Bu cihazda əvvəlki cavablar tapılmadı. İmtahan qalan vaxtla ("+fmtLeft(left)+") davam edəcək."}}
 return{k:"rd",pl:"Hazırdır",st:"Başlanmayıb",btn:"Başla",act:"start"}}
 /* ---- giriş ---- */
-function showErr(t,code){try{sessionStorage.removeItem("dqg_fin")}catch(x){}var e=$("err");e.textContent=t;e.style.display="block";var a=$("wa");
+function showErr(t,code){try{sessionStorage.removeItem("dqg_fin")}catch(x){}document.documentElement.classList.remove("auto");$("ld").classList.remove("on");var e=$("err");e.textContent=t;e.style.display="block";var a=$("wa");
 if(code){a.href="https://wa.me/"+WA+"?text="+encodeURIComponent("Salam, DQ Platform-da iştirak icazəsi almaq istəyirəm.\nİş nömrəsi: "+code);a.style.display="block"}else a.style.display="none"}
 function login(e){if(e)e.preventDefault();
 var fin=codeOf($("fin").value);$("fin").value=fin;$("err").style.display="none";$("wa").style.display="none";
@@ -211,7 +214,7 @@ if(!items.length)return showErr("“"+fin+"” nömrəsi üzrə icazə tapılmad
 return api("exam_results?select=exam_no,category&fin=eq."+encodeURIComponent(fin)).catch(function(){return[]}).then(function(rr){
 var done={};(rr||[]).forEach(function(x){done[String(x.exam_no)+"|"+String(x.category).toUpperCase()]=1});
 items.sort(function(a,b){return(isHint(a)?0:1)-(isHint(b)?0:1)||a.exam-b.exam||catRank(a)-catRank(b)||a.cat.localeCompare(b.cat)});
-S={fin:fin,name:name,items:items,prog:prog,done:done,snap:{}};return loadSnaps().then(render,render)})})
+S={fin:fin,name:name,items:items,prog:prog,done:done,snap:{}};return loadSnaps().then(render,render).then(afterLogin)})})
 }).catch(function(err){showErr("Bağlantı xətası: "+(err&&err.message?err.message:err)+". İnterneti yoxlayıb yenidən cəhd edin.")})
 .then(function(){b.disabled=false;b.textContent="Daxil ol"})}
 /* ---- kartlar ---- */
@@ -244,8 +247,35 @@ return Promise.race([q,new Promise(function(ok){setTimeout(ok,6000)})])});return
 function restoreSnap(it){var sn=S.snap&&S.snap[pkey(it)];if(!sn)return;try{for(var k in sn.keys)if(sn.keys[k]!=null)localStorage.setItem(k,sn.keys[k])}catch(e){}}
 /* ---- başqa cihazdan / təmizlənmiş yaddaşdan davam: serverdəki başlama vaxtı bu cihaza yazılır ki, taymer sıfırlanmasın ---- */
 function seedRun(it){try{var k="dqg_run:"+S.fin+":"+it.exam+":"+it.cat,run=getRun(it);if(run&&!(+localStorage.getItem(k)>0))localStorage.setItem(k,String(run))}catch(e){}}
+/* ---- nəticə pəncərəsi (exam_results cədvəlindən) ---- */
+function openResult(it){$("rvN").textContent="Dövlət Qulluğu "+it.cat+" · Sınaq "+it.exam;$("rvB").innerHTML="<p>Yüklənir…</p>";$("rv").classList.add("on");
+api("exam_results?select=*&fin=eq."+encodeURIComponent(S.fin)+"&exam_no=eq."+encodeURIComponent(it.exam)).then(function(rows){rows=rows||[];
+var r=rows.filter(function(c){return String(c.category||"").toUpperCase()===it.cat})[0]||rows[0];
+if(!r){$("rvB").innerHTML="<p>Bu sınaq üçün göndərilmiş nəticə tapılmadı. Sınağı bitirmisinizsə, administrasiya ilə əlaqə saxlayın.</p>";return}
+$("rvB").innerHTML=resHtml(r)}).catch(function(e){$("rvB").innerHTML="<p>Nəticəni yükləmək alınmadı: "+esc(e&&e.message?e.message:e)+"</p>"})}
+function resHtml(r){function K(re){for(var k in r)if(re.test(k)&&r[k]!=null&&typeof r[k]!=="object"&&r[k]!=="")return r[k];return null}
+var sc=K(/^(final_?score|score|bal|total_?score|points?)$/i),co=K(/^(correct|correct_?count|correct_?answers?|total_?correct|dogru\w*)$/i),wr=K(/^(wrong|incorrect|wrong_?count|wrong_?answers?|total_?wrong|yanlis\w*)$/i),un=K(/^(unanswered|empty|blank|skipped|unanswered_?count|bos\w*)$/i),dt=K(/^(created_at|submitted_at|finished_at|finish_time|date|tarix|time)$/i);
+var h="";function box(l,v,c){return'<div style="flex:1;min-width:92px;padding:10px 6px;border-radius:12px;background:rgba(255,255,255,.06);text-align:center"><div style="font-size:22px;font-weight:800;color:'+c+'">'+esc(v)+'</div><div style="font-size:11.5px;color:#9fb0d6;margin-top:2px">'+l+'</div></div>'}
+if(sc!=null)h+='<div style="text-align:center;margin:4px 0 12px;padding:14px;border-radius:14px;background:rgba(201,162,75,.14);border:1px solid #c9a24b"><div style="font-size:12px;color:#c9a24b;font-weight:700;letter-spacing:.8px">YEKUN BAL</div><div style="font-size:34px;font-weight:800;color:#f3d98b">'+esc(sc)+'</div></div>';
+if(co!=null||wr!=null||un!=null)h+='<div style="display:flex;gap:8px;flex-wrap:wrap">'+(co!=null?box("Doğru",co,"#6ee7a0"):"")+(wr!=null?box("Yanlış",wr,"#ff8a8a"):"")+(un!=null?box("Cavabsız",un,"#c9d4f0"):"")+'</div>';
+if(dt!=null){var d=new Date(dt);if(!isNaN(d))h+='<p style="margin:12px 0 0;font-size:12.5px;color:#9fb0d6;text-align:center">Tarix: '+fmtDT(d)+'</p>'}
+if(!h){var rows=[];for(var k in r){if(/^(id|fin|uuid|user\w*|exam_no|category)$/i.test(k)||r[k]==null||typeof r[k]==="object"||String(r[k]).length>120)continue;rows.push('<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.07)"><span style="color:#9fb0d6">'+esc(k)+'</span><b>'+esc(r[k])+'</b></div>')}h=rows.join("")||"<p>Nəticə qeydə alınıb.</p>"}
+return h}
+$("rvC").addEventListener("click",function(){$("rv").classList.remove("on")});
+$("rv").addEventListener("click",function(e){if(e.target===this)this.classList.remove("on")});
+/* giriş uğurlu olandan sonra: «auto» rejimində imtahan özü davam edir / nəticə özü açılır, ikinci giriş ekranı çıxmır */
+var AUTO=Q.get("auto")==="1";
+function afterLogin(){document.documentElement.classList.remove("auto");
+if(!AUTO||!S){$("ld").classList.remove("on");return}
+AUTO=false;var acts=[],res=[];
+S.items.forEach(function(it){var s=state(it);if(s.act==="go"||s.act==="resume")acts.push(it);else if(s.act==="res")res.push(it)});
+var pick=acts.filter(isHint)[0]||(acts.length===1?acts[0]:null);
+if(pick){if(state(pick).act==="resume"){restoreSnap(pick);seedRun(pick)}go(pick);return}
+$("ld").classList.remove("on");
+if(!acts.length&&res.length===1)openResult(res[0])}
+if(document.documentElement.classList.contains("auto")){$("ldt").textContent="Yoxlanılır…";$("ld").classList.add("on")}
 /* ---- imtahana keçid: iş nömrəsi təkrar soruşulmur ---- */
-function go(it){$("ld").classList.add("on");
+function go(it){$("ldt").textContent="İmtahana keçid edilir…";$("ld").classList.add("on");
 /* imtahan həmişə avtomatik masaüstü rejimdə açılsın: əvvəl əl ilə söndürülmüş ayar (dq_desktop_mode=0) varsa təmizlənir */
 try{localStorage.removeItem("dq_desktop_mode")}catch(e){}
 try{sessionStorage.setItem("dqg_handoff",JSON.stringify({fin:S.fin,exam:it?String(it.exam):"",cat:it?it.cat:"",ts:Date.now()}))}catch(e){}
@@ -254,7 +284,7 @@ location.assign("./?"+p.toString())}
 $("grid").addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-btn]");if(!b||b.disabled||!S)return;
 var it=S.items[+b.closest(".ex").dataset.i],a=b.dataset.act;
 if(a==="start"){pending=it;$("mn").textContent="Dövlət Qulluğu "+it.cat+" · Sınaq "+it.exam;$("ov").classList.add("on")}
-else if(a==="go")go(it);else if(a==="resume"){restoreSnap(it);seedRun(it);go(it)}else if(a==="cab")go(null)});
+else if(a==="res")openResult(it);else if(a==="go")go(it);else if(a==="resume"){restoreSnap(it);seedRun(it);go(it)}else if(a==="cab")go(null)});
 function closeDlg(){$("ov").classList.remove("on");pending=null}
 $("no").addEventListener("click",closeDlg);
 $("ov").addEventListener("click",function(e){if(e.target===this)closeDlg()});

@@ -8934,7 +8934,7 @@ setInterval(function(){try{syncEd();syncBar();wrapSave()}catch(e){}},1000);
 
 }</script>
 <script>if(!(window.__dqOff&&window.__dqOff.imtahanpro))document.write('<script src="dq-imtahanpro.js?v=2"><\/script>')</script>
-<script>if(!(window.__dqOff&&window.__dqOff.giris))document.write('<script src="dq-imtahan-giris.js?v=16"><\/script>')</script>
+<script>if(!(window.__dqOff&&window.__dqOff.giris))document.write('<script src="dq-imtahan-giris.js?v=18"><\/script>')</script>
 <script>if(!(window.__dqOff&&window.__dqOff.elan))document.write('<script src="dq-elan.js?v=1"><\/script>')</script>
 <script>if(!(window.__dqOff&&window.__dqOff.qapaq))document.write('<script src="dq-sinaq-qapaq.js?v=1"><\/script>')</script>
 <script>if(!(window.__dqOff&&window.__dqOff.studio))document.write('<script src="dq-elan-studio.js?v=3"><\/script>')</script>
@@ -10232,6 +10232,35 @@ function tick(){for(var id in CFG){var p=document.getElementById(id);if(!p)conti
 setInterval(tick,350);
 document.addEventListener("click",function(){setTimeout(tick,60)},true);
 setTimeout(tick,500);
+})();
+</script>
+<script id="dq-lock-fix">
+/* «Başladığınız cihazdan davam edin» kilidi HEÇ VAXT qalmasın: düymə həmişə aktiv «Davam et» olur.
+   Eyni cihazdadırsa imtahana birbaşa qayıdır; başqa cihazdadırsa giris.html-də cavablar yedəkdən bərpa olunur. */
+(function(){"use strict";if(window.__dqLockFix)return;window.__dqLockFix=1;
+function norm(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\u0259/g,"e").replace(/\u0131/g,"i")}
+function isLock(b){return /basladiginiz cihazdan davam/.test(norm(b.textContent))}
+function finOf(){var m=/is nomresi:\s*([a-z0-9]{4,12})/.exec(norm(document.body?document.body.innerText:""));return m?m[1].toUpperCase():""}
+function resume(){
+ var fin=finOf(),st=null;
+ try{st=JSON.parse(localStorage.getItem("dq_exam_state")||"null")}catch(e){}
+ if(st&&st.fin&&st.examId!=null&&localStorage.getItem("dq_exam_end_time")&&(!fin||String(st.fin).toUpperCase()===fin)){
+  var cat=String(st.userGroup||"BA").toUpperCase();
+  try{localStorage.removeItem("dq_desktop_mode")}catch(e){}
+  try{sessionStorage.setItem("dqg_handoff",JSON.stringify({fin:String(st.fin).toUpperCase(),exam:String(st.examId),cat:cat,ts:Date.now()}))}catch(e){}
+  location.assign("./?giris=1&sinaq="+encodeURIComponent(st.examId)+"&qrup="+encodeURIComponent(cat));return}
+ location.href="giris.html?"+(fin?"kod="+encodeURIComponent(fin)+"&":"")+"auto=1&v=20261122"}
+setInterval(function(){
+ var bs=document.querySelectorAll("button");
+ for(var i=0;i<bs.length;i++){var b=bs[i];
+  if(!b.__dqfix&&!isLock(b))continue;b.__dqfix=1;
+  if(isLock(b))b.textContent="Davam et";
+  b.disabled=false;b.classList.remove("lock");
+  b.style.setProperty("opacity","1","important");b.style.setProperty("cursor","pointer","important");
+  b.style.setProperty("background","linear-gradient(180deg,#f3d98b,#c9a24b)","important");b.style.setProperty("color","#0a1a3a","important")}
+},250);
+document.addEventListener("click",function(e){var b=e.target&&e.target.closest&&e.target.closest("button");
+ if(!b||!b.__dqfix)return;e.preventDefault();e.stopImmediatePropagation();resume()},true);
 })();
 </script>
 </body>
