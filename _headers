@@ -1,26 +1,19 @@
 # DQ Platform — keşləmə qaydaları (Cloudflare static assets).
-# Skriptlər index.html-də ?v=N ilə çağırılır: fayl dəyişəndə N-i artırın.
-# Hər fayl üçün aralıq maksimum köhnəlmə = 1 saat, sonra arxa fonda yenilənir.
-/app.js
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
-/yspro.js
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
-/dq-core.js
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
-/dq-hero.js
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
-/dq-live.js
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
-/dq-lock.js
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
-/dq-materials.js
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
-/dq-net.js
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
-/chatbot.js
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
-# Service worker həmişə təzə yoxlanmalıdır
-/sw.js
+# QAYDA: kod faylları (html/js/css/json) HƏR DƏFƏ yoxlanır (ETag ilə 304, sürətli).
+# Köhnə «max-age + stale-while-revalidate» qaydası dəyişikliklərin istifadəçiyə saatlarla,
+# bəzən günlərlə çatmamasına (köhnə versiya qalmasına) səbəb olurdu.
+# Şəkillər dəyişmir deyə uzun saxlanılır. Dəyişəndə faylın adını dəyişin.
+/
   Cache-Control: no-cache
-/service-worker.js
+/*.html
   Cache-Control: no-cache
+/*.js
+  Cache-Control: no-cache
+/*.css
+  Cache-Control: no-cache
+/*.json
+  Cache-Control: no-cache
+/*.png
+  Cache-Control: public, max-age=604800
+/*.jpg
+  Cache-Control: public, max-age=604800

@@ -508,10 +508,12 @@
         s.className = "st"; s.textContent = "Başlama vaxtı: " + fmtDT(it.start); lock("Hələ açılmayıb"); P("wt", "Gözləyir");
       } else if (run && left <= 0) {
         s.className = "st"; s.textContent = "Vaxt bitib";
-        if (loc) { b.textContent = "Nəticəni göndər"; P("er", "Vaxt bitib"); } else { lock("Vaxt bitib"); P("er", "Vaxt bitib", "Bu sınaq üçün ayrılan " + DUR + " dəqiqə bitib. Yenidən iştirak üçün administrasiya ilə əlaqə saxlayın."); }
+        b.textContent = "Nəticəni göndər";
+        P("er", "Vaxt bitib", loc ? "" : "Vaxt bitib. Cavablarınız serverdəki yedəkdən bərpa olunub nəticə hesablanacaq. Yedək yoxdursa, administrasiya ilə əlaqə saxlayın.");
       } else if (run) {
         s.className = "st run"; s.innerHTML = "Davam edir: <span>" + fmtLeft(left) + "</span>";
-        if (loc) b.textContent = "Davam et"; else lock("Başladığınız cihazdan davam edin"); P("rn", "Davam edir");
+        b.textContent = "Davam et";   /* eyni və ya başqa cihaz: kilid yoxdur, cavablar yedəkdən bərpa olunur */
+        P("rn", "Davam edir", loc ? "" : "Bu cihazda əvvəlki cavablar tapılmadısa, serverdəki yedəkdən bərpa olunacaq.");
       } else {
         s.className = "st"; s.textContent = "Başlanmayıb"; b.textContent = "Başla"; P("rd", "Hazırdır");
       }
@@ -520,9 +522,27 @@
 
   /* ---------- təsdiq pəncərəsi ---------- */
   var pending = null;
-  function openConfirm(it) {
+  /* başqa cihazdan / təmizlənmiş yaddaşdan davam: serverdəki yedək (exam_resume) bu cihaza yazılır */
+  async function fetchSnap(it) {
+    try {
+      if (!(window.V2 && V2.list)) return null;
+      var key = (session.fin + "_" + it.exam + "_" + it.cat).replace(/[^A-Z0-9_]/gi, ""), best = null;
+      var L = await V2.list("exam_resume");
+      (L || []).forEach(function (d) {
+        if (d && d.k === key && d.keys && d.keys.dq_exam_state && d.keys.dq_exam_end_time && (!best || (+d.t || 0) > (+best.t || 0))) best = d;
+      });
+      return best;
+    } catch (e) { return null; }
+  }
+  function applySnap(sn) { try { for (var k in sn.keys) if (sn.keys[k] != null) localStorage.setItem(k, sn.keys[k]); } catch (e) {} }
+  async function openConfirm(it) {
     pending = it;
     var resume = hasLocalState(it);
+    if (!resume && getRun(it)) {
+      var sn = await fetchSnap(it);
+      if (sn) { applySnap(sn); resume = hasLocalState(it); }
+      if (!resume) { pending = null; toast("Bu sınaq üçün cavab yedəyi tapılmadı. Administrasiya ilə əlaqə saxlayın."); return; }
+    }
     $("dqg-mn").textContent = "Dövlət Qulluğu " + it.cat + " · Sınaq " + it.exam;
     if (resume) { start(it); return; }  /* davam edən imtahan təsdiq tələb etmir */
     $("dqg-ov").classList.add("on");
