@@ -134,7 +134,7 @@ h2{font-size:11.5px;margin-bottom:11px}
 <div class="who"><div class="av" id="av">?</div><div><b id="nm"></b><small id="fn"></small></div></div>
 <h2>Sizə icazə verilmiş sınaqlar</h2>
 <div class="grid" id="grid"></div>
-<p style="margin:18px 0 0;text-align:center;font-size:10.5px;color:#4f6396">giris v20261120</p>
+<p style="margin:18px 0 0;text-align:center;font-size:10.5px;color:#4f6396">giris v20261121</p>
 </section>
 </main>
 <div class="ov" id="ov"><div class="md" role="dialog" aria-modal="true"><h4>İmtahanı başlat</h4><div class="nm" id="mn"></div>
@@ -179,7 +179,10 @@ function state(it){var now=Date.now(),run=getRun(it),loc=hasLocal(it),left=run?D
 if(S.done[pkey(it)])return{k:"ok",pl:"Tamamlanıb",st:"Tamamlanıb",btn:"Nəticəyə bax",act:"cab"};
 if(it.start&&it.start.getTime()>now&&!run)return{k:"wt",pl:"Gözləyir",st:"Başlama vaxtı: "+fmtDT(it.start),btn:"Hələ açılmayıb",lock:1};
 if(run&&left<=0){if(loc)return{k:"er",pl:"Vaxt bitib",st:"Vaxt bitib",btn:"Nəticəni göndər",act:"go"};
-return{k:"er",pl:"Vaxt bitib",st:"Vaxt bitib",btn:"Vaxt bitib",lock:1,note:"Bu sınaq üçün ayrılan "+DUR+" dəqiqə bitib. Yenidən iştirak üçün administrasiya ilə əlaqə saxlayın."}}
+/* vaxt bitib, nəticə hələ göndərilməyib: tələbə nəticəni görə bilməlidir */
+var sn0=S.snap&&S.snap[pkey(it)];
+if(sn0)return{k:"er",pl:"Vaxt bitib",st:"Vaxt bitib",btn:"Nəticəni göndər və gör",act:"resume",note:"Cavablarınız yedəkdən bərpa olunacaq, nəticə hesablanıb göstəriləcək (son saxlama: "+fmtDT(new Date(sn0.t)).split(", ")[1]+")."};
+return{k:"er",pl:"Vaxt bitib",st:"Vaxt bitib",btn:"Nəticəyə bax",act:"cab",note:"Bu sınaq üçün ayrılan "+DUR+" dəqiqə bitib. Nəticə hazırdırsa kabinetdə görünəcək. Görünmürsə administrasiya ilə əlaqə saxlayın."}}
 if(run){if(loc)return{k:"rn",pl:"Davam edir",st:"Davam edir: "+fmtLeft(left),run:1,btn:"Davam et",act:"go"};
 var sn=S.snap&&S.snap[pkey(it)];
 if(sn)return{k:"rn",pl:"Davam edir",st:"Davam edir: "+fmtLeft(left),run:1,btn:"Qaldığım yerdən davam et",act:"resume",note:"Cavablarınız və sual nömrəniz bərpa olunacaq (son saxlama: "+fmtDT(new Date(sn.t)).split(", ")[1]+"). Qalan vaxt davam edir."};
@@ -236,7 +239,7 @@ var q=api("dq_v2_store?select=data&collection=eq.exam_resume&data->>k=eq."+encod
 /* başqa cihaz: serverdə başlama vaxtı yoxdursa, yedəkdən hesablanır (bitiş vaxtı − müddət) → taymer sıfırlanmır, «Başla» çıxmır */
 if(!getRun(it)){var rk="dqg_run:"+S.fin+":"+it.exam+":"+it.cat,tm=function(v){v=String(v==null?"":v).trim();return/^\d+$/.test(v)?+v:Date.parse(v)},
 st0=+best.keys[rk]||0,en=tm(best.keys.dq_exam_end_time),run0=st0||(en?en-DUR*60000:0);
-if(run0&&run0+DUR*60000>Date.now())S.prog[pkey(it)]=run0}}}).catch(function(){});
+if(run0&&run0+DUR*60000>Date.now()-3*864e5)S.prog[pkey(it)]=run0}}}).catch(function(){});
 return Promise.race([q,new Promise(function(ok){setTimeout(ok,6000)})])});return Promise.all(ps)}
 function restoreSnap(it){var sn=S.snap&&S.snap[pkey(it)];if(!sn)return;try{for(var k in sn.keys)if(sn.keys[k]!=null)localStorage.setItem(k,sn.keys[k])}catch(e){}}
 /* ---- başqa cihazdan / təmizlənmiş yaddaşdan davam: serverdəki başlama vaxtı bu cihaza yazılır ki, taymer sıfırlanmasın ---- */
