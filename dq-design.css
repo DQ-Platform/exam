@@ -1,0 +1,164 @@
+/* ==========================================================================
+   DQ Platform — vahid dizayn sistemi (rəsmi / dövlət portalı üslubu)
+   Bu fayl ən sonda yüklənir və köhnə təbəqələri vahid qaydalara gətirir.
+   Rənglər, şrift və ölçülər yalnız aşağıdakı tokenlərdən götürülür.
+   ========================================================================== */
+
+:root{
+  /* Rəng */
+  --dq-navy:#0a2f7a;      /* əsas: başlıq, düymə, naviqasiya */
+  --dq-navy-d:#071f52;    /* tünd: hero, footer */
+  --dq-navy-l:#e8eefb;    /* açıq göy: fon, seçilmiş */
+  --dq-gold:#c9a24b;      /* vurğu: xətt, ikon */
+  --dq-gold-d:#8a6a1c;    /* qızılı mətn (AA kontrast) */
+  --dq-ink:#14213d;       /* əsas mətn */
+  --dq-mut:#52607a;       /* ikinci dərəcəli mətn */
+  --dq-line:#d9e1ee;      /* haşiyə */
+  --dq-bg:#f4f6fa;        /* səhifə fonu */
+  --dq-card:#ffffff;
+  --dq-ok:#15803d; --dq-err:#b91c1c; --dq-warn:#b45309;
+  /* Forma */
+  --dq-r:10px; --dq-r-s:6px;
+  --dq-sh:0 1px 2px rgba(10,47,122,.06),0 8px 20px -10px rgba(10,47,122,.18);
+  --dq-font:"Noto Sans","Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+}
+
+/* ---------- Şrift: bütün saytda bir ailə (ikon şriftləri istisna) ---------- */
+html body,
+html body :where(button,input,select,textarea,label,table,h1,h2,h3,h4,h5,h6,p,a,span,div,li,td,th,b,strong):not(i):not([class*="fa-"]):not(.fa):not(.fas):not(.far):not(.fab):not(.ic){
+  font-family:var(--dq-font);
+}
+
+/* ---------- Ana səhifə: açıq fon, tünd başlıq/hero/footer ---------- */
+html body #v3-home.dqr-on{background:var(--dq-bg)}
+html body #dqr{
+  --bg:var(--dq-bg); --tx:var(--dq-ink); --mt:var(--dq-mut);
+  --pn:var(--dq-card); --ln:var(--dq-line); --gd:var(--dq-gold-d);
+  --gd2:var(--dq-gold);
+  background:var(--dq-bg); color:var(--dq-ink);
+}
+html body #dqr .hero,
+html body #dqr header.hd,
+html body #dqr footer#dqr-ft{
+  --tx:#fff; --mt:#cfdaf3; --ln:rgba(255,255,255,.22); --gd:var(--dq-gold); --gd2:#e8c874;
+  color:#fff;
+}
+html body #dqr .hero{background-color:var(--dq-navy-d)}
+html body #dqr footer#dqr-ft{background:var(--dq-navy-d)}
+
+/* Bölmələr: səhifə fonunda açıq, panellər ağ; yalnız iki tünd zolaq qalır
+   (hero və "Nəticəni təhlil et") — səhifədə vurğu nöqtələri kimi */
+html body #dqr main>section{background:transparent;border:0;box-shadow:none}
+html body #dqr .sh h2,html body #dqr #dqr-why>h2,html body #dqr .nh{color:var(--dq-navy)}
+html body #dqr .sh p{color:var(--dq-mut)}
+html body #dqr .sh:before{background:var(--dq-gold)}
+html body #dqr .sh a,html body #dqr .nh a{color:var(--dq-navy);font-weight:600}
+
+/* Aktiv sınaqlar və Yeniliklər panelləri */
+html body #dqr .dpn{background:var(--dq-card);border:1px solid var(--dq-line);border-radius:var(--dq-r);box-shadow:var(--dq-sh);color:var(--dq-ink)}
+html body #dqr .dpn :where(button,.ar,[class*=arr],[class*=nav]):where(button){background:var(--dq-card);color:var(--dq-navy);border:1px solid var(--dq-line)}
+
+/* Fənn kartları (rəngli şəkil kartları qalır) */
+html body #dqr .ex{border-radius:var(--dq-r)}
+
+/* Nəticə təhlili: tünd göy zolaq */
+html body #dqr .an{background:var(--dq-navy-d)}
+html body #dqr #dqr-an :where(h2,h3,p){color:#fff}
+html body #dqr #dqr-an .rs{background:rgba(255,255,255,.07)}
+
+/* Niyə məhz DQ Platform */
+html body #dqr .wy{background:var(--dq-card);color:var(--dq-ink);border:1px solid var(--dq-line);border-radius:var(--dq-r);box-shadow:var(--dq-sh)}
+html body #dqr .wy .wi{background:var(--dq-navy-l);color:var(--dq-navy);border:1.5px solid var(--dq-gold);box-shadow:none}
+html body #dqr #dq-why-stats{background:var(--dq-navy);border-radius:var(--dq-r)}
+
+/* Son yeniliklər */
+html body #dqr .nb{background:var(--dq-card);border:1px solid var(--dq-line);border-radius:var(--dq-r);box-shadow:var(--dq-sh)}
+html body #dqr .nb .bn{color:#fff}
+
+/* İmtahan qeydiyyatı zolağı */
+html body #dqr #lxp-ban{background:var(--dq-navy);border-radius:var(--dq-r);box-shadow:var(--dq-sh)}
+
+/* ---------- Düymələr: iki növ (əsas / ikinci dərəcəli) ---------- */
+html body #dqr .b,
+html body :where(.btn,button.primary,.dq-btn){
+  border-radius:var(--dq-r-s); font-weight:600; letter-spacing:0;
+}
+html body #dqr .b.g{
+  background:var(--dq-gold); color:var(--dq-navy-d); border:1px solid #b08a33; box-shadow:none;
+}
+html body #dqr .b.g:hover{background:#d6b25e; filter:none; transform:none}
+html body #dqr main .b:not(.g){
+  background:transparent; color:var(--dq-navy); border:1px solid var(--dq-navy);
+}
+html body #dqr main .b:not(.g):hover{background:var(--dq-navy-l); transform:none; filter:none}
+
+/* ---------- Fokus və hərəkət ---------- */
+html body :focus-visible{outline:2px solid var(--dq-navy); outline-offset:2px}
+html body #dqr :focus-visible{outline-color:var(--dq-gold)}
+@media (prefers-reduced-motion:reduce){
+  html body *,html body *::before,html body *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+
+/* ---------- Pop-up nizamı: eyni anda yalnız biri görünür ----------
+   Prioritet: xoş gəldiniz pəncərəsi > kuki > tətbiq quraşdır > bildiriş sorğusu */
+html body:has(.dqg-ov) #dq-cookie,
+html body:has(.dqg-ov) #dq-install,
+html body:has(.dqg-ov) #dq-ask,
+html body:has(#dq-cookie) #dq-install,
+html body:has(#dq-cookie) #dq-ask,
+html body:has(#dq-install) #dq-ask{display:none!important}
+
+/* Xoş gəldiniz pəncərəsi: sakit, rəsmi */
+html body .dqg-ov .dqg-c{border-radius:var(--dq-r); box-shadow:0 24px 60px -20px rgba(7,31,82,.5)}
+html body .dqg-ov .dqg-p{background:var(--dq-navy); color:#fff; border-radius:var(--dq-r-s); box-shadow:none}
+html body .dqg-ov .dqg-l{color:var(--dq-mut)}
+
+/* ---------- Ana səhifə: düzəlişlər ---------- */
+html body #v3-home{background:var(--dq-bg)!important}
+html body #dqr .sh h2,
+html body #dqr #dqr-why>h2,
+html body #dqr .nh h2,
+html body #dqr #dqr-duo h2,
+html body #dqr #dqr-ex h2,
+html body #dqr #dqr-why h2{color:var(--dq-navy)!important}
+html body #dqr .bn h2{color:#fff!important}
+html body #dqr #dqr-an h2{color:#fff!important}
+html body #dqr .dpn :where(p,div,span):not([class*=btn]):not(.b){color:inherit}
+html body #dqr .dpn [class*=empty],
+html body #dqr .dpn .em{color:var(--dq-mut)!important}
+
+/* Alt hissə (footer) — tünd göy, qızılı xətt */
+html body #v3-home .v3-ft{
+  background:var(--dq-navy-d)!important; color:#cfdaf3!important;
+  border-top:3px solid var(--dq-gold); text-align:center; padding:28px 16px!important;
+}
+html body #v3-home .v3-ft a{color:#e8c874!important;text-decoration:none;font-weight:600}
+html body #v3-home .v3-ft a:hover{text-decoration:underline}
+html body #v3-home .v3-ft :where(span,i,button)[class*=soc],
+html body #v3-home .v3-ft [class*=soc] *{background:transparent!important;border:1px solid rgba(255,255,255,.35)!important;color:#fff!important}
+
+/* Köhnə qayda başlıqların "text-fill" rəngini açıq-ağ edirdi: eyni ağırlıqda, sonrakı qayda ilə düzəlir */
+html body #dqr .sh h2,
+html body #dqr #dqr-why>h2,
+html body #dqr .nh h2,
+html body #dqr #dqr-duo h2,
+html body #dqr #dqr-ex h2,
+html body #dqr #dqr-why h2,
+html body #dqr #dqr-news .nh h2{color:var(--dq-navy)!important;-webkit-text-fill-color:var(--dq-navy)!important;text-shadow:none!important}
+html body #dqr .bn h2,html body #dqr #dqr-an h2{-webkit-text-fill-color:#fff!important}
+
+/* Footer sosial düymələr: bir üslub (şəffaf, nazik haşiyə, hover-də qızılı) */
+html body #v3-home .dq-fab-b{background:transparent!important;border:1px solid rgba(255,255,255,.4)!important;color:#fff!important;box-shadow:none!important}
+html body #v3-home .dq-fab-b:hover{background:var(--dq-gold)!important;border-color:var(--dq-gold)!important;color:var(--dq-navy-d)!important}
+
+/* İmtahan qeydiyyatı zolağı: köhnə bənövşəyi qradiyent əvəzinə düz göy */
+html body #dqr #lxp-ban{background:var(--dq-navy)!important;background-image:none!important}
+
+/* ---------- Admin panel: bütün qruplar eyni göy rəngdə (əvvəl hər qrup ayrı rəng idi) ---------- */
+html body #admin-panel .dqap-g{--ag:var(--dq-navy)!important}
+html body #admin-panel .dqap-g .dqap-h{background:var(--dq-navy-l)}
+html body #admin-panel .dqap-g .dqap-tt{color:var(--dq-navy)!important}
+html body #admin-panel .dqap-g .dqap-n{background:var(--dq-navy)!important;color:#fff}
+html body #admin-panel .dqap-g{border-radius:var(--dq-r);box-shadow:var(--dq-sh);border-color:var(--dq-line)}
+html body #admin-panel .dqap-c .admin-nav-card{background:var(--dq-card)!important;border-color:var(--dq-line)!important;color:var(--dq-navy)}
+html body #admin-panel .dqap-c .admin-nav-card:hover{background:var(--dq-navy-l)!important}
