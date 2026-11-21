@@ -138,10 +138,13 @@ function isAdmin(s){return s&&s.user&&String(s.user.email||"").toLowerCase()===A
 /* ---- giriş: Supabase Auth (RLS ilə uyğun — parol brauzer kodunda saxlanmır) ---- */
 async function login(){
   $("lerr").textContent="";$("go").disabled=true;
-  var r=await DQ.client.auth.signInWithPassword({email:$("em").value.trim(),password:$("pw").value});
-  $("go").disabled=false;
-  if(r.error||!isAdmin(r.data.session)){ if(!r.error) await DQ.client.auth.signOut(); $("lerr").textContent="E-poçt və ya şifrə səhvdir."; return; }
-  enter();
+  try{
+    if(!window.DQ||!DQ.client||!DQ.client.auth)throw new Error("Giriş xidməti yüklənmədi. Səhifəni yeniləyin.");
+    var r=await DQ.client.auth.signInWithPassword({email:$("em").value.trim(),password:$("pw").value});
+    if(r.error||!isAdmin(r.data&&r.data.session)){if(!r.error)await DQ.client.auth.signOut();$("lerr").textContent="E-poçt və ya şifrə səhvdir.";return;}
+    enter();
+  }catch(e){$("lerr").textContent=e&&e.message||"Giriş zamanı xəta baş verdi.";}
+  finally{$("go").disabled=false;}
 }
 $("go").onclick=login; $("pw").onkeydown=function(e){if(e.key==="Enter")login()};
 $("out").onclick=async function(){await DQ.client.auth.signOut();location.reload()};
@@ -170,10 +173,17 @@ function render(){
       '<button class="btn red sm" data-id="'+esc(s.id)+'">Sil</button></div>';}).join(""):'<div class="li"><small>Heç nə tapılmadı.</small></div>';
 }
 $("q").oninput=render;
+async function reloadStudents(){
+  var r=await DQ.read("allowed_students",function(q){return q.select("*").order("id",{ascending:false})},{key:"admin-students",force:true,retries:2});
+  if(r.error)throw r.error;
+  students=r.data||[];render();return students;
+}
 $("list").onclick=async function(e){
   var id=e.target.getAttribute&&e.target.getAttribute("data-id");if(!id||!confirm("Silinsin?"))return;
   var r=await DQ.write("allowed_students",function(q){return q.delete().eq("id",id)});
-  r.error?DQ.toast(r.message,"err"):DQ.toast("Silindi","ok");
+  if(r.error){DQ.toast(r.message,"err");return;}
+  try{await reloadStudents();DQ.toast("İcazə silindi və siyahı yeniləndi","ok");}
+  catch(err){DQ.toast("Silindi, lakin siyahı yenilənmədi: "+(err.message||err),"err");}
 };
 $("add").onclick=async function(){
   var name=$("sn").value.trim(),fin=$("sf").value.trim().toUpperCase(),ex=$("se").value.trim(),cats=$("sc").value.split(",").map(function(x){return x.trim().toUpperCase()}).filter(Boolean);
@@ -183,12 +193,16 @@ $("add").onclick=async function(){
   if(students.some(function(s){return String(s.fin).toUpperCase()===fin&&String(s.exam_no)===ex})){$("aerr").textContent="Bu iş nömrəsi bu imtahan üçün artıq var.";return}
   var r=await DQ.write("allowed_students",function(q){return q.insert([{student_name:name,fin:fin,exam_no:ex,categories:cats}])});
   if(r.error){$("aerr").textContent=r.message;return}
-  $("sn").value="";$("sf").value="";DQ.toast("Əlavə olundu","ok");
+  $("sn").value="";$("sf").value="";
+  try{await reloadStudents();DQ.toast("İcazə əlavə olundu və siyahı yeniləndi","ok");}
+  catch(err){DQ.toast("Əlavə olundu, lakin siyahı yenilənmədi: "+(err.message||err),"err");}
 };
 $("sync").onclick=async function(){
   $("sync").disabled=true;$("syncInfo").textContent="Yenilənir…";t0=Date.now();
   ["allowed_students","exam_questions","exam_results","dq_v2_store"].forEach(DQ.invalidate);
-  await DQPreload.refresh();paintStats();$("sync").disabled=false;
+  try{await DQPreload.refresh();await reloadStudents();paintStats();paintSub();$("syncInfo").textContent="Məlumatlar yeniləndi · "+new Date().toLocaleTimeString("az");}
+  catch(e){$("syncInfo").textContent="Yenilənmə zamanı xəta: "+(e.message||e);}
+  finally{$("sync").disabled=false;}
 };
 
 /* ---- bağlantı göstəricisi ---- */
