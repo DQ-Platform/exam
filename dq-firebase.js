@@ -1,4 +1,7 @@
-/* DQ Platform — Supabase → Firebase (Firestore) MÜVƏQQƏTİ körpü, v1
+/* DQ Platform — MƏRKƏZİ BAZA qatı (Supabase → Firebase/Firestore körpüsü), v2 (möhkəmləndirilmiş)
+   v2: sorğu vaxt-aşımı, avtomatik təkrar cəhd (backoff), Firebase yenidən qoşulma, oflayn/onlayn izləmə,
+   əlaqə statusu (window.DQDB), xəta zamanı son uğurlu cavabın (stale) qaytarılması, Firestore lokal keşi.
+   Əvvəlki v1 təsviri:
    Mövcud kod (app.js və s.) dəyişmir. supabase-js-in göndərdiyi /rest/v1/... sorğuları
    burada tutulur və Firestore-a yönləndirilir. index.html-də <head>-in ƏN BİRİNCİ script-i olmalıdır. */
 (function () {
@@ -27,6 +30,85 @@
   var SKIP_COLL = { live: 1 };          /* canlı izləmə (heartbeat) Firestore kvotasını yeməsin deyə söndürülüb */
   var BIGLIM = 600000, CHUNK = 250000;  /* Firestore sənəd limiti 1 MiB — böyük sətirlər hissələrə bölünür */
   var BIG = {}, CACHE = {}, lastId = 0;
+
+
+  /* ---------- v2: əlaqə statusu, vaxt-aşımı, təkrar cəhd ---------- */
+  var OP_TIMEOUT = 15000, DELAYS = [300, 900, 2000];
+  var STATE = "connecting", subs = [], failStreak = 0, lastOk = 0, lastErr = "";
+  var STALE = {}, STALE_KEYS = [], STALE_MAX = 60, STALE_BYTES = 400000;
+  var NOFAIL = { "permission-denied": 1, "invalid-argument": 1, "not-found": 1, "unauthenticated": 1, "failed-precondition": 1, "already-exists": 1 };
+  function setState(s) {
+    if (s === STATE) return;
+    STATE = s;
+    subs.slice().forEach(function (f) { try { f(s); } catch (e) {} });
+    try { root.dispatchEvent(new CustomEvent("dq-db-status", { detail: { status: s } })); } catch (e) {}
+    banner(s);
+  }
+  function markOk() { failStreak = 0; lastOk = Date.now(); lastErr = ""; setState("online"); }
+  function markFail(e) {
+    failStreak++; lastErr = String((e && (e.code || e.message)) || e);
+    var off = typeof navigator !== "undefined" && navigator.onLine === false;
+    setState(off ? "offline" : (failStreak >= 2 ? "degraded" : STATE));
+  }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function withTimeout(p, ms, what) {
+    return new Promise(function (res, rej) {
+      var t = setTimeout(function () { var e = new Error("Bazaya sorğu vaxt aşımına düşdü (" + what + ")"); e.code = "timeout"; rej(e); }, ms);
+      p.then(function (v) { clearTimeout(t); res(v); }, function (e) { clearTimeout(t); rej(e); });
+    });
+  }
+  /* guard: hər Firestore əməliyyatı vaxt-aşımı + təkrar cəhd ilə (əməliyyatlar id-əsaslı olduğu üçün təkrar təhlükəsizdir) */
+  async function guard(what, fn) {
+    var lastE;
+    for (var n = 0; n <= DELAYS.length; n++) {
+      try {
+        var v = await withTimeout(Promise.resolve().then(fn), OP_TIMEOUT, what);
+        markOk(); return v;
+      } catch (e) {
+        lastE = e;
+        if (e && NOFAIL[e.code]) { throw e; }
+        markFail(e);
+        if (n < DELAYS.length) {
+          if (typeof navigator !== "undefined" && navigator.onLine === false) await waitOnline(DELAYS[n] * 4);
+          else await sleep(DELAYS[n] + Math.random() * 250);
+        }
+      }
+    }
+    throw lastE;
+  }
+  function waitOnline(maxMs) {
+    return new Promise(function (res) {
+      var done = false;
+      function fin() { if (done) return; done = true; root.removeEventListener("online", fin); res(); }
+      root.addEventListener("online", fin); setTimeout(fin, maxMs);
+    });
+  }
+  function staleSet(k, v) {
+    if (!v || v.b.length > STALE_BYTES) return;
+    if (!STALE[k]) { STALE_KEYS.push(k); if (STALE_KEYS.length > STALE_MAX) delete STALE[STALE_KEYS.shift()]; }
+    STALE[k] = v;
+  }
+  /* kiçik, diqqəti yayındırmayan status zolağı (yalnız əlaqə problemi olanda görünür) */
+  var bannerEl = null, bannerTimer = null;
+  function banner(s) {
+    try {
+      if (typeof document === "undefined" || !document.body) { if (typeof document !== "undefined") document.addEventListener("DOMContentLoaded", function () { banner(STATE); }, { once: true }); return; }
+      if (s === "online" || s === "connecting") { if (bannerEl) { bannerEl.style.opacity = "0"; clearTimeout(bannerTimer); bannerTimer = setTimeout(function () { if (bannerEl && bannerEl.parentNode) bannerEl.parentNode.removeChild(bannerEl); bannerEl = null; }, 400); } return; }
+      if (!bannerEl) {
+        bannerEl = document.createElement("div"); bannerEl.id = "dq-db-banner"; bannerEl.setAttribute("role", "status");
+        bannerEl.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:2147483000;padding:7px 14px;border-radius:999px;font:600 12.5px/1.3 system-ui,-apple-system,Segoe UI,sans-serif;color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.25);transition:opacity .3s;pointer-events:none;max-width:92vw;text-align:center";
+        document.body.appendChild(bannerEl);
+      }
+      clearTimeout(bannerTimer);
+      bannerEl.style.opacity = "1";
+      bannerEl.style.background = s === "offline" ? "#b45309" : "#b91c1c";
+      bannerEl.textContent = s === "offline" ? "İnternet yoxdur — bərpa olunanda avtomatik davam edəcək" : "Mərkəzi baza ilə əlaqə zəifdir — yenidən cəhd edilir…";
+    } catch (e) {}
+  }
+  if (typeof window !== "undefined") {
+    window.addEventListener("offline", function () { setState("offline"); });
+    window.addEventListener("online", function () { setState("connecting"); try { DQDB.ping(); } catch (e) {} });
+  }
 
   var configured = FIREBASE_CONFIG.projectId && FIREBASE_CONFIG.projectId.indexOf("BURAYA") < 0;
   if (!configured && !root.DQ_FS_TEST) {
@@ -65,6 +147,12 @@
     if (headers) Object.keys(headers).forEach(function (k) { h[k] = headers[k]; });
     return new Response(body == null ? null : JSON.stringify(body), { status: status, headers: h });
   }
+  function errRes(e) {
+    var off = typeof navigator !== "undefined" && navigator.onLine === false;
+    var code = e && e.code ? String(e.code) : "FIREBASE";
+    var st = code === "permission-denied" ? 403 : (code === "not-found" ? 404 : 503);
+    return J(st, { message: off ? "İnternet bağlantısı yoxdur" : String((e && e.message) || e), code: code }, { "X-DQ-Retried": "1" });
+  }
   function hget(h, n) {
     if (!h) return "";
     if (typeof h.get === "function") return h.get(n) || "";
@@ -91,7 +179,7 @@
     return d;
   }
   async function decode(t, rec) {
-    var d = rec.d, FS = await fsReady, row;
+    var d = rec.d, FS = await ensureFS(), row;
     if (d._big) {
       BIG[t + "/" + rec.id] = 1;
       row = JSON.parse((await FS.parts(t, rec.id)).join(""));
@@ -107,7 +195,7 @@
     return row;
   }
   async function save(t, row) {
-    var FS = await fsReady, id = String(row.id), key = t + "/" + id;
+    var FS = await ensureFS(), id = String(row.id), key = t + "/" + id;
     var enc = encode(t, row);
     if (JSON.stringify(enc).length <= BIGLIM) {
       if (BIG[key]) { await FS.delParts(t, id); delete BIG[key]; }
@@ -127,7 +215,7 @@
     await FS.set(t, id, idx); BIG[key] = 1;
   }
   async function remove(t, id) {
-    var FS = await fsReady, key = t + "/" + id;
+    var FS = await ensureFS(), key = t + "/" + id;
     if (BIG[key]) { await FS.delParts(t, id); delete BIG[key]; }
     await FS.del(t, id);
   }
@@ -210,7 +298,7 @@
     return t === "dq_v2_store" && filters.some(function (f) { return f.col === "collection" && f.op === "eq" && !f.not && SKIP_COLL[f.val]; });
   }
   async function fetchRows(t, filters) {
-    var FS = await fsReady;
+    var FS = await ensureFS();
     if (skipped(t, filters)) return [];
     var idf = filters.filter(function (f) { return f.col === "id" && f.op === "eq" && !f.not; })[0];
     var idin = filters.filter(function (f) { return f.col === "id" && f.op === "in" && !f.not; })[0];
@@ -222,7 +310,7 @@
     return rows.filter(function (r2) { return filters.every(function (f) { return matches(r2, f); }); });
   }
   async function countRows(t, filters) {
-    var FS = await fsReady;
+    var FS = await ensureFS();
     if (skipped(t, filters)) return 0;
     var pl = planWheres(t, filters);
     if (pl.served.length === filters.length && !filters.some(function (f) { return f.col === "id"; })) return FS.count(t, pl.w);
@@ -277,6 +365,7 @@
   async function handle(url, method, hd, body) {
     var u = new URL(url), p = u.pathname;
     if (p.indexOf("/rest/v1/") !== 0) {
+      if (p === "/auth/v1/health") return J(200, { status: "ok", backend: "firebase" });
       if (p.indexOf("/auth/v1/") === 0) return J(401, { message: "Auth müvəqqəti söndürülüb", code: "401" });
       return J(404, { message: "Not found" });
     }
@@ -293,10 +382,17 @@
     if (method === "GET") {
       var ck = t === "dq_v2_store" ? url : null, hit = ck && CACHE[ck];
       if (hit && Date.now() - hit.t < 60000) return new Response(hit.b, { status: 200, headers: hit.h });
-      var rows = sortRows(await fetchRows(t, filters), sp.get("order"));
+      var skey = method + " " + url, rows;
+      try { rows = sortRows(await fetchRows(t, filters), sp.get("order")); }
+      catch (ge) {
+        var st0 = STALE[skey];
+        if (st0 && !(ge && NOFAIL[ge.code])) { console.warn("[dq-firebase] əlaqə xətası — son uğurlu nəticə göstərilir:", t); return new Response(st0.b, { status: 200, headers: Object.assign({ "X-DQ-Stale": "1" }, st0.h) }); }
+        throw ge;
+      }
       var total = rows.length, off = parseInt(sp.get("offset") || "0", 10) || 0, lim = sp.get("limit");
       rows = rows.slice(off, lim != null ? off + parseInt(lim, 10) : undefined);
       var res = shape(project(t, rows, sel), obj, 200, total, off);
+      if (res.status === 200 && !obj) { var c2 = res.clone(); staleSet(skey, { b: await c2.text(), h: { "Content-Type": "application/json", "Content-Range": res.headers.get("Content-Range") || "*/0" } }); }
       if (ck && res.status === 200) {
         var clone = res.clone(), hh = { "Content-Type": "application/json", "Content-Range": res.headers.get("Content-Range") || "*/0" };
         CACHE[ck] = { t: Date.now(), b: await clone.text(), h: hh };
@@ -341,32 +437,64 @@
   async function initFirebase() {
     var base = "https://www.gstatic.com/firebasejs/" + SDK + "/";
     var A = await import(base + "firebase-app.js"), F = await import(base + "firebase-firestore.js");
-    var app = A.initializeApp(FIREBASE_CONFIG);
-    var db = F.initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
+    var app = A.getApps && A.getApps().length ? A.getApp() : A.initializeApp(FIREBASE_CONFIG);
+    var db;
+    try {
+      db = F.initializeFirestore(app, {
+        experimentalAutoDetectLongPolling: true,
+        localCache: F.persistentLocalCache({ tabManager: F.persistentMultipleTabManager() })
+      });
+    } catch (e1) {
+      try { db = F.getFirestore(app); } catch (e2) { db = F.initializeFirestore(app, { experimentalAutoDetectLongPolling: true }); }
+    }
     function q(coll, w) {
       var args = [F.collection(db, coll)];
       w.forEach(function (x) { args.push(F.where(x[0], "==", x[1])); });
       return F.query.apply(null, args);
     }
     return {
-      list: async function (c, w) { var s = await F.getDocs(q(c, w)); return s.docs.map(function (d) { return { id: d.id, d: d.data() }; }); },
-      get: async function (c, id) { var s = await F.getDoc(F.doc(db, c, id)); return s.exists() ? { id: id, d: s.data() } : null; },
-      set: function (c, id, d) { return F.setDoc(F.doc(db, c, id), d); },
-      del: function (c, id) { return F.deleteDoc(F.doc(db, c, id)); },
-      count: async function (c, w) { return (await F.getCountFromServer(q(c, w))).data().count; },
-      parts: async function (c, id) {
-        var s = await F.getDocs(F.collection(db, c, id, "p"));
-        return s.docs.map(function (d) { return d.data(); }).sort(function (a, b) { return a.i - b.i; }).map(function (x) { return x.s; });
+      list: function (c, w) { return guard("list " + c, async function () { var s = await F.getDocs(q(c, w)); return s.docs.map(function (d) { return { id: d.id, d: d.data() }; }); }); },
+      get: function (c, id) { return guard("get " + c, async function () { var s = await F.getDoc(F.doc(db, c, id)); return s.exists() ? { id: id, d: s.data() } : null; }); },
+      set: function (c, id, d) { return guard("set " + c, function () { return F.setDoc(F.doc(db, c, id), d); }); },
+      del: function (c, id) { return guard("del " + c, function () { return F.deleteDoc(F.doc(db, c, id)); }); },
+      count: function (c, w) { return guard("count " + c, async function () { return (await F.getCountFromServer(q(c, w))).data().count; }); },
+      parts: function (c, id) {
+        return guard("parts " + c, async function () {
+          var s = await F.getDocs(F.collection(db, c, id, "p"));
+          return s.docs.map(function (d) { return d.data(); }).sort(function (a, b) { return a.i - b.i; }).map(function (x) { return x.s; });
+        });
       },
-      setParts: async function (c, id, arr) { for (var i = 0; i < arr.length; i++) await F.setDoc(F.doc(db, c, id, "p", "p" + i), { i: i, s: arr[i] }); },
-      delParts: async function (c, id) {
-        var s = await F.getDocs(F.collection(db, c, id, "p"));
-        for (var i = 0; i < s.docs.length; i++) await F.deleteDoc(s.docs[i].ref);
+      setParts: async function (c, id, arr) { for (var i = 0; i < arr.length; i++) { await guard("setParts " + c, (function (i) { return function () { return F.setDoc(F.doc(db, c, id, "p", "p" + i), { i: i, s: arr[i] }); }; })(i)); } },
+      delParts: function (c, id) {
+        return guard("delParts " + c, async function () {
+          var s = await F.getDocs(F.collection(db, c, id, "p"));
+          for (var i = 0; i < s.docs.length; i++) await F.deleteDoc(s.docs[i].ref);
+        });
       }
     };
   }
-  var fsReady = root.DQ_FS_TEST ? Promise.resolve(root.DQ_FS_TEST) : initFirebase();
-  fsReady.catch(function (e) { console.error("[dq-firebase] Firebase açılmadı:", e); });
+  /* ensureFS: Firebase açılmayıbsa yenidən cəhd edir (v1-də bir dəfəlik xəta həmişəlik qalırdı) */
+  var fsReady = null, fsTries = 0;
+  function connect() {
+    if (root.DQ_FS_TEST) {  /* sınaq rejimi: saxta FS eyni guard (vaxt-aşımı + təkrar cəhd) ilə sarılır */
+      var T = root.DQ_FS_TEST, W = {};
+      Object.keys(T).forEach(function (m) { if (typeof T[m] === "function" && m.charAt(0) !== "_") W[m] = function () { var a = arguments; return guard("test " + m, function () { return T[m].apply(T, a); }); }; });
+      return Promise.resolve(W);
+    }
+    return withTimeout(initFirebase(), 25000, "Firebase qoşulması").then(function (fs) { fsTries = 0; markOk(); return fs; });
+  }
+  function ensureFS() {
+    if (!fsReady) {
+      fsReady = connect();
+      fsReady.catch(function (e) {
+        console.error("[dq-firebase] Firebase açılmadı:", e); markFail(e);
+        var wait = Math.min(1500 * Math.pow(2, fsTries++), 15000);
+        setTimeout(function () { fsReady = null; }, wait);
+      });
+    }
+    return fsReady;
+  }
+  ensureFS().catch(function () {});
 
   /* ---------- fetch tutucusu ---------- */
   var realFetch = root.fetch && root.fetch.bind(root);
@@ -380,22 +508,28 @@
       : (isReq && method !== "GET" && method !== "HEAD" ? input.clone().text() : Promise.resolve(null));
     return bp.then(function (b) { return handle(url, method, hd, b); }).catch(function (e) {
       console.error("[dq-firebase]", e);
-      return J(500, { message: String((e && e.message) || e), code: "FIREBASE" });
+      return errRes(e);
     });
   };
 
+  /* ictimai API: əlaqə statusu və sağlamlıq yoxlaması */
+  var DQDB = root.DQDB = {
+    status: function () { return STATE; },
+    onChange: function (f) { if (typeof f === "function") subs.push(f); },
+    info: function () { return { status: STATE, failStreak: failStreak, lastOk: lastOk, lastError: lastErr, online: typeof navigator === "undefined" ? true : navigator.onLine }; },
+    ping: async function () {
+      try { var FS = await ensureFS(); await FS.set("_ping", "1", { t: Date.now() }); var ok = !!(await FS.get("_ping", "1")); if (ok) markOk(); return ok; }
+      catch (e) { markFail(e); return false; }
+    }
+  };
   /* köçürmə səhifəsi üçün */
   root.DQFB = {
-    ready: fsReady,
+    get ready() { return ensureFS(); },
     importRow: async function (t, row) {
       row = normRow(t, row);
       if (row.id == null) row.id = newId();
       await save(t, row); return row.id;
     },
-    ping: async function () {
-      var FS = await fsReady;
-      await FS.set("_ping", "1", { t: Date.now() });
-      return !!(await FS.get("_ping", "1"));
-    }
+    ping: function () { return DQDB.ping(); }
   };
 })();

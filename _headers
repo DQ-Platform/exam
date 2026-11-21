@@ -20,7 +20,7 @@
 /chatbot.js
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 # Service worker həmişə təzə yoxlanmalıdır
-/sw.js
-  Cache-Control: no-cache
 /service-worker.js
   Cache-Control: no-cache
+/dq-firebase.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
