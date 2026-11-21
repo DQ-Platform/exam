@@ -16,7 +16,7 @@
     var root=document.getElementById('dqr');if(!root){busy=0;return}
     var els=root.querySelectorAll('a,span,b,i,button,small,em,strong,p,h1,h2,h3,h4,li,div');
     for(var i=0;i<els.length;i++){
-      var e=els[i];if(e.classList.contains('dq-lc')||!e.firstChild)continue;
+      var e=els[i];if(e.classList.contains('dq-lc')||e.classList.contains('dq-lw')||!e.firstChild)continue;
       var t=false;for(var n=e.firstChild;n;n=n.nextSibling){if(n.nodeType===3&&n.textContent.trim()){t=true;break}}
       if(!t)continue;
       var cs=getComputedStyle(e),m=cs.color.match(/[\d.]+/g);if(!m)continue;
@@ -24,7 +24,7 @@
       if(cs.color.indexOf('color(')===0){r=m[0]*255;g=m[1]*255;b=m[2]*255}
       if(r>150&&g<140&&b<130&&r-g>90){
         var a=lum(cs.color),c=lum(bgOf(e));
-        if((Math.max(a,c)+.05)/(Math.min(a,c)+.05)<3&&c<.2)e.classList.add('dq-lc');
+        if((Math.max(a,c)+.05)/(Math.min(a,c)+.05)<3)e.classList.add(c<.2?'dq-lc':'dq-lw');
       }
     }
     busy=0;

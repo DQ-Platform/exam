@@ -22,3 +22,7 @@ body.dq-q2 #dq-ask{display:none!important}
 #dqr nav a.on:after{background:#f72103!important;height:3px}
 #dq-pwa-wrap .dq-pw-card b,#dq-pwa-wrap .dq-pw-card strong{color:#fff!important}
 @media (max-width:640px){#dq-pwa-wrap{flex-direction:column!important;gap:8px!important;padding:8px!important}#dq-pwa-wrap .dq-pw-card{max-width:none!important;width:100%!important}}
+#dqr .dq-lc{color:#ffd0c8!important}
+#dqr .cta,#dqr .b,#dqr a.cta,#dqr .hero .cta{color:#fff!important}
+
+.dq-lw{color:#fff!important}
