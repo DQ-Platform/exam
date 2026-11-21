@@ -8,48 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>İmtahan Statistikası və Nəticələr - DQ Platform</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root { --primary-dark: #0f172a; --accent-gold: #d4af37; --success-green: #10b981; --danger-red: #ef4444; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #334155; margin: 0; padding: 20px; }
-        .container { max-width: 1100px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); border-top: 4px solid var(--accent-gold); }
-        
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        h2 { color: var(--primary-dark); margin: 0; }
-        .btn { background-color: var(--primary-dark); color: var(--accent-gold); border: none; padding: 10px 18px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; text-decoration: none; transition: 0.2s; }
-        .btn:hover { background-color: #1e293b; }
-        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
-        .btn-info { background-color: #0284c7; color: white; }
-        
-        /* STATİSTİKA KARTLARI */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: #f8fafc; border: 1px solid #cbd5e1; border-left: 5px solid var(--accent-gold); padding: 18px; border-radius: 8px; text-align: center; }
-        .stat-card h5 { margin: 0; color: #64748b; font-size: 13px; text-transform: uppercase; }
-        .stat-card .value { font-size: 26px; font-weight: bold; color: var(--primary-dark); margin-top: 5px; }
-        
-        /* KATEQORİYA FİLTRİ */
-        .filter-section { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; background: #f1f5f9; padding: 12px 15px; border-radius: 8px; border: 1px solid #cbd5e1; }
-        .filter-section label { font-weight: bold; font-size: 14px; }
-        .filter-select { padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: bold; outline: none; }
-        
-        /* CƏDVƏL STİLİ */
-        table { width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; }
-        th, td { padding: 12px 10px; border: 1px solid #cbd5e1; }
-        th { background: var(--primary-dark); color: white; }
-        .rank-badge { font-weight: bold; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; background: #e2e8f0; border-radius: 50%; color: #0f172a; }
-        .rank-1 { background: #fef08a; color: #854d0e; }
-        .rank-2 { background: #e2e8f0; color: #475569; }
-        .rank-3 { background: #fed7aa; color: #9a3412; }
-        .token-field { font-family: monospace; font-weight: bold; }
-
-        /* MODAL PƏNCƏRƏ (ƏTRAFLI NƏTİCƏ) */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: #ffffff; padding: 25px; border-radius: 12px; max-width: 650px; width: 90%; max-height: 85vh; overflow-y: auto; border-top: 4px solid var(--accent-gold); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px; }
-        .modal-header h3 { margin: 0; color: var(--primary-dark); }
-        .close-btn { font-size: 22px; cursor: pointer; color: #64748b; font-weight: bold; }
-        .subject-box { background: #f8fafc; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid #0284c7; display: flex; justify-content: space-between; font-weight: 500; }
-        .wrong-q-list { background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 6px; margin-top: 15px; font-size: 13px; color: #991b1b; }
-    </style>
+    <style>:root{--primary-dark: #005085;--accent-gold: #f72103;--success-green: #10b981;--danger-red: #ef4444}body{font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;background-color:#f5faff;color:#005288;margin:0;padding:20px}.container{max-width:1100px;margin:0 auto;background:#fff;padding:25px;border-radius:12px;box-shadow:0 4px 20px #0f172a14;border-top:4px solid var(--accent-gold)}.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}h2{color:var(--primary-dark);margin:0}.btn{background-color:var(--primary-dark);color:var(--accent-gold);border:none;padding:10px 18px;font-size:14px;font-weight:700;border-radius:6px;cursor:pointer;text-decoration:none;transition:.2s}.btn:hover{background-color:#005085}.btn-sm{padding:6px 12px;font-size:12px;border-radius:4px;border:none;cursor:pointer;font-weight:700}.btn-info{background-color:#0284c7;color:#fff}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:25px}.stat-card{background:#f5faff;border:1px solid #b1ddfb;border-left:5px solid var(--accent-gold);padding:18px;border-radius:8px;text-align:center}.stat-card h5{margin:0;color:#64748b;font-size:13px;text-transform:uppercase}.stat-card .value{font-size:26px;font-weight:700;color:var(--primary-dark);margin-top:5px}.filter-section{display:flex;align-items:center;gap:10px;margin-bottom:15px;background:#ebf7ff;padding:12px 15px;border-radius:8px;border:1px solid #b1ddfb}.filter-section label{font-weight:700;font-size:14px}.filter-select{padding:8px 12px;border-radius:6px;border:1px solid #b1ddfb;font-weight:700;outline:none}table{width:100%;border-collapse:collapse;text-align:center;font-size:14px}th,td{padding:12px 10px;border:1px solid #b1ddfb}th{background:var(--primary-dark);color:#fff}.rank-badge{font-weight:700;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;background:#d3edff;border-radius:50%;color:#005085}.rank-1{background:#ffb9ad;color:#c41a02}.rank-2{background:#d3edff;color:#006ab0}.rank-3{background:#ffb9ad;color:#9a3412}.token-field{font-family:monospace;font-weight:700}.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0f172a99;justify-content:center;align-items:center;z-index:1000}.modal-content{background:#fff;padding:25px;border-radius:12px;max-width:650px;width:90%;max-height:85vh;overflow-y:auto;border-top:4px solid var(--accent-gold);box-shadow:0 10px 25px #0003}.modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #ebf7ff;padding-bottom:10px;margin-bottom:15px}.modal-header h3{margin:0;color:var(--primary-dark)}.close-btn{font-size:22px;cursor:pointer;color:#64748b;font-weight:700}.subject-box{background:#f5faff;padding:10px 14px;border-radius:6px;margin-bottom:8px;border-left:4px solid #0284c7;display:flex;justify-content:space-between;font-weight:500}.wrong-q-list{background:#fef2f2;border:1px solid #fecaca;padding:12px;border-radius:6px;margin-top:15px;font-size:13px;color:#991b1b}
+</style>
 </head>
 <body>
 
@@ -59,7 +19,7 @@
             <a href="index.html" class="btn">🏠 Əsas Panələ Qayıt</a>
         </div>
 
-        <!-- Yuxarı Ümumi Statistika Bloku -->
+        
         <div class="stats-grid">
             <div class="stat-card">
                 <h5>Ümumi İştirakçı</h5>
@@ -75,7 +35,7 @@
             </div>
         </div>
 
-        <!-- Kateqoriya Üzrə Filtr -->
+        
         <div class="filter-section">
             <label for="category-filter">Kateqoriya Seçin:</label>
             <select id="category-filter" class="filter-select" onchange="filterAndRenderResults()">
@@ -88,7 +48,7 @@
             </select>
         </div>
 
-        <!-- İştirakçıların Sıralama Cədvəli -->
+        
         <div style="overflow-x: auto;">
             <table>
                 <thead>
@@ -109,7 +69,7 @@
         </div>
     </div>
 
-    <!-- ƏTRAFLI NƏTİCƏ MODALI (POPUP) -->
+    
     <div class="modal-overlay" id="detail-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -118,7 +78,7 @@
             </div>
             
             <div id="modal-body-content">
-                <!-- Dinamik fən nəticələri və səhv olunan suallar bura dolacaq -->
+                
             </div>
 
             <div style="margin-top: 20px; text-align: right;">
@@ -127,100 +87,21 @@
         </div>
     </div>
 
-    <script>
-        const SUPABASE_URL = "https://cpzwliqlgaplroscvduo.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        let globalResults = [];
-
-        document.addEventListener("DOMContentLoaded", fetchResultsData);
-
-        async function fetchResultsData() {
-            const { data, error } = await _supabase
-                .from('exam_results')
-                .select('*');
-
-            if (error) {
-                document.getElementById("stats-table-body").innerHTML = `<tr><td colspan="7" style="color:red;">Xəta baş verdi: ${error.message}</td></tr>`;
-                return;
-            }
-
-            globalResults = data || [];
-            
-            // Statistika bloklarının hesablanması
-            document.getElementById("stat-total-students").innerText = globalResults.length;
-            
-            let passedCount = globalResults.filter(r => r.score >= 65).length;
-            document.getElementById("stat-passed-students").innerText = passedCount;
-
-            let highestScore = globalResults.length > 0 ? Math.max(...globalResults.map(r => r.score || 0)) : 0;
-            document.getElementById("stat-highest-score").innerText = highestScore;
-
-            filterAndRenderResults();
-        }
-
-        function filterAndRenderResults() {
-            const selectedCat = document.getElementById("category-filter").value;
-            const tbody = document.getElementById("stats-table-body");
-
-            let filtered = [...globalResults];
-            if (selectedCat !== "ALL") {
-                filtered = filtered.filter(r => r.bb_group && r.bb_group.includes(selectedCat));
-            }
-
-            // Ballara görə azalan sıra ilə düzülməsi (Sıralama)
-            filtered.sort((a, b) => (b.score || 0) - (a.score || 0));
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7">Seçilmiş kateqoriya üzrə nəticə tapılmadı.</td></tr>`;
-                return;
-            }
-
-            let html = "";
-            filtered.forEach((r, index) => {
-                let rankClass = "rank-badge";
-                if (index === 0) rankClass += " rank-1";
-                else if (index === 1) rankClass += " rank-2";
-                else if (index === 2) rankClass += " rank-3";
-
-                let statusBadge = (r.score >= 65) 
-                    ? `<span style="color: green; font-weight: bold;">Məqbul (Keçdi)</span>` 
-                    : `<span style="color: red; font-weight: bold;">Qeyri-Məqbul</span>`;
-
-                html += `
+    <script>const SUPABASE_URL="https://cpzwliqlgaplroscvduo.supabase.co",SUPABASE_KEY="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF",_supabase=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);let globalResults=[];document.addEventListener("DOMContentLoaded",fetchResultsData);async function fetchResultsData(){const{data,error}=await _supabase.from("exam_results").select("*");if(error){document.getElementById("stats-table-body").innerHTML=`<tr><td colspan="7" style="color:red;">Xəta baş verdi: ${error.message}</td></tr>`;return}globalResults=data||[],document.getElementById("stat-total-students").innerText=globalResults.length;let passedCount=globalResults.filter(r=>r.score>=65).length;document.getElementById("stat-passed-students").innerText=passedCount;let highestScore=globalResults.length>0?Math.max(...globalResults.map(r=>r.score||0)):0;document.getElementById("stat-highest-score").innerText=highestScore,filterAndRenderResults()}function filterAndRenderResults(){const selectedCat=document.getElementById("category-filter").value,tbody=document.getElementById("stats-table-body");let filtered=[...globalResults];if(selectedCat!=="ALL"&&(filtered=filtered.filter(r=>r.bb_group&&r.bb_group.includes(selectedCat))),filtered.sort((a,b)=>(b.score||0)-(a.score||0)),filtered.length===0){tbody.innerHTML='<tr><td colspan="7">Seçilmiş kateqoriya üzrə nəticə tapılmadı.</td></tr>';return}let html="";filtered.forEach((r,index)=>{let rankClass="rank-badge";index===0?rankClass+=" rank-1":index===1?rankClass+=" rank-2":index===2&&(rankClass+=" rank-3");let statusBadge=r.score>=65?'<span style="color: green; font-weight: bold;">Məqbul (Keçdi)</span>':'<span style="color: red; font-weight: bold;">Qeyri-Məqbul</span>';html+=`
                     <tr>
-                        <td><span class="${rankClass}">${index + 1}</span></td>
-                        <td><b>${r.name || 'Nisbi İştirakçı'}</b></td>
-                        <td class="token-field">${r.fin || '-'}</td>
-                        <td><b>${r.bb_group || 'BB'}</b></td>
-                        <td style="font-size: 16px; font-weight: bold; color: var(--primary-dark);">${r.score || 0}</td>
+                        <td><span class="${rankClass}">${index+1}</span></td>
+                        <td><b>${r.name||"Nisbi İştirakçı"}</b></td>
+                        <td class="token-field">${r.fin||"-"}</td>
+                        <td><b>${r.bb_group||"BB"}</b></td>
+                        <td style="font-size: 16px; font-weight: bold; color: var(--primary-dark);">${r.score||0}</td>
                         <td>${statusBadge}</td>
                         <td>
                             <button class="btn-sm btn-info" onclick='showDetails(${JSON.stringify(r)})'>🔍 Ətraflı</button>
                         </td>
                     </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        function showDetails(data) {
-            document.getElementById("modal-student-name").innerText = `${data.name} (${data.fin})`;
-            
-            // Nümunəvi/Strukturlaşdırılmış fənn nəticələri və səhv sualların analizi
-            let azCorrect = data.az_correct !== undefined ? data.az_correct : Math.round((data.correct_count || 0) * 0.3);
-            let qanunCorrect = data.qanun_correct !== undefined ? data.qanun_correct : Math.round((data.correct_count || 0) * 0.4);
-            let infCorrect = data.inf_correct !== undefined ? data.inf_correct : Math.round((data.correct_count || 0) * 0.15);
-            let mentiqCorrect = data.mentiq_correct !== undefined ? data.mentiq_correct : Math.round((data.correct_count || 0) * 0.15);
-
-            let wrongQuestionNumbers = data.wrong_questions && data.wrong_questions.length > 0 
-                ? data.wrong_questions.join(", ") 
-                : "Sual 4, Sual 12, Sual 27, Sual 45, Sual 88";
-
-            let html = `
+                `}),tbody.innerHTML=html}function showDetails(data){document.getElementById("modal-student-name").innerText=`${data.name} (${data.fin})`;let azCorrect=data.az_correct!==void 0?data.az_correct:Math.round((data.correct_count||0)*.3),qanunCorrect=data.qanun_correct!==void 0?data.qanun_correct:Math.round((data.correct_count||0)*.4),infCorrect=data.inf_correct!==void 0?data.inf_correct:Math.round((data.correct_count||0)*.15),mentiqCorrect=data.mentiq_correct!==void 0?data.mentiq_correct:Math.round((data.correct_count||0)*.15),wrongQuestionNumbers=data.wrong_questions&&data.wrong_questions.length>0?data.wrong_questions.join(", "):"Sual 4, Sual 12, Sual 27, Sual 45, Sual 88",html=`
                 <div style="margin-bottom: 15px;">
-                    <p style="margin: 5px 0;"><b>Doğru:</b> <span style="color:green; font-weight:bold;">${data.correct_count || 0}</span> | <b>Yanlış:</b> <span style="color:red; font-weight:bold;">${data.wrong_count || 0}</span> | <b>Ümumi Bal:</b> <b>${data.score || 0}</b></p>
+                    <p style="margin: 5px 0;"><b>Doğru:</b> <span style="color:green; font-weight:bold;">${data.correct_count||0}</span> | <b>Yanlış:</b> <span style="color:red; font-weight:bold;">${data.wrong_count||0}</span> | <b>Ümumi Bal:</b> <b>${data.score||0}</b></p>
                 </div>
 
                 <h4 style="margin: 15px 0 10px 0; color: var(--primary-dark);">📚 Fənlər Üzrə Nəticələr</h4>
@@ -245,16 +126,8 @@
                     <strong>⚠️ Səhv Cavablandırılmış Suallar:</strong><br>
                     <span>${wrongQuestionNumbers}</span>
                 </div>
-            `;
-
-            document.getElementById("modal-body-content").innerHTML = html;
-            document.getElementById("detail-modal").style.display = "flex";
-        }
-
-        function closeModal() {
-            document.getElementById("detail-modal").style.display = "none";
-        }
-    </script>
+            `;document.getElementById("modal-body-content").innerHTML=html,document.getElementById("detail-modal").style.display="flex"}function closeModal(){document.getElementById("detail-modal").style.display="none"}
+</script>
 </body>
 </html>
 

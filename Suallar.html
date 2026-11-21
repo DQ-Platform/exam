@@ -4,66 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sualların Redaktəsi - DQ Platform</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #f4f6f9; padding: 20px; color: #333; }
-
-    /* Naviqasiya */
-    .breadcrumb-nav { background: #fff; padding: 12px 20px; border-radius: 6px; font-size: 14px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .breadcrumb-nav span { color: #007bff; cursor: pointer; font-weight: 600; }
-    .breadcrumb-nav span:hover { text-decoration: underline; }
-    .breadcrumb-nav .active { color: #6c757d; cursor: default; }
-
-    /* Qovluq Grid */
-    .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
-    .folder-card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e1e8ed; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; gap: 8px; }
-    .folder-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.08); border-color: #007bff; }
-    .folder-icon { width: 42px; height: 42px; background: #eef2ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-    .folder-title { font-size: 16px; font-weight: 700; color: #2e7d32; }
-    .folder-desc { font-size: 12px; color: #777; }
-
-    /* Redaktə Forması */
-    .editor-section { display: none; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-top: 15px; }
-    .card-title { font-size: 13px; font-weight: 700; text-transform: uppercase; color: #555; margin-bottom: 15px; letter-spacing: 0.5px; }
-    
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
-    .form-group { display: flex; flex-direction: column; }
-    .form-group label { font-size: 12px; font-weight: 600; color: #666; margin-bottom: 5px; }
-    .form-control { padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; outline: none; }
-    textarea.form-control { resize: vertical; min-height: 70px; }
-
-    /* Variantlar (Qapalı Sual) */
-    .option-row { display: flex; flex-direction: column; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef; margin-bottom: 12px; gap: 8px; }
-    .option-main { display: flex; align-items: center; gap: 10px; }
-    .option-label { font-weight: bold; width: 25px; }
-    .option-input { flex: 1; }
-    .correct-radio { cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; color: #2b9348; white-space: nowrap; }
-
-    /* Variant Şəkil Bölməsi */
-    .option-file-box { display: flex; align-items: center; gap: 10px; margin-left: 35px; }
-    .option-file-input { font-size: 12px; flex: 1; }
-    .option-img-preview { max-height: 60px; max-width: 100px; border-radius: 4px; border: 1px solid #ccc; display: none; }
-
-    /* Açıq Sual Cavab Bloku */
-    .open-answer-box { background: #f0f4f8; border: 1px solid #d0d7de; padding: 15px; border-radius: 6px; margin-bottom: 15px; display: none; }
-    .num-selector { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
-    .num-checkbox { display: none; }
-    .num-label { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border: 2px solid #007bff; background: #fff; color: #007bff; font-weight: 700; border-radius: 6px; cursor: pointer; transition: 0.2s; }
-    .num-checkbox:checked + .num-label { background: #007bff; color: #fff; }
-
-    /* İdarəetmə Düymələri */
-    .btn { padding: 9px 18px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
-    .btn-success { background-color: #2b9348; color: white; }
-    .btn-dark { background-color: #1d3557; color: white; }
-    .btn-primary { background-color: #007bff; color: white; }
-    .btn-danger { background-color: #dc3545; color: white; padding: 4px 8px; font-size: 12px; }
-    .actions-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 10px; }
-    .left-buttons { display: flex; gap: 10px; }
-  </style>
+  <style>*{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif}body{background-color:#eef8ff;padding:20px;color:#333}.breadcrumb-nav{background:#fff;padding:12px 20px;border-radius:6px;font-size:14px;margin-bottom:20px;box-shadow:0 2px 5px #0000000d}.breadcrumb-nav span{color:#0099ff;cursor:pointer;font-weight:600}.breadcrumb-nav span:hover{text-decoration:underline}.breadcrumb-nav .active{color:#6c757d;cursor:default}.folder-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:15px;margin-bottom:25px}.folder-card{background:#fff;padding:20px;border-radius:12px;border:1px solid #cfecff;cursor:pointer;transition:.2s;display:flex;flex-direction:column;gap:8px}.folder-card:hover{transform:translateY(-3px);box-shadow:0 6px 15px #00000014;border-color:#0099ff}.folder-icon{width:42px;height:42px;background:#eef8ff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px}.folder-title{font-size:16px;font-weight:700;color:#2e7d32}.folder-desc{font-size:12px;color:#777}.editor-section{display:none;background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 8px #0000000f;margin-top:15px}.card-title{font-size:13px;font-weight:700;text-transform:uppercase;color:#555;margin-bottom:15px;letter-spacing:.5px}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-bottom:15px}.form-group{display:flex;flex-direction:column}.form-group label{font-size:12px;font-weight:600;color:#666;margin-bottom:5px}.form-control{padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;outline:none}textarea.form-control{resize:vertical;min-height:70px}.option-row{display:flex;flex-direction:column;background:#f8f9fa;padding:12px;border-radius:6px;border:1px solid #e9ecef;margin-bottom:12px;gap:8px}.option-main{display:flex;align-items:center;gap:10px}.option-label{font-weight:700;width:25px}.option-input{flex:1}.correct-radio{cursor:pointer;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:#2b9348;white-space:nowrap}.option-file-box{display:flex;align-items:center;gap:10px;margin-left:35px}.option-file-input{font-size:12px;flex:1}.option-img-preview{max-height:60px;max-width:100px;border-radius:4px;border:1px solid #ccc;display:none}.open-answer-box{background:#e9f6ff;border:1px solid #d0d7de;padding:15px;border-radius:6px;margin-bottom:15px;display:none}.num-selector{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}.num-checkbox{display:none}.num-label{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border:2px solid #0099ff;background:#fff;color:#0099ff;font-weight:700;border-radius:6px;cursor:pointer;transition:.2s}.num-checkbox:checked+.num-label{background:#0099ff;color:#fff}.btn{padding:9px 18px;border:none;border-radius:4px;cursor:pointer;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:6px}.btn-success{background-color:#2b9348;color:#fff}.btn-dark{background-color:#005085;color:#fff}.btn-primary{background-color:#0099ff;color:#fff}.btn-danger{background-color:#dc3545;color:#fff;padding:4px 8px;font-size:12px}.actions-bar{display:flex;justify-content:space-between;align-items:center;margin-top:20px;flex-wrap:wrap;gap:10px}.left-buttons{display:flex;gap:10px}
+</style>
 </head>
 <body>
 
-  <!-- Naviqasiya -->
+  
   <div class="breadcrumb-nav">
     <span onclick="showStep(1)">Sınaqlar</span> &gt; 
     <span onclick="showStep(2)" id="navExam">Sınaq 1</span> &gt; 
@@ -71,9 +17,9 @@
     <span class="active" id="navSubject">Fənn Seçimi</span>
   </div>
 
-  <!-- MƏRHƏLƏ 1: Sınaq Seçimi -->
+  
   <div id="stepExams">
-    <h3 style="margin-bottom: 15px; color: #1d3557;">Sınaq Seçin</h3>
+    <h3 style="margin-bottom: 15px; color: #005085;">Sınaq Seçin</h3>
     <div class="folder-grid">
       <div class="folder-card" onclick="selectExam('Sınaq 1')">
         <div class="folder-icon">📁</div>
@@ -88,31 +34,31 @@
     </div>
   </div>
 
-  <!-- MƏRHƏLƏ 2: Kateqoriya Seçimi -->
+  
   <div id="stepCategories" style="display: none;">
-    <h3 style="margin-bottom: 15px; color: #1d3557;">Kateqoriya Seçin</h3>
+    <h3 style="margin-bottom: 15px; color: #005085;">Kateqoriya Seçin</h3>
     <div class="folder-grid">
       <div class="folder-card" onclick="selectCategory('BA')">
         <div class="folder-icon">🏷️</div>
-        <div class="folder-title" style="color: #1976d2;">BA Kateqoriyası</div>
+        <div class="folder-title" style="color: #008deb;">BA Kateqoriyası</div>
         <div class="folder-desc">100 Sual (Açıq və qapalı fənn bloku)</div>
       </div>
       <div class="folder-card" onclick="selectCategory('BB')">
         <div class="folder-icon">🏷️</div>
-        <div class="folder-title" style="color: #1976d2;">BB Kateqoriyası</div>
+        <div class="folder-title" style="color: #008deb;">BB Kateqoriyası</div>
         <div class="folder-desc">100 Sual (Qapalı testlər)</div>
       </div>
       <div class="folder-card" onclick="selectCategory('AC')">
         <div class="folder-icon">🏷️</div>
-        <div class="folder-title" style="color: #1976d2;">AC Kateqoriyası</div>
+        <div class="folder-title" style="color: #008deb;">AC Kateqoriyası</div>
         <div class="folder-desc">100 Sual (Qapalı testlər)</div>
       </div>
     </div>
   </div>
 
-  <!-- MƏRHƏLƏ 3: Fənn Seçimi -->
+  
   <div id="stepSubjects" style="display: none;">
-    <h3 style="margin-bottom: 15px; color: #1d3557;">Fənn Seçin</h3>
+    <h3 style="margin-bottom: 15px; color: #005085;">Fənn Seçin</h3>
     <div class="folder-grid">
       <div class="folder-card" onclick="openEditor('Azərbaycan dili')">
         <div class="folder-icon">📁</div>
@@ -137,7 +83,7 @@
     </div>
   </div>
 
-  <!-- MƏRHƏLƏ 4: Sual Redaktə Forması -->
+  
   <div id="stepEditor" class="editor-section">
     <div class="card-title">SUAL TƏRTİBATI (ƏLAVƏ ET / REDAKTƏ ET)</div>
 
@@ -172,13 +118,13 @@
       <img id="questionImgPreview" src="" style="display:none; max-width: 100%; max-height: 180px; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc;">
     </div>
 
-    <!-- 1. Qapalı Sual Variantları -->
+    
     <div id="closedOptionsContainer">
       <div id="optionsList"></div>
       <button class="btn btn-dark" onclick="addDynamicOption()">+ Dinamik Variant Əlavə Et</button>
     </div>
 
-    <!-- 2. Açıq Sual Cavab Bölməsi -->
+    
     <div id="openAnswerContainer" class="open-answer-box">
       <div class="form-group" style="margin-bottom: 12px;">
         <label>Açıq Sual Cavab Tipi:</label>
@@ -188,13 +134,13 @@
         </select>
       </div>
 
-      <!-- A) Mətn/Rəqəm Daxiletmə -->
+      
       <div id="openTextMode" class="form-group">
         <label>Düzgün Cavab Mətni / Rəqəmi:</label>
         <input type="text" class="form-control" id="openTextAnswer" placeholder="Məsələn: 1, 3, 5 və ya Mətn cavabı">
       </div>
 
-      <!-- B) 1-6 Rəqəm Seçimi -->
+      
       <div id="openNumbersMode" class="form-group" style="display: none;">
         <label>Düzgün Rəqəmləri Seçin (Çoxlu Seçim):</label>
         <div class="num-selector">
@@ -219,7 +165,7 @@
       </div>
     </div>
 
-    <!-- Alt Düymələr -->
+    
     <div class="actions-bar">
       <div class="left-buttons">
         <button class="btn btn-dark" onclick="prevQuestion()">⬅️ Əvvəlki Sual</button>
@@ -229,131 +175,11 @@
     </div>
   </div>
 
-  <script>
-    let currentExam = "Sınaq 1";
-    let currentCategory = "BA";
-    const optionLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
-
-    let questionsDatabase = {};
-
-    function getQuestionKey(num) {
-      const subject = document.getElementById('activeSubjectInput').value;
-      return `${currentExam}_${currentCategory}_${subject}_Q${num}`;
-    }
-
-    function selectExam(exam) {
-      currentExam = exam;
-      document.getElementById('navExam').innerText = exam;
-      document.getElementById('stepExams').style.display = 'none';
-      document.getElementById('stepCategories').style.display = 'block';
-    }
-
-    function selectCategory(cat) {
-      currentCategory = cat;
-      document.getElementById('navCategory').innerText = cat + " Kateqoriyası";
-      document.getElementById('stepCategories').style.display = 'none';
-      document.getElementById('stepSubjects').style.display = 'block';
-    }
-
-    function openEditor(subject) {
-      document.getElementById('navSubject').innerText = subject;
-      document.getElementById('activeSubjectInput').value = subject;
-      document.getElementById('questionNumber').value = 1;
-      document.getElementById('stepSubjects').style.display = 'none';
-      document.getElementById('stepEditor').style.display = 'block';
-      loadQuestionData(1);
-    }
-
-    function showStep(step) {
-      document.getElementById('stepEditor').style.display = 'none';
-      if (step === 1) {
-        document.getElementById('stepExams').style.display = 'block';
-        document.getElementById('stepCategories').style.display = 'none';
-        document.getElementById('stepSubjects').style.display = 'none';
-      } else if (step === 2) {
-        document.getElementById('stepExams').style.display = 'none';
-        document.getElementById('stepCategories').style.display = 'block';
-        document.getElementById('stepSubjects').style.display = 'none';
-      } else if (step === 3) {
-        document.getElementById('stepExams').style.display = 'none';
-        document.getElementById('stepCategories').style.display = 'none';
-        document.getElementById('stepSubjects').style.display = 'block';
-      }
-    }
-
-    function toggleQuestionType() {
-      const type = document.getElementById('questionType').value;
-      const closedBox = document.getElementById('closedOptionsContainer');
-      const openBox = document.getElementById('openAnswerContainer');
-
-      if (type === 'closed') {
-        closedBox.style.display = 'block';
-        openBox.style.display = 'none';
-      } else {
-        closedBox.style.display = 'none';
-        openBox.style.display = 'block';
-      }
-    }
-
-    function toggleOpenAnswerMode() {
-      const mode = document.getElementById('openAnswerType').value;
-      const textMode = document.getElementById('openTextMode');
-      const numbersMode = document.getElementById('openNumbersMode');
-
-      if (mode === 'text') {
-        textMode.style.display = 'flex';
-        numbersMode.style.display = 'none';
-      } else {
-        textMode.style.display = 'none';
-        numbersMode.style.display = 'flex';
-      }
-    }
-
-    // Əsas sualın şəklini nümayiş etdirir
-    function previewQuestionImage(input) {
-      const imgPreview = document.getElementById('questionImgPreview');
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          imgPreview.src = e.target.result;
-          imgPreview.style.display = 'block';
-        }
-        reader.readAsDataURL(input.files[0]);
-      } else {
-        imgPreview.style.display = 'none';
-      }
-    }
-
-    // Variant şəklinin canlı baxışı
-    function previewOptionImage(input) {
-      const imgPreview = input.nextElementSibling;
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          imgPreview.src = e.target.result;
-          imgPreview.style.display = 'block';
-        }
-        reader.readAsDataURL(input.files[0]);
-      } else {
-        imgPreview.style.display = 'none';
-      }
-    }
-
-    // Dynamic Variant (Mətn + Şəkil Dəstəkli)
-    function addDynamicOption(textValue = "", isCorrect = false) {
-      const optionsList = document.getElementById('optionsList');
-      const currentCount = optionsList.getElementsByClassName('option-row').length;
-
-      if (currentCount >= optionLetters.length) return;
-
-      const letter = optionLetters[currentCount];
-      const div = document.createElement('div');
-      div.className = 'option-row';
-      div.innerHTML = `
+  <script>let currentExam="Sınaq 1",currentCategory="BA";const optionLetters=["A","B","C","D","E","F","G","H"];let questionsDatabase={};function getQuestionKey(num){const subject=document.getElementById("activeSubjectInput").value;return`${currentExam}_${currentCategory}_${subject}_Q${num}`}function selectExam(exam){currentExam=exam,document.getElementById("navExam").innerText=exam,document.getElementById("stepExams").style.display="none",document.getElementById("stepCategories").style.display="block"}function selectCategory(cat){currentCategory=cat,document.getElementById("navCategory").innerText=cat+" Kateqoriyası",document.getElementById("stepCategories").style.display="none",document.getElementById("stepSubjects").style.display="block"}function openEditor(subject){document.getElementById("navSubject").innerText=subject,document.getElementById("activeSubjectInput").value=subject,document.getElementById("questionNumber").value=1,document.getElementById("stepSubjects").style.display="none",document.getElementById("stepEditor").style.display="block",loadQuestionData(1)}function showStep(step){document.getElementById("stepEditor").style.display="none",step===1?(document.getElementById("stepExams").style.display="block",document.getElementById("stepCategories").style.display="none",document.getElementById("stepSubjects").style.display="none"):step===2?(document.getElementById("stepExams").style.display="none",document.getElementById("stepCategories").style.display="block",document.getElementById("stepSubjects").style.display="none"):step===3&&(document.getElementById("stepExams").style.display="none",document.getElementById("stepCategories").style.display="none",document.getElementById("stepSubjects").style.display="block")}function toggleQuestionType(){const type=document.getElementById("questionType").value,closedBox=document.getElementById("closedOptionsContainer"),openBox=document.getElementById("openAnswerContainer");type==="closed"?(closedBox.style.display="block",openBox.style.display="none"):(closedBox.style.display="none",openBox.style.display="block")}function toggleOpenAnswerMode(){const mode=document.getElementById("openAnswerType").value,textMode=document.getElementById("openTextMode"),numbersMode=document.getElementById("openNumbersMode");mode==="text"?(textMode.style.display="flex",numbersMode.style.display="none"):(textMode.style.display="none",numbersMode.style.display="flex")}function previewQuestionImage(input){const imgPreview=document.getElementById("questionImgPreview");if(input.files&&input.files[0]){const reader=new FileReader;reader.onload=function(e){imgPreview.src=e.target.result,imgPreview.style.display="block"},reader.readAsDataURL(input.files[0])}else imgPreview.style.display="none"}function previewOptionImage(input){const imgPreview=input.nextElementSibling;if(input.files&&input.files[0]){const reader=new FileReader;reader.onload=function(e){imgPreview.src=e.target.result,imgPreview.style.display="block"},reader.readAsDataURL(input.files[0])}else imgPreview.style.display="none"}function addDynamicOption(textValue="",isCorrect=!1){const optionsList=document.getElementById("optionsList"),currentCount=optionsList.getElementsByClassName("option-row").length;if(currentCount>=optionLetters.length)return;const letter=optionLetters[currentCount],div=document.createElement("div");div.className="option-row",div.innerHTML=`
         <div class="option-main">
           <span class="option-label">${letter})</span>
           <input type="text" class="form-control option-input" placeholder="Variant mətni..." value="${textValue}">
-          <label class="correct-radio"><input type="radio" name="ans" ${isCorrect ? 'checked' : ''}> Düzgün</label>
+          <label class="correct-radio"><input type="radio" name="ans" ${isCorrect?"checked":""}> Düzgün</label>
           <button class="btn btn-danger" onclick="removeOption(this)">X</button>
         </div>
         <div class="option-file-box">
@@ -361,121 +187,7 @@
           <input type="file" class="option-file-input form-control" accept="image/*" onchange="previewOptionImage(this)">
           <img class="option-img-preview" src="" alt="Variant Şəkli">
         </div>
-      `;
-      optionsList.appendChild(div);
-    }
-
-    function removeOption(btn) {
-      btn.closest('.option-row').remove();
-      reindexOptions();
-    }
-
-    function reindexOptions() {
-      const rows = document.querySelectorAll('#optionsList .option-row');
-      rows.forEach((row, index) => {
-        if (index < optionLetters.length) {
-          row.querySelector('.option-label').innerText = optionLetters[index] + ')';
-        }
-      });
-    }
-
-    // Sualı yaddaşa saxlayır
-    function saveQuestion(silent = false) {
-      const num = document.getElementById('questionNumber').value;
-      const key = getQuestionKey(num);
-
-      const type = document.getElementById('questionType').value;
-      const text = document.getElementById('questionText').value;
-
-      let options = [];
-      if (type === 'closed') {
-        document.querySelectorAll('#optionsList .option-row').forEach(row => {
-          options.push({
-            text: row.querySelector('.option-input').value,
-            isCorrect: row.querySelector('input[name="ans"]').checked
-          });
-        });
-      }
-
-      const openType = document.getElementById('openAnswerType').value;
-      const openText = document.getElementById('openTextAnswer').value;
-      let openNumbers = [];
-      document.querySelectorAll('.num-checkbox:checked').forEach(cb => {
-        openNumbers.push(cb.value);
-      });
-
-      questionsDatabase[key] = {
-        type,
-        text,
-        options,
-        openType,
-        openText,
-        openNumbers
-      };
-
-      if (!silent) {
-        alert(`${num}-ci sual uğurla yadda saxlanıldı!`);
-      }
-    }
-
-    function loadQuestionData(num) {
-      const key = getQuestionKey(num);
-      const data = questionsDatabase[key];
-
-      document.getElementById('questionText').value = '';
-      document.getElementById('questionImage').value = '';
-      document.getElementById('questionImgPreview').style.display = 'none';
-      document.getElementById('openTextAnswer').value = '';
-      document.querySelectorAll('.num-checkbox').forEach(cb => cb.checked = false);
-
-      if (!data) {
-        document.getElementById('questionType').value = 'closed';
-        toggleQuestionType();
-        document.getElementById('optionsList').innerHTML = '';
-        for (let i = 0; i < 4; i++) addDynamicOption();
-        return;
-      }
-
-      document.getElementById('questionType').value = data.type;
-      toggleQuestionType();
-      document.getElementById('questionText').value = data.text;
-
-      if (data.type === 'closed') {
-        document.getElementById('optionsList').innerHTML = '';
-        data.options.forEach(opt => addDynamicOption(opt.text, opt.isCorrect));
-      } else {
-        document.getElementById('openAnswerType').value = data.openType;
-        toggleOpenAnswerMode();
-        document.getElementById('openTextAnswer').value = data.openText;
-        document.querySelectorAll('.num-checkbox').forEach(cb => {
-          cb.checked = data.openNumbers.includes(cb.value);
-        });
-      }
-    }
-
-    function nextQuestion() {
-      const numInput = document.getElementById('questionNumber');
-      saveQuestion(true);
-      
-      let currentNum = parseInt(numInput.value);
-      if (currentNum < 100) {
-        currentNum++;
-        numInput.value = currentNum;
-        loadQuestionData(currentNum);
-      }
-    }
-
-    function prevQuestion() {
-      const numInput = document.getElementById('questionNumber');
-      saveQuestion(true);
-      
-      let currentNum = parseInt(numInput.value);
-      if (currentNum > 1) {
-        currentNum--;
-        numInput.value = currentNum;
-        loadQuestionData(currentNum);
-      }
-    }
-  </script>
+      `,optionsList.appendChild(div)}function removeOption(btn){btn.closest(".option-row").remove(),reindexOptions()}function reindexOptions(){document.querySelectorAll("#optionsList .option-row").forEach((row,index)=>{index<optionLetters.length&&(row.querySelector(".option-label").innerText=optionLetters[index]+")")})}function saveQuestion(silent=!1){const num=document.getElementById("questionNumber").value,key=getQuestionKey(num),type=document.getElementById("questionType").value,text=document.getElementById("questionText").value;let options=[];type==="closed"&&document.querySelectorAll("#optionsList .option-row").forEach(row=>{options.push({text:row.querySelector(".option-input").value,isCorrect:row.querySelector('input[name="ans"]').checked})});const openType=document.getElementById("openAnswerType").value,openText=document.getElementById("openTextAnswer").value;let openNumbers=[];document.querySelectorAll(".num-checkbox:checked").forEach(cb=>{openNumbers.push(cb.value)}),questionsDatabase[key]={type,text,options,openType,openText,openNumbers},silent||alert(`${num}-ci sual uğurla yadda saxlanıldı!`)}function loadQuestionData(num){const key=getQuestionKey(num),data=questionsDatabase[key];if(document.getElementById("questionText").value="",document.getElementById("questionImage").value="",document.getElementById("questionImgPreview").style.display="none",document.getElementById("openTextAnswer").value="",document.querySelectorAll(".num-checkbox").forEach(cb=>cb.checked=!1),!data){document.getElementById("questionType").value="closed",toggleQuestionType(),document.getElementById("optionsList").innerHTML="";for(let i=0;i<4;i++)addDynamicOption();return}document.getElementById("questionType").value=data.type,toggleQuestionType(),document.getElementById("questionText").value=data.text,data.type==="closed"?(document.getElementById("optionsList").innerHTML="",data.options.forEach(opt=>addDynamicOption(opt.text,opt.isCorrect))):(document.getElementById("openAnswerType").value=data.openType,toggleOpenAnswerMode(),document.getElementById("openTextAnswer").value=data.openText,document.querySelectorAll(".num-checkbox").forEach(cb=>{cb.checked=data.openNumbers.includes(cb.value)}))}function nextQuestion(){const numInput=document.getElementById("questionNumber");saveQuestion(!0);let currentNum=parseInt(numInput.value);currentNum<100&&(currentNum++,numInput.value=currentNum,loadQuestionData(currentNum))}function prevQuestion(){const numInput=document.getElementById("questionNumber");saveQuestion(!0);let currentNum=parseInt(numInput.value);currentNum>1&&(currentNum--,numInput.value=currentNum,loadQuestionData(currentNum))}
+</script>
 </body>
 </html>

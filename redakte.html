@@ -14,112 +14,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs/editor/vscode-devoth.min.css">
 
-    <style>
-        :root {
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --primary-color: #1e293b;
-            --accent-color: #3b82f6;
-            --accent-gold: #f59e0b;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-            --success-color: #22c55e;
-            --amber-color: #eab308;
-            --danger-color: #ef4444;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; }
-
-        .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
-
-        /* Başlıq Bölməsi */
-        .header { text-align: center; margin-bottom: 25px; }
-        .header h1 { font-size: 1.8rem; font-weight: 700; color: var(--primary-color); display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .header p { font-size: 0.95rem; color: var(--text-muted); margin-top: 8px; }
-
-        /* Modul Mərkəzi İnteqrasiya Paneli */
-        .module-summary-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 30px;
-            box-shadow: var(--card-shadow);
-        }
-        .module-summary-title { text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 6px; }
-        .module-summary-desc { text-align: center; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 16px; }
-        .stat-box { background-color: #ffffff; border: 1px solid var(--border-color); border-left: 5px solid var(--amber-color); border-radius: 8px; padding: 16px 20px; text-align: center; }
-        .stat-box.success-border { border-left-color: var(--success-color); }
-        .stat-label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
-        .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--accent-color); }
-        .stat-value.success-text { color: var(--success-color); }
-        .module-summary-footer { font-size: 0.82rem; color: var(--text-muted); text-align: center; line-height: 1.5; }
-
-        /* Axtarış Və Filter Paneli */
-        .controls-panel { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px; flex-wrap: wrap; }
-        .search-box { position: relative; flex: 1; min-width: 280px; }
-        .search-box input { width: 100%; padding: 12px 16px 12px 42px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; font-size: 0.9rem; transition: border-color 0.2s; }
-        .search-box input:focus { border-color: var(--accent-color); }
-        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
-
-        .action-btns { display: flex; gap: 10px; }
-        .btn { padding: 10px 18px; border-radius: 8px; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; text-decoration: none; }
-        .btn-primary { background-color: var(--accent-color); color: white; }
-        .btn-primary:hover { background-color: #2563eb; }
-        .btn-secondary { background-color: #e2e8f0; color: var(--text-main); }
-        .btn-secondary:hover { background-color: #cbd5e1; }
-        .btn-dark { background-color: var(--primary-color); color: white; }
-        .btn-dark:hover { background-color: #0f172a; }
-        .btn-danger { background-color: var(--danger-color); color: white; }
-
-        /* Grid Layout & Kartlar */
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; text-decoration: none; color: inherit; transition: all 0.25s ease-in-out; box-shadow: var(--card-shadow); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; }
-        .card:hover { transform: translateY(-4px); box-shadow: var(--hover-shadow); border-color: var(--accent-color); }
-        .card-icon { width: 48px; height: 48px; background-color: #f1f5f9; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent-color); margin-bottom: 16px; }
-        .card-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 8px; }
-        .card-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 16px; }
-        .card-footer-row { display: flex; justify-content: space-between; align-items: center; }
-        .card-meta { font-size: 0.75rem; font-weight: 600; color: #94a3b8; background-color: #f8fafc; padding: 4px 8px; border-radius: 6px; }
-        .status-dot { width: 8px; height: 8px; background-color: var(--success-color); border-radius: 50%; display: inline-block; }
-
-        /* Modal / Fullscreen IDE Overlay */
-        .ide-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0b1120; z-index: 9999; flex-direction: column; color: #f8fafc; }
-        .ide-header { background: #0f172a; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
-        .ide-brand { font-weight: 700; color: var(--accent-gold); display: flex; align-items: center; gap: 10px; }
-        .ide-toolbar { background: #1e293b; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
-        .ide-tabs { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; background: #0f172a; padding: 6px 12px; border-radius: 4px; border: 1px solid #334155; }
-        
-        .view-mode-toggle { display: flex; background: #0f172a; padding: 3px; border-radius: 6px; border: 1px solid #334155; }
-        .toggle-btn { padding: 5px 12px; font-size: 12px; font-weight: 600; color: #94a3b8; border: none; background: transparent; cursor: pointer; border-radius: 4px; transition: 0.2s; }
-        .toggle-btn.active { background: #38bdf8; color: #000; }
-
-        .ide-body { flex: 1; display: flex; overflow: hidden; }
-        .ide-sidebar { width: 250px; background: #0f172a; border-right: 1px solid #334155; overflow-y: auto; padding: 10px 0; }
-        .sidebar-item { padding: 8px 16px; font-size: 13px; color: #94a3b8; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .sidebar-item:hover, .sidebar-item.active { background: #1e293b; color: #38bdf8; }
-
-        .ide-workspace { flex: 1; display: flex; position: relative; background: #090d16; }
-        .pane { flex: 1; height: 100%; position: relative; }
-        .pane-editor { display: none; border-right: 1px solid #334155; }
-        .pane-preview { display: block; background: #ffffff; }
-        #monacoContainer { width: 100%; height: 100%; }
-        #previewFrame { width: 100%; height: 100%; border: none; }
-
-        /* Dynamic Database Viewer Table Style */
-        .db-container { padding: 20px; overflow-y: auto; height: 100%; color: #0f172a; }
-        .db-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; font-size: 13px; }
-        .db-table th { background: #1e293b; color: #fff; text-align: left; padding: 12px; }
-        .db-table td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
-        .db-table tr:hover { background: #f8fafc; }
-
-        .footer { margin-top: 50px; text-align: center; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 20px; }
-    </style>
+    <style>:root{--bg-color: #f5faff;--card-bg: #ffffff;--primary-color: #005085;--accent-color: #0099ff;--accent-gold: #f72103;--text-main: #005085;--text-muted: #64748b;--border-color: #d3edff;--card-shadow: 0 4px 6px -1px rgba(0, 0, 0, .05), 0 2px 4px -1px rgba(0, 0, 0, .03);--hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, .08), 0 4px 6px -2px rgba(0, 0, 0, .04);--success-color: #22c55e;--amber-color: #f72103;--danger-color: #ef4444}*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,sans-serif}body{background-color:var(--bg-color);color:var(--text-main);min-height:100vh}.container{max-width:1200px;margin:0 auto;padding:30px 20px}.header{text-align:center;margin-bottom:25px}.header h1{font-size:1.8rem;font-weight:700;color:var(--primary-color);display:flex;align-items:center;justify-content:center;gap:10px}.header p{font-size:.95rem;color:var(--text-muted);margin-top:8px}.module-summary-card{background-color:var(--card-bg);border:1px solid var(--border-color);border-radius:12px;padding:24px;margin-bottom:30px;box-shadow:var(--card-shadow)}.module-summary-title{text-align:center;font-size:1.2rem;font-weight:700;color:var(--primary-color);margin-bottom:6px}.module-summary-desc{text-align:center;font-size:.9rem;color:var(--text-muted);margin-bottom:20px}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:16px}.stat-box{background-color:#fff;border:1px solid var(--border-color);border-left:5px solid var(--amber-color);border-radius:8px;padding:16px 20px;text-align:center}.stat-box.success-border{border-left-color:var(--success-color)}.stat-label{font-size:.85rem;font-weight:600;color:var(--text-muted);margin-bottom:6px}.stat-value{font-size:1.6rem;font-weight:700;color:var(--accent-color)}.stat-value.success-text{color:var(--success-color)}.module-summary-footer{font-size:.82rem;color:var(--text-muted);text-align:center;line-height:1.5}.controls-panel{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;gap:15px;flex-wrap:wrap}.search-box{position:relative;flex:1;min-width:280px}.search-box input{width:100%;padding:12px 16px 12px 42px;border:1px solid var(--border-color);border-radius:8px;outline:none;font-size:.9rem;transition:border-color .2s}.search-box input:focus{border-color:var(--accent-color)}.search-box i{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--text-muted)}.action-btns{display:flex;gap:10px}.btn{padding:10px 18px;border-radius:8px;border:none;font-weight:600;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .2s;text-decoration:none}.btn-primary{background-color:var(--accent-color);color:#fff}.btn-primary:hover{background-color:#0099ff}.btn-secondary{background-color:#d3edff;color:var(--text-main)}.btn-secondary:hover{background-color:#b1ddfb}.btn-dark{background-color:var(--primary-color);color:#fff}.btn-dark:hover{background-color:#005085}.btn-danger{background-color:var(--danger-color);color:#fff}.grid-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}.card{background-color:var(--card-bg);border:1px solid var(--border-color);border-radius:12px;padding:24px;text-decoration:none;color:inherit;transition:all .25s ease-in-out;box-shadow:var(--card-shadow);display:flex;flex-direction:column;justify-content:space-between;cursor:pointer}.card:hover{transform:translateY(-4px);box-shadow:var(--hover-shadow);border-color:var(--accent-color)}.card-icon{width:48px;height:48px;background-color:#ebf7ff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:var(--accent-color);margin-bottom:16px}.card-title{font-size:1.1rem;font-weight:600;color:var(--primary-color);margin-bottom:8px}.card-desc{font-size:.85rem;color:var(--text-muted);line-height:1.4;margin-bottom:16px}.card-footer-row{display:flex;justify-content:space-between;align-items:center}.card-meta{font-size:.75rem;font-weight:600;color:#4db8ff;background-color:#f5faff;padding:4px 8px;border-radius:6px}.status-dot{width:8px;height:8px;background-color:var(--success-color);border-radius:50%;display:inline-block}.ide-overlay{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#005085;z-index:9999;flex-direction:column;color:#f5faff}.ide-header{background:#005085;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #005288}.ide-brand{font-weight:700;color:var(--accent-gold);display:flex;align-items:center;gap:10px}.ide-toolbar{background:#005085;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #005288}.ide-tabs{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;background:#005085;padding:6px 12px;border-radius:4px;border:1px solid #005288}.view-mode-toggle{display:flex;background:#005085;padding:3px;border-radius:6px;border:1px solid #005288}.toggle-btn{padding:5px 12px;font-size:12px;font-weight:600;color:#4db8ff;border:none;background:transparent;cursor:pointer;border-radius:4px;transition:.2s}.toggle-btn.active{background:#38bdf8;color:#000}.ide-body{flex:1;display:flex;overflow:hidden}.ide-sidebar{width:250px;background:#005085;border-right:1px solid #005288;overflow-y:auto;padding:10px 0}.sidebar-item{padding:8px 16px;font-size:13px;color:#4db8ff;display:flex;align-items:center;gap:10px;cursor:pointer}.sidebar-item:hover,.sidebar-item.active{background:#005085;color:#38bdf8}.ide-workspace{flex:1;display:flex;position:relative;background:#005085}.pane{flex:1;height:100%;position:relative}.pane-editor{display:none;border-right:1px solid #005288}.pane-preview{display:block;background:#fff}#monacoContainer{width:100%;height:100%}#previewFrame{width:100%;height:100%;border:none}.db-container{padding:20px;overflow-y:auto;height:100%;color:#005085}.db-table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;font-size:13px}.db-table th{background:#005085;color:#fff;text-align:left;padding:12px}.db-table td{padding:10px 12px;border-bottom:1px solid #d3edff}.db-table tr:hover{background:#f5faff}.footer{margin-top:50px;text-align:center;font-size:.85rem;color:var(--text-muted);border-top:1px solid var(--border-color);padding-top:20px}
+</style>
 </head>
 <body>
 
@@ -147,7 +43,7 @@
             </div>
             
             <div class="module-summary-footer">
-                Bu modul <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">modul.html</code> faylının daxili strukturunu təmsil edir. Bütün komponentlər tək koda cəmlənərək platformaya birbaşa mərkəzləşdirilib.
+                Bu modul <code style="background: #ebf7ff; padding: 2px 6px; border-radius: 4px;">modul.html</code> faylının daxili strukturunu təmsil edir. Bütün komponentlər tək koda cəmlənərək platformaya birbaşa mərkəzləşdirilib.
             </div>
         </section>
 
@@ -388,188 +284,17 @@
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs/loader.min.js"></script>
-    <script>
-        // Supabase Konfiqurasiyası
-        const SUPABASE_URL = "https://cpzwliqlgaplroscvduo.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // IDE Parametrləri
-        const AUTH_KEY = "6675157";
-        let activeFile = "redakte.html";
-        let monacoInstance = null;
-        let isAuthorized = false;
-
-        // Monaco Editor Loader
-        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs' } });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Sessiyada saxlanılan adminlik statusunu yoxla
-            if (sessionStorage.getItem("adminAuthorized") === "true") {
-                grantAdminAccess();
-            }
-        });
-
-        function initMonaco(initialContent = "") {
-            return new Promise((resolve) => {
-                if (monacoInstance) {
-                    if (initialContent) monacoInstance.setValue(initialContent);
-                    resolve();
-                    return;
-                }
-                require(['vs/editor/editor.main'], function () {
-                    monacoInstance = monaco.editor.create(document.getElementById('monacoContainer'), {
-                        value: initialContent || `<!-- ${activeFile} Yüklənir... -->`,
-                        language: 'html',
-                        theme: 'vs-dark',
-                        automaticLayout: true,
-                        fontSize: 13,
-                        minimap: { enabled: true }
-                    });
-
-                    // Kod dəyişdikcə Split rejimi üçün iframe-i canlı yenilə
-                    monacoInstance.onDidChangeModelContent(() => {
-                        const code = monacoInstance.getValue();
-                        const previewFrame = document.getElementById('previewFrame');
-                        if (document.getElementById('editorPane').style.display !== 'none') {
-                            previewFrame.srcdoc = code;
-                        }
-                    });
-                    resolve();
-                });
-            });
-        }
-
-        function openIDE(fileName) {
-            document.getElementById('ideOverlay').style.display = 'flex';
-            switchFile(fileName);
-        }
-
-        function closeIDE() {
-            document.getElementById('ideOverlay').style.display = 'none';
-        }
-
-        async function switchFile(fileName) {
-            activeFile = fileName;
-            document.getElementById('activeTabLabel').innerHTML = `<i class="fa-solid fa-code"></i> ${fileName}`;
-            const previewFrame = document.getElementById('previewFrame');
-            previewFrame.removeAttribute('srcdoc');
-
-            // Xüsusi interaktiv idarəetmə funksiyası (Bütün suallara baxış və silmə üçün)
-            if (fileName === 'redakte.html' && isAuthorized) {
-                renderQuestionsTable();
-            } else {
-                previewFrame.src = fileName;
-            }
-
-            // Faylı HTTP üzərindən Fetch et
-            try {
-                const response = await fetch(fileName);
-                if (response.ok) {
-                    const text = await response.text();
-                    if (monacoInstance) monacoInstance.setValue(text);
-                    else await initMonaco(text);
-                } else {
-                    const fallbackCode = `<!-- ${fileName} local serverdə tapılmadı. Yeni shablon yaradıldı. -->\n<div class="module-root">\n  <h1>${fileName} Məzmunu</h1>\n</div>`;
-                    if (monacoInstance) monacoInstance.setValue(fallbackCode);
-                    else await initMonaco(fallbackCode);
-                }
-            } catch (e) {
-                const defaultText = `<!-- ${fileName} yükləndi -->\n<div class="container">\n  <h2>Modul: ${fileName}</h2>\n</div>`;
-                if (monacoInstance) monacoInstance.setValue(defaultText);
-                else await initMonaco(defaultText);
-            }
-
-            // Aktiv pəncərə rejiminə uyğun interfeysi yenilə
-            if (isAuthorized) {
-                document.querySelectorAll('.sidebar-item').forEach(item => {
-                    item.classList.toggle('active', item.innerText.trim() === fileName);
-                });
-            }
-        }
-
-        function promptAdminAuth() {
-            if (isAuthorized) {
-                alert("Siz artıq sistem idarəçisi kimi daxil olmusunuz!");
-                return;
-            }
-            let input = prompt("Sistem İdarəçisi Şifrəsi:");
-            if (input === AUTH_KEY) {
-                sessionStorage.setItem("adminAuthorized", "true");
-                grantAdminAccess();
-                alert("Təhlükəsizlik doğrulandı! İdarəetmə paneli və Kod Redaktoru aktivdir.");
-            } else {
-                alert("Giriş imtina edildi: Yanlış şifrə!");
-            }
-        }
-
-        function grantAdminAccess() {
-            isAuthorized = true;
-            document.getElementById("explorerSidebar").style.display = "block";
-            document.getElementById("modeControls").style.display = "flex";
-            document.getElementById("saveActionGroup").style.display = "block";
-            document.getElementById("adminAuthBtn").innerHTML = `<i class="fa-solid fa-unlock"></i> Admin: Aktiv`;
-            document.getElementById("adminAuthBtn").classList.replace("btn-secondary", "btn-primary");
-            initMonaco();
-        }
-
-        function setMode(mode) {
-            const editorPane = document.getElementById('editorPane');
-            const previewPane = document.getElementById('previewPane');
-
-            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-
-            if (mode === 'preview') {
-                editorPane.style.display = 'none';
-                previewPane.style.display = 'block';
-                document.getElementById('btnPreview').classList.add('active');
-            } else if (mode === 'editor') {
-                editorPane.style.display = 'block';
-                previewPane.style.display = 'none';
-                document.getElementById('btnEditor').classList.add('active');
-            } else if (mode === 'split') {
-                editorPane.style.display = 'block';
-                previewPane.style.display = 'block';
-                document.getElementById('btnSplit').classList.add('active');
-            }
-            if (monacoInstance) monacoInstance.layout();
-        }
-
-        async function commitCode() {
-            if (!isAuthorized) return;
-            const updatedCode = monacoInstance.getValue();
-            
-            // Kod canlı olaraq Baxış Frame-ə tətbiq olunur
-            document.getElementById('previewFrame').srcdoc = updatedCode;
-            
-            alert(`[Uğurlu]: ${activeFile} dəyişiklikləri yadda saxlanıldı və icra edildi!`);
-        }
-
-        // Supabase İnteqrasiyası: Sual Bazasını Cədvəl Halında Canlı Göstərmək Və Silmək
-        async function renderQuestionsTable() {
-            const previewFrame = document.getElementById('previewFrame');
-            previewFrame.removeAttribute('src');
-            
-            try {
-                const { data: questions, error } = await _supabase.from('questions').select('*');
-                
-                let htmlContent = `
-                    <style>
-                        body { font-family: 'Inter', sans-serif; padding: 20px; background: #f8fafc; color: #0f172a; }
-                        h2 { margin-bottom: 15px; font-size: 1.2rem; color: #1e293b; }
-                        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-                        th { background: #1e293b; color: #fff; text-align: left; padding: 10px 12px; font-size: 13px; }
-                        td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
-                        .btn-del { background: #ef4444; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
-                        .btn-del:hover { background: #dc2626; }
-                    </style>
+    <script>const SUPABASE_URL="https://cpzwliqlgaplroscvduo.supabase.co",SUPABASE_KEY="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF",_supabase=supabase.createClient(SUPABASE_URL,SUPABASE_KEY),AUTH_KEY="6675157";let activeFile="redakte.html",monacoInstance=null,isAuthorized=!1;require.config({paths:{vs:"https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs"}}),document.addEventListener("DOMContentLoaded",()=>{sessionStorage.getItem("adminAuthorized")==="true"&&grantAdminAccess()});function initMonaco(initialContent=""){return new Promise(resolve=>{if(monacoInstance){initialContent&&monacoInstance.setValue(initialContent),resolve();return}require(["vs/editor/editor.main"],function(){monacoInstance=monaco.editor.create(document.getElementById("monacoContainer"),{value:initialContent||``,language:"html",theme:"vs-dark",automaticLayout:!0,fontSize:13,minimap:{enabled:!0}}),monacoInstance.onDidChangeModelContent(()=>{const code=monacoInstance.getValue(),previewFrame=document.getElementById("previewFrame");document.getElementById("editorPane").style.display!=="none"&&(previewFrame.srcdoc=code)}),resolve()})})}function openIDE(fileName){document.getElementById("ideOverlay").style.display="flex",switchFile(fileName)}function closeIDE(){document.getElementById("ideOverlay").style.display="none"}async function switchFile(fileName){activeFile=fileName,document.getElementById("activeTabLabel").innerHTML=`<i class="fa-solid fa-code"></i> ${fileName}`;const previewFrame=document.getElementById("previewFrame");previewFrame.removeAttribute("srcdoc"),fileName==="redakte.html"&&isAuthorized?renderQuestionsTable():previewFrame.src=fileName;try{const response=await fetch(fileName);if(response.ok){const text=await response.text();monacoInstance?monacoInstance.setValue(text):await initMonaco(text)}else{const fallbackCode=`
+<div class="module-root">
+  <h1>${fileName} Məzmunu</h1>
+</div>`;monacoInstance?monacoInstance.setValue(fallbackCode):await initMonaco(fallbackCode)}}catch{const defaultText=`
+<div class="container">
+  <h2>Modul: ${fileName}</h2>
+</div>`;monacoInstance?monacoInstance.setValue(defaultText):await initMonaco(defaultText)}isAuthorized&&document.querySelectorAll(".sidebar-item").forEach(item=>{item.classList.toggle("active",item.innerText.trim()===fileName)})}function promptAdminAuth(){if(isAuthorized){alert("Siz artıq sistem idarəçisi kimi daxil olmusunuz!");return}prompt("Sistem İdarəçisi Şifrəsi:")===AUTH_KEY?(sessionStorage.setItem("adminAuthorized","true"),grantAdminAccess(),alert("Təhlükəsizlik doğrulandı! İdarəetmə paneli və Kod Redaktoru aktivdir.")):alert("Giriş imtina edildi: Yanlış şifrə!")}function grantAdminAccess(){isAuthorized=!0,document.getElementById("explorerSidebar").style.display="block",document.getElementById("modeControls").style.display="flex",document.getElementById("saveActionGroup").style.display="block",document.getElementById("adminAuthBtn").innerHTML='<i class="fa-solid fa-unlock"></i> Admin: Aktiv',document.getElementById("adminAuthBtn").classList.replace("btn-secondary","btn-primary"),initMonaco()}function setMode(mode){const editorPane=document.getElementById("editorPane"),previewPane=document.getElementById("previewPane");document.querySelectorAll(".toggle-btn").forEach(b=>b.classList.remove("active")),mode==="preview"?(editorPane.style.display="none",previewPane.style.display="block",document.getElementById("btnPreview").classList.add("active")):mode==="editor"?(editorPane.style.display="block",previewPane.style.display="none",document.getElementById("btnEditor").classList.add("active")):mode==="split"&&(editorPane.style.display="block",previewPane.style.display="block",document.getElementById("btnSplit").classList.add("active")),monacoInstance&&monacoInstance.layout()}async function commitCode(){if(!isAuthorized)return;const updatedCode=monacoInstance.getValue();document.getElementById("previewFrame").srcdoc=updatedCode,alert(`[Uğurlu]: ${activeFile} dəyişiklikləri yadda saxlanıldı və icra edildi!`)}async function renderQuestionsTable(){const previewFrame=document.getElementById("previewFrame");previewFrame.removeAttribute("src");try{const{data:questions,error}=await _supabase.from("questions").select("*");let htmlContent=`
+                    <style>body{font-family:Inter,sans-serif;padding:20px;background:#f5faff;color:#005085}h2{margin-bottom:15px;font-size:1.2rem;color:#005085}table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px #0000001a}th{background:#005085;color:#fff;text-align:left;padding:10px 12px;font-size:13px}td{padding:10px 12px;border-bottom:1px solid #d3edff;font-size:13px}.btn-del{background:#ef4444;color:#fff;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600}.btn-del:hover{background:#dc2626}
+</style>
                     <h2>📋 Suallar Bazası (Canlı Supabase Məlumatları)</h2>
-                `;
-
-                if (error || !questions || questions.length === 0) {
-                    htmlContent += `<p style="color:#64748b;">Məlumat tapılmadı və ya bazaya qoşulma xətası baş verdi.</p>`;
-                } else {
-                    htmlContent += `
+                `;error||!questions||questions.length===0?htmlContent+='<p style="color:#64748b;">Məlumat tapılmadı və ya bazaya qoşulma xətası baş verdi.</p>':(htmlContent+=`
                         <table>
                             <thead>
                                 <tr>
@@ -580,58 +305,14 @@
                                 </tr>
                             </thead>
                             <tbody>
-                    `;
-                    questions.forEach(q => {
-                        htmlContent += `
+                    `,questions.forEach(q=>{htmlContent+=`
                             <tr>
                                 <td><b>${q.id}</b></td>
-                                <td>${q.question_text || q.title || 'Məzmun yoxdur'}</td>
-                                <td><span style="color:#22c55e; font-weight:600;">${q.correct_answer || 'A'}</span></td>
+                                <td>${q.question_text||q.title||"Məzmun yoxdur"}</td>
+                                <td><span style="color:#22c55e; font-weight:600;">${q.correct_answer||"A"}</span></td>
                                 <td><button class="btn-del" onclick="parent.deleteQuestion(${q.id})">Sil</button></td>
                             </tr>
-                        `;
-                    });
-                    htmlContent += `</tbody></table>`;
-                }
-                
-                previewFrame.srcdoc = htmlContent;
-            } catch (e) {
-                previewFrame.srcdoc = `<p style="padding:20px; color:red;">Sual cədvəli yüklənərkən xəta yarandı.</p>`;
-            }
-        }
-
-        // Supabase-dən Sual Silmə Funksiyası
-        window.deleteQuestion = async function(id) {
-            if (!confirm(`ID: ${id} olan sualı silməyə əminsiniz?`)) return;
-            
-            const { error } = await _supabase.from('questions').delete().eq('id', id);
-            if (error) {
-                alert("Xəta baş verdi: " + error.message);
-            } else {
-                alert("Sual uğurla silindi!");
-                renderQuestionsTable();
-            }
-        };
-
-        // Dinamik Kart Axtarış Funksiyası
-        function filterCards() {
-            const input = document.getElementById('searchInput').value.toLowerCase();
-            const cards = document.querySelectorAll('.card');
-            let visibleCount = 0;
-
-            cards.forEach(card => {
-                const title = card.getAttribute('data-title').toLowerCase();
-                const file = card.getAttribute('data-file').toLowerCase();
-                if (title.includes(input) || file.includes(input)) {
-                    card.style.display = "flex";
-                    visibleCount++;
-                } else {
-                    card.style.display = "none";
-                }
-            });
-
-            document.getElementById('statModuleCount').innerText = `${visibleCount} Modul`;
-        }
-    </script>
+                        `}),htmlContent+="</tbody></table>"),previewFrame.srcdoc=htmlContent}catch{previewFrame.srcdoc='<p style="padding:20px; color:red;">Sual cədvəli yüklənərkən xəta yarandı.</p>'}}window.deleteQuestion=async function(id){if(!confirm(`ID: ${id} olan sualı silməyə əminsiniz?`))return;const{error}=await _supabase.from("questions").delete().eq("id",id);error?alert("Xəta baş verdi: "+error.message):(alert("Sual uğurla silindi!"),renderQuestionsTable())};function filterCards(){const input=document.getElementById("searchInput").value.toLowerCase(),cards=document.querySelectorAll(".card");let visibleCount=0;cards.forEach(card=>{const title=card.getAttribute("data-title").toLowerCase(),file=card.getAttribute("data-file").toLowerCase();title.includes(input)||file.includes(input)?(card.style.display="flex",visibleCount++):card.style.display="none"}),document.getElementById("statModuleCount").innerText=`${visibleCount} Modul`}
+</script>
 </body>
 </html>

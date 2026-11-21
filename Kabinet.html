@@ -8,118 +8,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DQ Platform - Dövlət Qulluğu Sınaq İmtahanı</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; user-select: none; }
-        :root { --primary-dark: #0f172a; --accent-gold: #d4af37; --success-green: #10b981; --danger-red: #ef4444; }
-        
-        .container { max-width: 1050px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); border-top: 4px solid var(--accent-gold); }
-        h2, h3, h4 { color: var(--primary-dark); text-align: center; }
-        
-        /* GİRİŞ VƏ SEÇİM EKRANLARI */
-        #login-screen, #waiting-screen, #exam-select-screen { text-align: center; padding: 20px; }
-        .code-input, .select-control { padding: 12px; font-size: 16px; width: 80%; max-width: 400px; border: 2px solid #cbd5e1; border-radius: 6px; margin-bottom: 15px; outline: none; text-align: center; }
-        .code-input:focus, .select-control:focus { border-color: var(--accent-gold); }
-        .token-field { letter-spacing: 2px; text-transform: uppercase; }
-        .btn { background-color: var(--primary-dark); color: var(--accent-gold); border: none; padding: 12px 25px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.3s; display: inline-block; text-decoration: none; text-align: center; }
-        .btn:hover { background-color: #1e293b; }
-        .btn-danger { background-color: #dc2626; color: white; }
-        .btn-secondary { background-color: #64748b; color: white; }
-        .btn-success { background-color: var(--success-green); color: white; }
-        .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 4px; }
-        
-        /* SINAQ EKRANI */
-        #exam-screen { display: none; }
-        .exam-header { display: flex; justify-content: space-between; align-items: center; background: var(--primary-dark); color: #ffffff; padding: 12px 20px; border-radius: 6px; margin-bottom: 20px; }
-        .timer { font-size: 18px; font-weight: bold; color: var(--accent-gold); }
-        .exam-layout { display: flex; gap: 20px; position: relative; }
-        .questions-area { flex: 3; background: #ffffff; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; min-height: 350px; display: flex; flex-direction: column; justify-content: space-between; }
-        .answer-card-sidebar { flex: 1; background: #f1f5f9; padding: 15px; border-radius: 8px; height: fit-content; border: 1px solid #cbd5e1; }
-        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .sidebar-header h4 { margin: 0; font-size: 15px; }
-        .grid-nav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; max-height: 400px; overflow-y: auto; }
-        .nav-box { padding: 6px 0; text-align: center; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; position: relative; }
-        .nav-box.answered { background-color: #d1fae5; border-color: var(--success-green); color: #065f46; }
-        .nav-box.current { border: 2px solid var(--primary-dark); background-color: #e2e8f0; }
-        .nav-box.flagged::before { content: ''; position: absolute; top: 2px; left: 3px; width: 5px; height: 5px; background-color: var(--danger-red); border-radius: 50%; }
-        .question-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .question-title { font-weight: 600; color: var(--primary-dark); font-size: 15px; line-height: 1.5; white-space: pre-line; }
-        .flag-label { display: flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; color: #d97706; font-weight: 600; }
-        .options label { display: block; padding: 10px 14px; margin: 8px 0; background: #f1f5f9; border-radius: 6px; cursor: pointer; font-size: 14px; }
-        .options label:hover { background: #e2e8f0; }
-        .exam-navigation-buttons { display: flex; justify-content: space-between; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px; }
-        .review-mode-banner { background: #fef3c7; color: #92400e; padding: 10px; text-align: center; font-weight: bold; border-radius: 6px; margin-bottom: 15px; }
-
-        /* NƏTİCƏ EKRANI (DİM / KABİNET DİZAYNI) */
-        #result-screen { display: none; }
-        .result-card { background: #fff; border-radius: 8px; }
-        .result-header { text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 15px; margin-bottom: 20px; }
-        .result-header h2 { font-size: 18px; color: #2c3e50; margin-bottom: 15px; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left; font-size: 14px; background: #f8f9fa; padding: 12px; border-radius: 6px; }
-        
-        .subject-block { margin-bottom: 20px; }
-        .subject-title-stat { font-size: 13px; margin-bottom: 6px; color: #333; }
-        .subject-title-stat strong { font-size: 14px; color: #2c3e50; }
-        .table-wrapper { overflow-x: auto; margin-bottom: 8px; }
-        .answer-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 11px; }
-        .answer-table th, .answer-table td { border: 1px solid #ccc; padding: 4px 5px; min-width: 22px; }
-        .answer-table th { background: #f8f9fa; font-weight: bold; }
-        .status-plus { color: green; font-weight: bold; }
-        .status-minus { color: red; font-weight: bold; }
-
-        .summary-box { border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; margin: 20px 0; font-size: 14px; background: #fff; }
-        .summary-box p { margin-bottom: 5px; }
-        .status-alert { margin-top: 15px; padding: 12px; background: #e0f2fe; border: 1px solid #7dd3fc; color: #0369a1; text-align: center; border-radius: 6px; font-weight: bold; font-size: 15px; }
-        .status-alert.failed { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
-
-        .analysis-section { margin-top: 25px; }
-        .section-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 5px; }
-        .progress-item { margin-bottom: 12px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #edf2f7; }
-        .progress-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #4a5568; }
-        .progress-bar-bg { width: 100%; height: 10px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
-        .progress-bar-fill { height: 100%; background: #48bb78; border-radius: 10px; transition: width 0.4s ease; }
-        .progress-bar-fill.warning { background: #ed8936; }
-
-        .question-detail { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 10px; font-size: 13px; text-align: left; }
-        .q-badge { background: #edf2f7; color: #4a5568; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 8px; }
-        .q-title { font-weight: bold; margin: 6px 0; color: #2d3748; line-height: 1.4; }
-        .q-ans { margin-top: 3px; color: #4a5568; }
-
-        /* ADMİN VƏ MODUL NAVİQASİYASI */
-        #admin-panel { display: none; margin-top: 20px; border-top: 2px solid var(--accent-gold); padding-top: 20px; }
-        .admin-nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        .admin-nav-card { background: var(--primary-dark); color: var(--accent-gold); padding: 12px 8px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #334155; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .admin-nav-card:hover { background: #1e293b; border-color: var(--accent-gold); transform: translateY(-2px); }
-        .admin-nav-card span.icon { font-size: 18px; }
-        
-        .nav-header-bar { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap; }
-        .nav-header-bar .btn { padding: 8px 15px; font-size: 13px; }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: #f8fafc; border: 1px solid #cbd5e1; border-left: 4px solid var(--accent-gold); padding: 15px; border-radius: 8px; text-align: center; }
-        .stat-card h5 { margin: 0; color: #64748b; font-size: 13px; }
-        .stat-card .value { font-size: 22px; font-weight: bold; color: var(--primary-dark); margin-top: 5px; }
-        .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        .form-control { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        
-        .footer { text-align: center; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 15px; }
-        .footer-text { color: var(--primary-dark); font-weight: bold; font-size: 14px; }
-        .secret-admin-trigger { cursor: pointer; text-decoration: underline; }
-        .error-msg { color: #ef4444; font-weight: bold; }
-        
-        table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; }
-        th, td { padding: 8px; border: 1px solid #cbd5e1; }
-        th { background: var(--primary-dark); color: white; }
-
-        .toggle-details-btn { width: 100%; background: #0284c7; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 15px; transition: 0.2s; }
-        .toggle-details-btn:hover { background: #0369a1; }
-    </style>
+    <style>*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background-color:#eef8ff;color:#333;margin:0;padding:20px;user-select:none}:root{--primary-dark: #005085;--accent-gold: #f72103;--success-green: #10b981;--danger-red: #ef4444}.container{max-width:1050px;margin:0 auto;background:#fff;padding:25px;border-radius:12px;box-shadow:0 4px 20px #0f172a14;border-top:4px solid var(--accent-gold)}h2,h3,h4{color:var(--primary-dark);text-align:center}#login-screen,#waiting-screen,#exam-select-screen{text-align:center;padding:20px}.code-input,.select-control{padding:12px;font-size:16px;width:80%;max-width:400px;border:2px solid #b1ddfb;border-radius:6px;margin-bottom:15px;outline:none;text-align:center}.code-input:focus,.select-control:focus{border-color:var(--accent-gold)}.token-field{letter-spacing:2px;text-transform:uppercase}.btn{background-color:var(--primary-dark);color:var(--accent-gold);border:none;padding:12px 25px;font-size:16px;font-weight:700;border-radius:6px;cursor:pointer;transition:background .3s;display:inline-block;text-decoration:none;text-align:center}.btn:hover{background-color:#005085}.btn-danger{background-color:#dc2626;color:#fff}.btn-secondary{background-color:#64748b;color:#fff}.btn-success{background-color:var(--success-green);color:#fff}.btn-sm{padding:4px 10px;font-size:12px;border-radius:4px}#exam-screen{display:none}.exam-header{display:flex;justify-content:space-between;align-items:center;background:var(--primary-dark);color:#fff;padding:12px 20px;border-radius:6px;margin-bottom:20px}.timer{font-size:18px;font-weight:700;color:var(--accent-gold)}.exam-layout{display:flex;gap:20px;position:relative}.questions-area{flex:3;background:#fff;padding:20px;border:1px solid #d3edff;border-radius:8px;min-height:350px;display:flex;flex-direction:column;justify-content:space-between}.answer-card-sidebar{flex:1;background:#ebf7ff;padding:15px;border-radius:8px;height:fit-content;border:1px solid #b1ddfb}.sidebar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.sidebar-header h4{margin:0;font-size:15px}.grid-nav{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-height:400px;overflow-y:auto}.nav-box{padding:6px 0;text-align:center;background:#fff;border:1px solid #b1ddfb;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;position:relative}.nav-box.answered{background-color:#d1fae5;border-color:var(--success-green);color:#065f46}.nav-box.current{border:2px solid var(--primary-dark);background-color:#d3edff}.nav-box.flagged:before{content:"";position:absolute;top:2px;left:3px;width:5px;height:5px;background-color:var(--danger-red);border-radius:50%}.question-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.question-title{font-weight:600;color:var(--primary-dark);font-size:15px;line-height:1.5;white-space:pre-line}.flag-label{display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;color:#d91d02;font-weight:600}.options label{display:block;padding:10px 14px;margin:8px 0;background:#ebf7ff;border-radius:6px;cursor:pointer;font-size:14px}.options label:hover{background:#d3edff}.exam-navigation-buttons{display:flex;justify-content:space-between;margin-top:20px;border-top:1px solid #d3edff;padding-top:15px}.review-mode-banner{background:#ffe9e5;color:#92400e;padding:10px;text-align:center;font-weight:700;border-radius:6px;margin-bottom:15px}#result-screen{display:none}.result-card{background:#fff;border-radius:8px}.result-header{text-align:center;border-bottom:2px solid #ddd;padding-bottom:15px;margin-bottom:20px}.result-header h2{font-size:18px;color:#005085;margin-bottom:15px}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left;font-size:14px;background:#f8f9fa;padding:12px;border-radius:6px}.subject-block{margin-bottom:20px}.subject-title-stat{font-size:13px;margin-bottom:6px;color:#333}.subject-title-stat strong{font-size:14px;color:#005085}.table-wrapper{overflow-x:auto;margin-bottom:8px}.answer-table{width:100%;border-collapse:collapse;text-align:center;font-size:11px}.answer-table th,.answer-table td{border:1px solid #ccc;padding:4px 5px;min-width:22px}.answer-table th{background:#f8f9fa;font-weight:700}.status-plus{color:green;font-weight:700}.status-minus{color:red;font-weight:700}.summary-box{border:1px solid #d3edff;border-radius:6px;padding:15px;margin:20px 0;font-size:14px;background:#fff}.summary-box p{margin-bottom:5px}.status-alert{margin-top:15px;padding:12px;background:#dff2ff;border:1px solid #7dd3fc;color:#0369a1;text-align:center;border-radius:6px;font-weight:700;font-size:15px}.status-alert.failed{background:#fef2f2;border-color:#fca5a5;color:#991b1b}.analysis-section{margin-top:25px}.section-title{font-size:16px;font-weight:700;color:#005085;margin-bottom:15px;border-bottom:2px solid #eee;padding-bottom:5px}.progress-item{margin-bottom:12px;background:#f5faff;padding:10px;border-radius:6px;border:1px solid #e5f5ff}.progress-info{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px;color:#4a5568}.progress-bar-bg{width:100%;height:10px;background:#d3edff;border-radius:10px;overflow:hidden}.progress-bar-fill{height:100%;background:#48bb78;border-radius:10px;transition:width .4s ease}.progress-bar-fill.warning{background:#ed8936}.question-detail{background:#fff;border:1px solid #d3edff;border-radius:6px;padding:12px;margin-bottom:10px;font-size:13px;text-align:left}.q-badge{background:#e5f5ff;color:#4a5568;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;margin-left:8px}.q-title{font-weight:700;margin:6px 0;color:#005085;line-height:1.4}.q-ans{margin-top:3px;color:#4a5568}#admin-panel{display:none;margin-top:20px;border-top:2px solid var(--accent-gold);padding-top:20px}.admin-nav-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:20px}.admin-nav-card{background:var(--primary-dark);color:var(--accent-gold);padding:12px 8px;border-radius:8px;text-align:center;text-decoration:none;font-weight:700;font-size:12px;border:1px solid #005288;transition:.2s;display:flex;flex-direction:column;align-items:center;gap:4px}.admin-nav-card:hover{background:#005085;border-color:var(--accent-gold);transform:translateY(-2px)}.admin-nav-card span.icon{font-size:18px}.nav-header-bar{display:flex;gap:10px;margin-bottom:15px;justify-content:center;flex-wrap:wrap}.nav-header-bar .btn{padding:8px 15px;font-size:13px}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-bottom:25px}.stat-card{background:#f5faff;border:1px solid #b1ddfb;border-left:4px solid var(--accent-gold);padding:15px;border-radius:8px;text-align:center}.stat-card h5{margin:0;color:#64748b;font-size:13px}.stat-card .value{font-size:22px;font-weight:700;color:var(--primary-dark);margin-top:5px}.form-group{margin-bottom:15px;text-align:left}.form-group label{display:block;font-weight:700;margin-bottom:5px;font-size:14px}.form-control{width:100%;padding:10px;border:1px solid #b1ddfb;border-radius:6px;box-sizing:border-box;font-size:14px}.footer{text-align:center;margin-top:30px;border-top:1px solid #d3edff;padding-top:15px}.footer-text{color:var(--primary-dark);font-weight:700;font-size:14px}.secret-admin-trigger{cursor:pointer;text-decoration:underline}.error-msg{color:#ef4444;font-weight:700}table{width:100%;border-collapse:collapse;text-align:center;font-size:13px}th,td{padding:8px;border:1px solid #b1ddfb}th{background:var(--primary-dark);color:#fff}.toggle-details-btn{width:100%;background:#0284c7;color:#fff;padding:10px;border:none;border-radius:6px;font-weight:700;cursor:pointer;margin-bottom:15px;transition:.2s}.toggle-details-btn:hover{background:#0369a1}
+</style>
+<link rel="stylesheet" href="dq-tema.css?v=5">
 </head>
 <body oncontextmenu="return false;">
 
     <div class="container" id="top">
-        <!-- GİRİŞ HİSSƏSİ -->
+        
         <div id="login-screen">
             <h2>DQ Platform - Dövlət Qulluğu Sınaq İmtahanı</h2>
             <p>Zəhmət olmasa məlumatlarınızı daxil edin:</p>
@@ -129,7 +25,7 @@
             <p id="error-msg" class="error-msg" style="margin-top: 10px;"></p>
         </div>
 
-        <!-- SINAQ SEÇİM EKRANI -->
+        
         <div id="exam-select-screen" style="display: none;">
             <h2>📝 Sınaq Seçimi</h2>
             <p>Zəhmət olmasa işləmək istədiyiniz sınağı və vəzifə qrupunu seçin:</p>
@@ -159,7 +55,7 @@
             <button class="btn btn-secondary btn-sm" onclick="goHome()">🏠 Əsas Səhifəyə Qayıt</button>
         </div>
 
-        <!-- SINAQ HİSSƏSİ -->
+        
         <div id="exam-screen">
             <div id="review-banner" class="review-mode-banner" style="display: none;">
                 🔍 Cavablara Baxış Rejimi (Düzəliş etmək mümkün deyil)
@@ -191,7 +87,7 @@
             </div>
         </div>
 
-        <!-- NƏTİCƏ EKRANI (DİM / KABİNET STİLİNDƏ) -->
+        
         <div id="result-screen">
             <div class="result-card">
                 <header class="result-header">
@@ -204,10 +100,10 @@
                     </div>
                 </header>
 
-                <!-- Fənlərin Cavab Cədvəlləri -->
+                
                 <div id="resSubjectsContainer"></div>
 
-                <!-- Yekun Statistika və Sertifikat Alerti -->
+                
                 <div class="summary-box">
                     <p>Düzgün cavabların sayı: <strong id="resTotalCorrect">0</strong></p>
                     <p>Səhv cavabların sayı: <strong id="resTotalWrong">0</strong></p>
@@ -219,13 +115,13 @@
                     </div>
                 </div>
 
-                <!-- Fənlər Üzrə Nəticə Analizi (Progress Bar) -->
+                
                 <div class="analysis-section">
                     <h3 class="section-title">Fənlər Üzrə Nəticə Analizi</h3>
                     <div id="resAnalysisContainer"></div>
                 </div>
 
-                <!-- Sual-Sual Detallar Və İzahlar -->
+                
                 <div class="analysis-section">
                     <h3 class="section-title">Sual-Sual Detallar Və İzahlar</h3>
                     <div id="resDetailsContainer"></div>
@@ -238,7 +134,7 @@
             </div>
         </div>
 
-        <!-- ADMİN PANELİ VƏ MODULLAR -->
+        
         <div id="admin-panel">
             <div class="nav-header-bar">
                 <button class="btn" onclick="goHome()">🏠 Əsas Səhifə</button>
@@ -267,7 +163,7 @@
             <button class="toggle-details-btn" onclick="toggleAdminDetails()">👁️ Tənzimləmələri Və Nəticələri Göstər / Gizlə</button>
 
             <div id="admin-details-section" style="display: none;">
-                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 15px;">
+                <div style="background: #f5faff; padding: 15px; border-radius: 8px; border: 1px solid #b1ddfb; margin-top: 15px;">
                     <h4>İştirakçıya İcazə Ver</h4>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <input type="text" id="adm-student-name" class="form-control" placeholder="Ad Soyad" style="flex: 2; min-width: 180px;">
@@ -302,7 +198,7 @@
 
                 <hr>
                 <h4 style="text-align: left; margin-top: 20px;">Sınağa Sual Əlavə Et</h4>
-                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                <div style="background: #f5faff; padding: 15px; border-radius: 8px; border: 1px solid #b1ddfb;">
                     <div class="form-group">
                         <label>Hansı Sınaq Üçün?</label>
                         <select id="target-exam-id" class="form-control">
@@ -372,361 +268,21 @@
         </div>
     </div>
 
-    <script>
-        const SUPABASE_URL = "https://cpzwliqlgaplroscvduo.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        const ADMIN_PASS = "6675157";
-        const testDuration = 3 * 3600;
-
-        let currentStudentName = "";
-        let currentActiveFin = "";
-        let selectedExamId = "1";
-        let selectedGroup = "BB";
-        let allQuestions = [];
-        let userAnswers = {};
-        let flaggedQuestions = {};
-        let currentQuestionIndex = 0;
-        let timerInterval;
-        let timeLeft = testDuration;
-        let examFinished = false;
-
-        const letters = ["A", "B", "C", "D", "E"];
-
-        document.addEventListener("DOMContentLoaded", restoreSession);
-
-        function goHome() {
-            clearSessionStorage();
-            window.location.reload();
-        }
-
-        function clearSessionStorage() {
-            localStorage.removeItem("dq_exam_state");
-        }
-
-        function saveSessionState() {
-            if (!currentActiveFin || examFinished) return;
-            const state = {
-                studentName: currentStudentName,
-                fin: currentActiveFin,
-                examId: selectedExamId,
-                group: selectedGroup,
-                answers: userAnswers,
-                flags: flaggedQuestions,
-                currentIndex: currentQuestionIndex,
-                timeLeft: timeLeft,
-                questions: allQuestions
-            };
-            localStorage.setItem("dq_exam_state", JSON.stringify(state));
-        }
-
-        function restoreSession() {
-            const savedState = localStorage.getItem("dq_exam_state");
-            if (savedState) {
-                try {
-                    const state = JSON.parse(savedState);
-                    currentStudentName = state.studentName;
-                    currentActiveFin = state.fin;
-                    selectedExamId = state.examId;
-                    selectedGroup = state.group || "BB";
-                    userAnswers = state.answers || {};
-                    flaggedQuestions = state.flags || {};
-                    currentQuestionIndex = state.currentIndex || 0;
-                    timeLeft = state.timeLeft || testDuration;
-                    allQuestions = state.questions || [];
-
-                    if (allQuestions.length > 0) {
-                        document.getElementById("login-screen").style.display = "none";
-                        document.getElementById("exam-select-screen").style.display = "none";
-                        document.getElementById("exam-screen").style.display = "block";
-                        document.getElementById("active-exam-title").innerText = `Dövlət Qulluğu Vəzifələri Üzrə Sınaq ${selectedExamId} (${selectedGroup})`;
-
-                        loadNavGrid();
-                        renderCurrentQuestion();
-                        startTimer(timeLeft);
-                    }
-                } catch(e) {
-                    clearSessionStorage();
-                }
-            }
-        }
-
-        function toggleAdminDetails() {
-            const sec = document.getElementById("admin-details-section");
-            sec.style.display = sec.style.display === "none" ? "block" : "none";
-        }
-
-        async function proceedToExamSelect() {
-            const nameInput = document.getElementById("user-name").value.trim();
-            const finInput = document.getElementById("user-fin").value.trim().toUpperCase();
-            const errorMsg = document.getElementById("error-msg");
-
-            if (!nameInput || finInput.length < 5) {
-                errorMsg.innerText = "Ad və etibarlı FIN kod daxil edin!";
-                return;
-            }
-
-            errorMsg.style.color = "blue";
-            errorMsg.innerText = "Məlumatlar yoxlanılır...";
-
-            const { data: allowedData } = await _supabase
-                .from('allowed_students')
-                .select('*')
-                .eq('fin', finInput);
-
-            if (!allowedData || allowedData.length === 0) {
-                errorMsg.style.color = "#ef4444";
-                errorMsg.innerText = "Bu FİN kod üçün sınağa icazə verilməyib!";
-                return;
-            }
-
-            currentStudentName = nameInput;
-            currentActiveFin = finInput;
-
-            document.getElementById("login-screen").style.display = "none";
-            document.getElementById("exam-select-screen").style.display = "block";
-        }
-
-        async function startExamSession() {
-            selectedExamId = document.getElementById("exam-selector").value;
-            selectedGroup = document.getElementById("group-selector").value;
-
-            // 1 dəfə iştirak yoxlanışı
-            const { data: existingResults } = await _supabase
-                .from('exam_results')
-                .select('*')
-                .eq('fin', currentActiveFin)
-                .eq('exam_no', selectedExamId);
-
-            if (existingResults && existingResults.length > 0) {
-                alert(`Siz artıq Sınaq ${selectedExamId} üzrə imtahanda iştirak etmisiniz!`);
-                return;
-            }
-
-            const { data, error } = await _supabase
-                .from('exam_questions')
-                .select('*')
-                .eq('exam_id', selectedExamId)
-                .order('q_number', { ascending: true });
-
-            if (error || !data || data.length === 0) {
-                alert("Bu sınaq üçün hələ sual əlavə edilməyib!");
-                return;
-            }
-
-            allQuestions = data.map(q => ({
-                id: q.q_number,
-                subject: q.subject || "Ümumi",
-                question: q.question,
-                options: q.options,
-                correct: q.correct
-            }));
-
-            userAnswers = {};
-            flaggedQuestions = {};
-            currentQuestionIndex = 0;
-            timeLeft = testDuration;
-            examFinished = false;
-
-            document.getElementById("exam-select-screen").style.display = "none";
-            document.getElementById("exam-screen").style.display = "block";
-            document.getElementById("active-exam-title").innerText = `Dövlət Qulluğu Vəzifələri Üzrə Sınaq ${selectedExamId} (${selectedGroup})`;
-
-            saveSessionState();
-            loadNavGrid();
-            renderCurrentQuestion();
-            startTimer(timeLeft);
-        }
-
-        function renderCurrentQuestion() {
-            const q = allQuestions[currentQuestionIndex];
-            const container = document.getElementById("single-question-container");
-            const isFlagged = flaggedQuestions[q.id] ? "checked" : "";
-            const userAns = userAnswers[q.id];
-
-            let html = `
+    <script>const SUPABASE_URL="https://cpzwliqlgaplroscvduo.supabase.co",SUPABASE_KEY="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF",_supabase=supabase.createClient(SUPABASE_URL,SUPABASE_KEY),ADMIN_PASS="6675157",testDuration=3*3600;let currentStudentName="",currentActiveFin="",selectedExamId="1",selectedGroup="BB",allQuestions=[],userAnswers={},flaggedQuestions={},currentQuestionIndex=0,timerInterval,timeLeft=testDuration,examFinished=!1;const letters=["A","B","C","D","E"];document.addEventListener("DOMContentLoaded",restoreSession);function goHome(){clearSessionStorage(),window.location.reload()}function clearSessionStorage(){localStorage.removeItem("dq_exam_state")}function saveSessionState(){if(!currentActiveFin||examFinished)return;const state={studentName:currentStudentName,fin:currentActiveFin,examId:selectedExamId,group:selectedGroup,answers:userAnswers,flags:flaggedQuestions,currentIndex:currentQuestionIndex,timeLeft,questions:allQuestions};localStorage.setItem("dq_exam_state",JSON.stringify(state))}function restoreSession(){const savedState=localStorage.getItem("dq_exam_state");if(savedState)try{const state=JSON.parse(savedState);currentStudentName=state.studentName,currentActiveFin=state.fin,selectedExamId=state.examId,selectedGroup=state.group||"BB",userAnswers=state.answers||{},flaggedQuestions=state.flags||{},currentQuestionIndex=state.currentIndex||0,timeLeft=state.timeLeft||testDuration,allQuestions=state.questions||[],allQuestions.length>0&&(document.getElementById("login-screen").style.display="none",document.getElementById("exam-select-screen").style.display="none",document.getElementById("exam-screen").style.display="block",document.getElementById("active-exam-title").innerText=`Dövlət Qulluğu Vəzifələri Üzrə Sınaq ${selectedExamId} (${selectedGroup})`,loadNavGrid(),renderCurrentQuestion(),startTimer(timeLeft))}catch{clearSessionStorage()}}function toggleAdminDetails(){const sec=document.getElementById("admin-details-section");sec.style.display=sec.style.display==="none"?"block":"none"}async function proceedToExamSelect(){const nameInput=document.getElementById("user-name").value.trim(),finInput=document.getElementById("user-fin").value.trim().toUpperCase(),errorMsg=document.getElementById("error-msg");if(!nameInput||finInput.length<5){errorMsg.innerText="Ad və etibarlı FIN kod daxil edin!";return}errorMsg.style.color="blue",errorMsg.innerText="Məlumatlar yoxlanılır...";const{data:allowedData}=await _supabase.from("allowed_students").select("*").eq("fin",finInput);if(!allowedData||allowedData.length===0){errorMsg.style.color="#ef4444",errorMsg.innerText="Bu FİN kod üçün sınağa icazə verilməyib!";return}currentStudentName=nameInput,currentActiveFin=finInput,document.getElementById("login-screen").style.display="none",document.getElementById("exam-select-screen").style.display="block"}async function startExamSession(){selectedExamId=document.getElementById("exam-selector").value,selectedGroup=document.getElementById("group-selector").value;const{data:existingResults}=await _supabase.from("exam_results").select("*").eq("fin",currentActiveFin).eq("exam_no",selectedExamId);if(existingResults&&existingResults.length>0){alert(`Siz artıq Sınaq ${selectedExamId} üzrə imtahanda iştirak etmisiniz!`);return}const{data,error}=await _supabase.from("exam_questions").select("*").eq("exam_id",selectedExamId).order("q_number",{ascending:!0});if(error||!data||data.length===0){alert("Bu sınaq üçün hələ sual əlavə edilməyib!");return}allQuestions=data.map(q=>({id:q.q_number,subject:q.subject||"Ümumi",question:q.question,options:q.options,correct:q.correct})),userAnswers={},flaggedQuestions={},currentQuestionIndex=0,timeLeft=testDuration,examFinished=!1,document.getElementById("exam-select-screen").style.display="none",document.getElementById("exam-screen").style.display="block",document.getElementById("active-exam-title").innerText=`Dövlət Qulluğu Vəzifələri Üzrə Sınaq ${selectedExamId} (${selectedGroup})`,saveSessionState(),loadNavGrid(),renderCurrentQuestion(),startTimer(timeLeft)}function renderCurrentQuestion(){const q=allQuestions[currentQuestionIndex],container=document.getElementById("single-question-container"),isFlagged=flaggedQuestions[q.id]?"checked":"",userAns=userAnswers[q.id];let html=`
                 <div>
                     <div class="question-top">
                         <div class="question-title">Sual ${q.id} (${q.subject}): ${q.question}</div>
                         <label class="flag-label">
-                            <input type="checkbox" id="flag_chk" ${isFlagged} ${examFinished ? 'disabled' : ''} onchange="toggleFlag(${q.id})"> Tərəddüdlü
+                            <input type="checkbox" id="flag_chk" ${isFlagged} ${examFinished?"disabled":""} onchange="toggleFlag(${q.id})"> Tərəddüdlü
                         </label>
                     </div>
                     <div class="options">
-            `;
-
-            q.options.forEach((opt, idx) => {
-                let checked = (userAns === idx) ? "checked" : "";
-                let disabledAttr = examFinished ? "disabled" : "";
-                let correctHighlight = "";
-                
-                if (examFinished) {
-                    if (idx === q.correct) correctHighlight = "background-color: #d1fae5; border: 2px solid #10b981; font-weight: bold;";
-                    else if (userAns === idx && userAns !== q.correct) correctHighlight = "background-color: #fef2f2; border: 2px solid #ef4444;";
-                }
-
-                html += `
+            `;q.options.forEach((opt,idx)=>{let checked=userAns===idx?"checked":"",disabledAttr=examFinished?"disabled":"",correctHighlight="";examFinished&&(idx===q.correct?correctHighlight="background-color: #d1fae5; border: 2px solid #10b981; font-weight: bold;":userAns===idx&&userAns!==q.correct&&(correctHighlight="background-color: #fef2f2; border: 2px solid #ef4444;")),html+=`
                     <label style="${correctHighlight}">
                         <input type="radio" name="current_opt" value="${idx}" ${checked} ${disabledAttr} onclick="selectOption(${q.id}, ${idx})">
                         ${letters[idx]}) ${opt}
                     </label>
-                `;
-            });
-
-            html += `</div></div>`;
-            container.innerHTML = html;
-            updateNavActiveState();
-        }
-
-        function loadNavGrid() {
-            const gridContainer = document.getElementById("grid-nav-container");
-            let html = "";
-            allQuestions.forEach((q, index) => {
-                let answeredClass = userAnswers[q.id] !== undefined ? "answered" : "";
-                let flaggedClass = flaggedQuestions[q.id] ? "flagged" : "";
-                html += `<div class="nav-box ${answeredClass} ${flaggedClass}" id="nav_${q.id}" onclick="jumpToQuestion(${index})">${q.id}</div>`;
-            });
-            gridContainer.innerHTML = html;
-        }
-
-        function jumpToQuestion(index) { currentQuestionIndex = index; renderCurrentQuestion(); saveSessionState(); }
-        function nextQuestion() { if (currentQuestionIndex < allQuestions.length - 1) { currentQuestionIndex++; renderCurrentQuestion(); saveSessionState(); } }
-        function prevQuestion() { if (currentQuestionIndex > 0) { currentQuestionIndex--; renderCurrentQuestion(); saveSessionState(); } }
-        
-        function selectOption(qId, optIdx) { 
-            if(examFinished) return; 
-            userAnswers[qId] = optIdx; 
-            document.getElementById(`nav_${qId}`).classList.add("answered"); 
-            saveSessionState();
-        }
-        
-        function toggleFlag(qId) {
-            if(examFinished) return;
-            let chk = document.getElementById("flag_chk").checked;
-            let nav = document.getElementById(`nav_${qId}`);
-            if (chk) { flaggedQuestions[qId] = true; nav.classList.add("flagged"); } 
-            else { delete flaggedQuestions[qId]; nav.classList.remove("flagged"); }
-            saveSessionState();
-        }
-
-        function updateNavActiveState() {
-            allQuestions.forEach((q, idx) => {
-                let box = document.getElementById(`nav_${q.id}`);
-                if (box) {
-                    if (idx === currentQuestionIndex) box.classList.add("current");
-                    else box.classList.remove("current");
-                }
-            });
-        }
-
-        function startTimer(duration) {
-            timeLeft = duration;
-            const display = document.getElementById("timer");
-            if (timerInterval) clearInterval(timerInterval);
-            
-            timerInterval = setInterval(() => {
-                if (examFinished) return;
-                let hours = String(Math.floor(timeLeft / 3600)).padStart(2, '0');
-                let minutes = String(Math.floor((timeLeft % 3600) / 60)).padStart(2, '0');
-                let seconds = String(timeLeft % 60).padStart(2, '0');
-                display.textContent = `${hours}:${minutes}:${seconds}`;
-                
-                timeLeft--;
-                if (timeLeft % 5 === 0) saveSessionState();
-
-                if (timeLeft < 0) { 
-                    clearInterval(timerInterval); 
-                    finishExam(); 
-                }
-            }, 1000);
-        }
-
-        function confirmFinish() {
-            if (confirm("Testi bitirmək istədiyinizə əminsinizmi?")) {
-                finishExam();
-            }
-        }
-
-        function calculateSubgroup(group, score) {
-            if (group === 'BA') {
-                if (score >= 102) return { code: 'BA1', percent: '85%' };
-                if (score >= 96)  return { code: 'BA2', percent: '80%' };
-                if (score >= 90)  return { code: 'BA3', percent: '75%' };
-                if (score >= 84)  return { code: 'BA4', percent: '70%' };
-                return { code: 'Kəsilib', percent: '70%-dən aşağı' };
-            } else if (group === 'AC') {
-                if (score >= 80) return { code: 'AC1', percent: '80%' };
-                if (score >= 75) return { code: 'AC2', percent: '75%' };
-                if (score >= 70) return { code: 'AC3', percent: '70%' };
-                if (score >= 65) return { code: 'AC4', percent: '65%' };
-                return { code: 'Kəsilib', percent: '65%-dən aşağı' };
-            } else if (group === 'BB') {
-                if (score >= 80) return { code: 'BB1', percent: '80%' };
-                if (score >= 75) return { code: 'BB2', percent: '75%' };
-                if (score >= 70) return { code: 'BB3', percent: '70%' };
-                if (score >= 65) return { code: 'BB4', percent: '65%' };
-                return { code: 'Kəsilib', percent: '65%-dən aşağı' };
-            }
-            return { code: '-', percent: '0%' };
-        }
-
-        async function finishExam() {
-            clearInterval(timerInterval);
-            examFinished = true;
-            clearSessionStorage();
-
-            let totalCorrect = 0, totalWrong = 0, totalBlank = 0;
-            let subjectsMap = {};
-
-            // Fənlər üzrə qruplaşdırma və nəticələri hesablama
-            allQuestions.forEach(q => {
-                let subj = q.subject || "Ümumi";
-                if (!subjectsMap[subj]) {
-                    subjectsMap[subj] = { questions: [], correctCount: 0, wrongCount: 0, blankCount: 0 };
-                }
-
-                let userAns = userAnswers[q.id];
-                let isCorrect = false;
-
-                if (userAns === undefined) {
-                    totalBlank++;
-                    subjectsMap[subj].blankCount++;
-                } else if (userAns === q.correct) {
-                    totalCorrect++;
-                    subjectsMap[subj].correctCount++;
-                    isCorrect = true;
-                } else {
-                    totalWrong++;
-                    subjectsMap[subj].wrongCount++;
-                }
-
-                subjectsMap[subj].questions.push({
-                    qId: q.id,
-                    text: q.question,
-                    correctIndex: q.correct,
-                    correctLetter: letters[q.correct],
-                    userIndex: userAns,
-                    userLetter: userAns !== undefined ? letters[userAns] : "-",
-                    userOptText: userAns !== undefined ? q.options[userAns] : "Cavab verilməyib",
-                    correctOptText: q.options[q.correct],
-                    isCorrect: isCorrect
-                });
-            });
-
-            let score = totalCorrect;
-            let subResult = calculateSubgroup(selectedGroup, score);
-            let today = new Date().toLocaleDateString('az-AZ');
-
-            // 1. DİM Cavab Cədvəllərinin dinamik qurulması
-            let subjContainer = document.getElementById("resSubjectsContainer");
-            subjContainer.innerHTML = "";
-
-            Object.keys(subjectsMap).forEach(subjName => {
-                let subjData = subjectsMap[subjName];
-                let qList = subjData.questions;
-
-                let tableHtml = `
+                `}),html+="</div></div>",container.innerHTML=html,updateNavActiveState()}function loadNavGrid(){const gridContainer=document.getElementById("grid-nav-container");let html="";allQuestions.forEach((q,index)=>{let answeredClass=userAnswers[q.id]!==void 0?"answered":"",flaggedClass=flaggedQuestions[q.id]?"flagged":"";html+=`<div class="nav-box ${answeredClass} ${flaggedClass}" id="nav_${q.id}" onclick="jumpToQuestion(${index})">${q.id}</div>`}),gridContainer.innerHTML=html}function jumpToQuestion(index){currentQuestionIndex=index,renderCurrentQuestion(),saveSessionState()}function nextQuestion(){currentQuestionIndex<allQuestions.length-1&&(currentQuestionIndex++,renderCurrentQuestion(),saveSessionState())}function prevQuestion(){currentQuestionIndex>0&&(currentQuestionIndex--,renderCurrentQuestion(),saveSessionState())}function selectOption(qId,optIdx){examFinished||(userAnswers[qId]=optIdx,document.getElementById(`nav_${qId}`).classList.add("answered"),saveSessionState())}function toggleFlag(qId){if(examFinished)return;let chk=document.getElementById("flag_chk").checked,nav=document.getElementById(`nav_${qId}`);chk?(flaggedQuestions[qId]=!0,nav.classList.add("flagged")):(delete flaggedQuestions[qId],nav.classList.remove("flagged")),saveSessionState()}function updateNavActiveState(){allQuestions.forEach((q,idx)=>{let box=document.getElementById(`nav_${q.id}`);box&&(idx===currentQuestionIndex?box.classList.add("current"):box.classList.remove("current"))})}function startTimer(duration){timeLeft=duration;const display=document.getElementById("timer");timerInterval&&clearInterval(timerInterval),timerInterval=setInterval(()=>{if(examFinished)return;let hours=String(Math.floor(timeLeft/3600)).padStart(2,"0"),minutes=String(Math.floor(timeLeft%3600/60)).padStart(2,"0"),seconds=String(timeLeft%60).padStart(2,"0");display.textContent=`${hours}:${minutes}:${seconds}`,timeLeft--,timeLeft%5===0&&saveSessionState(),timeLeft<0&&(clearInterval(timerInterval),finishExam())},1e3)}function confirmFinish(){confirm("Testi bitirmək istədiyinizə əminsinizmi?")&&finishExam()}function calculateSubgroup(group,score){return group==="BA"?score>=102?{code:"BA1",percent:"85%"}:score>=96?{code:"BA2",percent:"80%"}:score>=90?{code:"BA3",percent:"75%"}:score>=84?{code:"BA4",percent:"70%"}:{code:"Kəsilib",percent:"70%-dən aşağı"}:group==="AC"?score>=80?{code:"AC1",percent:"80%"}:score>=75?{code:"AC2",percent:"75%"}:score>=70?{code:"AC3",percent:"70%"}:score>=65?{code:"AC4",percent:"65%"}:{code:"Kəsilib",percent:"65%-dən aşağı"}:group==="BB"?score>=80?{code:"BB1",percent:"80%"}:score>=75?{code:"BB2",percent:"75%"}:score>=70?{code:"BB3",percent:"70%"}:score>=65?{code:"BB4",percent:"65%"}:{code:"Kəsilib",percent:"65%-dən aşağı"}:{code:"-",percent:"0%"}}async function finishExam(){clearInterval(timerInterval),examFinished=!0,clearSessionStorage();let totalCorrect=0,totalWrong=0,totalBlank=0,subjectsMap={};allQuestions.forEach(q=>{let subj=q.subject||"Ümumi";subjectsMap[subj]||(subjectsMap[subj]={questions:[],correctCount:0,wrongCount:0,blankCount:0});let userAns=userAnswers[q.id],isCorrect=!1;userAns===void 0?(totalBlank++,subjectsMap[subj].blankCount++):userAns===q.correct?(totalCorrect++,subjectsMap[subj].correctCount++,isCorrect=!0):(totalWrong++,subjectsMap[subj].wrongCount++),subjectsMap[subj].questions.push({qId:q.id,text:q.question,correctIndex:q.correct,correctLetter:letters[q.correct],userIndex:userAns,userLetter:userAns!==void 0?letters[userAns]:"-",userOptText:userAns!==void 0?q.options[userAns]:"Cavab verilməyib",correctOptText:q.options[q.correct],isCorrect})});let score=totalCorrect,subResult=calculateSubgroup(selectedGroup,score),today=new Date().toLocaleDateString("az-AZ"),subjContainer=document.getElementById("resSubjectsContainer");subjContainer.innerHTML="",Object.keys(subjectsMap).forEach(subjName=>{let subjData=subjectsMap[subjName],qList=subjData.questions,tableHtml=`
                     <div class="subject-block">
                         <div class="subject-title-stat">
                             <strong>${subjName}</strong> <i>(Düzgün cavabların sayı: ${subjData.correctCount}, Səhv cavabların sayı: ${subjData.wrongCount}, Cavablandırılmamış sualların sayı: ${subjData.blankCount})</i>
@@ -735,212 +291,42 @@
                             <table class="answer-table">
                                 <tr>
                                     <th>Sual №</th>
-                                    ${qList.map(item => `<td>${item.qId}</td>`).join('')}
+                                    ${qList.map(item=>`<td>${item.qId}</td>`).join("")}
                                 </tr>
                                 <tr>
                                     <th>Düzgün</th>
-                                    ${qList.map(item => `<td>${item.correctLetter}</td>`).join('')}
+                                    ${qList.map(item=>`<td>${item.correctLetter}</td>`).join("")}
                                 </tr>
                                 <tr>
                                     <th>Cavab</th>
-                                    ${qList.map(item => `<td>${item.userLetter}</td>`).join('')}
+                                    ${qList.map(item=>`<td>${item.userLetter}</td>`).join("")}
                                 </tr>
                                 <tr class="status-row">
                                     <th>Nəticə</th>
-                                    ${qList.map(item => {
-                                        if (item.userIndex === undefined) return `<td>-</td>`;
-                                        return item.isCorrect ? `<td class="status-plus">+</td>` : `<td class="status-minus">-</td>`;
-                                    }).join('')}
+                                    ${qList.map(item=>item.userIndex===void 0?"<td>-</td>":item.isCorrect?'<td class="status-plus">+</td>':'<td class="status-minus">-</td>').join("")}
                                 </tr>
                             </table>
                         </div>
                     </div>
-                `;
-                subjContainer.innerHTML += tableHtml;
-            });
-
-            // 2. Fənlər Üzrə Nəticə Analizi (Progress Bars)
-            let analysisContainer = document.getElementById("resAnalysisContainer");
-            analysisContainer.innerHTML = "";
-
-            Object.keys(subjectsMap).forEach(subjName => {
-                let subjData = subjectsMap[subjName];
-                let totalQ = subjData.questions.length;
-                let percent = Math.round((subjData.correctCount / totalQ) * 100) || 0;
-                let warningClass = percent < 50 ? "warning" : "";
-
-                let progressHtml = `
+                `;subjContainer.innerHTML+=tableHtml});let analysisContainer=document.getElementById("resAnalysisContainer");analysisContainer.innerHTML="",Object.keys(subjectsMap).forEach(subjName=>{let subjData=subjectsMap[subjName],totalQ=subjData.questions.length,percent=Math.round(subjData.correctCount/totalQ*100)||0,warningClass=percent<50?"warning":"",progressHtml=`
                     <div class="progress-item">
                         <div class="progress-info"><span>${subjName}</span><span>${subjData.correctCount}/${totalQ} düzgün (${percent}%)</span></div>
                         <div class="progress-bar-bg"><div class="progress-bar-fill ${warningClass}" style="width: ${percent}%;"></div></div>
                     </div>
-                `;
-                analysisContainer.innerHTML += progressHtml;
-            });
-
-            // 3. Sual-Sual Detallar Və İzahlar
-            let detailsContainer = document.getElementById("resDetailsContainer");
-            detailsContainer.innerHTML = "";
-
-            allQuestions.forEach(q => {
-                let uAns = userAnswers[q.id];
-                let uText = uAns !== undefined ? `${letters[uAns]}) ${q.options[uAns]}` : "Cavablandırılmayıb";
-                let cText = `${letters[q.correct]}) ${q.options[q.correct]}`;
-
-                let detailHtml = `
+                `;analysisContainer.innerHTML+=progressHtml});let detailsContainer=document.getElementById("resDetailsContainer");detailsContainer.innerHTML="",allQuestions.forEach(q=>{let uAns=userAnswers[q.id],uText=uAns!==void 0?`${letters[uAns]}) ${q.options[uAns]}`:"Cavablandırılmayıb",cText=`${letters[q.correct]}) ${q.options[q.correct]}`,detailHtml=`
                     <div class="question-detail">
-                        <div><strong>Sual ${q.id}</strong> <span class="q-badge">${q.subject || 'Ümumi'}</span></div>
+                        <div><strong>Sual ${q.id}</strong> <span class="q-badge">${q.subject||"Ümumi"}</span></div>
                         <div class="q-title">${q.question}</div>
                         <div class="q-ans"><strong>Sizin cavab:</strong> ${uText}</div>
                         <div class="q-ans"><strong>Düzgün cavab:</strong> ${cText}</div>
                     </div>
-                `;
-                detailsContainer.innerHTML += detailHtml;
-            });
-
-            // Ümumi dəyərlərin doldurulması
-            document.getElementById("resUserName").innerText = currentStudentName;
-            document.getElementById("resUserGroup").innerText = selectedGroup;
-            document.getElementById("resExamDate").innerText = today;
-
-            document.getElementById("resTotalCorrect").innerText = totalCorrect;
-            document.getElementById("resTotalWrong").innerText = totalWrong;
-            document.getElementById("resTotalBlank").innerText = totalBlank;
-            document.getElementById("resFinalScore").innerText = score;
-
-            let alertBox = document.getElementById("resStatusAlert");
-            if (subResult.code === 'Kəsilib' || subResult.code === '-') {
-                alertBox.className = "status-alert failed";
-                alertBox.innerHTML = `Təəssüf ki, keçid balını toplaya bilmədiniz. (Yığılan faiz: ${subResult.percent})`;
-            } else {
-                alertBox.className = "status-alert";
-                document.getElementById("resSubgroupCode").innerText = subResult.code;
-                document.getElementById("resSubgroupText").innerText = subResult.code;
-            }
-
-            // Supabase bazasına nəticəni yazmaq
-            await _supabase.from('exam_results').insert([{
-                name: currentStudentName,
-                fin: currentActiveFin,
-                exam_no: selectedExamId,
-                correct_count: totalCorrect,
-                wrong_count: totalWrong,
-                score: score,
-                bb_group: subResult.code
-            }]);
-
-            document.getElementById("exam-screen").style.display = "none";
-            document.getElementById("result-screen").style.display = "block";
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function backToReviewQuestions() {
-            document.getElementById("result-screen").style.display = "none";
-            document.getElementById("exam-screen").style.display = "block";
-            document.getElementById("review-banner").style.display = "block";
-            document.getElementById("finish-btn").style.display = "none";
-            document.getElementById("review-home-btn").style.display = "block";
-            
-            currentQuestionIndex = 0;
-            renderCurrentQuestion();
-        }
-
-        function openAdminLogin() {
-            let pass = prompt("Admin şifrəsini daxil edin:");
-            if (pass === ADMIN_PASS) {
-                document.getElementById("login-screen").style.display = "none";
-                document.getElementById("exam-select-screen").style.display = "none";
-                document.getElementById("exam-screen").style.display = "none";
-                document.getElementById("admin-panel").style.display = "block";
-                loadAdminPanelData();
-            }
-        }
-        function closeAdminPanel() { document.getElementById("admin-panel").style.display = "none"; document.getElementById("login-screen").style.display = "block"; }
-
-        async function allowStudent() {
-            let name = document.getElementById("adm-student-name").value.trim();
-            let fin = document.getElementById("adm-student-fin").value.trim().toUpperCase();
-            let msg = document.getElementById("adm-student-msg");
-
-            if (!name || !fin) { msg.style.color = "red"; msg.innerText = "Xanaları doldurun!"; return; }
-
-            const { error } = await _supabase.from('allowed_students').insert([{ name, fin }]);
-            if (error) { msg.style.color = "red"; msg.innerText = "Xəta: " + error.message; }
-            else { 
-                msg.style.color = "green"; 
-                msg.innerText = "Tələbəyə icazə verildi!"; 
-                document.getElementById("adm-student-name").value = "";
-                document.getElementById("adm-student-fin").value = "";
-                loadAllowedStudents(); 
-            }
-        }
-
-        async function removeStudentPermission(fin) {
-            if (confirm(`${fin} FİN kodlu tələbənin icazəsini ləğv etmək istədiyinizə əminsiniz?`)) {
-                const { error } = await _supabase.from('allowed_students').delete().eq('fin', fin);
-                if (error) alert("Xəta baş verdi: " + error.message);
-                else loadAllowedStudents();
-            }
-        }
-
-        async function loadAllowedStudents() {
-            const { data, error } = await _supabase.from('allowed_students').select('*');
-            let tbody = document.getElementById("allowed-students-table-body");
-            if (error || !data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3">İcazə verilmiş tələbə yoxdur</td></tr>`;
-                return;
-            }
-            let html = "";
-            data.forEach(s => {
-                html += `
+                `;detailsContainer.innerHTML+=detailHtml}),document.getElementById("resUserName").innerText=currentStudentName,document.getElementById("resUserGroup").innerText=selectedGroup,document.getElementById("resExamDate").innerText=today,document.getElementById("resTotalCorrect").innerText=totalCorrect,document.getElementById("resTotalWrong").innerText=totalWrong,document.getElementById("resTotalBlank").innerText=totalBlank,document.getElementById("resFinalScore").innerText=score;let alertBox=document.getElementById("resStatusAlert");subResult.code==="Kəsilib"||subResult.code==="-"?(alertBox.className="status-alert failed",alertBox.innerHTML=`Təəssüf ki, keçid balını toplaya bilmədiniz. (Yığılan faiz: ${subResult.percent})`):(alertBox.className="status-alert",document.getElementById("resSubgroupCode").innerText=subResult.code,document.getElementById("resSubgroupText").innerText=subResult.code),await _supabase.from("exam_results").insert([{name:currentStudentName,fin:currentActiveFin,exam_no:selectedExamId,correct_count:totalCorrect,wrong_count:totalWrong,score,bb_group:subResult.code}]),document.getElementById("exam-screen").style.display="none",document.getElementById("result-screen").style.display="block",window.scrollTo({top:0,behavior:"smooth"})}function backToReviewQuestions(){document.getElementById("result-screen").style.display="none",document.getElementById("exam-screen").style.display="block",document.getElementById("review-banner").style.display="block",document.getElementById("finish-btn").style.display="none",document.getElementById("review-home-btn").style.display="block",currentQuestionIndex=0,renderCurrentQuestion()}function openAdminLogin(){prompt("Admin şifrəsini daxil edin:")===ADMIN_PASS&&(document.getElementById("login-screen").style.display="none",document.getElementById("exam-select-screen").style.display="none",document.getElementById("exam-screen").style.display="none",document.getElementById("admin-panel").style.display="block",loadAdminPanelData())}function closeAdminPanel(){document.getElementById("admin-panel").style.display="none",document.getElementById("login-screen").style.display="block"}async function allowStudent(){let name=document.getElementById("adm-student-name").value.trim(),fin=document.getElementById("adm-student-fin").value.trim().toUpperCase(),msg=document.getElementById("adm-student-msg");if(!name||!fin){msg.style.color="red",msg.innerText="Xanaları doldurun!";return}const{error}=await _supabase.from("allowed_students").insert([{name,fin}]);error?(msg.style.color="red",msg.innerText="Xəta: "+error.message):(msg.style.color="green",msg.innerText="Tələbəyə icazə verildi!",document.getElementById("adm-student-name").value="",document.getElementById("adm-student-fin").value="",loadAllowedStudents())}async function removeStudentPermission(fin){if(confirm(`${fin} FİN kodlu tələbənin icazəsini ləğv etmək istədiyinizə əminsiniz?`)){const{error}=await _supabase.from("allowed_students").delete().eq("fin",fin);error?alert("Xəta baş verdi: "+error.message):loadAllowedStudents()}}async function loadAllowedStudents(){const{data,error}=await _supabase.from("allowed_students").select("*");let tbody=document.getElementById("allowed-students-table-body");if(error||!data||data.length===0){tbody.innerHTML='<tr><td colspan="3">İcazə verilmiş tələbə yoxdur</td></tr>';return}let html="";data.forEach(s=>{html+=`
                     <tr>
-                        <td>${s.name || '-'}</td>
+                        <td>${s.name||"-"}</td>
                         <td><b>${s.fin}</b></td>
                         <td><button class="btn btn-danger btn-sm" onclick="removeStudentPermission('${s.fin}')">Deaktiv Et / Sil</button></td>
                     </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        async function loadAdminPanelData() {
-            loadAllowedStudents();
-
-            const { data: results } = await _supabase.from('exam_results').select('*');
-            if(results) {
-                document.getElementById("stat-total-students").innerText = results.length;
-                let tbody = document.getElementById("results-table-body");
-                let html = "";
-                results.forEach(r => {
-                    html += `<tr><td>${r.name}</td><td>${r.fin}</td><td>Sınaq ${r.exam_no}</td><td style="color:green">${r.correct_count}</td><td style="color:red">${r.wrong_count}</td><td><b>${r.score}</b></td></tr>`;
-                });
-                tbody.innerHTML = html;
-            }
-        }
-
-        async function addNewQuestionToExam() {
-            let targetExam = document.getElementById("target-exam-id").value;
-            let qId = parseInt(document.getElementById("new-q-id").value);
-            let subject = document.getElementById("new-q-subject").value;
-            let text = document.getElementById("new-q-text").value.trim();
-            let optInputs = document.querySelectorAll(".opt-input");
-            let correct = parseInt(document.getElementById("new-q-correct").value);
-
-            let options = [];
-            optInputs.forEach(input => options.push(input.value.trim()));
-
-            const { error } = await _supabase.from('exam_questions').insert([{
-                exam_id: targetExam,
-                q_number: qId,
-                subject: subject,
-                question: text,
-                options: options,
-                correct: correct
-            }]);
-
-            if (error) alert("Xəta baş verdi: " + error.message);
-            else alert(`Sınaq ${targetExam} - Sual ${qId} bazaya əlavə edildi!`);
-        }
-    </script>
+                `}),tbody.innerHTML=html}async function loadAdminPanelData(){loadAllowedStudents();const{data:results}=await _supabase.from("exam_results").select("*");if(results){document.getElementById("stat-total-students").innerText=results.length;let tbody=document.getElementById("results-table-body"),html="";results.forEach(r=>{html+=`<tr><td>${r.name}</td><td>${r.fin}</td><td>Sınaq ${r.exam_no}</td><td style="color:green">${r.correct_count}</td><td style="color:red">${r.wrong_count}</td><td><b>${r.score}</b></td></tr>`}),tbody.innerHTML=html}}async function addNewQuestionToExam(){let targetExam=document.getElementById("target-exam-id").value,qId=parseInt(document.getElementById("new-q-id").value),subject=document.getElementById("new-q-subject").value,text=document.getElementById("new-q-text").value.trim(),optInputs=document.querySelectorAll(".opt-input"),correct=parseInt(document.getElementById("new-q-correct").value),options=[];optInputs.forEach(input=>options.push(input.value.trim()));const{error}=await _supabase.from("exam_questions").insert([{exam_id:targetExam,q_number:qId,subject,question:text,options,correct}]);alert(error?"Xəta baş verdi: "+error.message:`Sınaq ${targetExam} - Sual ${qId} bazaya əlavə edildi!`)}
+</script>
 </body>
 </html>

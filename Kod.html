@@ -4,52 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Giriş Kodlarının İdarəsi - DQ Platform</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #f0f2f5; padding: 20px; color: #333; }
-    
-    .top-bar { background-color: #0b132b; color: #fff; padding: 12px 20px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .top-bar h1 { font-size: 16px; font-weight: 600; }
-    .top-bar .btn-badge { background-color: #27ae60; color: #fff; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; }
-
-    .admin-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 25px; }
-    .card-title { font-size: 14px; font-weight: 700; text-transform: uppercase; color: #1d3557; margin-bottom: 15px; border-bottom: 2px solid #e9ecef; padding-bottom: 8px; }
-
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
-    .form-group { display: flex; flex-direction: column; }
-    .form-group label { font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; }
-    .form-control { padding: 9px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; outline: none; }
-    .form-control:focus { border-color: #1d3557; }
-
-    /* Kateqoriya Çoxlu Seçim (Checkbox) Hissəsi */
-    .checkbox-group { display: flex; gap: 15px; align-items: center; padding: 8px 12px; background: #f8f9fa; border: 1px solid #ccc; border-radius: 4px; height: 40px; }
-    .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .checkbox-item input { cursor: pointer; width: 16px; height: 16px; }
-
-    .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
-    .btn-success { background-color: #2b9348; color: white; width: 100%; margin-top: 10px; }
-    .btn-success:hover { background-color: #1b4332; }
-    .btn-danger { background-color: #e63946; color: white; padding: 4px 8px; font-size: 11px; }
-
-    /* Cədvəl Hissəsi */
-    .access-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; text-align: left; }
-    .access-table th, .access-table td { border: 1px solid #dee2e6; padding: 10px; }
-    .access-table th { background-color: #1d3557; color: white; }
-    .access-table tr:nth-child(even) { background-color: #f8f9fa; }
-    .badge { padding: 3px 7px; border-radius: 4px; font-weight: bold; font-size: 11px; color: white; background: #457b9d; margin-right: 2px; }
-
-    .footer-text { text-align: center; font-size: 12px; color: #888; margin-top: 20px; }
-  </style>
+  <style>*{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif}body{background-color:#e6f5ff;padding:20px;color:#333}.top-bar{background-color:#005085;color:#fff;padding:12px 20px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.top-bar h1{font-size:16px;font-weight:600}.top-bar .btn-badge{background-color:#27ae60;color:#fff;padding:4px 10px;border-radius:4px;font-weight:700;font-size:12px}.admin-card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 8px #0000000f;margin-bottom:25px}.card-title{font-size:14px;font-weight:700;text-transform:uppercase;color:#005085;margin-bottom:15px;border-bottom:2px solid #e9ecef;padding-bottom:8px}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:15px}.form-group{display:flex;flex-direction:column}.form-group label{font-size:12px;font-weight:600;color:#555;margin-bottom:5px}.form-control{padding:9px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;outline:none}.form-control:focus{border-color:#005085}.checkbox-group{display:flex;gap:15px;align-items:center;padding:8px 12px;background:#f8f9fa;border:1px solid #ccc;border-radius:4px;height:40px}.checkbox-item{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;cursor:pointer}.checkbox-item input{cursor:pointer;width:16px;height:16px}.btn{padding:10px 20px;border:none;border-radius:4px;cursor:pointer;font-weight:600;font-size:13px;transition:.2s}.btn-success{background-color:#2b9348;color:#fff;width:100%;margin-top:10px}.btn-success:hover{background-color:#1b4332}.btn-danger{background-color:#e63946;color:#fff;padding:4px 8px;font-size:11px}.access-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:13px;text-align:left}.access-table th,.access-table td{border:1px solid #dee2e6;padding:10px}.access-table th{background-color:#005085;color:#fff}.access-table tr:nth-child(2n){background-color:#f8f9fa}.badge{padding:3px 7px;border-radius:4px;font-weight:700;font-size:11px;color:#fff;background:#0088e2;margin-right:2px}.footer-text{text-align:center;font-size:12px;color:#888;margin-top:20px}
+</style>
 </head>
 <body>
 
-  <!-- Top Bar -->
+  
   <div class="top-bar">
     <h1>İştirakçı Giriş Kodları və İcazələr Panel</h1>
     <span class="btn-badge">KOD İDARƏSİ</span>
   </div>
 
-  <!-- İştirakçıya İcazə Vermə Forması -->
+  
   <div class="admin-card">
     <div class="card-title">İştirakçıya İcazə Ver / Kod Yarad</div>
     
@@ -86,7 +52,7 @@
     <button class="btn btn-success">🔑 İcazə Ver və Yadda Saxla</button>
   </div>
 
-  <!-- Aktiv İcazələrin Siyahısı Cədvəli -->
+  
   <div class="admin-card">
     <div class="card-title">Aktiv Giriş Kodları və İcazə Siyahısı</div>
     

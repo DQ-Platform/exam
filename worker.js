@@ -220,6 +220,7 @@ export default {
 
     /* 0) Diaqnostika */
     if (url.pathname === '/news-debug') {
+      const t0 = Date.now();
       const id = url.searchParams.get('id') || '';
       const n = await findNews(id);
       const pick = n && pickImage(n);
@@ -228,6 +229,11 @@ export default {
       return new Response(JSON.stringify({
         worker: 'v5', found: !!n, title: n && n.title, slug: n && n.slug, id: n && n._id,
         hasImg: !!(n && n.img), hasOg: !!(n && n.og),
+        imgBytes: n && decodeDataUrl(n.img) ? decodeDataUrl(n.img).bytes.length : 0,
+        ogBytes: n && decodeDataUrl(n.og) ? decodeDataUrl(n.og).bytes.length : 0,
+        limit: WA_MAX,
+        reason: !n ? 'xəbər tapılmadı' : pick ? 'şəkil uyğundur' : (n.img || n.og) ? 'şəkil var, amma 300KB-dan böyükdür və ya oxunmur' : 'xəbərdə şəkil yoxdur (qapaq əlavə edilməyib)',
+        ms: Date.now() - t0,
         chosen: pick ? { type: pick.type, bytes: pick.bytes.length, w: pick.w, h: pick.h } : 'fallback',
         fallback: fb
       }, null, 2), { headers: { 'content-type': 'application/json;charset=utf-8', 'cache-control': 'no-store' } });
@@ -261,12 +267,14 @@ export default {
     if (url.pathname.replace(/\/$/, '') === '/news') {
       const id = url.searchParams.get('id') || '';
       if (!id) return section('Xəbərlər', '📰 DQPlatform — Xəbərlər və elanlar', 'İmtahan elanları, qanunvericilikdə dəyişikliklər və yeniliklər bir yerdə.', SITE + '/news', SITE + '/?go=news', head);
+      const hck = new Request(SITE + '/news?id=' + encodeURIComponent(id) + '&_og=3');
+      if (!head) { const hit = await caches.default.match(hck); if (hit) return hit; }
       const n = await findNews(id);
       if (!n) return Response.redirect(SITE + '/?go=news', 302);
 
       const key = n.slug || n.id || n._id;
       const title = clean(n.title, 90) || 'DQPlatform';
-      const desc = clean(n.sum || n.body, 200) || 'DQPlatform — dövlət qulluğu imtahanlarına hazırlıq platforması';
+      const desc = clean(n.sum || n.summary || n.body, 200) || 'DQPlatform — dövlət qulluğu imtahanlarına hazırlıq platforması';
       const page = `${SITE}/news?id=${encodeURIComponent(key)}`;
       const go = `${SITE}/?news=${encodeURIComponent(key)}`;
 
@@ -280,7 +288,9 @@ export default {
       }
 
       const html = ogPage({ title, ptitle: title + ' | DQPlatform', desc, page, go, img, itype, iw, ih, type: 'article' });
-      return new Response(head ? null : html, { headers: { 'content-type': 'text/html;charset=utf-8', 'cache-control': 'public, max-age=300' } });
+      const res = new Response(head ? null : html, { headers: { 'content-type': 'text/html;charset=utf-8', 'cache-control': 'public, max-age=300' } });
+      if (!head) ctx.waitUntil(caches.default.put(hck, res.clone()));
+      return res;
     }
 
     /* 2b) Testlər və Sınaq bölmələri */

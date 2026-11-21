@@ -1,5 +1,5 @@
 /* DQ Platform – service worker (PWA + push) */
-const VERSION = 'dq-v5';
+const VERSION = 'dq-v6';
 const CORE = ['./', 'manifest.json', 'icon-192.png', 'icon-512.png', 'favicon.png'];
 /* Mərkəzi baza: Firebase Firestore (REST). Sayt (dq-firebase.js) və worker.js ilə eyni layihə. */
 const FS_DOCS = 'https://firestore.googleapis.com/v1/projects/dq-platform-bdaf3/databases/(default)/documents';

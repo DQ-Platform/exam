@@ -4,38 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DQ Platform - Admin Panel (Yunis İmanov)</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .container { background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); width: 100%; max-width: 750px; }
-        h2 { color: #1a1a1a; margin-bottom: 20px; font-size: 22px; text-align: center; }
-        .form-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 5px; }
-        input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; }
-        input:focus { border-color: #007bff; }
-        button { width: 100%; padding: 11px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 5px; }
-        button:hover { background-color: #0056b3; }
-        .logout-btn { background-color: #dc3545; margin-top: 20px; }
-        .logout-btn:hover { background-color: #a71d2a; }
-        #adminPanel, #errorBox { display: none; }
-        .error { color: #dc3545; font-size: 13px; margin-top: 10px; text-align: center; }
-        .success { color: #28a745; font-size: 13px; margin-top: 10px; text-align: center; }
-        ul { list-style: none; margin-top: 15px; max-height: 150px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; padding: 5px; }
-        li { padding: 8px; border-bottom: 1px solid #f1f1f1; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
-        li:last-child { border-bottom: none; }
-        .delete-btn { background: #ff4d4d; color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
-
-        /* MODULLAR BÖLMƏSİ ÜÇÜN DİZAYN */
-        .modules-title { margin-top: 25px; margin-bottom: 10px; font-size: 15px; font-weight: 700; color: #1a1a1a; border-bottom: 2px solid #f1f1f1; padding-bottom: 5px; }
-        .modules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
-        .module-card { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center; text-decoration: none; color: #333; font-weight: 600; font-size: 13px; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
-        .module-card:hover { background: #007bff; color: #ffffff; border-color: #007bff; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,123,255,0.2); }
-        .module-card small { font-size: 10px; opacity: 0.7; font-weight: normal; }
-    </style>
+    <style>*{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif}body{background-color:#eef8ff;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}.container{background:#fff;padding:30px;border-radius:12px;box-shadow:0 4px 15px #00000014;width:100%;max-width:750px}h2{color:#1a1a1a;margin-bottom:20px;font-size:22px;text-align:center}.form-group{margin-bottom:15px;text-align:left}label{display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:5px}input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;outline:none}input:focus{border-color:#0099ff}button{width:100%;padding:11px;background-color:#0099ff;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;margin-top:5px}button:hover{background-color:#006bb3}.logout-btn{background-color:#dc3545;margin-top:20px}.logout-btn:hover{background-color:#a71d2a}#adminPanel,#errorBox{display:none}.error{color:#dc3545;font-size:13px;margin-top:10px;text-align:center}.success{color:#28a745;font-size:13px;margin-top:10px;text-align:center}ul{list-style:none;margin-top:15px;max-height:150px;overflow-y:auto;border:1px solid #eee;border-radius:6px;padding:5px}li{padding:8px;border-bottom:1px solid #f1f1f1;display:flex;justify-content:space-between;align-items:center;font-size:13px}li:last-child{border-bottom:none}.delete-btn{background:#ff4d4d;color:#fff;border:none;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:11px}.modules-title{margin-top:25px;margin-bottom:10px;font-size:15px;font-weight:700;color:#1a1a1a;border-bottom:2px solid #f1f1f1;padding-bottom:5px}.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:10px}.module-card{background:#f8f9fa;border:1px solid #d3edff;border-radius:8px;padding:10px;text-align:center;text-decoration:none;color:#333;font-weight:600;font-size:13px;transition:all .2s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}.module-card:hover{background:#0099ff;color:#fff;border-color:#0099ff;transform:translateY(-2px);box-shadow:0 4px 10px #007bff33}.module-card small{font-size:10px;opacity:.7;font-weight:400}
+</style>
+<link rel="stylesheet" href="dq-tema.css?v=5">
 </head>
 <body>
 
-    <!-- GİRİŞ HİSSƏSİ -->
+    
     <div class="container" id="loginBox" style="max-width: 450px;">
         <h2>Yunis İmanov - Admin Girişi</h2>
         <div class="form-group">
@@ -46,11 +21,11 @@
         <div id="loginError" class="error">Şifrə səhvdir!</div>
     </div>
 
-    <!-- İDARƏETMƏ PANELİ -->
+    
     <div class="container" id="adminPanel">
         <h2>DQ Platform - İdarəetmə Paneli</h2>
         
-        <!-- Sinaq Istirakcilari Bolmesi -->
+        
         <div class="form-group">
             <label>Tələbənin Adı və Soyadı</label>
             <input type="text" id="studentName" placeholder="Məs: Əli Məmmədov">
@@ -69,7 +44,7 @@
             <ul id="studentList"></ul>
         </div>
 
-        <!-- Şəkildəki Bütün Modullar -->
+        
         <div class="modules-title">Sistem Modulları və Səhifələr</div>
         <div class="modules-grid">
             <a href="index.html" class="module-card">Index <small>index.html</small></a>
@@ -92,87 +67,7 @@
         <button class="logout-btn" onclick="adminLogout()">Çıxış</button>
     </div>
 
-    <script>
-        // Admin şifrəsini burdan dəyişə bilərsiniz:
-        const ADMIN_PASS = "6675157"; 
-
-        function adminLogin() {
-            const pass = document.getElementById('adminPassword').value;
-            if (pass === ADMIN_PASS) {
-                localStorage.setItem('yunisAdminLoggedIn', 'true');
-                showPanel();
-            } else {
-                document.getElementById('loginError').style.display = 'block';
-            }
-        }
-
-        function showPanel() {
-            document.getElementById('loginBox').style.display = 'none';
-            document.getElementById('adminPanel').style.display = 'block';
-            loadStudents();
-        }
-
-        function adminLogout() {
-            localStorage.removeItem('yunisAdminLoggedIn');
-            location.reload();
-        }
-
-        window.onload = function() {
-            if (localStorage.getItem('yunisAdminLoggedIn') === 'true') {
-                showPanel();
-            }
-        }
-
-        function getStudents() {
-            let students = localStorage.getItem('yunisAllowedStudents');
-            return students ? JSON.parse(students) : [];
-        }
-
-        function loadStudents() {
-            const listEl = document.getElementById('studentList');
-            listEl.innerHTML = '';
-            let students = getStudents();
-
-            students.forEach((s, index) => {
-                listEl.innerHTML += `<li><span><b>${s.name}</b> (${s.fin})</span> <button class="delete-btn" onclick="deleteStudent(${index})">Sil</button></li>`;
-            });
-        }
-
-        function addStudent() {
-            let name = document.getElementById('studentName').value.trim();
-            let fin = document.getElementById('studentFin').value.trim().toUpperCase();
-            let msgBox = document.getElementById('actionMsg');
-
-            if (name === "" || fin === "") {
-                msgBox.className = "error";
-                msgBox.innerText = "Bütün xanaları doldurun!";
-                return;
-            }
-
-            let students = getStudents();
-            
-            if (students.some(s => s.fin === fin)) {
-                msgBox.className = "error";
-                msgBox.innerText = "Bu FİN kod artıq siyahıda mövcuddur!";
-                return;
-            }
-
-            students.push({ name: name, fin: fin });
-            localStorage.setItem('yunisAllowedStudents', JSON.stringify(students));
-
-            document.getElementById('studentName').value = "";
-            document.getElementById('studentFin').value = "";
-            msgBox.className = "success";
-            msgBox.innerText = "Uğurla əlavə olundu!";
-            loadStudents();
-        }
-
-        function deleteStudent(index) {
-            let students = getStudents();
-            students.splice(index, 1);
-            localStorage.setItem('yunisAllowedStudents', JSON.stringify(students));
-            loadStudents();
-        }
-    </script>
+    <script>const ADMIN_PASS="6675157";function adminLogin(){document.getElementById("adminPassword").value===ADMIN_PASS?(localStorage.setItem("yunisAdminLoggedIn","true"),showPanel()):document.getElementById("loginError").style.display="block"}function showPanel(){document.getElementById("loginBox").style.display="none",document.getElementById("adminPanel").style.display="block",loadStudents()}function adminLogout(){localStorage.removeItem("yunisAdminLoggedIn"),location.reload()}window.onload=function(){localStorage.getItem("yunisAdminLoggedIn")==="true"&&showPanel()};function getStudents(){let students=localStorage.getItem("yunisAllowedStudents");return students?JSON.parse(students):[]}function loadStudents(){const listEl=document.getElementById("studentList");listEl.innerHTML="",getStudents().forEach((s,index)=>{listEl.innerHTML+=`<li><span><b>${s.name}</b> (${s.fin})</span> <button class="delete-btn" onclick="deleteStudent(${index})">Sil</button></li>`})}function addStudent(){let name=document.getElementById("studentName").value.trim(),fin=document.getElementById("studentFin").value.trim().toUpperCase(),msgBox=document.getElementById("actionMsg");if(name===""||fin===""){msgBox.className="error",msgBox.innerText="Bütün xanaları doldurun!";return}let students=getStudents();if(students.some(s=>s.fin===fin)){msgBox.className="error",msgBox.innerText="Bu FİN kod artıq siyahıda mövcuddur!";return}students.push({name,fin}),localStorage.setItem("yunisAllowedStudents",JSON.stringify(students)),document.getElementById("studentName").value="",document.getElementById("studentFin").value="",msgBox.className="success",msgBox.innerText="Uğurla əlavə olundu!",loadStudents()}function deleteStudent(index){let students=getStudents();students.splice(index,1),localStorage.setItem("yunisAllowedStudents",JSON.stringify(students)),loadStudents()}
+</script>
 </body>
 </html>

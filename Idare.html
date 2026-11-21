@@ -8,48 +8,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Nəzarət Paneli - DQ Platform</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #f0f2f5; padding: 20px; color: #333; }
-    
-    .top-bar { background-color: #0b132b; color: #fff; padding: 12px 20px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .top-bar h1 { font-size: 16px; font-weight: 600; }
-    .top-bar .btn-badge { background-color: #ff9f1c; color: #000; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; }
-
-    .admin-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 25px; }
-    .card-title { font-size: 13px; font-weight: 700; text-transform: uppercase; color: #555; margin-bottom: 15px; letter-spacing: 0.5px; }
-
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
-    .form-group { display: flex; flex-direction: column; }
-    .form-group label { font-size: 12px; font-weight: 600; color: #666; margin-bottom: 5px; }
-    .form-control { padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; outline: none; }
-    .form-control:focus { border-color: #1d3557; }
-
-    textarea.form-control { resize: vertical; min-height: 70px; }
-
-    .option-row { display: flex; align-items: center; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px solid #e9ecef; margin-bottom: 10px; }
-    .option-label { font-weight: bold; width: 25px; }
-    .option-input { flex: 1; }
-    .correct-radio { cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; color: #2b9348; }
-
-    .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
-    .btn-success { background-color: #2b9348; color: white; }
-    .btn-success:hover { background-color: #1b4332; }
-    .btn-dark { background-color: #1d3557; color: white; }
-    .btn-secondary { background-color: #6c757d; color: white; }
-    .btn-danger { background-color: #e63946; color: white; }
-    .btn-group { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
-
-    .test-preview { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px; }
-    .question-box { flex: 3; min-width: 300px; background: #fafafa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 20px; min-height: 180px; }
-    .answer-card-sidebar { flex: 1; min-width: 200px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; }
-    .answer-card-sidebar h4 { font-size: 13px; margin-bottom: 10px; color: #444; text-align: center; }
-
-    .nav-btn { padding: 6px; margin: 2px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; }
-    .nav-btn.active { background-color: #1d3557; color: white; font-weight: bold; }
-
-    .footer-text { text-align: center; font-size: 12px; color: #888; margin-top: 20px; }
-  </style>
+  <style>*{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif}body{background-color:#e6f5ff;padding:20px;color:#333}.top-bar{background-color:#005085;color:#fff;padding:12px 20px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.top-bar h1{font-size:16px;font-weight:600}.top-bar .btn-badge{background-color:#f72103;color:#000;padding:4px 10px;border-radius:4px;font-weight:700;font-size:12px}.admin-card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 8px #0000000f;margin-bottom:25px}.card-title{font-size:13px;font-weight:700;text-transform:uppercase;color:#555;margin-bottom:15px;letter-spacing:.5px}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-bottom:15px}.form-group{display:flex;flex-direction:column}.form-group label{font-size:12px;font-weight:600;color:#666;margin-bottom:5px}.form-control{padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;outline:none}.form-control:focus{border-color:#005085}textarea.form-control{resize:vertical;min-height:70px}.option-row{display:flex;align-items:center;gap:10px;background:#f8f9fa;padding:10px;border-radius:6px;border:1px solid #e9ecef;margin-bottom:10px}.option-label{font-weight:700;width:25px}.option-input{flex:1}.correct-radio{cursor:pointer;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:#2b9348}.btn{padding:8px 16px;border:none;border-radius:4px;cursor:pointer;font-weight:600;font-size:13px;transition:.2s}.btn-success{background-color:#2b9348;color:#fff}.btn-success:hover{background-color:#1b4332}.btn-dark{background-color:#005085;color:#fff}.btn-secondary{background-color:#6c757d;color:#fff}.btn-danger{background-color:#e63946;color:#fff}.btn-group{display:flex;justify-content:space-between;align-items:center;margin-top:15px}.test-preview{display:flex;gap:20px;flex-wrap:wrap;margin-top:15px}.question-box{flex:3;min-width:300px;background:#fafafa;border:1px solid #e0e0e0;border-radius:6px;padding:20px;min-height:180px}.answer-card-sidebar{flex:1;min-width:200px;background:#f8f9fa;border:1px solid #e0e0e0;border-radius:6px;padding:15px}.answer-card-sidebar h4{font-size:13px;margin-bottom:10px;color:#444;text-align:center}.nav-btn{padding:6px;margin:2px;border-radius:4px;border:1px solid #ccc;cursor:pointer}.nav-btn.active{background-color:#005085;color:#fff;font-weight:700}.footer-text{text-align:center;font-size:12px;color:#888;margin-top:20px}
+</style>
 </head>
 <body>
 
@@ -58,7 +18,7 @@
     <span class="btn-badge">ADMİN REJİMİ</span>
   </div>
 
-  <!-- Sual Tərtibatı -->
+  
   <div class="admin-card">
     <div class="card-title">Sual Tərtibatı (Əlavə et / Redaktə et)</div>
     
@@ -102,7 +62,7 @@
       <textarea class="form-control" id="questionText" placeholder="Sualın mətnini daxil edin..."></textarea>
     </div>
 
-    <!-- Variantlar -->
+    
     <div id="optionsContainer">
       <div class="option-row">
         <span class="option-label">A)</span>
@@ -133,7 +93,7 @@
     <p id="statusMsg" style="margin-top:10px; font-size:13px; font-weight:bold;"></p>
   </div>
 
-  <!-- Canlı ÖnBaxış və İdarəetmə -->
+  
   <div class="admin-card">
     <div class="card-title">Sual İdarəçiliyi və Keçid Paneli</div>
     <div class="test-preview">
@@ -158,133 +118,11 @@
     © 2026 DQ Platform – Developed by Yunis İmanov
   </div>
 
-  <script>
-    const SUPABASE_URL = "https://cpzwliqlgaplroscvduo.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF";
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    const letters = ["A", "B", "C", "D", "E", "F", "G"];
-    let currentNavIndex = 1;
-
-    document.addEventListener("DOMContentLoaded", () => {
-      renderNavGrid();
-      loadPreview(currentNavIndex);
-    });
-
-    function addOption() {
-      const container = document.getElementById("optionsContainer");
-      const count = container.children.length;
-      if (count >= letters.length) {
-        alert("Maksimum variant limitinə çatdınız!");
-        return;
-      }
-      const char = letters[count];
-      const div = document.createElement("div");
-      div.className = "option-row";
-      div.innerHTML = `
+  <script>const SUPABASE_URL="https://cpzwliqlgaplroscvduo.supabase.co",SUPABASE_KEY="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF",_supabase=supabase.createClient(SUPABASE_URL,SUPABASE_KEY),letters=["A","B","C","D","E","F","G"];let currentNavIndex=1;document.addEventListener("DOMContentLoaded",()=>{renderNavGrid(),loadPreview(currentNavIndex)});function addOption(){const container=document.getElementById("optionsContainer"),count=container.children.length;if(count>=letters.length){alert("Maksimum variant limitinə çatdınız!");return}const char=letters[count],div=document.createElement("div");div.className="option-row",div.innerHTML=`
         <span class="option-label">${char})</span>
         <input type="text" class="form-control option-input" placeholder="${char} variantının mətni...">
         <label class="correct-radio"><input type="radio" name="correct_ans" value="${count}"> Düzgün</label>
-      `;
-      container.appendChild(div);
-    }
-
-    async function saveQuestion() {
-      const examId = document.getElementById("examSelect").value;
-      const qNo = parseInt(document.getElementById("questionNo").value);
-      const subject = document.getElementById("subjectSelect").value;
-      const category = document.getElementById("categorySelect").value;
-      const qText = document.getElementById("questionText").value.trim();
-      const statusMsg = document.getElementById("statusMsg");
-
-      const optInputs = document.querySelectorAll(".option-input");
-      let options = [];
-      optInputs.forEach(i => { if(i.value.trim() !== "") options.push(i.value.trim()); });
-
-      const correctRadio = document.querySelector('input[name="correct_ans"]:checked');
-
-      if (!qText || options.length < 2 || !correctRadio) {
-        statusMsg.style.color = "red";
-        statusMsg.innerText = "Zəhmət olmasa sual mətnini və ən azı 2 variantı doldurun!";
-        return;
-      }
-
-      statusMsg.style.color = "blue";
-      statusMsg.innerText = "Yadda saxlanılır...";
-
-      const { error } = await _supabase.from('exam_questions').upsert([{
-        exam_id: examId,
-        q_number: qNo,
-        subject: subject,
-        question: qText,
-        options: options,
-        correct: parseInt(correctRadio.value)
-      }], { onConflict: 'exam_id, q_number' });
-
-      if (error) {
-        statusMsg.style.color = "red";
-        statusMsg.innerText = "Xəta baş verdi: " + error.message;
-      } else {
-        statusMsg.style.color = "green";
-        statusMsg.innerText = "Sual uğurla bazaya yazıldı!";
-        loadPreview(qNo);
-      }
-    }
-
-    function renderNavGrid() {
-      const grid = document.getElementById("gridNav");
-      grid.innerHTML = "";
-      for (let i = 1; i <= 25; i++) {
-        const btn = document.createElement("button");
-        btn.className = `btn btn-secondary nav-btn ${i === currentNavIndex ? 'active' : ''}`;
-        btn.innerText = i;
-        btn.onclick = () => { currentNavIndex = i; renderNavGrid(); loadPreview(i); };
-        grid.appendChild(btn);
-      }
-    }
-
-    async function loadPreview(qNo) {
-      document.getElementById("questionNo").value = qNo;
-      const examId = document.getElementById("examSelect").value;
-      const previewArea = document.getElementById("previewArea");
-
-      const { data } = await _supabase
-        .from('exam_questions')
-        .select('*')
-        .eq('exam_id', examId)
-        .eq('q_number', qNo)
-        .single();
-
-      if (data) {
-        document.getElementById("questionText").value = data.question;
-        let html = `<b>Sual ${data.q_number} (${data.subject || 'Ümumi'}):</b> <p style="margin-top:8px;">${data.question}</p><ul style="margin-top:10px; padding-left:20px;">`;
-        data.options.forEach((opt, idx) => {
-          let style = (idx === data.correct) ? "color: green; font-weight: bold;" : "";
-          html += `<li style="${style}">${letters[idx]}) ${opt}</li>`;
-        });
-        html += "</ul>";
-        previewArea.innerHTML = html;
-      } else {
-        document.getElementById("questionText").value = "";
-        previewArea.innerHTML = `<i>Sual ${qNo} hələ bazada yoxdur. Yuxarıdakı formdan əlavə edə bilərsiniz.</i>`;
-      }
-    }
-
-    function nextQuestion() {
-      if (currentNavIndex < 25) { currentNavIndex++; renderNavGrid(); loadPreview(currentNavIndex); }
-    }
-
-    function prevQuestion() {
-      if (currentNavIndex > 1) { currentNavIndex--; renderNavGrid(); loadPreview(currentNavIndex); }
-    }
-
-    async function deleteCurrentQuestion() {
-      const examId = document.getElementById("examSelect").value;
-      if (confirm(`Sual ${currentNavIndex} ləğv edilsin?`)) {
-        await _supabase.from('exam_questions').delete().eq('exam_id', examId).eq('q_number', currentNavIndex);
-        loadPreview(currentNavIndex);
-      }
-    }
-  </script>
+      `,container.appendChild(div)}async function saveQuestion(){const examId=document.getElementById("examSelect").value,qNo=parseInt(document.getElementById("questionNo").value),subject=document.getElementById("subjectSelect").value,category=document.getElementById("categorySelect").value,qText=document.getElementById("questionText").value.trim(),statusMsg=document.getElementById("statusMsg"),optInputs=document.querySelectorAll(".option-input");let options=[];optInputs.forEach(i=>{i.value.trim()!==""&&options.push(i.value.trim())});const correctRadio=document.querySelector('input[name="correct_ans"]:checked');if(!qText||options.length<2||!correctRadio){statusMsg.style.color="red",statusMsg.innerText="Zəhmət olmasa sual mətnini və ən azı 2 variantı doldurun!";return}statusMsg.style.color="blue",statusMsg.innerText="Yadda saxlanılır...";const{error}=await _supabase.from("exam_questions").upsert([{exam_id:examId,q_number:qNo,subject,question:qText,options,correct:parseInt(correctRadio.value)}],{onConflict:"exam_id, q_number"});error?(statusMsg.style.color="red",statusMsg.innerText="Xəta baş verdi: "+error.message):(statusMsg.style.color="green",statusMsg.innerText="Sual uğurla bazaya yazıldı!",loadPreview(qNo))}function renderNavGrid(){const grid=document.getElementById("gridNav");grid.innerHTML="";for(let i=1;i<=25;i++){const btn=document.createElement("button");btn.className=`btn btn-secondary nav-btn ${i===currentNavIndex?"active":""}`,btn.innerText=i,btn.onclick=()=>{currentNavIndex=i,renderNavGrid(),loadPreview(i)},grid.appendChild(btn)}}async function loadPreview(qNo){document.getElementById("questionNo").value=qNo;const examId=document.getElementById("examSelect").value,previewArea=document.getElementById("previewArea"),{data}=await _supabase.from("exam_questions").select("*").eq("exam_id",examId).eq("q_number",qNo).single();if(data){document.getElementById("questionText").value=data.question;let html=`<b>Sual ${data.q_number} (${data.subject||"Ümumi"}):</b> <p style="margin-top:8px;">${data.question}</p><ul style="margin-top:10px; padding-left:20px;">`;data.options.forEach((opt,idx)=>{let style=idx===data.correct?"color: green; font-weight: bold;":"";html+=`<li style="${style}">${letters[idx]}) ${opt}</li>`}),html+="</ul>",previewArea.innerHTML=html}else document.getElementById("questionText").value="",previewArea.innerHTML=`<i>Sual ${qNo} hələ bazada yoxdur. Yuxarıdakı formdan əlavə edə bilərsiniz.</i>`}function nextQuestion(){currentNavIndex<25&&(currentNavIndex++,renderNavGrid(),loadPreview(currentNavIndex))}function prevQuestion(){currentNavIndex>1&&(currentNavIndex--,renderNavGrid(),loadPreview(currentNavIndex))}async function deleteCurrentQuestion(){const examId=document.getElementById("examSelect").value;confirm(`Sual ${currentNavIndex} ləğv edilsin?`)&&(await _supabase.from("exam_questions").delete().eq("exam_id",examId).eq("q_number",currentNavIndex),loadPreview(currentNavIndex))}
+</script>
 </body>
 </html>
