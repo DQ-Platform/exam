@@ -1,304 +1,178 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex,nofollow">
-<title>İdarəetmə Paneli — DQ Platform</title>
-<link rel="icon" href="favicon.png">
-<link rel="stylesheet" href="dq-ui.css?v=3">
-<style>
-*{box-sizing:border-box}
-body.dq-adminx{margin:0;min-height:100vh;background:var(--u-bg);color:var(--u-ink);font-family:var(--u-font)}
-.ad-hide{display:none!important}
-svg.ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DQ Platform - Admin Panel (Yunis İmanov)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); width: 100%; max-width: 750px; }
+        h2 { color: #1a1a1a; margin-bottom: 20px; font-size: 22px; text-align: center; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; }
+        input:focus { border-color: #007bff; }
+        button { width: 100%; padding: 11px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 5px; }
+        button:hover { background-color: #0056b3; }
+        .logout-btn { background-color: #dc3545; margin-top: 20px; }
+        .logout-btn:hover { background-color: #a71d2a; }
+        #adminPanel, #errorBox { display: none; }
+        .error { color: #dc3545; font-size: 13px; margin-top: 10px; text-align: center; }
+        .success { color: #28a745; font-size: 13px; margin-top: 10px; text-align: center; }
+        ul { list-style: none; margin-top: 15px; max-height: 150px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; padding: 5px; }
+        li { padding: 8px; border-bottom: 1px solid #f1f1f1; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        li:last-child { border-bottom: none; }
+        .delete-btn { background: #ff4d4d; color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
 
-/* ---- Giriş ---- */
-.lg-wrap{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(1200px 500px at 50% -10%,#123d8f 0,var(--u-navy-d) 60%)}
-.lg-card{width:100%;max-width:420px;background:#fff;border:1px solid var(--u-line);border-top:4px solid var(--u-gold);border-radius:var(--u-r-l);box-shadow:var(--u-sh-m);padding:32px 30px 26px}
-.lg-brand{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:22px;text-align:center}
-.lg-brand img{width:56px;height:56px;border-radius:12px;object-fit:contain}
-.lg-brand h1{margin:0;font-size:20px;color:var(--u-navy)}
-.lg-brand p{margin:0;color:var(--u-mut);font-size:13.5px}
-.fld{margin-bottom:16px}
-.fld label{display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:var(--u-ink)}
-.fld .hint{margin-top:5px;font-size:12px;color:var(--u-mut)}
-.inp{width:100%;height:44px;padding:0 12px;border:1px solid var(--u-line);border-radius:var(--u-r);background:#fff;font:inherit;font-size:14px;color:var(--u-ink)}
-.inp:focus{outline:0;border-color:var(--u-navy);box-shadow:var(--u-ring)}
-.pw{position:relative}.pw .inp{padding-right:44px}
-.pw button{position:absolute;right:4px;top:4px;width:36px;height:36px;display:grid;place-items:center;background:transparent;border:0;color:var(--u-mut);border-radius:var(--u-r-s);cursor:pointer}
-.pw button:hover{background:var(--u-navy-l);color:var(--u-navy)}
-.bt{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:var(--u-r);border:1px solid var(--u-navy);background:var(--u-navy);color:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s}
-.bt:hover{background:var(--u-navy-h);border-color:var(--u-navy-h)}
-.bt.block{width:100%}
-.bt.ghost{background:#fff;color:var(--u-navy);border-color:var(--u-line)}
-.bt.ghost:hover{background:var(--u-navy-l);border-color:var(--u-navy)}
-.bt.sm{height:34px;padding:0 12px;font-size:13px}
-.bt.dng{background:#fff;color:var(--u-err);border-color:#f0c4c4}
-.bt.dng:hover{background:var(--u-err-l);border-color:var(--u-err)}
-.alert{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:var(--u-r);font-size:13px;font-weight:600;margin-top:14px}
-.alert.err{background:var(--u-err-l);color:var(--u-err);border:1px solid #f3c2c2}
-.alert.ok{background:var(--u-ok-l);color:var(--u-ok);border:1px solid #bfe3cd}
-.lg-foot{margin-top:20px;text-align:center;font-size:12px;color:var(--u-mut)}
-
-/* ---- Panel ---- */
-.tp{background:var(--u-navy-d);color:#fff;border-bottom:3px solid var(--u-gold);position:sticky;top:0;z-index:20}
-.tp-in{max-width:1180px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;gap:14px}
-.tp img{width:36px;height:36px;border-radius:8px;background:#fff;padding:3px;object-fit:contain}
-.tp-t{display:flex;flex-direction:column;line-height:1.2}
-.tp-t b{font-size:15px;font-weight:700;color:#fff}
-.tp-t span{font-size:11.5px;color:#b9cdea;letter-spacing:.06em;text-transform:uppercase}
-.tp-sp{flex:1}
-.tp-u{display:flex;align-items:center;gap:10px;font-size:13px;color:#dbe6f8}
-.tp-av{width:32px;height:32px;border-radius:50%;background:var(--u-gold);color:var(--u-navy-d);display:grid;place-items:center;font-weight:800;font-size:13px}
-.tp .bt{height:36px;background:transparent;border-color:rgba(255,255,255,.35);font-size:13px}
-.tp .bt:hover{background:rgba(255,255,255,.12);border-color:#fff}
-.pg{max-width:1180px;margin:0 auto;padding:26px 20px 40px}
-.pg-h{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap}
-.pg-h h1{margin:0;font-size:22px;color:var(--u-navy)}
-.pg-h p{margin:4px 0 0;color:var(--u-mut);font-size:13.5px}
-.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:22px}
-.kp div{background:#fff;border:1px solid var(--u-line);border-left:4px solid var(--u-navy);border-radius:var(--u-r);padding:14px 16px;box-shadow:var(--u-sh)}
-.kp small{display:block;font-size:12px;color:var(--u-mut);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
-.kp strong{display:block;font-size:26px;color:var(--u-navy);margin-top:2px}
-.gr{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:18px;align-items:start;margin-bottom:26px}
-@media(max-width:860px){.gr{grid-template-columns:1fr}}
-.pn{background:#fff;border:1px solid var(--u-line);border-radius:var(--u-r-l);box-shadow:var(--u-sh);overflow:hidden}
-.pn-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;border-bottom:1px solid var(--u-line-s);background:#fbfcfe}
-.pn-h h2{margin:0;font-size:15px;color:var(--u-navy);display:flex;align-items:center;gap:8px}
-.pn-b{padding:18px}
-.srch{position:relative;max-width:240px;flex:1}
-.srch .inp{height:36px;font-size:13px;padding-left:34px}
-.srch svg{position:absolute;left:10px;top:9px;color:var(--u-mut);width:16px;height:16px}
-.lst{list-style:none;margin:0;padding:0;max-height:380px;overflow:auto}
-.lst li{display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid var(--u-line-s)}
-.lst li:last-child{border-bottom:0}
-.lst li:hover{background:var(--u-navy-l)}
-.lst .av{width:34px;height:34px;border-radius:50%;background:var(--u-navy-l);color:var(--u-navy);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
-.lst .nm{flex:1;min-width:0}
-.lst .nm b{display:block;font-size:14px;color:var(--u-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lst .nm span{font-size:12px;color:var(--u-mut);letter-spacing:.06em}
-.empty{padding:36px 18px;text-align:center;color:var(--u-mut);font-size:14px}
-.empty svg{width:34px;height:34px;color:#b3c0d8;margin-bottom:8px}
-
-.sec{margin-bottom:22px}
-.sec-t{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--u-mut)}
-.sec-t:after{content:"";flex:1;height:1px;background:var(--u-line)}
-.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
-.mc{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--u-line);border-radius:var(--u-r-l);padding:14px;text-decoration:none;color:var(--u-ink);box-shadow:var(--u-sh);transition:border-color .15s,box-shadow .15s}
-.mc:hover{border-color:var(--u-navy);box-shadow:0 2px 4px rgba(10,47,122,.08),0 10px 24px -10px rgba(10,47,122,.28)}
-.mc i{width:40px;height:40px;border-radius:10px;background:var(--u-navy-l);color:var(--u-navy);display:grid;place-items:center;flex:none;font-style:normal}
-.mc:hover i{background:var(--u-navy);color:#fff}
-.mc b{display:block;font-size:14px;color:var(--u-navy)}
-.mc span{display:block;font-size:12px;color:var(--u-mut);margin-top:2px;line-height:1.35}
-
-/* ---- Təsdiq pəncərəsi və bildiriş ---- */
-.ov{position:fixed;inset:0;background:rgba(7,31,82,.55);backdrop-filter:blur(2px);display:grid;place-items:center;padding:20px;z-index:50}
-.dlg{width:100%;max-width:400px;background:#fff;border-radius:var(--u-r-l);box-shadow:var(--u-sh-m);overflow:hidden}
-.dlg-h{background:var(--u-navy);color:#fff;padding:14px 18px;font-weight:700;font-size:15px}
-.dlg-b{padding:18px;font-size:14px;color:var(--u-ink);line-height:1.5}
-.dlg-f{display:flex;gap:8px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--u-line-s);background:#fbfcfe}
-.ts{position:fixed;right:20px;bottom:20px;background:var(--u-navy-d);color:#fff;padding:12px 16px;border-radius:var(--u-r);box-shadow:var(--u-sh-m);font-size:14px;font-weight:600;z-index:60}
-.tp-t b,.tp-t span{white-space:nowrap}
-@media(max-width:600px){.tp-u span{display:none}.tp-in{padding:0 14px;gap:10px}.tp-t span{display:none}.pg{padding:20px 14px 32px}.lg-wrap{background:var(--u-navy-d)}}
-.ft{text-align:center;color:var(--u-mut);font-size:12.5px;padding:0 20px 28px}
-</style>
+        /* MODULLAR BÖLMƏSİ ÜÇÜN DİZAYN */
+        .modules-title { margin-top: 25px; margin-bottom: 10px; font-size: 15px; font-weight: 700; color: #1a1a1a; border-bottom: 2px solid #f1f1f1; padding-bottom: 5px; }
+        .modules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
+        .module-card { background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center; text-decoration: none; color: #333; font-weight: 600; font-size: 13px; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+        .module-card:hover { background: #007bff; color: #ffffff; border-color: #007bff; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,123,255,0.2); }
+        .module-card small { font-size: 10px; opacity: 0.7; font-weight: normal; }
+    </style>
 </head>
-<body class="dq-adminx">
+<body>
 
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
- <defs>
-  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
-  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2.4.6 4 2.5 4 5"/></symbol>
-  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
-  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
-  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
-  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
-  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 8l-4 4 4 4M6 12h10"/></symbol>
-  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
-  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
-  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 16v-5M13 16V8M18 16v-8"/></symbol>
-  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/></symbol>
-  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3"/></symbol>
-  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h8l5 5v13H6zM14 3v5h5M9 13h7M9 17h7"/></symbol>
-  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
-  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
-  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
-  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3 2 20h20zM12 10v5M12 18v.5"/></symbol>
- </defs>
-</svg>
-
-<!-- GİRİŞ -->
-<div class="lg-wrap" id="loginBox">
-  <form class="lg-card" onsubmit="adminLogin();return false" autocomplete="off">
-    <div class="lg-brand">
-      <img src="logo.png" alt="DQ Platform">
-      <h1>İdarəetmə Paneli</h1>
-      <p>Davam etmək üçün admin şifrəsini daxil edin</p>
-    </div>
-    <div class="fld">
-      <label for="adminPassword">Admin şifrəsi</label>
-      <div class="pw">
-        <input class="inp" type="password" id="adminPassword" placeholder="Şifrəni daxil edin" autofocus>
-        <button type="button" onclick="togglePw()" aria-label="Şifrəni göstər / gizlət"><svg class="ic"><use href="#i-eye"/></svg></button>
-      </div>
-    </div>
-    <button class="bt block" type="submit"><svg class="ic"><use href="#i-lock"/></svg>Daxil ol</button>
-    <div id="loginError" class="alert err ad-hide" role="alert"><svg class="ic"><use href="#i-warn"/></svg><span>Şifrə səhvdir. Yenidən cəhd edin.</span></div>
-    <div class="lg-foot">© 2026 DQ Platform · Yalnız səlahiyyətli istifadəçilər üçün</div>
-  </form>
-</div>
-
-<!-- PANEL -->
-<div id="adminPanel" class="ad-hide">
-  <header class="tp"><div class="tp-in">
-    <img src="logo.png" alt="">
-    <div class="tp-t"><b>DQ Platform</b><span>İdarəetmə paneli</span></div>
-    <div class="tp-sp"></div>
-    <div class="tp-u"><div class="tp-av">Y</div><span>Yunis İmanov</span></div>
-    <button class="bt" onclick="adminLogout()"><svg class="ic"><use href="#i-logout"/></svg>Çıxış</button>
-  </div></header>
-
-  <main class="pg">
-    <div class="pg-h">
-      <div><h1>İcazə və modul idarəetməsi</h1><p>İmtahan icazələrini idarə edin və sistem səhifələrinə keçid edin.</p></div>
-    </div>
-
-    <div class="kp">
-      <div><small>İcazə verilənlər</small><strong id="kCount">0</strong></div>
-      <div><small>Sistem modulları</small><strong id="kMods">14</strong></div>
-      <div><small>Status</small><strong style="font-size:18px;color:var(--u-ok);padding-top:6px">● Aktiv</strong></div>
-    </div>
-
-    <div class="gr">
-      <section class="pn">
-        <div class="pn-h"><h2><svg class="ic"><use href="#i-user"/></svg>Yeni icazə</h2></div>
-        <div class="pn-b">
-          <div class="fld"><label for="studentName">Ad və soyad</label><input class="inp" type="text" id="studentName" placeholder="Məs: Əli Məmmədov"></div>
-          <div class="fld"><label for="studentFin">FİN kod</label><input class="inp" type="text" id="studentFin" maxlength="7" placeholder="Məs: 7P7GS57" style="text-transform:uppercase;letter-spacing:.08em"><div class="hint">7 simvol: rəqəm və latın hərfləri</div></div>
-          <button class="bt block" onclick="addStudent()"><svg class="ic"><use href="#i-plus"/></svg>İcazə ver</button>
-          <div id="actionMsg" class="ad-hide" role="status"></div>
+    <!-- GİRİŞ HİSSƏSİ -->
+    <div class="container" id="loginBox" style="max-width: 450px;">
+        <h2>Yunis İmanov - Admin Girişi</h2>
+        <div class="form-group">
+            <label>Admin Şifrəsi</label>
+            <input type="password" id="adminPassword" placeholder="Şifrəni daxil edin">
         </div>
-      </section>
-
-      <section class="pn">
-        <div class="pn-h"><h2><svg class="ic"><use href="#i-users"/></svg>İcazə verilən şəxslər</h2>
-          <div class="srch"><svg class="ic"><use href="#i-search"/></svg><input class="inp" id="studentSearch" placeholder="Axtar…" oninput="loadStudents()"></div>
-        </div>
-        <ul id="studentList" class="lst"></ul>
-      </section>
+        <button onclick="adminLogin()">Daxil ol</button>
+        <div id="loginError" class="error">Şifrə səhvdir!</div>
     </div>
 
-    <div id="modules"></div>
-  </main>
-  <div class="ft">© 2026 DQ Platform · Developed by Yunis İmanov</div>
-</div>
+    <!-- İDARƏETMƏ PANELİ -->
+    <div class="container" id="adminPanel">
+        <h2>DQ Platform - İdarəetmə Paneli</h2>
+        
+        <!-- Sinaq Istirakcilari Bolmesi -->
+        <div class="form-group">
+            <label>Tələbənin Adı və Soyadı</label>
+            <input type="text" id="studentName" placeholder="Məs: Əli Məmmədov">
+        </div>
+        
+        <div class="form-group">
+            <label>Tələbənin FİN Kodu</label>
+            <input type="text" id="studentFin" placeholder="Məs: 7P7GS57" style="text-transform: uppercase;">
+        </div>
 
-<div id="dlgHost"></div>
+        <button onclick="addStudent()">İcazə Ver (Əlavə et)</button>
+        <div id="actionMsg"></div>
 
-<script>
-// Admin şifrəsini burdan dəyişə bilərsiniz:
-const ADMIN_PASS = "6675157";
+        <div style="margin-top: 15px;">
+            <label>İcazə Verilən Şəxslər Siyahısı:</label>
+            <ul id="studentList"></ul>
+        </div>
 
-const MODULES = [
-  ["İdarəetmə", [
-    ["Mərkəz","merkez.html","Mərkəzi idarəetmə və canlı nəzarət","i-grid"],
-    ["Pult","Pult.html","Canlı pult və tənzimləmələr","i-sliders"],
-    ["Kontrol","Kontrol.html","İmtahan gedişatına nəzarət","i-monitor"],
-    ["İdarə","Idare.html","Test və sual idarəetməsi","i-doc"],
-    ["Modul","modul.html","Modul 3 kataloqu və idarəetmə","i-grid"]
-  ]],
-  ["İştirakçılar və nəticələr", [
-    ["Kabinet","Kabinet.html","İştirakçı kabineti","i-user"],
-    ["Siyahı","Siyaha.html","İştirakçılar və icazələr","i-users"],
-    ["Statistika","Statistika.html","İmtahan statistikası və nəticələr","i-chart"],
-    ["Cavablar","Cavablar.html","Cavab açarları və suallar","i-check"],
-    ["Kod","Kod.html","Giriş kodlarının generasiyası","i-key"]
-  ]],
-  ["Məzmun və sistem", [
-    ["Suallar","Suallar.html","Sual bankı və qovluqlar","i-doc"],
-    ["Redaktə","redakte.html","Səhifə və modul redaktoru","i-edit"],
-    ["Operator","Operator.html","Səhifə kataloqu","i-sliders"],
-    ["Ana səhifə","index.html","İctimai sayt","i-home"]
-  ]]
-];
+        <!-- Şəkildəki Bütün Modullar -->
+        <div class="modules-title">Sistem Modulları və Səhifələr</div>
+        <div class="modules-grid">
+            <a href="index.html" class="module-card">Index <small>index.html</small></a>
+            <a href="admin.html" class="module-card">Admin <small>admin.html</small></a>
+            <a href="Idare.html" class="module-card">İdarə <small>Idare.html</small></a>
+            <a href="Kabinet.html" class="module-card">Kabinet <small>Kabinet.html</small></a>
+            <a href="Kod.html" class="module-card">Kod <small>Kod.html</small></a>
+            <a href="Kontrol.html" class="module-card">Kontrol <small>Kontrol.html</small></a>
+            <a href="Operator.html" class="module-card">Operator <small>Operator.html</small></a>
+            <a href="Pult.html" class="module-card">Pult <small>Pult.html</small></a>
+            <a href="Siyahi.html" class="module-card">Siyahı <small>Siyahi.html</small></a>
+            <a href="Statistika.html" class="module-card">Statistika <small>Statistika.html</small></a>
+            <a href="Suallar.html" class="module-card">Suallar <small>Suallar.html</small></a>
+            <a href="merkez.html" class="module-card">Mərkəz <small>merkez.html</small></a>
+            <a href="modul.html" class="module-card">Modul <small>modul.html</small></a>
+            <a href="redakte.html" class="module-card">Redaktə <small>redakte.html</small></a>
+            <a href="Cavablar.html" class="module-card">Cavablar <small>Cavablar.html</small></a>
+        </div>
 
-const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let toastT;
-function toast(m){ clearTimeout(toastT); let t=$('toast'); if(!t){t=document.createElement('div');t.id='toast';t.className='ts';document.body.appendChild(t)} t.textContent=m; t.style.display='block'; toastT=setTimeout(()=>t.style.display='none',2600); }
+        <button class="logout-btn" onclick="adminLogout()">Çıxış</button>
+    </div>
 
-function togglePw(){ const i=$('adminPassword'); i.type = i.type==='password' ? 'text' : 'password'; }
+    <script>
+        // Admin şifrəsini burdan dəyişə bilərsiniz:
+        const ADMIN_PASS = "6675157"; 
 
-function adminLogin(){
-  if ($('adminPassword').value === ADMIN_PASS){
-    localStorage.setItem('yunisAdminLoggedIn','true');
-    showPanel();
-  } else {
-    $('loginError').classList.remove('ad-hide');
-    $('adminPassword').select();
-  }
-}
-function showPanel(){
-  $('loginBox').classList.add('ad-hide');
-  $('adminPanel').classList.remove('ad-hide');
-  renderModules(); loadStudents();
-}
-function adminLogout(){ localStorage.removeItem('yunisAdminLoggedIn'); location.reload(); }
+        function adminLogin() {
+            const pass = document.getElementById('adminPassword').value;
+            if (pass === ADMIN_PASS) {
+                localStorage.setItem('yunisAdminLoggedIn', 'true');
+                showPanel();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
 
-function getStudents(){ try{ return JSON.parse(localStorage.getItem('yunisAllowedStudents')||'[]') }catch(e){ return [] } }
-function saveStudents(a){ localStorage.setItem('yunisAllowedStudents', JSON.stringify(a)); }
+        function showPanel() {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            loadStudents();
+        }
 
-function loadStudents(){
-  const all = getStudents();
-  const q = ($('studentSearch').value||'').trim().toLowerCase();
-  const rows = all.map((s,i)=>({s,i})).filter(x => !q || x.s.name.toLowerCase().includes(q) || x.s.fin.toLowerCase().includes(q));
-  $('kCount').textContent = all.length;
-  $('studentList').innerHTML = rows.length ? rows.map(({s,i}) =>
-    `<li><div class="av">${esc(s.name.trim().charAt(0).toUpperCase())}</div>
-      <div class="nm"><b>${esc(s.name)}</b><span>${esc(s.fin)}</span></div>
-      <button class="bt dng sm" onclick="askDelete(${i})"><svg class="ic"><use href="#i-trash"/></svg>Sil</button></li>`).join('')
-    : `<li style="display:block;padding:0"><div class="empty"><svg class="ic"><use href="#i-users"/></svg><div>${all.length ? 'Axtarışa uyğun nəticə yoxdur' : 'Hələ icazə verilmiş şəxs yoxdur'}</div></div></li>`;
-}
+        function adminLogout() {
+            localStorage.removeItem('yunisAdminLoggedIn');
+            location.reload();
+        }
 
-function msg(type,text){ const b=$('actionMsg'); b.className='alert '+type; b.innerHTML=`<svg class="ic"><use href="#${type==='ok'?'i-check':'i-warn'}"/></svg><span>${esc(text)}</span>`; }
+        window.onload = function() {
+            if (localStorage.getItem('yunisAdminLoggedIn') === 'true') {
+                showPanel();
+            }
+        }
 
-function addStudent(){
-  const name = $('studentName').value.trim().replace(/\s+/g,' ');
-  const fin = $('studentFin').value.trim().toUpperCase();
-  if(!name || !fin) return msg('err','Bütün xanaları doldurun.');
-  if(!/^[A-Z0-9]{7}$/.test(fin)) return msg('err','FİN kod 7 simvoldan (rəqəm və latın hərfləri) ibarət olmalıdır.');
-  const a = getStudents();
-  if(a.some(s=>s.fin===fin)) return msg('err','Bu FİN kod artıq siyahıdadır.');
-  a.push({name,fin}); saveStudents(a);
-  $('studentName').value=''; $('studentFin').value='';
-  $('actionMsg').className='ad-hide';
-  toast('İcazə uğurla əlavə olundu'); loadStudents();
-}
+        function getStudents() {
+            let students = localStorage.getItem('yunisAllowedStudents');
+            return students ? JSON.parse(students) : [];
+        }
 
-function askDelete(i){
-  const s = getStudents()[i]; if(!s) return;
-  $('dlgHost').innerHTML = `<div class="ov" onclick="if(event.target===this)closeDlg()"><div class="dlg" role="dialog" aria-modal="true">
-    <div class="dlg-h">İcazənin silinməsi</div>
-    <div class="dlg-b"><b>${esc(s.name)}</b> (${esc(s.fin)}) üçün verilmiş icazə silinsin?<br>Bu əməliyyatı geri qaytarmaq olmaz.</div>
-    <div class="dlg-f"><button class="bt ghost sm" onclick="closeDlg()">Ləğv et</button><button class="bt sm" style="background:var(--u-err);border-color:var(--u-err)" onclick="doDelete(${i})">Sil</button></div></div></div>`;
-}
-function closeDlg(){ $('dlgHost').innerHTML=''; }
-function doDelete(i){ const a=getStudents(); a.splice(i,1); saveStudents(a); closeDlg(); toast('İcazə silindi'); loadStudents(); }
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDlg(); });
+        function loadStudents() {
+            const listEl = document.getElementById('studentList');
+            listEl.innerHTML = '';
+            let students = getStudents();
 
-function renderModules(){
-  $('modules').innerHTML = MODULES.map(([t,items]) =>
-    `<div class="sec"><h3 class="sec-t">${esc(t)}</h3><div class="mg">` +
-    items.map(([n,h,d,ic]) => `<a class="mc" href="${h}"><i><svg class="ic"><use href="#${ic}"/></svg></i><div><b>${esc(n)}</b><span>${esc(d)}</span></div></a>`).join('') +
-    `</div></div>`).join('');
-}
+            students.forEach((s, index) => {
+                listEl.innerHTML += `<li><span><b>${s.name}</b> (${s.fin})</span> <button class="delete-btn" onclick="deleteStudent(${index})">Sil</button></li>`;
+            });
+        }
 
-window.onload = function(){
-  if(localStorage.getItem('yunisAdminLoggedIn')==='true') showPanel();
-  $('adminPassword').addEventListener('input',()=>$('loginError').classList.add('ad-hide'));
-};
-</script>
+        function addStudent() {
+            let name = document.getElementById('studentName').value.trim();
+            let fin = document.getElementById('studentFin').value.trim().toUpperCase();
+            let msgBox = document.getElementById('actionMsg');
+
+            if (name === "" || fin === "") {
+                msgBox.className = "error";
+                msgBox.innerText = "Bütün xanaları doldurun!";
+                return;
+            }
+
+            let students = getStudents();
+            
+            if (students.some(s => s.fin === fin)) {
+                msgBox.className = "error";
+                msgBox.innerText = "Bu FİN kod artıq siyahıda mövcuddur!";
+                return;
+            }
+
+            students.push({ name: name, fin: fin });
+            localStorage.setItem('yunisAllowedStudents', JSON.stringify(students));
+
+            document.getElementById('studentName').value = "";
+            document.getElementById('studentFin').value = "";
+            msgBox.className = "success";
+            msgBox.innerText = "Uğurla əlavə olundu!";
+            loadStudents();
+        }
+
+        function deleteStudent(index) {
+            let students = getStudents();
+            students.splice(index, 1);
+            localStorage.setItem('yunisAllowedStudents', JSON.stringify(students));
+            loadStudents();
+        }
+    </script>
 </body>
 </html>

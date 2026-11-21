@@ -1,144 +1,26 @@
 # DQ Platform — keşləmə qaydaları (Cloudflare static assets).
-# Skript/üslub fayllarını dəyişəndə index.html-də ?v=N nömrəsini artırın.
-# JS/CSS: 1 gün təzə + 7 gün arxa fonda yenilənmə; şəkillər: 30 gün; service worker: həmişə yoxlanır.
-
+# Skriptlər index.html-də ?v=N ilə çağırılır: fayl dəyişəndə N-i artırın.
+# Hər fayl üçün aralıq maksimum köhnəlmə = 1 saat, sonra arxa fonda yenilənir.
 /app.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/chatbot.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-admin-fix.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-admin-mod.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-admin-mode.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-admin.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-assets.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-birlesdirme.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-bolmeler.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-canva-pro.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-copymaster.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-core.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-design.css
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-editor.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-elan-studio.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-elan.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-firebase.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-giris.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-gov.css
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-home2.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-hub.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-imtahan-giris.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-imtahanpro.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-kecid.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-kitab.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-live.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-lock.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-materials.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-nav.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-net.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-open-multi.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-open-pro.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-oxuyucu.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-panel-patch.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-panelv2.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-pdf-engine.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-pdf-oxu.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-pdf-pro.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-pdf-secim.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-premium-pro.css
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-premium.css
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-qapaq.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-qpro.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-quiz.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-reco.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-redesign.css
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-redesign.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-resepsiya-netice.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-resepsiya.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-sinaq-pro.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-sinaq-qapaq.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-sual-duzelt.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-sual-papka.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-ui.css
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/dq-variant-fix.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/sual-studio.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 /yspro.js
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/apple-touch-icon.png
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
-/chart.jpg
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
-/favicon.png
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
-/hero.jpg
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
-/icon-192.png
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
-/icon-512.png
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
-/icon-maskable-512.png
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
-/logo.png
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
-/mount.jpg
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
-/og-image.jpg
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
-/og-square.jpg
-  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/dq-core.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/dq-hero.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/dq-live.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/dq-lock.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/dq-materials.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/dq-net.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/chatbot.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+# Service worker həmişə təzə yoxlanmalıdır
+/sw.js
+  Cache-Control: no-cache
 /service-worker.js
   Cache-Control: no-cache
-/manifest.json
-  Cache-Control: public, max-age=86400
