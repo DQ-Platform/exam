@@ -1,64 +1,87 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<!-- DQ: Firebase SDK-nı HTML parse olunarkən paralel yüklə (qoşulma gecikməsini azaldır) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js" crossorigin>
+
+<script src="dq-firebase.js?v=20261121b"></script>
+<script src="dq-net.js?v=2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="dq-db.js?v=2"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kontrol Paneli - DQ Platform</title>
   <style>*{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif}body{background-color:#005085;color:#f5faff;padding:20px}.container{max-width:1100px;margin:0 auto;background:#005085;border-radius:12px;padding:25px;box-shadow:0 10px 25px #0000004d;border:1px solid #005288}.header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #005288;padding-bottom:15px;margin-bottom:20px}.header h2{font-size:20px;color:#f72103}.back-btn{background:#005288;color:#fff;text-decoration:none;padding:8px 16px;border-radius:6px;font-size:13px;transition:.2s}.back-btn:hover{background:#006ab0}.control-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:25px}.stat-card{background:#005085;border:1px solid #005288;border-radius:8px;padding:15px;text-align:center}.stat-card h4{font-size:13px;color:#4db8ff;margin-bottom:5px}.stat-card .num{font-size:22px;font-weight:700;color:#38bdf8}.table-wrapper{overflow-x:auto}.control-table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}.control-table th,.control-table td{padding:12px 15px;border-bottom:1px solid #005288}.control-table th{background:#005085;color:#f72103;font-weight:600}.control-table tr:hover{background:#005085}.badge{padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700}.badge-active{background:#22c55e33;color:#22c55e;border:1px solid #22c55e}.badge-finished{background:#94a3b833;color:#4db8ff;border:1px solid #4db8ff}.btn-action{background:#ef4444;color:#fff;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:11px}.btn-action:hover{background:#dc2626}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="dq-skyline.css?v=2">
 </head>
-<body>
+<body data-dq-status>
 
 <div class="container">
   <div class="header">
-    <h2>CANLI KONTROL PANELİ</h2>
-    <a href="admin.html" class="back-btn">← Admin Panelə Qayıt</a>
+    <h2>Canlı kontrol paneli</h2>
+    <a href="admin.html" class="back-btn">← Admin panelə qayıt</a>
   </div>
 
   <div class="control-stats">
-    <div class="stat-card">
-      <h4>Aktiv İştirakçılar</h4>
-      <div class="num" id="activeUsersCount">1</div>
-    </div>
-    <div class="stat-card">
-      <h4>Tamamlanan İmtahanlar</h4>
-      <div class="num" id="finishedCount">12</div>
-    </div>
-    <div class="stat-card">
-      <h4>Ümumi Giriş Kodları</h4>
-      <div class="num" id="totalCodes">15</div>
-    </div>
+    <div class="stat-card"><h4>İcazəli iştirakçılar</h4><div class="num" id="cAllowed">—</div></div>
+    <div class="stat-card"><h4>Tamamlanan imtahanlar</h4><div class="num" id="cDone">—</div></div>
+    <div class="stat-card"><h4>Gözləyən</h4><div class="num" id="cWait">—</div></div>
+    <div class="stat-card"><h4>Dayandırılmış</h4><div class="num" id="cBlocked">—</div></div>
   </div>
 
   <div class="table-wrapper">
     <table class="control-table">
-      <thead>
-        <tr>
-          <th>İştirakçı Adı</th>
-          <th>Qrup</th>
-          <th>Giriş Kodu</th>
-          <th>Başlama Vaxtı</th>
-          <th>Status</th>
-          <th>Əməliyyat</th>
-        </tr>
-      </thead>
-      <tbody id="controlTableBody">
-        <tr>
-          <td>Yunis İmanov</td>
-          <td>BA</td>
-          <td><code>DQ-8842</code></td>
-          <td>19:40</td>
-          <td><span class="badge badge-active">İmtahandadır</span></td>
-          <td><button class="btn-action" onclick="terminateSession(this)">İmtahanı Dayandır</button></td>
-        </tr>
-      </tbody>
+      <thead><tr><th>İştirakçı adı</th><th>Qrup</th><th>Giriş kodu</th><th>Tamamlama vaxtı</th><th>Bal</th><th>Status</th><th>Əməliyyat</th></tr></thead>
+      <tbody id="controlTableBody"><tr><td colspan="7"><div class="dq-skel"></div></td></tr></tbody>
     </table>
   </div>
 </div>
 
-<script>function terminateSession(btn){if(confirm("Bu iştirakçının imtahanını məcburi yekunlaşdırmaq istədiyinizdən əminsiniz?")){const statusTd=btn.closest("tr").querySelector(".badge");statusTd.className="badge badge-finished",statusTd.innerText="Dayandırıldı",btn.disabled=!0,btn.style.opacity="0.5"}}
-</script>
+<script>
+(function(){
+  var students=[],results=[],$=function(i){return document.getElementById(i)};
 
+  function fmt(v){if(!v)return "—";var d=new Date(v);return isNaN(d)?"—":d.toLocaleString("az-AZ",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}
+
+  function render(){
+    // iş nömrəsi üzrə ən son nəticə
+    var last={};
+    results.forEach(function(r){var k=String(r.fin);if(!last[k]||new Date(r.created_at||0)>=new Date(last[k].created_at||0))last[k]=r});
+    var done=0,wait=0,blocked=0;
+    var html=students.map(function(s){
+      var r=last[String(s.fin)],st,cls,btn;
+      if(s.is_blocked){blocked++;st="Dayandırılıb";cls="badge-finished"}
+      else if(r){done++;st="Tamamlayıb";cls="badge-active"}
+      else{wait++;st="Gözləyir";cls="badge"}
+      btn=s.is_blocked
+        ?'<button class="btn-action btn-success" data-act="allow" data-fin="'+DQ.esc(s.fin)+'" type="button">İcazə ver</button>'
+        :'<button class="btn-action btn-danger" data-act="block" data-fin="'+DQ.esc(s.fin)+'" type="button">Dayandır</button>';
+      return '<tr><td>'+DQ.esc(s.name||"—")+'</td><td>'+DQ.esc(s.category||"—")+'</td><td><code>'+DQ.esc(s.fin)+'</code></td><td>'+fmt(r&&r.created_at)+'</td><td>'+(r&&r.score!=null?DQ.esc(r.score):"—")+'</td><td><span class="badge '+cls+'">'+st+'</span></td><td>'+btn+'</td></tr>';
+    }).join("");
+    $("cAllowed").textContent=students.length;$("cDone").textContent=done;$("cWait").textContent=wait;$("cBlocked").textContent=blocked;
+    $("controlTableBody").innerHTML=html||'<tr><td colspan="7" class="dq-empty">İştirakçı yoxdur</td></tr>';
+  }
+
+  DQ.watch("allowed_students",function(q){return q.select("*").order("id",{ascending:false})},function(d){students=d||[];render()},{every:10000,key:"ctl-students"});
+  DQ.watch("exam_results",function(q){return q.select("fin,score,created_at")},function(d){results=d||[];render()},{every:15000,key:"ctl-results"});
+
+  $("controlTableBody").addEventListener("click",async function(e){
+    var b=e.target.closest("[data-act]");if(!b)return;
+    var block=b.getAttribute("data-act")==="block",fin=b.getAttribute("data-fin");
+    if(block&&!confirm(fin+" üçün iştirakı dayandırmaq istədiyinizə əminsiniz?"))return;
+    b.disabled=true;
+    var r=await DQ.write("allowed_students",function(q){return q.update({is_blocked:block}).eq("fin",fin)});
+    if(r.error){b.disabled=false;return DQ.toast(r.message||"Əməliyyat alınmadı","err")}
+    students.forEach(function(s){if(String(s.fin)===fin)s.is_blocked=block});render();
+    DQ.toast(block?"İştirak dayandırıldı":"İcazə verildi","ok");
+  });
+})();
+</script>
 </body>
 </html>
-

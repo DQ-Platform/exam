@@ -1,17 +1,27 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<!-- DQ: Firebase SDK-nı HTML parse olunarkən paralel yüklə (qoşulma gecikməsini azaldır) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js" crossorigin>
+
 <script src="dq-firebase.js?v=20261121b"></script>
 <script src="dq-net.js?v=2"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>İştirakçılar və İcazələr - DQ Platform</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="dq-db.js?v=2"></script>
     <style>:root{--primary-dark: #005085;--accent-gold: #f72103;--success-green: #10b981;--danger-red: #ef4444}body{font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;background-color:#f5faff;color:#005288;margin:0;padding:20px}.container{max-width:1150px;margin:0 auto;background:#fff;padding:25px;border-radius:12px;box-shadow:0 4px 20px #0f172a14;border-top:4px solid var(--accent-gold)}h2{color:var(--primary-dark);text-align:center;margin-top:0}.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}.btn{background-color:var(--primary-dark);color:var(--accent-gold);border:none;padding:10px 18px;font-size:14px;font-weight:700;border-radius:6px;cursor:pointer;text-decoration:none;transition:.2s}.btn:hover{background-color:#005085}.btn-danger{background-color:var(--danger-red);color:#fff}.btn-warning{background-color:#f72103;color:#fff}.btn-success{background-color:var(--success-green);color:#fff}.btn-sm{padding:6px 12px;font-size:12px;border-radius:4px;border:none;cursor:pointer;font-weight:700;margin:2px}.filter-container{display:flex;gap:8px;margin-bottom:15px;flex-wrap:wrap;align-items:center}.filter-btn{padding:8px 16px;border:1px solid #b1ddfb;background:#ebf7ff;color:var(--primary-dark);font-weight:700;border-radius:6px;cursor:pointer;transition:.2s}.filter-btn.active{background:var(--primary-dark);color:var(--accent-gold);border-color:var(--primary-dark)}.add-card{background:#ebf7ff;padding:15px;border-radius:8px;border:1px solid #b1ddfb;margin-bottom:25px}.form-row{display:flex;gap:10px;flex-wrap:wrap}.form-control{padding:10px;border:1px solid #b1ddfb;border-radius:6px;font-size:14px;outline:none;flex:1;min-width:150px}.form-control:focus{border-color:var(--accent-gold)}table{width:100%;border-collapse:collapse;text-align:center;font-size:14px;margin-top:10px}th,td{padding:12px 10px;border:1px solid #b1ddfb}th{background:var(--primary-dark);color:#fff}.badge{padding:4px 8px;border-radius:4px;font-weight:700;font-size:12px;display:inline-block}.badge-active{background:#d1fae5;color:#065f46}.badge-blocked{background:#fef2f2;color:#991b1b}.token-field{letter-spacing:1px;font-weight:700;font-family:monospace}.score-badge{font-weight:700;color:#007bcd;background:#e0f3ff;padding:4px 8px;border-radius:4px}.footer-back{margin-top:20px;text-align:center}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="dq-skyline.css?v=2">
 </head>
-<body>
+<body data-dq-status>
 
     <div class="container">
         <div class="top-bar">
@@ -24,7 +34,7 @@
             <h4 style="margin-top: 0; color: var(--primary-dark);">➕ Yeni İştirakçı Və Kateqoriya Əlavə Et</h4>
             <div class="form-row">
                 <input type="text" id="new-name" class="form-control" placeholder="Ad Soyad">
-                <input type="text" id="new-fin" class="form-control token-field" placeholder="FIN Kod (7 simvol)" maxlength="7">
+                <input type="text" id="new-fin" class="form-control token-field" placeholder="İş nömrəsi (7 simvol)" maxlength="7">
                 <select id="new-category" class="form-control">
                     <option value="BA">Kateqoriya: BA</option>
                     <option value="BB">Kateqoriya: BB</option>
@@ -52,7 +62,7 @@
                 <thead>
                     <tr>
                         <th>Ad Soyad</th>
-                        <th>FIN Kod</th>
+                        <th>İş nömrəsi</th>
                         <th>Kateqoriya</th>
                         <th>Nəticə (Bal)</th>
                         <th>İcazə Statusu</th>
@@ -70,19 +80,19 @@
         </div>
     </div>
 
-    <script>const SUPABASE_URL="https://cpzwliqlgaplroscvduo.supabase.co",SUPABASE_KEY="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF",_supabase=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);let allStudents=[],currentFilter="ALL";document.addEventListener("DOMContentLoaded",loadStudentsList);async function loadStudentsList(){const tbody=document.getElementById("students-table-body"),[studentsRes,resultsRes]=await Promise.all([_supabase.from("allowed_students").select("*").order("id",{ascending:!1}),_supabase.from("exam_results").select("fin, score, total_questions")]);if(studentsRes.error){tbody.innerHTML=`<tr><td colspan="6" style="color:red;">Xəta baş verdi: ${studentsRes.error.message}</td></tr>`;return}const resultsMap={};resultsRes.data&&resultsRes.data.forEach(r=>{resultsMap[r.fin]=r.score!==void 0?`${r.score} bal`:"Keçirilməyib"}),allStudents=studentsRes.data.map(s=>({...s,score:resultsMap[s.fin]||"İştirak etməyib"})),renderTable()}function renderTable(){const tbody=document.getElementById("students-table-body");let filtered=allStudents;if(currentFilter!=="ALL"&&(filtered=allStudents.filter(s=>s.category&&s.category.toUpperCase().startsWith(currentFilter))),!filtered||filtered.length===0){tbody.innerHTML='<tr><td colspan="6">Bu kateqoriyada heç bir iştirakçı tapılmadı.</td></tr>';return}let html="";filtered.forEach(s=>{const isBlocked=s.is_blocked||!1,statusBadge=isBlocked?'<span class="badge badge-blocked">⛔ İştirak Dayandırılıb</span>':'<span class="badge badge-active">✅ Aktiv (İcazəli)</span>',toggleBtn=isBlocked?`<button class="btn-sm btn-success" onclick="toggleStudentStatus('${s.fin}', false)">▶️ İcazə Ver</button>`:`<button class="btn-sm btn-warning" onclick="toggleStudentStatus('${s.fin}', true)">⏸️ İştirakı Dayandır</button>`;html+=`
+    <script>const _supabase=DQ.client;let allStudents=[],currentFilter="ALL";document.addEventListener("DOMContentLoaded",loadStudentsList);function loadStudentsList(){var R=null;function combine(S){const resultsMap={};(R||[]).forEach(r=>{resultsMap[r.fin]=r.score!==void 0?`${r.score} bal`:"Keçirilməyib"});allStudents=(S||[]).map(s=>({...s,score:resultsMap[s.fin]||"İştirak etməyib"}));renderTable()}var last=[];DQ.load("exam_results",q=>q.select("fin, score, total_questions"),{key:"siyaha-r",render:d=>{R=d;combine(last)}});DQ.load("allowed_students",q=>q.select("*").order("id",{ascending:!1}),{key:"siyaha-s",target:"students-table-body",cols:6,render:d=>{last=d;combine(d)}})}function renderTable(){const tbody=document.getElementById("students-table-body");let filtered=allStudents;if(currentFilter!=="ALL"&&(filtered=allStudents.filter(s=>s.category&&s.category.toUpperCase().startsWith(currentFilter))),!filtered||filtered.length===0){tbody.innerHTML='<tr><td colspan="6">Bu kateqoriyada heç bir iştirakçı tapılmadı.</td></tr>';return}let html="";filtered.forEach(s=>{const isBlocked=s.is_blocked||!1,statusBadge=isBlocked?'<span class="badge badge-blocked">⛔ İştirak Dayandırılıb</span>':'<span class="badge badge-active">✅ Aktiv (İcazəli)</span>',toggleBtn=isBlocked?`<button class="btn-sm btn-success" onclick="toggleStudentStatus('${DQ.arg(s.fin)}', false)">▶️ İcazə Ver</button>`:`<button class="btn-sm btn-warning" onclick="toggleStudentStatus('${DQ.arg(s.fin)}', true)">⏸️ İştirakı Dayandır</button>`;html+=`
                     <tr>
-                        <td><b>${s.name||"-"}</b></td>
-                        <td class="token-field">${s.fin}</td>
-                        <td><b>${s.category||"Ümumi"}</b></td>
+                        <td><b>${DQ.esc(s.name||"-")}</b></td>
+                        <td class="token-field">${DQ.esc(s.fin)}</td>
+                        <td><b>${DQ.esc(s.category||"Ümumi")}</b></td>
                         <td><span class="score-badge">${s.score}</span></td>
                         <td>${statusBadge}</td>
                         <td>
                             ${toggleBtn}
-                            <button class="btn-sm btn-danger" onclick="deleteStudent('${s.fin}')">🗑️ Sil</button>
+                            <button class="btn-sm btn-danger" onclick="deleteStudent('${DQ.arg(s.fin)}')">🗑️ Sil</button>
                         </td>
                     </tr>
-                `}),tbody.innerHTML=html}function filterStudents(category,btnElement){currentFilter=category,document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active")),btnElement.classList.add("active"),renderTable()}async function addNewStudent(){const name=document.getElementById("new-name").value.trim(),fin=document.getElementById("new-fin").value.trim().toUpperCase(),category=document.getElementById("new-category").value,msg=document.getElementById("status-msg");if(!name||fin.length<5){msg.style.color="red",msg.innerText="Ad və etibarlı FIN kod daxil edin!";return}const{error}=await _supabase.from("allowed_students").insert([{name,fin,category,is_blocked:!1}]);error?(msg.style.color="red",msg.innerText="Xəta: "+error.message):(msg.style.color="green",msg.innerText="İştirakçı uğurla əlavə olundu!",document.getElementById("new-name").value="",document.getElementById("new-fin").value="",loadStudentsList())}async function toggleStudentStatus(fin,blockStatus){const{error}=await _supabase.from("allowed_students").update({is_blocked:blockStatus}).eq("fin",fin);error?alert("Xəta baş verdi: "+error.message):loadStudentsList()}async function deleteStudent(fin){if(confirm(`${fin} FİN kodlu iştirakçını ləğv etmək istədiyinizə əminsiniz?`)){const{error}=await _supabase.from("allowed_students").delete().eq("fin",fin);error?alert("Silinərkən xəta baş verdi: "+error.message):loadStudentsList()}}
+                `}),tbody.innerHTML=html}function filterStudents(category,btnElement){currentFilter=category,document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active")),btnElement.classList.add("active"),renderTable()}async function addNewStudent(){const name=document.getElementById("new-name").value.trim(),fin=document.getElementById("new-fin").value.trim().toUpperCase(),category=document.getElementById("new-category").value,msg=document.getElementById("status-msg");if(!name||fin.length<5){msg.style.color="red",msg.innerText="Ad və etibarlı iş nömrəsi daxil edin!";return}const{error}=await _supabase.from("allowed_students").insert([{name,fin,category,is_blocked:!1}]);error?(msg.style.color="red",msg.innerText="Xəta: "+error.message):(msg.style.color="green",msg.innerText="İştirakçı uğurla əlavə olundu!",document.getElementById("new-name").value="",document.getElementById("new-fin").value="",loadStudentsList())}async function toggleStudentStatus(fin,blockStatus){fin=DQ.unarg(fin);const{error}=await _supabase.from("allowed_students").update({is_blocked:blockStatus}).eq("fin",fin);error?DQ.toast(DQ.friendly(error),"err"):loadStudentsList()}async function deleteStudent(fin){fin=DQ.unarg(fin);if(confirm(`${fin} iş nömrəli iştirakçını ləğv etmək istədiyinizə əminsiniz?`)){const{error}=await _supabase.from("allowed_students").delete().eq("fin",fin);error?DQ.toast(DQ.friendly(error),"err"):loadStudentsList()}}
 </script>
 </body>
 </html>

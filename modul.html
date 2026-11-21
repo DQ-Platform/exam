@@ -1,17 +1,27 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<!-- DQ: Firebase SDK-nı HTML parse olunarkən paralel yüklə (qoşulma gecikməsini azaldır) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js" crossorigin>
+
 <script src="dq-firebase.js?v=20261121b"></script>
 <script src="dq-net.js?v=2"></script>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mərkəzi Nəzarət və İdarəetmə Paneli - DQ Platform</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="dq-db.js?v=2"></script>
   <style>*{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif}body{background-color:#005085;color:#f5faff;padding:20px}.container{max-width:1250px;margin:0 auto;background:#005085;border-radius:12px;padding:25px;box-shadow:0 10px 25px #0000004d;border:1px solid #005288;border-top:4px solid #f72103}.header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #005288;padding-bottom:15px;margin-bottom:20px;flex-wrap:wrap;gap:10px}.header h2{font-size:20px;color:#f72103}.admin-nav-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}.admin-nav-card{background:#005085;color:#f72103;padding:10px;border-radius:8px;text-align:center;font-weight:700;font-size:12px;border:1px solid #005288;cursor:pointer;transition:.2s;display:flex;flex-direction:column;align-items:center;gap:4px}.admin-nav-card:hover,.admin-nav-card.active{background:#f72103;color:#005085;border-color:#f72103}.admin-nav-card span.icon{font-size:18px}.tab-content{display:none;background:#005085;padding:20px;border-radius:8px;border:1px solid #005288}.tab-content.active{display:block}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:15px}.form-group{display:flex;flex-direction:column;margin-bottom:12px}.form-group label{font-size:12px;font-weight:600;color:#4db8ff;margin-bottom:5px}.form-control{padding:9px 12px;border:1px solid #005288;background:#005085;color:#fff;border-radius:4px;font-size:14px;outline:none}.form-control:focus{border-color:#f72103}.btn{padding:9px 18px;border:none;border-radius:4px;cursor:pointer;font-weight:600;font-size:13px;transition:.2s;display:inline-block;text-align:center}.btn-success{background-color:#22c55e;color:#fff}.btn-success:hover{background-color:#15803d}.btn-danger{background-color:#ef4444;color:#fff}.btn-danger:hover{background-color:#b91c1c}.btn-primary{background-color:#0099ff;color:#fff}.btn-warning{background-color:#f72103;color:#005085}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-bottom:20px}.stat-card{background:#005085;border:1px solid #005288;border-radius:8px;padding:15px;text-align:center}.stat-card h4{font-size:12px;color:#4db8ff;margin-bottom:5px}.stat-card .num{font-size:22px;font-weight:700;color:#38bdf8}.table-wrapper{overflow-x:auto;margin-top:15px}table{width:100%;border-collapse:collapse;text-align:left;font-size:13px;color:#f5faff}th,td{padding:10px;border:1px solid #005288}th{background:#005085;color:#f72103}tr:nth-child(2n){background-color:#005085}.badge{padding:3px 7px;border-radius:4px;font-size:11px;font-weight:700}.badge-success{background:#22c55e33;color:#22c55e;border:1px solid #22c55e}.badge-danger{background:#ef444433;color:#ef4444;border:1px solid #ef4444}.option-row{display:flex;align-items:center;gap:10px;background:#005085;padding:8px;border-radius:6px;border:1px solid #005288;margin-bottom:8px}.option-label{font-weight:700;width:25px;color:#f72103}.footer-text{text-align:center;font-size:12px;color:#64748b;margin-top:25px;border-top:1px solid #005288;padding-top:15px}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="dq-skyline.css?v=2">
 </head>
-<body>
+<body data-dq-status>
 
 <div class="container">
   <div class="header">
@@ -47,7 +57,7 @@
         <thead>
           <tr>
             <th>İştirakçı Adı</th>
-            <th>FIN Kod</th>
+            <th>İş nömrəsi</th>
             <th>Sınaq №</th>
             <th>Status</th>
             <th>Əməliyyat</th>
@@ -120,7 +130,7 @@
         <input type="text" id="codeStudentName" class="form-control" placeholder="Məs: Yunis İmanov">
       </div>
       <div class="form-group">
-        <label>FIN Kod</label>
+        <label>İş nömrəsi</label>
         <input type="text" id="codeStudentFin" class="form-control" placeholder="Məs: 77C2UF7" maxlength="7">
       </div>
     </div>
@@ -137,7 +147,7 @@
         <thead>
           <tr>
             <th>Ad Soyad</th>
-            <th>FIN Kod</th>
+            <th>İş nömrəsi</th>
             <th>Əməliyyat</th>
           </tr>
         </thead>
@@ -157,7 +167,7 @@
         <thead>
           <tr>
             <th>Ad Soyad</th>
-            <th>FIN</th>
+            <th>İş nömrəsi</th>
             <th>Sınaq №</th>
             <th>Doğru</th>
             <th>Yanlış</th>
@@ -191,7 +201,7 @@
   </div>
 </div>
 
-<script>const SUPABASE_URL="https://cpzwliqlgaplroscvduo.supabase.co",SUPABASE_KEY="sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF",_supabase=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);document.addEventListener("DOMContentLoaded",()=>{loadAllowedStudentsData(),loadResultsData()});function switchTab(tabId,btn){document.querySelectorAll(".tab-content").forEach(el=>el.classList.remove("active")),document.querySelectorAll(".admin-nav-card").forEach(el=>el.classList.remove("active")),document.getElementById(tabId).classList.add("active"),btn.classList.add("active")}function terminateSession(btn){if(confirm("Bu iştirakçının imtahanını dayandırmaq istədiyinizdən əminsiniz?")){const badge=btn.closest("tr").querySelector(".badge");badge.className="badge badge-danger",badge.innerText="Dayandırıldı",btn.disabled=!0}}async function saveQuestionToDb(){const examId=document.getElementById("qExamSelect").value,qNo=parseInt(document.getElementById("qNo").value),subject=document.getElementById("qSubjectSelect").value,qText=document.getElementById("qText").value.trim(),msg=document.getElementById("qStatusMsg"),optInputs=document.querySelectorAll(".q-opt");let options=[];optInputs.forEach(input=>{input.value.trim()!==""&&options.push(input.value.trim())});const correctRadio=document.querySelector('input[name="correctRadio"]:checked');if(!qText||options.length<2){msg.style.color="#ef4444",msg.innerText="Sual mətnini və ən azı 2 variantı doldurun!";return}msg.style.color="#38bdf8",msg.innerText="Yadda saxlanılır...";const{error}=await _supabase.from("exam_questions").upsert([{exam_id:examId,q_number:qNo,subject,question:qText,options,correct:parseInt(correctRadio.value)}],{onConflict:"exam_id, q_number"});error?(msg.style.color="#ef4444",msg.innerText="Xəta: "+error.message):(msg.style.color="#22c55e",msg.innerText="Sual uğurla bazaya əlavə edildi!")}async function allowStudentDirect(){const name=document.getElementById("codeStudentName").value.trim(),fin=document.getElementById("codeStudentFin").value.trim().toUpperCase(),msg=document.getElementById("codeStatusMsg");if(!name||!fin){msg.style.color="#ef4444",msg.innerText="Ad və FIN daxil edin!";return}const{error}=await _supabase.from("allowed_students").insert([{name,fin}]);error?(msg.style.color="#ef4444",msg.innerText="Xəta: "+error.message):(msg.style.color="#22c55e",msg.innerText="Tələbəyə icazə verildi!",document.getElementById("codeStudentName").value="",document.getElementById("codeStudentFin").value="",loadAllowedStudentsData())}async function loadAllowedStudentsData(){const{data}=await _supabase.from("allowed_students").select("*"),tbody=document.getElementById("allowedStudentsTable");if(!data||data.length===0){tbody.innerHTML='<tr><td colspan="3">Qeydiyyatlı tələbə tapılmadı.</td></tr>',document.getElementById("totalAllowedCount").innerText=0;return}document.getElementById("totalAllowedCount").innerText=data.length;let html="";data.forEach(s=>{html+=`<tr><td>${s.name||"-"}</td><td><b>${s.fin}</b></td><td><button class="btn btn-danger" style="padding: 2px 6px; font-size:11px;" onclick="deleteStudent('${s.fin}')">Sil</button></td></tr>`}),tbody.innerHTML=html}async function deleteStudent(fin){confirm(`${fin} FİN kodunu silmək istədiyinizdən əminsiniz?`)&&(await _supabase.from("allowed_students").delete().eq("fin",fin),loadAllowedStudentsData())}async function loadResultsData(){const{data}=await _supabase.from("exam_results").select("*"),tbody=document.getElementById("resultsTableBody");if(!data||data.length===0){tbody.innerHTML='<tr><td colspan="6">Hələ heç bir nəticə yoxdur.</td></tr>';return}document.getElementById("finishedCount").innerText=data.length;let html="";data.forEach(r=>{html+=`<tr><td>${r.name}</td><td>${r.fin}</td><td>Sınaq ${r.exam_no}</td><td style="color:#22c55e">${r.correct_count}</td><td style="color:#ef4444">${r.wrong_count}</td><td><b>${r.score}</b></td></tr>`}),tbody.innerHTML=html}
+<script>const _supabase=DQ.client;document.addEventListener("DOMContentLoaded",()=>{loadAllowedStudentsData(),loadResultsData()});function switchTab(tabId,btn){document.querySelectorAll(".tab-content").forEach(el=>el.classList.remove("active")),document.querySelectorAll(".admin-nav-card").forEach(el=>el.classList.remove("active")),document.getElementById(tabId).classList.add("active"),btn.classList.add("active")}function terminateSession(btn){if(confirm("Bu iştirakçının imtahanını dayandırmaq istədiyinizdən əminsiniz?")){const badge=btn.closest("tr").querySelector(".badge");badge.className="badge badge-danger",badge.innerText="Dayandırıldı",btn.disabled=!0}}async function saveQuestionToDb(){const examId=document.getElementById("qExamSelect").value,qNo=parseInt(document.getElementById("qNo").value),subject=document.getElementById("qSubjectSelect").value,qText=document.getElementById("qText").value.trim(),msg=document.getElementById("qStatusMsg"),optInputs=document.querySelectorAll(".q-opt");let options=[];optInputs.forEach(input=>{input.value.trim()!==""&&options.push(input.value.trim())});const correctRadio=document.querySelector('input[name="correctRadio"]:checked');if(!qText||options.length<2){msg.style.color="#ef4444",msg.innerText="Sual mətnini və ən azı 2 variantı doldurun!";return}msg.style.color="#38bdf8",msg.innerText="Yadda saxlanılır...";const{error}=await _supabase.from("exam_questions").upsert([{exam_id:examId,q_number:qNo,subject,question:qText,options,correct:parseInt(correctRadio.value)}],{onConflict:"exam_id, q_number"});error?(msg.style.color="#ef4444",msg.innerText="Xəta: "+error.message):(msg.style.color="#22c55e",msg.innerText="Sual uğurla bazaya əlavə edildi!")}async function allowStudentDirect(){const name=document.getElementById("codeStudentName").value.trim(),fin=document.getElementById("codeStudentFin").value.trim().toUpperCase(),msg=document.getElementById("codeStatusMsg");if(!name||!fin){msg.style.color="#ef4444",msg.innerText="Ad və iş nömrəsi daxil edin!";return}const{error}=await _supabase.from("allowed_students").insert([{name,fin}]);error?(msg.style.color="#ef4444",msg.innerText="Xəta: "+error.message):(msg.style.color="#22c55e",msg.innerText="Tələbəyə icazə verildi!",document.getElementById("codeStudentName").value="",document.getElementById("codeStudentFin").value="",loadAllowedStudentsData())}function loadAllowedStudentsData(){DQ.load("allowed_students",q=>q.select("*"),{key:"modul-allowed",target:"allowedStudentsTable",cols:3,render:renderAllowed})}function renderAllowed(data){const tbody=document.getElementById("allowedStudentsTable");if(!data||data.length===0){tbody.innerHTML='<tr><td colspan="3">Qeydiyyatlı tələbə tapılmadı.</td></tr>',document.getElementById("totalAllowedCount").innerText=0;return}document.getElementById("totalAllowedCount").innerText=data.length;let html="";data.forEach(s=>{html+=`<tr><td>${DQ.esc(s.name||"-")}</td><td><b>${DQ.esc(s.fin)}</b></td><td><button class="btn btn-danger" style="padding: 2px 6px; font-size:11px;" onclick="deleteStudent('${DQ.arg(s.fin)}')">Sil</button></td></tr>`}),tbody.innerHTML=html}async function deleteStudent(fin){fin=DQ.unarg(fin);confirm(`${fin} iş nömrəsini silmək istədiyinizdən əminsiniz?`)&&(await _supabase.from("allowed_students").delete().eq("fin",fin),loadAllowedStudentsData())}function loadResultsData(){DQ.load("exam_results",q=>q.select("*"),{key:"modul-results",target:"resultsTableBody",cols:6,render:renderResults})}function renderResults(data){const tbody=document.getElementById("resultsTableBody");if(!data||data.length===0){tbody.innerHTML='<tr><td colspan="6">Hələ heç bir nəticə yoxdur.</td></tr>';return}document.getElementById("finishedCount").innerText=data.length;let html="";data.forEach(r=>{html+=`<tr><td>${DQ.esc(r.name)}</td><td>${DQ.esc(r.fin)}</td><td>Sınaq ${DQ.esc(r.exam_no)}</td><td class="ok-num">${r.correct_count}</td><td class="bad-num">${r.wrong_count}</td><td><b>${r.score}</b></td></tr>`}),tbody.innerHTML=html}
 </script>
 </body>
 </html>

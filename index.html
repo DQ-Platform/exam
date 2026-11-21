@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js" crossorigin>
+
 <script src="dq-tema.js?v=7026112101"></script>
 <script id="dq-build-reset">(function(){var B="20261116b";try{if(localStorage.getItem("dq_build")===B)return;localStorage.setItem("dq_build",B);var done=function(){try{location.reload()}catch{}},a=navigator.serviceWorker&&navigator.serviceWorker.getRegistrations?navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister()}))}):Promise.resolve();a.then(function(){return window.caches?caches.keys().then(function(k){return Promise.all(k.map(function(n){return caches.delete(n)}))}):0}).then(done,done),setTimeout(done,3e3)}catch{}})();
 </script>
@@ -36,18 +42,19 @@
 
 <script>try{var __u=new URL(location.href);(__u.searchParams.get("news")||/\/news\/?$/.test(__u.pathname))&&sessionStorage.setItem("dq_share_in","1")}catch{}
 </script>
-<meta charset="UTF-8">
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 <script id="dq-perf-core">(function(){"use strict";if(window.__dqPerf)return;window.__dqPerf=1;var NMO=window.MutationObserver,SI=window.setInterval,CRIT=/Date|Timer|tick|left|[+-]{2}|\+=|-=|count|remain|finish|TICK|DUR|elapsed|secs?\b|\bend/i,hot=Date.now()+12e3;function warm(){var t=Date.now()+2500;t>hot&&(hot=t)}["pointerdown","touchstart","keydown","input","change","click","popstate","hashchange","focusin","visibilitychange"].forEach(function(e){try{addEventListener(e,warm,{passive:!0,capture:!0})}catch{}});try{NMO&&new NMO(function(l){for(var i=0;i<l.length;i++)if(l[i].addedNodes.length){warm();return}}).observe(document.documentElement,{childList:!0,subtree:!0})}catch{}window.setInterval=function(fn,d){if(typeof fn=="function"&&d>=200&&d<1500){var a=Array.prototype.slice.call(arguments,2),p=d<300?300:d,crit=!1,n=0,every;try{crit=CRIT.test(Function.prototype.toString.call(fn))}catch{crit=!0}return every=Math.max(1,Math.ceil(2e3/p)),(window.__dqIv=window.__dqIv||[]).push({d:p,crit,name:fn.name||""}),SI(function(){d<1e3&&document.hidden||!crit&&Date.now()>hot&&++n%every||fn.apply(this,a)},p)}return SI.apply(window,arguments)}})();
 </script>
+<link rel="preconnect" href="https://cpzwliqlgaplroscvduo.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://cpzwliqlgaplroscvduo.supabase.co">
 <link rel="preload" as="script" href="dq-net.js?v=2026112101">
-<link rel="preload" as="script" href="app.js?v=2026112102">
+<link rel="preload" as="script" href="app.js?v=20261122fin">
 <link rel="preload" as="script" href="dq-qapaq.js?v=2026112101">
 <link rel="preload" as="script" href="dq-birlesdirme.js?v=2026112101">
 <link rel="preload" as="script" href="dq-lock.js?v=2026112101">
-<link rel="preload" as="script" href="yspro.js?v=2026112101">
-<link rel="preload" as="script" href="dq-core.js?v=2026112101">
-<link rel="preload" as="script" href="dq-hero.js?v=2026112101">
+<link rel="preload" as="script" href="yspro.js?v=20261122fin">
+<link rel="preload" as="script" href="dq-core.js?v=20261122fin">
+<link rel="preload" as="script" href="dq-hero.js?v=20261122fin">
 <link rel="preload" as="script" href="dq-materials.js?v=2026112101">
 <link rel="preload" as="script" href="dq-live.js?v=2026112101">
 <link rel="preload" as="script" href="dq-home2.js?v=2026112101">
@@ -139,6 +146,8 @@
 <script src="dq-admin.js?v=2026112101"></script>
 <script src="dq-net.js?v=2026112101"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="dq-db.js?v=2026112204"></script>
+<script src="dq-preload.js?v=2026112204" defer></script>
 <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
 <noscript></noscript>
 <link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2">
@@ -3032,7 +3041,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <style id="dq-news-pro">#dtn .dtn-st{display:grid;grid-template-columns:minmax(0,1fr)}#dtn .dtn-s{display:grid!important;grid-area:1/1;opacity:0;visibility:hidden;pointer-events:none;z-index:0;transform:translate(26px) scale(.985);animation:none!important;transition:opacity .75s cubic-bezier(.4,0,.2,1),transform .85s cubic-bezier(.22,.61,.36,1),visibility 0s linear .75s}#dtn .dtn-s.on{opacity:1;visibility:visible;pointer-events:auto;z-index:1;transform:none;transition:opacity .75s cubic-bezier(.4,0,.2,1),transform .85s cubic-bezier(.22,.61,.36,1),visibility 0s}#dtn .dtn-im{overflow:hidden;min-height:220px}#dtn .dtn-im img{object-fit:cover;object-position:center 22%;transform:scale(1.07);transition:transform 7s cubic-bezier(.2,.6,.3,1)}#dtn .dtn-s.on .dtn-im img{transform:scale(1)}#dtn .dtn-bd>*{opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease}#dtn .dtn-s.on .dtn-bd>*{opacity:1;transform:none}#dtn .dtn-s.on .dtn-bd>*:nth-child(1){transition-delay:.18s}#dtn .dtn-s.on .dtn-bd>*:nth-child(2){transition-delay:.26s}#dtn .dtn-s.on .dtn-bd>*:nth-child(3){transition-delay:.34s}#dtn .dtn-s.on .dtn-bd>*:nth-child(4){transition-delay:.42s}#dtn .dtn-dots i{transition:width .4s cubic-bezier(.4,0,.2,1),background-color .4s,opacity .4s}#dtn .dtn-new{z-index:2}@media(max-width:700px){#dtn .dtn-im{aspect-ratio:16/10;min-height:0}}@media(prefers-reduced-motion:reduce){#dtn .dtn-s,#dtn .dtn-s.on,#dtn .dtn-bd>*,#dtn .dtn-im img{transition-duration:.01s!important;transform:none!important}}#nw-pub .nw-card img.im{width:clamp(104px,24vw,190px)!important;aspect-ratio:4/5!important;height:auto!important;max-height:none!important;object-fit:cover!important;object-position:center top;background:#e6f5ff;border-radius:16px;align-self:flex-start;flex:none;box-shadow:0 8px 20px #0f172a1f;border:1px solid #0f172a0f}#nw-pub .nw-card{align-items:flex-start;min-height:0}#nw-pub .nw-card .nw-more{margin-top:4px}#nw-pub .nw-rc img,#nw-pub .dq2n-im img,#nw-pub .dq2n-r img{object-fit:cover;object-position:center top}#nw-pub .nw-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}#nw-pub .nw-chips::-webkit-scrollbar{display:none}#nw-pub .nw-chip{white-space:nowrap;flex:none;transition:background-color .25s,color .25s,border-color .25s,transform .2s}#nw-pub .nw-subs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 0 14px;padding:2px 2px 4px;animation:nwSubIn .35s ease both}#nw-pub .nw-subs::-webkit-scrollbar{display:none}#nw-pub .nw-sub{flex:none;border:1px dashed #f72103;background:#fffaf0;color:#c41a02;border-radius:999px;padding:7px 14px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background-color .25s,color .25s,transform .2s}#nw-pub .nw-sub.on{background:#f72103;border-style:solid;color:#fff}#nw-pub .nw-sub:active{transform:scale(.96)}#nw-pub .nw-meta .tg2{background:#0077cc0f;color:#007acc;border-radius:999px;padding:1px 9px;font-weight:700;letter-spacing:.2px}@keyframes nwSubIn{0%{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}.krs-cov{display:flex;gap:14px;align-items:center;margin-top:12px;padding-top:12px;border-top:1px dashed #b1ddfb}.krs-cv{flex:none;width:84px;aspect-ratio:5/7;border-radius:12px;background:#d3edff center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:11px;color:#64748b;text-align:center;box-shadow:0 6px 16px #0f172a22;border:1px solid #b1ddfb}.krs-cvb{display:flex;flex-direction:column;gap:6px;min-width:0}.krs-cvb small{color:#64748b;line-height:1.35}#dqs-root{position:fixed;inset:0;z-index:2147483000;display:none;background:#0b1b3acc;backdrop-filter:blur(3px);overflow:auto;-webkit-overflow-scrolling:touch}#dqs-root.open{display:block}#dqs-root .dqs-p{max-width:760px;margin:28px auto;background:#fff;border-radius:22px;box-shadow:0 30px 80px #0008;overflow:hidden}#dqs-root .dqs-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 20px;background:linear-gradient(135deg,#007acc,#0088e2);color:#fff}#dqs-root .dqs-h b{font-size:17px}#dqs-root .dqs-h small{display:block;opacity:.8;font-weight:400}#dqs-root .dqs-b{padding:18px 20px;display:grid;gap:16px}#dqs-root .dqs-c{border:1px solid #d3edff;border-radius:16px;padding:14px;display:flex;gap:14px;align-items:center;background:#f5faff}#dqs-root .dqs-pv{flex:none;width:150px;aspect-ratio:16/10;border-radius:12px;background:#d3edff center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:12px;text-align:center;border:1px solid #b1ddfb}#dqs-root .dqs-tx{display:flex;flex-direction:column;gap:6px;min-width:0}#dqs-root .dqs-tx small{color:#64748b;line-height:1.35}#dqs-root .dqs-bt{border:0;border-radius:10px;padding:8px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;background:#d3edff;color:#005085}#dqs-root .dqs-bt.pri{background:#007acc;color:#fff}#dqs-root .dqs-bt.blue{background:#0088e2;color:#fff}#dqs-root .dqs-bt.red{background:#fee2e2;color:#b91c1c}#dqs-root .dqs-bt:disabled{opacity:.5;cursor:default}#dqs-root .dqs-row{display:flex;gap:8px;flex-wrap:wrap}#dqs-root .dqs-f{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid #d3edff;background:#f5faff}#dqs-root .dqs-st{font-size:12px;color:#64748b;margin-right:auto;align-self:center}@media(max-width:560px){#dqs-root .dqs-p{margin:0;border-radius:0;min-height:100%}#dqs-root .dqs-c{flex-direction:column;align-items:stretch}#dqs-root .dqs-pv{width:100%}}
 </style>
 <script src="dq-qapaq.js?v=2026112101"></script>
-<script src="app.js?v=2026112102"></script>
+<script src="app.js?v=20261122fin"></script>
 <script src="sual-studio.js?v=2026112101"></script>
 <script src="dq-birlesdirme.js?v=2026112101"></script>
 <script src="dq-oxuyucu.js?v=2026112101"></script>
@@ -3040,10 +3049,10 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <script src="dq-panelv2.js?v=2026112101"></script>
 <script src="dq-hub.js?v=2026112101"></script>
 <script src="dq-lock.js?v=2026112101"></script>
-<script src="yspro.js?v=2026112101"></script>
-<script src="dq-core.js?v=2026112101"></script>
+<script src="yspro.js?v=20261122fin"></script>
+<script src="dq-core.js?v=20261122fin"></script>
 <script src="dq-qpro.js?v=2026112101"></script>
-<script src="dq-hero.js?v=2026112101"></script>
+<script src="dq-hero.js?v=20261122fin"></script>
 <script src="dq-materials.js?v=2026112101"></script>
 <script src="dq-live.js?v=2026112101"></script>
 <script src="dq-home2.js?v=2026112101"></script>

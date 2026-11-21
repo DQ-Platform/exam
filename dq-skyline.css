@@ -1,0 +1,234 @@
+/*!
+ * DQ Platform — "Skyline" dizayn sistemi (dq-skyline.css)
+ * Referans: səmavi gradient hero + bulud-ağ kartlar + yanıq-qırmızı vurğu + dar qalın başlıq şrifti.
+ * Bütün panellərə eyni fayl qoşulur; panellərin köhnə sinifləri (top-bar, admin-card, btn, ...) bu faylla yenidən üslublanır.
+ * Yüklənmə: dq-skyline.css panelin öz <style> blokundan SONRA qoşulmalıdır.
+ */
+:root{
+  --sky:#0099ff; --sky-2:#3d9bff; --sky-3:#8cc4ff; --sky-4:#d9ebff; --sky-5:#eef6ff;
+  --cloud:#fdfdfe; --amber:#f72103; --amber-d:#d41c02; --amber-t:#c81a02; --sky-btn:#0077cc; --sky-btn-h:#0065b0;
+  --ink:#0a2540; --ink-2:#4a6385; --ink-3:#55698a; --line:#dbeafe;
+  --r-xl:24px; --r-lg:18px; --r-md:12px; --r-sm:8px;
+  --sh-card:0 1px 2px rgba(0,60,140,.06),0 18px 40px -20px rgba(0,70,160,.38);
+  --sh-pop:0 24px 60px -20px rgba(0,60,140,.5);
+  --f-display:'Oswald','Bebas Neue','Arial Narrow','Roboto Condensed',Impact,sans-serif;
+  --f-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+
+/* ---------- əsas fon və mətn ---------- */
+html body{
+  font-family:var(--f-body)!important;color:var(--ink)!important;
+  background:linear-gradient(180deg,#0e73d9 0,#1478e0 300px,#5aa9fa 540px,#b7d8ff 780px,#eaf3ff 1000px,#fdfdfe 1240px) no-repeat,#fdfdfe!important;
+  background-color:#fdfdfe!important;-webkit-font-smoothing:antialiased;line-height:1.5;
+}
+html body *{font-family:inherit}
+html body :is(h1,h2,h3,h4,.card-title,.page-title,.modules-title,th,.stat-title,.stat-card h4,.stat-card h5,.badge,.btn,.menu-btn,.filter-btn,.nav-btn,.admin-nav-card,.header-nav,label,.btn-save,.nav-links button,.panel-section h2){font-family:var(--f-display)}
+html body input,html body select,html body textarea{font-family:var(--f-body)!important}
+html body ::selection{background:var(--amber);color:#fff}
+
+/* ---------- hero (başlıq zolağı) ---------- */
+html body :is(.top-bar,.header,header){
+  background:transparent!important;border:0!important;box-shadow:none!important;color:#fff!important;
+  padding:8px 4px 26px!important;margin:0 0 6px!important;border-radius:0!important;
+  display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;
+}
+html body :is(.top-bar h1,.header h2,header h1,.container>h2,.container>h1){
+  font-family:var(--f-display)!important;font-weight:700!important;text-transform:uppercase;letter-spacing:.01em;
+  font-size:clamp(30px,6.4vw,58px)!important;line-height:.98!important;color:#fff!important;margin:0!important;
+  text-shadow:0 2px 24px rgba(0,60,160,.28);
+}
+html body header p{color:rgba(255,255,255,.88)!important;font-size:14px;margin-top:8px}
+html body .top-bar .btn-badge,html body .header .badge{
+  background:var(--amber-d)!important;color:#fff!important;padding:8px 14px!important;border-radius:var(--r-sm)!important;
+  font:600 11px/1 var(--f-display)!important;letter-spacing:.12em;text-transform:uppercase;box-shadow:0 8px 20px -8px rgba(247,33,3,.7);
+}
+
+/* ---------- konteyner və kartlar ---------- */
+html body .container{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;max-width:1180px;margin:0 auto}
+html body :is(.admin-card,.card-box,.add-card,.tab-content,.filter-container,.filter-section,.question-box,.answer-card-sidebar,.modal-content,.catalog-card,.module-card,.admin-nav-card,.subject-box,.stat-card,.table-wrapper,.control-table,aside){
+  background:var(--cloud)!important;color:var(--ink)!important;border:1px solid rgba(255,255,255,.9)!important;
+  border-radius:var(--r-xl)!important;box-shadow:var(--sh-card)!important;
+}
+html body :is(.admin-card,.card-box,.add-card,.tab-content,.filter-container,.filter-section,.question-box,.answer-card-sidebar,.subject-box){padding:clamp(16px,3vw,28px)!important;margin-bottom:22px!important}
+html body .container>table,html body .table-wrapper{padding:6px 10px;overflow-x:auto}
+html body .card-title,html body .modules-title,html body .page-title{
+  font-weight:600!important;font-size:12px!important;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)!important;
+  margin:0 0 16px!important;padding:0!important;border:0!important;
+}
+html body .page-title{font-size:clamp(24px,4vw,34px)!important;letter-spacing:.01em;color:var(--ink)!important;font-weight:700!important}
+
+/* ---------- statistika kartları ---------- */
+html body :is(.stats-grid,.control-stats){display:grid!important;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:22px}
+html body .stat-card{padding:18px 20px!important;text-align:left!important;position:relative;overflow:hidden}
+html body :is(.stat-card h4,.stat-card h5,.stat-title){font-size:11px!important;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)!important;font-weight:600!important;margin:0 0 6px!important}
+html body :is(.stat-card .num,.stat-card .value,.stat-value){
+  font-family:var(--f-display)!important;font-size:clamp(32px,5vw,46px)!important;font-weight:700!important;line-height:1!important;color:var(--ink)!important;margin:2px 0!important;
+}
+html body .stat-sub{color:var(--amber-t)!important;font-weight:600;font-size:11px!important}
+
+/* ---------- formalar ---------- */
+html body .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+html body :is(.form-group label,label.field,.filter-section label,.form-row label){
+  font-size:12px!important;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)!important;font-weight:600!important;margin-bottom:6px!important;display:block;
+}
+html body :is(.form-control,.filter-select,.token-field,input[type=text],input[type=password],input[type=number],input[type=search],select,textarea){
+  background:#fff!important;color:var(--ink)!important;border:1.5px solid var(--line)!important;border-radius:var(--r-md)!important;
+  padding:12px 14px!important;font-size:14px!important;outline:0!important;width:100%;transition:border-color .18s,box-shadow .18s;
+}
+html body :is(.form-control,.filter-select,.token-field,input,select,textarea):focus{border-color:var(--sky)!important;box-shadow:0 0 0 4px rgba(0,153,255,.16)!important}
+html body ::placeholder{color:#667a99;opacity:1}
+html body :is(input[type=checkbox],input[type=radio]){width:auto!important;accent-color:var(--amber)}
+html body .checkbox-group{display:flex;flex-wrap:wrap;gap:8px}
+html body .checkbox-item{background:var(--sky-5);border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;font:600 13px var(--f-display);letter-spacing:.06em;cursor:pointer}
+html body .option-row{background:var(--sky-5)!important;border:1px solid var(--line)!important;border-radius:var(--r-md)!important}
+html body .search-box input{border-radius:999px!important;padding-left:44px!important;box-shadow:var(--sh-card)}
+html body .search-box i{color:var(--sky)!important}
+
+/* ---------- düymələr: əsas CTA = yanıq-qırmızı, qalanı səmavi ---------- */
+html body :is(.btn,.btn-sm,.btn-action,.back-btn,.filter-btn,.btn-submit,.btn-save,.logout-btn,.delete-btn,#loginBox button,#adminPanel button){
+  font:600 12px/1 var(--f-display)!important;letter-spacing:.12em;text-transform:uppercase;border:0;border-radius:var(--r-sm)!important;
+  padding:12px 20px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:auto;
+  transition:transform .15s,box-shadow .2s,background .2s;
+}
+html body :is(.btn-sm,.delete-btn){padding:9px 14px}
+html body :is(.btn-success,.btn-primary,.btn-submit,.btn-save,#loginBox button,#adminPanel form button,.btn-action:not(.btn-danger)){background:var(--amber-d)!important;color:#fff!important;box-shadow:0 10px 22px -10px rgba(247,33,3,.75)}
+html body :is(.btn-success,.btn-primary,.btn-submit,.btn-save):hover{background:#b71801!important;transform:translateY(-1px)}
+html body :is(.btn-dark,.btn-secondary,.btn-info,.btn-warning,.back-btn,.btn:not([class*=btn-]),.filter-btn){background:var(--sky-btn)!important;color:#fff!important;box-shadow:0 10px 22px -12px rgba(0,120,220,.8)}
+html body :is(.btn-dark,.btn-secondary,.btn-info,.btn-warning,.back-btn,.filter-btn):hover{background:var(--sky-btn-h)!important;transform:translateY(-1px)}
+html body :is(.btn-danger,.logout-btn,#adminPanel .logout-btn,.delete-btn){background:#fff!important;color:var(--amber-t)!important;box-shadow:inset 0 0 0 1.5px rgba(247,33,3,.35)}
+html body :is(.btn-danger,.logout-btn,.delete-btn):hover{background:var(--amber-d)!important;color:#fff!important}
+html body .filter-btn{background:#fff!important;color:var(--sky-btn)!important;box-shadow:inset 0 0 0 1.5px var(--line)}
+html body .filter-btn.active{background:var(--sky-btn)!important;color:#fff!important;box-shadow:0 10px 22px -12px rgba(0,120,220,.8)}
+html body :is(.btn,.btn-save,.btn-sm):disabled{opacity:.5;cursor:not-allowed;transform:none}
+html body :is(button,.btn,a):focus-visible{outline:3px solid rgba(0,153,255,.4);outline-offset:2px}
+html body .btn-group{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between}
+html body .nav-btn{background:#fff!important;border:1.5px solid var(--line)!important;border-radius:10px!important;color:var(--ink)!important;min-width:38px;padding:8px!important}
+html body .nav-btn.active{background:var(--sky-btn)!important;color:#fff!important;border-color:var(--sky-btn)!important}
+
+/* ---------- cədvəllər ---------- */
+html body table{width:100%;border-collapse:separate!important;border-spacing:0;background:transparent!important;color:var(--ink)!important;font-size:14px}
+html body :is(th,td){border:0!important;border-bottom:1px solid var(--line)!important;padding:14px 12px!important;text-align:left;background:transparent!important;color:var(--ink)!important}
+html body th{font-size:11.5px!important;letter-spacing:.16em;text-transform:uppercase;font-weight:600!important;color:var(--ink-3)!important;white-space:nowrap}
+html body tbody tr:hover td{background:var(--sky-5)!important}
+html body tr:last-child td{border-bottom:0!important}
+html body :is(td strong,td code,.access-table td:nth-child(2)){font-family:var(--f-display);font-weight:600;letter-spacing:.04em;font-size:16px}
+
+/* ---------- çiplər / badge ---------- */
+html body .badge,html body .score-badge,html body .badge-cat,html body .rank-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 11px!important;border-radius:999px!important;border:0!important;
+  font:600 12px/1 var(--f-display)!important;letter-spacing:.08em;text-transform:uppercase;background:var(--sky-4)!important;color:#0069b8!important;
+}
+html body :is(.badge-blocked,.badge-danger,.badge-finished){background:var(--amber-d)!important;color:#fff!important}
+html body :is(.badge-active,.badge-success){background:var(--sky-4)!important;color:#0069b8!important}
+html body .rank-1{background:var(--amber-d)!important;color:#fff!important}
+html body :is(.rank-2,.rank-3){background:var(--sky-btn)!important;color:#fff!important}
+html body .wrong-q-list{border-radius:var(--r-md)}
+
+/* ---------- naviqasiya kartları (Operator, modul, admin) ---------- */
+html body .catalog-grid,html body .modules-grid,html body .admin-nav-grid{display:grid;gap:16px}
+html body :is(.catalog-card,.module-card,.admin-nav-card){transition:transform .2s,box-shadow .25s;color:var(--ink)!important;text-decoration:none}
+html body :is(.catalog-card,.module-card,.admin-nav-card):hover,html body .admin-nav-card.active{
+  transform:translateY(-3px);box-shadow:var(--sh-pop)!important;background:#fff!important;border-color:var(--sky)!important;color:var(--ink)!important;
+}
+html body .admin-nav-card.active{outline:2px solid var(--sky)}
+html body :is(.catalog-card .title,.module-card){font-family:var(--f-display);font-size:19px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--ink)!important}
+html body :is(.catalog-card .path,.module-card small){color:var(--ink-3)!important;font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:1}
+html body :is(.catalog-card i,.admin-nav-card span.icon){color:var(--sky)!important}
+html body .stats{background:#fff!important;color:var(--ink-2)!important;border:0!important;border-radius:999px!important;box-shadow:var(--sh-card);font:600 11px var(--f-display);letter-spacing:.1em;text-transform:uppercase}
+
+/* ---------- Pult: yuxarı zolaq + yan menyu ---------- */
+html body header:has(.header-nav){padding:14px clamp(14px,3vw,32px)!important;margin:0!important}
+html body .header-logo{font:700 22px/1 var(--f-display)!important;letter-spacing:.04em;text-transform:uppercase;color:#fff}
+html body .header-nav{gap:18px!important;font-size:11px!important;letter-spacing:.12em}
+html body .header-nav a{color:rgba(255,255,255,.9)!important;text-decoration:none}
+html body .header-nav a::before{content:"("}
+html body .header-nav a::after{content:")"}
+html body .header-nav a.active,html body .header-nav a:hover{color:#fff!important;text-shadow:0 0 12px rgba(255,255,255,.8)}
+html body .user-badge{background:#fff!important;color:var(--ink)!important;border-radius:var(--r-sm)!important;padding:9px 14px!important;font:700 11px var(--f-display);letter-spacing:.1em;text-transform:uppercase}
+html body .admin-container{gap:20px;padding:0 clamp(12px,2.5vw,28px) 28px}
+html body aside{width:250px!important;align-self:flex-start;padding:18px 12px!important;position:sticky;top:16px}
+html body .user-profile{border-bottom:1px solid var(--line)!important}
+html body .avatar{background:var(--sky-4)!important}
+html body .profile-name{font:700 17px var(--f-display)!important;letter-spacing:.03em;text-transform:uppercase;color:var(--ink)!important}
+html body .profile-role{color:var(--amber-t)!important;font-size:10px!important;letter-spacing:.14em}
+html body .menu-btn{background:transparent!important;color:var(--ink-2)!important;box-shadow:none!important;border-radius:12px!important;justify-content:flex-start;text-align:left;letter-spacing:.06em;padding:11px 14px!important;width:100%}
+html body .menu-btn:hover{background:var(--sky-5)!important;color:var(--ink)!important;transform:none}
+html body .menu-btn.active{background:var(--sky-btn)!important;color:#fff!important;box-shadow:0 10px 22px -12px rgba(0,120,220,.8)!important}
+html body main{background:transparent!important;padding:6px 0 0!important;min-width:0}
+html body .dropzone{border:2px dashed var(--sky-3)!important;background:var(--sky-5)!important;border-radius:var(--r-lg)!important}
+html body .variant-item,html body .variant-header{border-radius:var(--r-md)!important}
+html body .variant-circle{background:var(--sky-btn)!important;color:#fff!important}
+html body footer{background:transparent!important;color:var(--ink-3)!important}
+html body .card-box,html body .stats-grid{max-width:none!important}
+@media(max-width:820px){
+  html body .admin-container{flex-direction:column}
+  html body aside{width:100%!important;position:static;flex-direction:row!important;flex-wrap:wrap;gap:6px}
+  html body .user-profile{display:none}
+  html body .menu-btn{width:auto!important}
+}
+
+/* ---------- modal ---------- */
+html body .modal-overlay{background:rgba(10,37,64,.55)!important}
+html body .modal-header{border-bottom:1px solid var(--line)!important;color:var(--ink)!important}
+html body .modal-header h3{font-size:24px;text-transform:uppercase;color:var(--ink)!important}
+html body .close-btn{background:transparent!important;color:var(--ink-3)!important;box-shadow:none!important}
+
+/* ---------- admin giriş kartı ---------- */
+html body:has(#loginBox){align-items:center;justify-content:center;display:flex}
+html body #loginBox,html body #adminPanel{max-width:760px;margin:0 auto}
+html body .container:has(#loginBox){background:var(--cloud)!important;border-radius:var(--r-xl)!important;box-shadow:var(--sh-pop)!important;padding:clamp(22px,4vw,40px)!important;max-width:780px}
+html body .container:has(#loginBox) h2{color:var(--ink)!important;text-shadow:none;text-align:center}
+html body .error{color:var(--amber-t)!important;font-weight:600}
+html body .success{color:#0a7d3b!important;font-weight:600}
+html body ul{border:1px solid var(--line)!important;border-radius:var(--r-md)!important;background:#fff}
+html body li{border-bottom:1px solid var(--line)!important}
+
+/* ---------- footer ---------- */
+html body :is(.footer-text,.footer-back){color:var(--ink)!important;text-align:center;font-size:12px;letter-spacing:.06em;margin:24px 0 10px}
+html body .footer-back a{display:inline-flex}
+
+/* ---------- baza statusu və boş hal ---------- */
+.dq-hero-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+html body .dq-empty{padding:34px 12px;text-align:center;color:var(--ink-3);font:600 12px var(--f-display);letter-spacing:.14em;text-transform:uppercase}
+html body .dq-skel{height:14px;border-radius:7px;background:linear-gradient(90deg,#e6f0fc 25%,#f5f9ff 50%,#e6f0fc 75%);background-size:200% 100%;animation:dqsk 1.2s infinite}
+@keyframes dqsk{to{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){html body *{animation:none!important;transition:none!important}}
+@media(max-width:640px){html body{padding:14px!important}html body th,html body td{padding:11px 8px!important;font-size:13px}}
+@media print{html body{background:#fff!important}html body :is(.top-bar,.header,header) *{color:#000!important;text-shadow:none}}
+
+/* ---------- merkez.html: sol menyu + bölmələr ---------- */
+html body:has(.sidebar){display:flex;height:100vh;overflow:hidden;padding:0!important;gap:16px}
+html body .sidebar{width:272px;margin:16px 0 16px 16px;border-radius:var(--r-xl)!important;background:var(--cloud)!important;border:1px solid rgba(255,255,255,.9)!important;box-shadow:var(--sh-card)!important;overflow:hidden}
+html body .sidebar-header{color:var(--ink)!important;font:700 24px/1 var(--f-display)!important;letter-spacing:.04em;border-bottom:1px solid var(--line)!important;text-transform:uppercase}
+html body .sidebar-header i{color:var(--amber)}
+html body .nav-links li button{background:transparent!important;color:var(--ink-2)!important;border:0!important;border-radius:12px!important;margin:2px 12px;width:calc(100% - 24px)!important;padding:12px 14px!important;font:600 13px var(--f-display)!important;letter-spacing:.08em;text-transform:uppercase;box-shadow:none}
+html body .nav-links li button:hover{background:var(--sky-5)!important;color:var(--ink)!important}
+html body .nav-links li button.active{background:var(--sky-btn)!important;color:#fff!important;border:0!important;box-shadow:0 10px 22px -12px rgba(0,120,220,.8)}
+html body .sidebar-footer{color:var(--ink-3)!important;border-top:1px solid var(--line)!important;letter-spacing:.06em}
+html body .main-content{padding:22px clamp(12px,2.5vw,32px) 28px 6px!important}
+html body .header-title{color:#fff!important;margin-bottom:22px!important}
+html body .header-title h2{font:700 clamp(28px,5vw,48px)/1 var(--f-display)!important;text-transform:uppercase;color:#fff!important;text-shadow:0 2px 24px rgba(0,60,160,.28)}
+html body .panel-section{background:var(--cloud)!important;border:1px solid rgba(255,255,255,.9)!important;border-radius:var(--r-xl)!important;box-shadow:var(--sh-card)!important;padding:clamp(18px,3vw,30px)!important;color:var(--ink)!important}
+html body .panel-section label{color:var(--ink-3)!important}
+html body .data-table th{color:var(--ink-3)!important;background:transparent!important}
+html body .data-table td{color:var(--ink)!important}
+html body .badge-success{background:var(--sky-4)!important;color:#0069b8!important}
+html body .badge-danger{background:var(--amber-d)!important;color:#fff!important}
+@media(max-width:820px){
+  html body:has(.sidebar){flex-direction:column;height:auto;overflow:auto}
+  html body .sidebar{width:auto;margin:12px}
+  html body .nav-links{display:flex;overflow-x:auto;padding:8px}
+  html body .nav-links li button{white-space:nowrap;width:auto!important;margin:0 4px}
+  html body .main-content{overflow:visible;padding:6px 12px 24px!important}
+}
+
+/* ---------- oxunaqlılıq: köhnə inline rənglər (AA ≥ 4.5:1) ---------- */
+html body :is([style*="#22c55e" i],[style*="#28a745" i],[style*="#2b9348" i],[style*="color:green" i],[style*="color: green" i],.ok-num){color:#0a7d3b!important}
+html body :is([style*="#ef4444" i],[style*="color:red" i],[style*="color: red" i],[style*="#dc3545" i],.bad-num){color:#b91c1c!important}
+html body :is([style*="#4db8ff" i],[style*="#38bdf8" i],[style*="#8b949e" i],[style*="#888" i],[style*="#80ccff" i],[style*="#039aff" i]){color:var(--ink-3)!important}
+html body :is(.ok-num,.bad-num){font-weight:700}
+html body :is(.hero-sub,header p,.top-bar p){color:#fff!important;font-size:15px}
+html body .stat-sub{font-size:12px!important}
+html body .profile-role{font-size:11px!important}
+html body .dq-conn{color:var(--ink)}
+@media (prefers-contrast:more){html body{--ink-3:#2f4468;--line:#8aa6cf}html body :is(.card,.admin-card,.stat-card){border:1px solid #2f4468!important}}

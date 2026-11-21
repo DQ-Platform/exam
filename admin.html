@@ -1,73 +1,210 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DQ Platform - Admin Panel (Yunis İmanov)</title>
-    <style>*{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif}body{background-color:#eef8ff;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}.container{background:#fff;padding:30px;border-radius:12px;box-shadow:0 4px 15px #00000014;width:100%;max-width:750px}h2{color:#1a1a1a;margin-bottom:20px;font-size:22px;text-align:center}.form-group{margin-bottom:15px;text-align:left}label{display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:5px}input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;outline:none}input:focus{border-color:#0099ff}button{width:100%;padding:11px;background-color:#0099ff;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;margin-top:5px}button:hover{background-color:#006bb3}.logout-btn{background-color:#dc3545;margin-top:20px}.logout-btn:hover{background-color:#a71d2a}#adminPanel,#errorBox{display:none}.error{color:#dc3545;font-size:13px;margin-top:10px;text-align:center}.success{color:#28a745;font-size:13px;margin-top:10px;text-align:center}ul{list-style:none;margin-top:15px;max-height:150px;overflow-y:auto;border:1px solid #eee;border-radius:6px;padding:5px}li{padding:8px;border-bottom:1px solid #f1f1f1;display:flex;justify-content:space-between;align-items:center;font-size:13px}li:last-child{border-bottom:none}.delete-btn{background:#ff4d4d;color:#fff;border:none;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:11px}.modules-title{margin-top:25px;margin-bottom:10px;font-size:15px;font-weight:700;color:#1a1a1a;border-bottom:2px solid #f1f1f1;padding-bottom:5px}.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:10px}.module-card{background:#f8f9fa;border:1px solid #d3edff;border-radius:8px;padding:10px;text-align:center;text-decoration:none;color:#333;font-weight:600;font-size:13px;transition:all .2s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}.module-card:hover{background:#0099ff;color:#fff;border-color:#0099ff;transform:translateY(-2px);box-shadow:0 4px 10px #007bff33}.module-card small{font-size:10px;opacity:.7;font-weight:400}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DQ Platform — İdarəetmə Paneli</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{--sky:#0099FF;--cloud:#FDFDFE;--amber:#F72103;--ink:#0b2540;--mute:#6b7a90;--line:#e3ecf6;--ok:#0a7d3b}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:Inter,system-ui,sans-serif;color:var(--ink);min-height:100vh;
+background:linear-gradient(180deg,#3a9bfa 0,#7fbcfb 320px,#e8f3fe 620px,#f4f9ff 100%) fixed;
+padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.nav{display:flex;align-items:center;justify-content:space-between;color:#fff;padding:6px 0 0}
+.logo{font:400 26px 'Bebas Neue',Impact,sans-serif;letter-spacing:.04em}
+.pill{background:#fff;color:var(--ink);border:0;border-radius:6px;padding:8px 16px;font:700 11px Inter;letter-spacing:.04em;cursor:pointer;width:auto;margin:0}
+.hero{text-align:center;color:#fff;padding:26px 0 18px}
+.hero h1{font:400 clamp(40px,10vw,84px)/.95 'Bebas Neue',Impact,sans-serif;letter-spacing:.01em;text-transform:uppercase;text-shadow:0 2px 18px rgba(0,60,140,.25)}
+.hero p{font-size:13px;opacity:.92;margin:12px auto 18px;max-width:420px}
+.cta{background:var(--amber);color:#fff;border:0;border-radius:6px;padding:12px 22px;font:700 12px Inter;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 16px rgba(247,33,3,.35);transition:transform .15s,filter .15s}
+.cta:hover{filter:brightness(1.08);transform:translateY(-1px)}.cta:disabled{opacity:.6;cursor:wait}
+.sub{font-size:11px;color:#fff;opacity:.9;margin-top:10px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:6px}
+@media(min-width:760px){.stats{grid-template-columns:repeat(4,1fr)}}
+.card{position:relative;background:var(--cloud);border-radius:16px;padding:14px;box-shadow:0 10px 28px rgba(8,60,130,.14)}
+.card .k{font:600 9px Inter;letter-spacing:.1em;color:var(--mute);text-transform:uppercase}
+.card .v{font:400 36px/1.05 'Bebas Neue',Impact,sans-serif;margin:4px 0 8px}
+.card .tag{position:absolute;top:10px;right:10px;background:var(--amber);color:#fff;font:700 10px Inter;padding:3px 8px;border-radius:999px}
+.card .tag.ok{background:var(--ok)}
+.card .price{border-top:1px dashed var(--line);padding-top:8px;font:400 22px 'Bebas Neue',Impact,sans-serif;color:var(--sky)}
+.panel{background:var(--cloud);border-radius:18px;box-shadow:0 10px 28px rgba(8,60,130,.12);padding:18px;margin-top:16px}
+.panel h2{font:400 26px 'Bebas Neue',Impact,sans-serif;letter-spacing:.02em;margin-bottom:12px}
+.row{display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:760px){.row{grid-template-columns:1fr 1fr 110px 1fr auto}}
+input,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font:500 14px Inter;background:#fff;color:var(--ink);outline:none}
+input:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(0,153,255,.15)}
+.btn{background:var(--sky);color:#fff;border:0;border-radius:10px;padding:11px 16px;font:700 13px Inter;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(1.07)}.btn.red{background:var(--amber)}.btn.sm{padding:6px 10px;font-size:11px}
+.list{margin-top:12px;max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #f0f5fb;font-size:13px}
+.li:last-child{border:0}.li small{color:var(--mute)}
+.skel{height:14px;margin:12px;border-radius:7px;background:linear-gradient(90deg,#eef4fb,#f8fbff,#eef4fb);background-size:200% 100%;animation:sh 1.1s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.mods a{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;text-decoration:none;color:var(--ink);font-weight:600;font-size:13px;transition:.15s}
+.mods a:hover{background:var(--sky);color:#fff;border-color:var(--sky);transform:translateY(-2px)}
+.mods a small{display:block;font-weight:400;font-size:10px;opacity:.65;margin-top:2px}
+#login{max-width:420px;margin:12vh auto 0}
+#login .card{padding:22px}#login input{margin-bottom:10px}
+.err{color:var(--amber);font-size:12px;min-height:16px;margin-top:6px}
+#app{display:none}
+.bar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;color:#fff;font-size:12px}
+.conn{display:inline-flex;gap:6px;align-items:center;background:rgba(255,255,255,.9);color:var(--ink);padding:5px 10px;border-radius:999px;font:700 10px Inter;letter-spacing:.06em;text-transform:uppercase}
+.conn i{width:8px;height:8px;border-radius:50%;background:#16a34a}.conn.degraded i{background:#f59e0b}.conn.offline i{background:var(--amber)}
 </style>
-<link rel="stylesheet" href="dq-tema.css?v=7">
 </head>
 <body>
+<div class="wrap">
 
-    
-    <div class="container" id="loginBox" style="max-width: 450px;">
-        <h2>Yunis İmanov - Admin Girişi</h2>
-        <div class="form-group">
-            <label>Admin Şifrəsi</label>
-            <input type="password" id="adminPassword" placeholder="Şifrəni daxil edin">
-        </div>
-        <button onclick="adminLogin()">Daxil ol</button>
-        <div id="loginError" class="error">Şifrə səhvdir!</div>
+<section id="login">
+  <div class="hero" style="padding-bottom:10px"><h1>DQ Platform<br>İdarəetmə</h1></div>
+  <div class="card">
+    <input id="em" type="email" placeholder="Admin e-poçtu" autocomplete="username">
+    <input id="pw" type="password" placeholder="Şifrə" autocomplete="current-password">
+    <button class="cta" id="go" style="width:100%">Daxil ol →</button>
+    <div class="err" id="lerr"></div>
+  </div>
+</section>
+
+<section id="app">
+  <div class="nav"><div class="logo">DQ PLATFORM ↗</div>
+    <div style="display:flex;gap:8px;align-items:center"><span class="conn" id="conn"><i></i><b>Aktiv</b></span><button class="pill" id="out">ÇIXIŞ</button></div></div>
+  <div class="hero">
+    <h1>Bütün sistem<br>bir paneldə</h1>
+    <p>Tələbələr, suallar, imtahanlar və nəticələr — canlı və mərkəzi bazadan.</p>
+    <button class="cta" id="sync">Hamısını yenilə →</button>
+    <div class="sub" id="syncInfo">Yüklənir…</div>
+  </div>
+
+  <div class="stats">
+    <div class="card"><span class="tag ok" id="t1">canlı</span><div class="k">İcazəli tələbə</div><div class="v" id="n1">—</div><div class="price" id="p1">&nbsp;</div></div>
+    <div class="card"><span class="tag ok" id="t2">canlı</span><div class="k">Suallar</div><div class="v" id="n2">—</div><div class="price" id="p2">&nbsp;</div></div>
+    <div class="card"><span class="tag ok" id="t3">canlı</span><div class="k">İmtahan nəticəsi</div><div class="v" id="n3">—</div><div class="price" id="p3">&nbsp;</div></div>
+    <div class="card"><span class="tag ok" id="t4">canlı</span><div class="k">Yenilik / test</div><div class="v" id="n4">—</div><div class="price" id="p4">&nbsp;</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>İcazə ver</h2>
+    <div class="row">
+      <input id="sn" placeholder="Ad və soyad">
+      <input id="sf" placeholder="İş nömrəsi" maxlength="10" style="text-transform:uppercase">
+      <input id="se" placeholder="İmtahan №" value="1">
+      <input id="sc" placeholder="Kateqoriyalar (BA,BB,AC)" value="BA,BB,AC">
+      <button class="btn red" id="add">Əlavə et</button>
     </div>
+    <div class="err" id="aerr"></div>
+    <input id="q" placeholder="Siyahıda axtar (ad və ya iş nömrəsi)" style="margin-top:8px">
+    <div class="list" id="list"><div class="skel"></div><div class="skel" style="width:70%"></div></div>
+  </div>
 
-    
-    <div class="container" id="adminPanel">
-        <h2>DQ Platform - İdarəetmə Paneli</h2>
-        
-        
-        <div class="form-group">
-            <label>Tələbənin Adı və Soyadı</label>
-            <input type="text" id="studentName" placeholder="Məs: Əli Məmmədov">
-        </div>
-        
-        <div class="form-group">
-            <label>Tələbənin FİN Kodu</label>
-            <input type="text" id="studentFin" placeholder="Məs: 7P7GS57" style="text-transform: uppercase;">
-        </div>
-
-        <button onclick="addStudent()">İcazə Ver (Əlavə et)</button>
-        <div id="actionMsg"></div>
-
-        <div style="margin-top: 15px;">
-            <label>İcazə Verilən Şəxslər Siyahısı:</label>
-            <ul id="studentList"></ul>
-        </div>
-
-        
-        <div class="modules-title">Sistem Modulları və Səhifələr</div>
-        <div class="modules-grid">
-            <a href="index.html" class="module-card">Index <small>index.html</small></a>
-            <a href="admin.html" class="module-card">Admin <small>admin.html</small></a>
-            <a href="Idare.html" class="module-card">İdarə <small>Idare.html</small></a>
-            <a href="Kabinet.html" class="module-card">Kabinet <small>Kabinet.html</small></a>
-            <a href="Kod.html" class="module-card">Kod <small>Kod.html</small></a>
-            <a href="Kontrol.html" class="module-card">Kontrol <small>Kontrol.html</small></a>
-            <a href="Operator.html" class="module-card">Operator <small>Operator.html</small></a>
-            <a href="Pult.html" class="module-card">Pult <small>Pult.html</small></a>
-            <a href="Siyahi.html" class="module-card">Siyahı <small>Siyahi.html</small></a>
-            <a href="Statistika.html" class="module-card">Statistika <small>Statistika.html</small></a>
-            <a href="Suallar.html" class="module-card">Suallar <small>Suallar.html</small></a>
-            <a href="merkez.html" class="module-card">Mərkəz <small>merkez.html</small></a>
-            <a href="modul.html" class="module-card">Modul <small>modul.html</small></a>
-            <a href="redakte.html" class="module-card">Redaktə <small>redakte.html</small></a>
-            <a href="Cavablar.html" class="module-card">Cavablar <small>Cavablar.html</small></a>
-        </div>
-
-        <button class="logout-btn" onclick="adminLogout()">Çıxış</button>
+  <div class="panel">
+    <h2>Sistem modulları</h2>
+    <div class="mods">
+      <a href="index.html">Əsas səhifə<small>index.html</small></a>
+      <a href="Idare.html">İdarə<small>Idare.html</small></a>
+      <a href="Kabinet.html">Kabinet<small>Kabinet.html</small></a>
+      <a href="Kod.html">Kod<small>Kod.html</small></a>
+      <a href="Kontrol.html">Kontrol<small>Kontrol.html</small></a>
+      <a href="Operator.html">Operator<small>Operator.html</small></a>
+      <a href="Pult.html">Pult<small>Pult.html</small></a>
+      <a href="Cavablar.html">Cavablar<small>Cavablar.html</small></a>
+      <a href="Statistika.html">Statistika<small>Statistika.html</small></a>
+      <a href="Suallar.html">Suallar<small>Suallar.html</small></a>
+      <a href="merkez.html">Mərkəz<small>merkez.html</small></a>
+      <a href="modul.html">Modul<small>modul.html</small></a>
+      <a href="redakte.html">Redaktə<small>redakte.html</small></a>
     </div>
+  </div>
+</section>
+</div>
 
-    <script>const ADMIN_PASS="6675157";function adminLogin(){document.getElementById("adminPassword").value===ADMIN_PASS?(localStorage.setItem("yunisAdminLoggedIn","true"),showPanel()):document.getElementById("loginError").style.display="block"}function showPanel(){document.getElementById("loginBox").style.display="none",document.getElementById("adminPanel").style.display="block",loadStudents()}function adminLogout(){localStorage.removeItem("yunisAdminLoggedIn"),location.reload()}window.onload=function(){localStorage.getItem("yunisAdminLoggedIn")==="true"&&showPanel()};function getStudents(){let students=localStorage.getItem("yunisAllowedStudents");return students?JSON.parse(students):[]}function loadStudents(){const listEl=document.getElementById("studentList");listEl.innerHTML="",getStudents().forEach((s,index)=>{listEl.innerHTML+=`<li><span><b>${s.name}</b> (${s.fin})</span> <button class="delete-btn" onclick="deleteStudent(${index})">Sil</button></li>`})}function addStudent(){let name=document.getElementById("studentName").value.trim(),fin=document.getElementById("studentFin").value.trim().toUpperCase(),msgBox=document.getElementById("actionMsg");if(name===""||fin===""){msgBox.className="error",msgBox.innerText="Bütün xanaları doldurun!";return}let students=getStudents();if(students.some(s=>s.fin===fin)){msgBox.className="error",msgBox.innerText="Bu FİN kod artıq siyahıda mövcuddur!";return}students.push({name,fin}),localStorage.setItem("yunisAllowedStudents",JSON.stringify(students)),document.getElementById("studentName").value="",document.getElementById("studentFin").value="",msgBox.className="success",msgBox.innerText="Uğurla əlavə olundu!",loadStudents()}function deleteStudent(index){let students=getStudents();students.splice(index,1),localStorage.setItem("yunisAllowedStudents",JSON.stringify(students)),loadStudents()}
+<script src="dq-net.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="dq-db.js"></script>
+<script src="dq-preload.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i)}, esc=DQ.esc, ADMIN="dqplatform7@gmail.com", students=[];
+
+function show(on){$("login").style.display=on?"none":"block";$("app").style.display=on?"block":"none";}
+function isAdmin(s){return s&&s.user&&String(s.user.email||"").toLowerCase()===ADMIN;}
+
+/* ---- giriş: Supabase Auth (RLS ilə uyğun — parol brauzer kodunda saxlanmır) ---- */
+async function login(){
+  $("lerr").textContent="";$("go").disabled=true;
+  var r=await DQ.client.auth.signInWithPassword({email:$("em").value.trim(),password:$("pw").value});
+  $("go").disabled=false;
+  if(r.error||!isAdmin(r.data.session)){ if(!r.error) await DQ.client.auth.signOut(); $("lerr").textContent="E-poçt və ya şifrə səhvdir."; return; }
+  enter();
+}
+$("go").onclick=login; $("pw").onkeydown=function(e){if(e.key==="Enter")login()};
+$("out").onclick=async function(){await DQ.client.auth.signOut();location.reload()};
+
+/* ---- statistika kartları (preload keşindən, dərhal) ---- */
+function count(k){var a=window.DQPreload&&DQPreload.get(k);return a?a.length:null}
+function paintStats(){
+  var m={n1:"students",n2:"questions",n3:"results"};
+  Object.keys(m).forEach(function(id){var c=count(m[id]);if(c!=null)$(id).textContent=c.toLocaleString("az")});
+  var a=count("news"),b=count("tests");if(a!=null||b!=null)$("n4").textContent=(a||0)+" / "+(b||0);
+  var el=Math.round((Date.now()-t0)/100)/10;
+  $("syncInfo").textContent="Son yenilənmə: "+new Date().toLocaleTimeString("az",{hour:"2-digit",minute:"2-digit",second:"2-digit"})+" · "+el+" san";
+}
+var t0=Date.now();
+function paintSub(){var f=function(k){var a=window.DQPreload&&DQPreload.get(k);return a?a.length.toLocaleString("az"):"—"};
+$("p2").textContent="sual bankı";$("p3").textContent="son nəticələr";$("p4").textContent=f("news")+" yenilik · "+f("tests")+" test"}
+window.addEventListener("dq:preload",function(){paintStats();paintSub()});
+
+/* ---- tələbə siyahısı: DQ.load = keşdən dərhal + fonda yeniləmə ---- */
+function render(){
+  var q=$("q").value.trim().toLowerCase(),box=$("list");
+  var rows=students.filter(function(s){return !q||(String(s.student_name||"").toLowerCase().indexOf(q)>-1||String(s.fin||"").toLowerCase().indexOf(q)>-1)});
+  $("p1").textContent=students.length+" nəfər";
+  box.innerHTML=rows.length?rows.slice(0,300).map(function(s){
+    return '<div class="li"><span><b>'+esc(s.student_name)+'</b> · '+esc(s.fin)+'<br><small>İmtahan '+esc(s.exam_no)+' · '+esc((s.categories||[]).join(", "))+'</small></span>'+
+      '<button class="btn red sm" data-id="'+esc(s.id)+'">Sil</button></div>';}).join(""):'<div class="li"><small>Heç nə tapılmadı.</small></div>';
+}
+$("q").oninput=render;
+$("list").onclick=async function(e){
+  var id=e.target.getAttribute&&e.target.getAttribute("data-id");if(!id||!confirm("Silinsin?"))return;
+  var r=await DQ.write("allowed_students",function(q){return q.delete().eq("id",id)});
+  r.error?DQ.toast(r.message,"err"):DQ.toast("Silindi","ok");
+};
+$("add").onclick=async function(){
+  var name=$("sn").value.trim(),fin=$("sf").value.trim().toUpperCase(),ex=$("se").value.trim(),cats=$("sc").value.split(",").map(function(x){return x.trim().toUpperCase()}).filter(Boolean);
+  $("aerr").textContent="";
+  if(!name||!fin){$("aerr").textContent="Ad və iş nömrəsi mütləqdir.";return}
+  if(!/^[A-Z0-9]{5,10}$/.test(fin)){$("aerr").textContent="İş nömrəsi formatı yanlışdır.";return}
+  if(students.some(function(s){return String(s.fin).toUpperCase()===fin&&String(s.exam_no)===ex})){$("aerr").textContent="Bu iş nömrəsi bu imtahan üçün artıq var.";return}
+  var r=await DQ.write("allowed_students",function(q){return q.insert([{student_name:name,fin:fin,exam_no:ex,categories:cats}])});
+  if(r.error){$("aerr").textContent=r.message;return}
+  $("sn").value="";$("sf").value="";DQ.toast("Əlavə olundu","ok");
+};
+$("sync").onclick=async function(){
+  $("sync").disabled=true;$("syncInfo").textContent="Yenilənir…";t0=Date.now();
+  ["allowed_students","exam_questions","exam_results","dq_v2_store"].forEach(DQ.invalidate);
+  await DQPreload.refresh();paintStats();$("sync").disabled=false;
+};
+
+/* ---- bağlantı göstəricisi ---- */
+var L={online:"Aktiv",degraded:"Zəif",offline:"Oflayn"};
+function conn(s){$("conn").className="conn "+s;$("conn").querySelector("b").textContent=L[s]}
+conn(DQ.status());DQ.on("status",conn);
+
+function enter(){
+  show(true);paintStats();paintSub();
+  DQ.load("allowed_students",function(q){return q.select("*").order("id",{ascending:false})},
+    {key:"admin-students",every:15000,render:function(d){students=d;render()}});
+}
+
+/* ---- açılışda: aktiv sessiya varsa dərhal panel ---- */
+DQ.client.auth.getSession().then(function(r){ if(isAdmin(r.data&&r.data.session)) enter(); else show(false); });
+})();
 </script>
 </body>
 </html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baza diaqnostikası - DQ Platform</title>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js" crossorigin>
+<script src="dq-firebase.js?v=20261121b"></script>
+<script src="dq-net.js?v=2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="dq-db.js?v=2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="dq-skyline.css?v=2">
+</head>
+<body data-dq-status>
+<div class="container">
+  <div class="top-bar">
+    <h1>Baza diaqnostikası</h1>
+    <span class="btn-badge">HƏDƏF ≤ 3 SANİYƏ</span>
+  </div>
+
+  <div class="control-stats">
+    <div class="stat-card"><h4>Ən yavaş cədvəl</h4><div class="num" id="hMax">—</div></div>
+    <div class="stat-card"><h4>Keçən / Cəmi</h4><div class="num" id="hPass">—</div></div>
+    <div class="stat-card"><h4>Əlaqə</h4><div class="num" id="hConn" style="font-size:28px!important">—</div></div>
+  </div>
+
+  <div class="admin-card">
+    <div class="card-title">Cədvəl üzrə yüklənmə vaxtı</div>
+    <div class="table-wrapper" style="box-shadow:none!important;border:0!important;padding:0">
+      <table>
+        <thead><tr><th>Cədvəl</th><th>Sətir</th><th>İlk yükləmə</th><th>Keşdən</th><th>Nəticə</th></tr></thead>
+        <tbody id="hBody"></tbody>
+      </table>
+    </div>
+    <div class="btn-group" style="margin-top:18px;justify-content:flex-start">
+      <button class="btn btn-success" id="hRun" type="button">Yenidən ölç</button>
+      <a class="back-btn" href="admin.html">← Admin panelə qayıt</a>
+    </div>
+  </div>
+  <div class="footer-text">Birinci ölçmə şəbəkədən, ikinci keşdən aparılır. Keş istifadəçinin ikinci və sonrakı açılışlarını göstərir.</div>
+</div>
+
+<script>
+(function(){
+  var TABLES=[["allowed_students","İcazəli iştirakçılar"],["exam_results","İmtahan nəticələri"],["exam_questions","İmtahan sualları"],["dq_v2_store","Mərkəzi saxlama (dq_v2_store)"]];
+  var LIMIT=3000,$=function(i){return document.getElementById(i)};
+
+  async function measure(t){
+    var b=function(q){return q.select("*")},o={key:"health:"+t,budget:0,force:true,fallbackStale:false,retries:0};
+    var t0=performance.now(),r=await DQ.read(t,b,o),ms1=Math.round(performance.now()-t0);
+    var t1=performance.now(),c=await DQ.read(t,b,{key:"health:"+t,ttl:60000,budget:0}),ms2=Math.round(performance.now()-t1);
+    return {t:t,rows:r.error?null:(r.data||[]).length,ms:ms1,cache:ms2,err:r.error?(r.message||DQ.friendly(r.error)):""};
+  }
+
+  async function run(){
+    $("hRun").disabled=true;$("hBody").innerHTML='<tr><td colspan="5"><div class="dq-skel"></div></td></tr>';
+    var res=await Promise.all(TABLES.map(function(x){return measure(x[0])}));
+    var pass=0,max=0;
+    $("hBody").innerHTML=res.map(function(r,i){
+      var ok=!r.err&&r.ms<=LIMIT; if(ok)pass++; max=Math.max(max,r.ms);
+      var badge=r.err?'<span class="badge badge-blocked">Xəta</span>':ok?'<span class="badge badge-active">Keçdi</span>':'<span class="badge badge-blocked">Yavaş</span>';
+      return '<tr><td>'+DQ.esc(TABLES[i][1])+'<br><small style="color:var(--ink-3)">'+DQ.esc(r.t)+'</small></td><td>'+(r.rows==null?"—":r.rows)+'</td><td><b>'+r.ms+' ms</b></td><td>'+r.cache+' ms</td><td>'+badge+(r.err?'<br><small>'+DQ.esc(r.err)+'</small>':'')+'</td></tr>';
+    }).join("");
+    $("hMax").textContent=(max/1000).toFixed(2)+" s";$("hPass").textContent=pass+" / "+res.length;
+    $("hConn").textContent=({online:"Aktiv",degraded:"Zəif",offline:"Yoxdur"})[DQ.status()];
+    $("hRun").disabled=false;
+  }
+  $("hRun").addEventListener("click",run);run();
+})();
+</script>
+</body>
+</html>

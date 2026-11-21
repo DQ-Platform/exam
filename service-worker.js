@@ -1,5 +1,7 @@
 /* DQ Platform – service worker (PWA + push) */
-const VERSION = 'dq-v6';
+const VERSION = 'dq-v8';
+const API = 'dq-api-v1';
+const SB_HOST = 'cpzwliqlgaplroscvduo.supabase.co';
 const CORE = ['./', 'manifest.json', 'icon-192.png', 'icon-512.png', 'favicon.png'];
 /* Mərkəzi baza: Firebase Firestore (REST). Sayt (dq-firebase.js) və worker.js ilə eyni layihə. */
 const FS_DOCS = 'https://firestore.googleapis.com/v1/projects/dq-platform-bdaf3/databases/(default)/documents';
@@ -15,7 +17,7 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
+    caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== VERSION && k !== API).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -24,7 +26,21 @@ self.addEventListener('fetch', (e) => {
   const r = e.request;
   if (r.method !== 'GET') return;
   const u = new URL(r.url);
-  if (u.origin !== location.origin) return;           /* Supabase və s. toxunulmur */
+  /* Supabase oxu sorğuları (GET, giriş tokensiz): şəbəkə əvvəl (2.5 san), olmasa/yavaşdırsa son keş.
+     Tokenli (admin/istifadəçi) sorğular keşlənmir — məlumat sızması olmasın. */
+  if (u.host === SB_HOST && u.pathname.startsWith('/rest/v1/')) {
+    const auth = r.headers.get('authorization') || '';
+    if (/^Bearer eyJ/.test(auth)) return;
+    e.respondWith((async () => {
+      const cache = await caches.open(API);
+      const hit = await cache.match(r);
+      const net = fetch(r).then((res) => { if (res && res.ok) cache.put(r, res.clone()).catch(() => {}); return res; });
+      if (!hit) return net.catch(() => Response.error());
+      return Promise.race([net.catch(() => hit), new Promise((ok) => setTimeout(() => ok(hit), 2500))]);
+    })());
+    return;
+  }
+  if (u.origin !== location.origin) return;           /* digər xarici sorğular toxunulmur */
   if (SKIP.test(u.pathname)) return;                  /* önizləmə/keçid səhifələri birbaşa şəbəkədən */
 
   if (r.mode === 'navigate') {                         /* səhifə: əvvəl şəbəkə, oflayn olanda keş */

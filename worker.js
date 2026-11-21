@@ -320,8 +320,8 @@ export default {
     if (pth === '/sinaq') {
       const x = await liveExam(env).catch(() => null);
       const desc = x
-        ? `🎓 ${x.type || 'Qəbul tipli sınaq'} — ${x.catline || x.cat}\n📅 ${dmy(x.start)} · ${hm(x.start)}–${hm(x.end || x.start)}\n🔒 FİN kod ilə daxil olun`
-        : 'Qəbul tipli sınaq imtahanları. FİN kod ilə daxil olun.';
+        ? `🎓 ${x.type || 'Qəbul tipli sınaq'} — ${x.catline || x.cat}\n📅 ${dmy(x.start)} · ${hm(x.start)}–${hm(x.end || x.start)}\n🔒 İş nömrəsi ilə daxil olun`
+        : 'Qəbul tipli sınaq imtahanları. İş nömrəsi ilə daxil olun.';
       const hasCover = x && x.cover && /^data:image\//.test(x.cover);
       return section('Sınaq', '🎓 DQPlatform — Sınaq imtahanı', desc, SITE + '/sinaq', SITE + '/?go=sinaq', head, hasCover ? `${SITE}/cover/${x._id}.jpg` : '');
     }
@@ -331,7 +331,7 @@ export default {
       const x = await liveExam(env).catch(() => null);
       const title = x ? `📢 ${x.type || 'Qəbul tipli sınaq'} — ${x.catline || x.cat}` : '📢 DQplatform — Sınaq qeydiyyatı';
       const desc = x
-        ? `📅 ${dmy(x.start)} · ${hm(x.start)}–${hm(x.end || x.start)}\n🔒 Yalnız qeydiyyatdan keçmiş tələbələr · FİN kod ilə\n📝 Qeydiyyat üçün keçidə daxil olun`
+        ? `📅 ${dmy(x.start)} · ${hm(x.start)}–${hm(x.end || x.start)}\n🔒 Yalnız qeydiyyatdan keçmiş tələbələr · iş nömrəsi ilə\n📝 Qeydiyyat üçün keçidə daxil olun`
         : 'Qeydiyyat üçün keçidə daxil olun';
       const hasCover = x && x.cover && /^data:image\//.test(x.cover);
       const img = hasCover ? `${SITE}/cover/${x._id}.jpg` : `${SITE}/og-image.jpg`;

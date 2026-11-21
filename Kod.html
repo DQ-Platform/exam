@@ -1,89 +1,123 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<!-- DQ: Firebase SDK-nı HTML parse olunarkən paralel yüklə (qoşulma gecikməsini azaldır) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js" crossorigin>
+
+<script src="dq-firebase.js?v=20261121b"></script>
+<script src="dq-net.js?v=2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="dq-db.js?v=2"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Giriş Kodlarının İdarəsi - DQ Platform</title>
   <style>*{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif}body{background-color:#e6f5ff;padding:20px;color:#333}.top-bar{background-color:#005085;color:#fff;padding:12px 20px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.top-bar h1{font-size:16px;font-weight:600}.top-bar .btn-badge{background-color:#27ae60;color:#fff;padding:4px 10px;border-radius:4px;font-weight:700;font-size:12px}.admin-card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 8px #0000000f;margin-bottom:25px}.card-title{font-size:14px;font-weight:700;text-transform:uppercase;color:#005085;margin-bottom:15px;border-bottom:2px solid #e9ecef;padding-bottom:8px}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:15px}.form-group{display:flex;flex-direction:column}.form-group label{font-size:12px;font-weight:600;color:#555;margin-bottom:5px}.form-control{padding:9px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;outline:none}.form-control:focus{border-color:#005085}.checkbox-group{display:flex;gap:15px;align-items:center;padding:8px 12px;background:#f8f9fa;border:1px solid #ccc;border-radius:4px;height:40px}.checkbox-item{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;cursor:pointer}.checkbox-item input{cursor:pointer;width:16px;height:16px}.btn{padding:10px 20px;border:none;border-radius:4px;cursor:pointer;font-weight:600;font-size:13px;transition:.2s}.btn-success{background-color:#2b9348;color:#fff;width:100%;margin-top:10px}.btn-success:hover{background-color:#1b4332}.btn-danger{background-color:#e63946;color:#fff;padding:4px 8px;font-size:11px}.access-table{width:100%;border-collapse:collapse;margin-top:15px;font-size:13px;text-align:left}.access-table th,.access-table td{border:1px solid #dee2e6;padding:10px}.access-table th{background-color:#005085;color:#fff}.access-table tr:nth-child(2n){background-color:#f8f9fa}.badge{padding:3px 7px;border-radius:4px;font-weight:700;font-size:11px;color:#fff;background:#0088e2;margin-right:2px}.footer-text{text-align:center;font-size:12px;color:#888;margin-top:20px}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="dq-skyline.css?v=2">
 </head>
-<body>
+<body data-dq-status>
 
-  
   <div class="top-bar">
-    <h1>İştirakçı Giriş Kodları və İcazələr Panel</h1>
+    <h1>Giriş kodları və icazələr</h1>
     <span class="btn-badge">KOD İDARƏSİ</span>
   </div>
 
-  
   <div class="admin-card">
-    <div class="card-title">İştirakçıya İcazə Ver / Kod Yarad</div>
-    
+    <div class="card-title">İştirakçıya icazə ver / kod yarat</div>
     <div class="form-grid">
       <div class="form-group">
-        <label>Ad və Soyad</label>
-        <input type="text" class="form-control" placeholder="Məs: Yunis İmanov">
+        <label for="kName">Ad və Soyad</label>
+        <input id="kName" type="text" class="form-control" placeholder="Məs: Yunis İmanov" autocomplete="off" maxlength="80">
       </div>
-
       <div class="form-group">
-        <label>FİN KOD / İcazə Kodu</label>
-        <input type="text" class="form-control" placeholder="Məs: 77C2UF7">
+        <label for="kFin">İŞ NÖMRƏSİ / İcazə kodu</label>
+        <input id="kFin" type="text" class="form-control" placeholder="Məs: 77C2UF7" autocomplete="off" maxlength="20" style="text-transform:uppercase">
       </div>
-
       <div class="form-group">
-        <label>Sınaq Seçin</label>
-        <select class="form-control">
-          <option value="1">Sınaq 1</option>
-          <option value="2">Sınaq 2</option>
-          <option value="3">Sınaq 3</option>
+        <label for="kExam">Sınaq seçin</label>
+        <select id="kExam" class="form-control">
+          <option value="1">Sınaq 1</option><option value="2">Sınaq 2</option><option value="3">Sınaq 3</option>
         </select>
       </div>
-
       <div class="form-group">
-        <label>İcazəli Kateqoriyalar (Birdən çox seçilə bilər)</label>
-        <div class="checkbox-group">
+        <label>İcazəli kateqoriyalar</label>
+        <div class="checkbox-group" id="kCats">
           <label class="checkbox-item"><input type="checkbox" value="BA"> BA</label>
           <label class="checkbox-item"><input type="checkbox" value="BB"> BB</label>
           <label class="checkbox-item"><input type="checkbox" value="AC"> AC</label>
         </div>
       </div>
     </div>
-
-    <button class="btn btn-success">🔑 İcazə Ver və Yadda Saxla</button>
+    <button class="btn btn-success" id="kSave" type="button">İcazə ver və yadda saxla</button>
   </div>
 
-  
   <div class="admin-card">
-    <div class="card-title">Aktiv Giriş Kodları və İcazə Siyahısı</div>
-    
-    <table class="access-table">
-      <thead>
-        <tr>
-          <th>Tələbə Adı</th>
-          <th>FİN KOD</th>
-          <th>Sınaq №</th>
-          <th>İcazəli Kateqoriyalar</th>
-          <th>Əməliyyat</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Yunis İmanov</td>
-          <td><strong>77C2UF7</strong></td>
-          <td>Sınaq 1</td>
-          <td>
-            <span class="badge">BA</span>
-            <span class="badge">BB</span>
-          </td>
-          <td><button class="btn btn-danger">Sil</button></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="card-title">Aktiv giriş kodları və icazə siyahısı <span id="kCount" class="badge" style="margin-left:8px">0</span></div>
+    <input id="kSearch" type="search" class="form-control" placeholder="Ad və ya iş nömrəsi üzrə axtar…" style="margin-bottom:14px">
+    <div class="table-wrapper" style="box-shadow:none!important;border:0!important;padding:0">
+      <table class="access-table">
+        <thead><tr><th>Tələbə adı</th><th>İş nömrəsi</th><th>Sınaq №</th><th>Kateqoriyalar</th><th>Əməliyyat</th></tr></thead>
+        <tbody id="kBody"><tr><td colspan="5"><div class="dq-skel"></div></td></tr></tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="footer-text">
-    © 2026 DQ Platform – Developed by Yunis İmanov
-  </div>
+  <div class="footer-text">© 2026 DQ Platform – Developed by Yunis İmanov</div>
 
+<script>
+(function(){
+  var rows=[], $=function(i){return document.getElementById(i)};
+  var build=function(q){return q.select("*").order("id",{ascending:false})};
+
+  function render(){
+    var term=$("kSearch").value.trim().toLowerCase(), list=rows.filter(function(r){
+      return !term||String(r.name||"").toLowerCase().indexOf(term)>-1||String(r.fin||"").toLowerCase().indexOf(term)>-1;
+    });
+    $("kCount").textContent=rows.length;
+    if(!list.length){$("kBody").innerHTML='<tr><td colspan="5" class="dq-empty">İcazəli iştirakçı tapılmadı</td></tr>';return}
+    $("kBody").innerHTML=list.map(function(r){
+      var cats=String(r.category||"").split(",").filter(Boolean).map(function(c){return '<span class="badge">'+DQ.esc(c.trim())+'</span>'}).join(" ")||"—";
+      return '<tr><td>'+DQ.esc(r.name||"—")+'</td><td><strong>'+DQ.esc(r.fin)+'</strong></td><td>'+(r.exam_no?"Sınaq "+DQ.esc(r.exam_no):"—")+'</td><td>'+cats+'</td>'
+        +'<td><button class="btn btn-danger btn-sm" data-del="'+DQ.esc(r.fin)+'" type="button">Sil</button></td></tr>';
+    }).join("");
+  }
+
+  DQ.watch("allowed_students",build,function(d){rows=d||[];render()},{every:12000,key:"kod-list"});
+  $("kSearch").addEventListener("input",render);
+
+  $("kBody").addEventListener("click",async function(e){
+    var b=e.target.closest("[data-del]"); if(!b) return;
+    var fin=b.getAttribute("data-del");
+    if(!confirm(fin+" İş nömrəsini silmək istədiyinizə əminsiniz?")) return;
+    b.disabled=true;
+    var r=await DQ.write("allowed_students",function(q){return q.delete().eq("fin",fin)});
+    if(r.error){b.disabled=false;return DQ.toast(r.message||"Silinmədi","err")}
+    rows=rows.filter(function(x){return x.fin!==fin}); render(); DQ.toast("Silindi","ok");
+  });
+
+  $("kSave").addEventListener("click",async function(){
+    var btn=this, name=$("kName").value.trim(), fin=$("kFin").value.trim().toUpperCase().replace(/\s+/g,"");
+    var cats=[].map.call(document.querySelectorAll("#kCats input:checked"),function(i){return i.value});
+    if(name.length<3) return DQ.toast("Ad və soyadı daxil edin","err");
+    if(!/^[A-Z0-9]{5,10}$/.test(fin)) return DQ.toast("İş nömrəsi 5–10 simvol (hərf/rəqəm) olmalıdır","err");
+    if(!cats.length) return DQ.toast("Ən azı bir kateqoriya seçin","err");
+    btn.disabled=true;
+    try{
+      var ex=await DQ.read("allowed_students",function(q){return q.select("id").eq("fin",fin)},{force:true,key:"kod-chk:"+fin,fallbackStale:false});
+      if(ex.error) return DQ.toast(ex.message||"Baza ilə əlaqə yoxdur","err");
+      if(ex.data&&ex.data.length) return DQ.toast("Bu iş nömrəsi artıq icazəlidir","err");
+      var r=await DQ.write("allowed_students",function(q){return q.insert([{name:name,fin:fin,exam_no:$("kExam").value,category:cats.join(",")}])});
+      if(r.error) return DQ.toast(r.message||"Yadda saxlanmadı","err");
+      DQ.toast("İcazə verildi: "+name,"ok");
+      $("kName").value="";$("kFin").value="";document.querySelectorAll("#kCats input").forEach(function(i){i.checked=false});
+    }finally{btn.disabled=false}
+  });
+})();
+</script>
 </body>
 </html>

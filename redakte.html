@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+<!-- DQ: Firebase SDK-nı HTML parse olunarkən paralel yüklə (qoşulma gecikməsini azaldır) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js" crossorigin>
+
 <script src="dq-firebase.js?v=20261121b"></script>
 <script src="dq-net.js?v=2"></script>
 
@@ -102,7 +108,7 @@
                 <div>
                     <div class="card-icon"><i class="fa-solid fa-gear"></i></div>
                     <div class="card-title">İştirakçı İcazələri</div>
-                    <div class="card-desc">Idare.html - FIN kod icazələri və tələbə siyahısını idarə edin.</div>
+                    <div class="card-desc">Idare.html - iş nömrəsi icazələri və tələbə siyahısını idarə edin.</div>
                 </div>
                 <div class="card-footer-row">
                     <div class="card-meta">Idare.html</div>
