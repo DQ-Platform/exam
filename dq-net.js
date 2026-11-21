@@ -51,6 +51,8 @@
 
     function attempt() {
       return nf.apply(window, args).then(function (res) {
+        /* mərkəzi baza qatı (dq-firebase.js) artıq özü təkrar cəhd edib — ikiqat gözləmə olmasın */
+        if (res.headers && res.headers.get("x-dq-retried")) { mark(res.status < 500); return res; }
         if (canRetry && RETRY_ST[res.status] && n < DELAYS.length) {
           var d = DELAYS[n++], ra = +res.headers.get("retry-after");
           if (ra > 0 && ra <= 5) d = Math.max(d, ra * 1000);

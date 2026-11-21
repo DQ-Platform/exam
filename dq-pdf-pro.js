@@ -565,20 +565,7 @@ function parseBlock(block,ctx){
 }
 
 /* Nömrə nöqtəsiz ("12 Mətn") və ya variant hərfi mötərizəsiz ("A 14") yazılmış PDF-lər üçün ehtiyat rejim */
-function normalizeLoose(pages){
-  var n=0;
-  pages.forEach(function(pg){
-    if(pg.isKey)return;
-    (pg.lines||[]).forEach(function(l){
-      var o=l.text,t=o;
-      t=t.replace(/^(\s*)(\d{1,3})[ \t]+(?=[^\d\s])/,"$1$2. ");
-      t=t.replace(/^(\s*)([A-E])[ \t]+(?=\S)/,"$1$2) ");
-      t=t.replace(/^(\s*)([A-E])\s*$/,"$1$2)");
-      if(t!==o){l.text=t;n++}
-    });
-  });
-  return n;
-}
+
 function pdfDiag(pages){
   var lines=0,sample=[];
   pages.forEach(function(pg){(pg.lines||[]).forEach(function(l){lines++;if(sample.length<3&&l.text.trim().length>8)sample.push(l.text.trim().slice(0,50))})});
@@ -1397,7 +1384,7 @@ async function epClick(e){
     t.disabled=false;t.textContent=old;
   }
 }
-function optLetterList(q){return"ABCDE"}
+
 
 /* Variant mətnini çapa uyğun təmizləyir: <p> işarələri yox, şəkillər real şəkil kimi */
 function optPrintHtml(o){

@@ -84,9 +84,7 @@
     try { if (typeof dqClean === "function") return dqClean(s); } catch (e) { }
     return basic(s);
   }
-  function plainLen(s) {
-    return String(s == null ? "" : s).replace(/<[^>]*>/g, "").replace(/&[#a-z0-9]+;/gi, "x").replace(/\s+/g, " ").trim().length;
-  }
+  
   function safeSrc(u) {
     u = String(u || "").trim();
     return /^(https?:\/\/|data:image\/|blob:|\/|[\w.-]+\/)/i.test(u) ? u : "";

@@ -14,8 +14,11 @@
 // Secrets (Settings → Variables and Secrets): VAPID_PRIVATE, ADMIN_KEY
 // Vars (istəyə bağlı): VAPID_SUBJECT (məs: mailto:you@mail.com)
 
-const SB = 'https://cpzwliqlgaplroscvduo.supabase.co';
-const KEY = 'sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF';
+// Mərkəzi baza = Firebase Firestore (sayt dq-firebase.js ilə eyni layihə). Worker oxu/yazmanı Firestore REST ilə edir.
+const FS_PROJECT = 'dq-platform-bdaf3';
+const FS_KEY = 'AIzaSyA6mD_qCRIcc8gIEsZB1EiEbUozZeMmd34'; // ictimai web açarı (dq-firebase.js ilə eynidir)
+const FS_DOCS = `https://firestore.googleapis.com/v1/projects/${FS_PROJECT}/databases/(default)/documents`;
+const FS_T = 'dq_v2_store';
 const SITE = 'https://exam.dqplatform.workers.dev';
 const VAPID_PUBLIC_DEFAULT = 'BDtYn14Q2yQe5x4zgSLRf8Mh6aSiVjagyfbUhUDllpTt2AYfnWE8jMbichN3C3NsyxyZaV1ffzsy3toSp_CL1aI';
 // Şəkli olmayan elanlar üçün (kvadrat → WhatsApp-da kiçik şəkil + başlıq + mətn kartı)
@@ -33,28 +36,85 @@ const CORS = {
   'access-control-allow-headers': 'x-admin-key,content-type'
 };
 
-/* ---------------- Supabase ---------------- */
+/* ---------------- Mərkəzi baza (Firestore REST) ---------------- */
+function fsVal(v) {
+  if (!v) return null;
+  if ('stringValue' in v) return v.stringValue;
+  if ('integerValue' in v) return Number(v.integerValue);
+  if ('doubleValue' in v) return v.doubleValue;
+  if ('booleanValue' in v) return v.booleanValue;
+  if ('timestampValue' in v) return v.timestampValue;
+  if ('mapValue' in v) { const o = {}; for (const k in (v.mapValue.fields || {})) o[k] = fsVal(v.mapValue.fields[k]); return o; }
+  if ('arrayValue' in v) return (v.arrayValue.values || []).map(fsVal);
+  return null;
+}
+async function fsFetch(url, init, tries = 3) {
+  let last;
+  for (let i = 0; i < tries; i++) {
+    try {
+      const r = await fetch(url + (url.includes('?') ? '&' : '?') + 'key=' + FS_KEY, init);
+      if (r.status < 500 && r.status !== 429) return r;
+      last = new Error('Firestore ' + r.status);
+    } catch (e) { last = e; }
+    await new Promise(res => setTimeout(res, 250 * (i + 1) * (i + 1)));
+  }
+  throw last;
+}
+// Sənəd → { id, data, collection } (sətir formatı dq-firebase.js ilə eyni: j_* = JSON, _big = hissələrə bölünmüş)
+async function fsRow(doc) {
+  const f = doc.fields || {}, id = String(doc.name || '').split('/').pop();
+  let row;
+  if (f._big) {
+    const r = await fsFetch(`${FS_DOCS}/${FS_T}/${id}/p?pageSize=300`);
+    const parts = ((await r.json()).documents || []).map(d => ({ i: fsVal(d.fields.i), s: fsVal(d.fields.s) })).sort((a, b) => a.i - b.i);
+    row = JSON.parse(parts.map(p => p.s).join(''));
+  } else {
+    row = {};
+    for (const k in f) {
+      if (k === '_big' || k.startsWith('d_')) continue;
+      if (k.startsWith('j_')) { try { row[k.slice(2)] = JSON.parse(f[k].stringValue); } catch (e) { row[k.slice(2)] = null; } }
+      else row[k] = fsVal(f[k]);
+    }
+  }
+  const n = row.id != null ? Number(row.id) : Number(id);
+  return { id: isNaN(n) ? id : n, collection: row.collection, data: row.data || {} };
+}
+async function dbQuery(collection, where = [], limit = 50) {
+  const filters = [{ fieldFilter: { field: { fieldPath: 'collection' }, op: 'EQUAL', value: { stringValue: collection } } }];
+  for (const [k, v] of where) filters.push({ fieldFilter: { field: { fieldPath: 'd_' + k }, op: 'EQUAL', value: { stringValue: String(v) } } });
+  const r = await fsFetch(`${FS_DOCS}:runQuery`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ structuredQuery: { from: [{ collectionId: FS_T }], where: { compositeFilter: { op: 'AND', filters } }, limit } })
+  });
+  if (!r.ok) return [];
+  const rows = await Promise.all((await r.json()).filter(x => x.document).map(x => fsRow(x.document)));
+  return rows.sort((a, b) => Number(b.id) - Number(a.id));
+}
+async function dbGet(id, collection) {
+  const r = await fsFetch(`${FS_DOCS}/${FS_T}/${encodeURIComponent(String(id))}`);
+  if (!r.ok) return null;
+  const row = await fsRow(await r.json());
+  return !collection || row.collection === collection ? row : null;
+}
+async function dbDelete(id) {
+  await fsFetch(`${FS_DOCS}/${FS_T}/${encodeURIComponent(String(id))}`, { method: 'DELETE' }, 1).catch(() => {});
+}
 async function findNews(id) {
   id = String(id || '').trim();
   if (!id || id.length > 80) return null;
-  const e = encodeURIComponent(id);
   // Xəbər linkindəki id slug, data.id, data.nid və ya sətrin öz nömrəsi ola bilər — hamısı yoxlanılır
-  const tries = [`data->>slug=eq.${e}`, `data->>id=eq.${e}`, `data->>nid=eq.${e}`];
-  if (/^\d+$/.test(id)) tries.push(`id=eq.${id}`);
-  for (const q of tries) {
+  const tries = [['slug', id], ['id', id], ['nid', id]];
+  for (const w of tries) {
     try {
-      const r = await fetch(`${SB}/rest/v1/dq_v2_store?select=id,data&collection=eq.news&${q}&limit=1`, { headers: { apikey: KEY } });
-      if (!r.ok) continue;
-      const rows = await r.json();
+      const rows = await dbQuery('news', [w], 1);
       if (rows[0]) return { ...rows[0].data, _id: rows[0].id };
     } catch (x) {}
   }
+  if (/^\d+$/.test(id)) {
+    try { const row = await dbGet(id, 'news'); if (row) return { ...row.data, _id: row.id }; } catch (x) {}
+  }
   return null;
 }
-const sb = (env, q, init = {}) => {
-  const url = env.SUPABASE_URL || SB, key = env.SUPABASE_KEY || KEY;
-  return fetch(`${url}/rest/v1/dq_v2_store?${q}`, { ...init, headers: { apikey: key, Authorization: 'Bearer ' + key } });
-};
 
 /* ---------------- Şəkil köməkçiləri ---------------- */
 function decodeDataUrl(u) {
@@ -104,8 +164,7 @@ const dmy = d => baku(d, { day: '2-digit', month: '2-digit', year: 'numeric' }).
 const hm = d => baku(d, { hour: '2-digit', minute: '2-digit', hour12: false });
 
 async function liveExam(env) {
-  const r = await sb(env, 'collection=eq.liveexams&order=id.desc&limit=10&select=id,data');
-  const l = (await r.json()).map(x => ({ ...x.data, _id: x.id }));
+  const l = (await dbQuery('liveexams', [], 10)).map(x => ({ ...x.data, _id: x.id }));
   return l.find(x => x.status !== 'Bitib' && (!x.end || new Date(x.end) > Date.now())) || l[0];
 }
 async function vapidJwt(aud, env) {
@@ -259,7 +318,7 @@ export default {
       let x = null;
       try {
         x = cm[1] === 'latest' ? await liveExam(env)
-          : ((await (await sb(env, `collection=eq.liveexams&id=eq.${cm[1]}&select=id,data`)).json())[0] || {}).data;
+          : ((await dbGet(cm[1], 'liveexams')) || {}).data;
       } catch (e) {}
       const m = x && String(x.cover || '').match(/^data:(image\/\w+);base64,(.+)$/);
       if (!m) return Response.redirect(SITE + '/og-image.jpg', 302);
@@ -275,7 +334,7 @@ export default {
       if (!env.ADMIN_KEY || request.headers.get('x-admin-key') !== env.ADMIN_KEY) return new Response('forbidden', { status: 403, headers: CORS });
       if (!env.VAPID_PRIVATE || !env.VAPID_SUBJECT) return Response.json({ error: 'VAPID_PRIVATE / VAPID_SUBJECT təyin olunmayıb' }, { status: 500, headers: CORS });
 
-      const subs = await (await sb(env, 'collection=eq.push_subs&select=id,data&limit=2000')).json();
+      const subs = await dbQuery('push_subs', [], 2000);
       let sent = 0;
       await Promise.all(subs.map(async s => {
         try {
@@ -285,7 +344,7 @@ export default {
             headers: { Authorization: `vapid t=${await vapidJwt(aud, env)}, k=${env.VAPID_PUBLIC || VAPID_PUBLIC_DEFAULT}`, TTL: '86400', Urgency: 'high', 'Content-Length': '0' }
           });
           if (r.ok) sent++;
-          else if (r.status === 404 || r.status === 410) await sb(env, `id=eq.${s.id}`, { method: 'DELETE' });
+          else if (r.status === 404 || r.status === 410) await dbDelete(s.id);
         } catch (e) {}
       }));
       return Response.json({ sent, total: subs.length }, { headers: CORS });

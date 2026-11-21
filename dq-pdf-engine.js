@@ -892,7 +892,7 @@
     } catch (e) { say('Xəta: ' + (e && e.message || e)); }
     proBusy = false;
   }
-  function proModal(el) { return el && el.closest ? el.closest('.modal, [class*="modal"], #modal') || (el.closest('.ig') && el.closest('.ig').parentElement) : null; }
+  
   function wantsEngine(f) { return /\.pdf$/i.test(f.name) || /^image\//.test(f.type) || /\.(png|jpe?g|webp|bmp)$/i.test(f.name); }
   document.addEventListener('change', function (e) {
     var el = e.target; if (!el || el.id !== 'f' || el.type !== 'file') return;

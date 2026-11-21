@@ -1,8 +1,9 @@
 /* DQ Platform – service worker (PWA + push) */
-const VERSION = 'dq-v4';
+const VERSION = 'dq-v5';
 const CORE = ['./', 'manifest.json', 'icon-192.png', 'icon-512.png', 'favicon.png'];
-const SB = 'https://cpzwliqlgaplroscvduo.supabase.co';
-const SB_KEY = 'sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF';
+/* Mərkəzi baza: Firebase Firestore (REST). Sayt (dq-firebase.js) və worker.js ilə eyni layihə. */
+const FS_DOCS = 'https://firestore.googleapis.com/v1/projects/dq-platform-bdaf3/databases/(default)/documents';
+const FS_KEY = 'AIzaSyA6mD_qCRIcc8gIEsZB1EiEbUozZeMmd34';
 /* Worker-in özünə məxsus marşrutları keşləmə / toxunma */
 const SKIP = /^\/(news|news-img|news-debug|qeydiyyat|cover|push)(\/|$|\?)/;
 
@@ -50,13 +51,22 @@ self.addEventListener('fetch', (e) => {
 });
 
 /* ---------- Push bildirişləri ----------
-   Worker yükləməsiz ("boş") push göndərir; mətn Supabase-dəki son push_msg qeydindən oxunur. */
+   Worker yükləməsiz ("boş") push göndərir; mətn mərkəzi bazadakı son push_msg qeydindən oxunur. */
 async function latestMsg() {
   try {
-    const r = await fetch(SB + '/rest/v1/dq_v2_store?select=data&collection=eq.push_msg&order=id.desc&limit=1', { headers: { apikey: SB_KEY } });
+    const r = await fetch(FS_DOCS + ':runQuery?key=' + FS_KEY, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'dq_v2_store' }],
+        where: { fieldFilter: { field: { fieldPath: 'collection' }, op: 'EQUAL', value: { stringValue: 'push_msg' } } }, limit: 50 } })
+    });
     if (!r.ok) return {};
-    const rows = await r.json();
-    return (rows[0] && rows[0].data) || {};
+    let best = null, bestId = -1;
+    (await r.json()).forEach(function (x) {
+      const f = x.document && x.document.fields; if (!f || !f.j_data) return;
+      const id = Number(f.id && f.id.integerValue) || 0;
+      if (id > bestId) { bestId = id; best = f.j_data.stringValue; }
+    });
+    return best ? (JSON.parse(best) || {}) : {};
   } catch (e) { return {}; }
 }
 

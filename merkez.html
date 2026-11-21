@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+    <!-- Mərkəzi baza qatı (Firebase) — HƏMİŞƏ ilk script -->
+    <script src="dq-firebase.js?v=20261121"></script>
+    <script src="dq-net.js?v=2"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DQ Platform — Mərkəzi İdarəetmə Paneli</title>
@@ -220,10 +223,9 @@
                 <li><button class="active" onclick="showSection('design', this)"><i class="fa-solid fa-palette"></i> Dizayn & Şablon</button></li>
                 <li><button onclick="showSection('questions', this)"><i class="fa-solid fa-pen-to-square"></i> Suallar & Modullar</button></li>
                 <li><button onclick="showSection('codes', this)"><i class="fa-solid fa-key"></i> Kod İdarəetməsi</button></li>
-                <li><button onclick="showSection('pult', this)"><i class="fa-solid fa-tower-broadcast"></i> Canlı Pult / İdarə</button></li>
                 <li><button onclick="showSection('stats', this)"><i class="fa-solid fa-chart-line"></i> Nəticələr & Analitika</button></li>
                 <li><button onclick="showSection('users', this)"><i class="fa-solid fa-users"></i> İştirakçılar</button></li>
-                <li><button onclick="showSection('settings', this)"><i class="fa-solid fa-gear"></i> Supabase Tənzimləmələri</button></li>
+                <li><button onclick="showSection('settings', this)"><i class="fa-solid fa-gear"></i> Baza Əlaqəsi</button></li>
             </ul>
         </div>
         <div class="sidebar-footer">
@@ -330,31 +332,8 @@
                         <th>Əməliyyat</th>
                     </tr>
                 </thead>
-                <tbody id="codeTableBody">
-                    <tr>
-                        <td>DQ-8891</td>
-                        <td>Yunis İmanov</td>
-                        <td><span class="badge badge-success">Aktiv</span></td>
-                        <td><button style="background:var(--danger); color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;" onclick="deactivateCode('DQ-8891')">Deaktiv et</button></td>
-                    </tr>
-                </tbody>
+                <tbody id="codeTableBody"><tr><td colspan="4">Yüklənir…</td></tr></tbody>
             </table>
-        </div>
-
-        <!-- SECTION 4: Canlı Pult (Pult.html) -->
-        <div id="pult" class="panel-section">
-            <div class="header-title">
-                <h2>📡 Canlı İmtahan Nəzarət Pultu</h2>
-            </div>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Davam edən imtahanlara canlı müdaxilə edin və rejimi idarə edin.</p>
-            <div class="form-grid">
-                <button class="btn-save" style="background: var(--danger); color: white;" onclick="toggleExamStatus(false)">
-                    <i class="fa-solid fa-circle-stop"></i> Bütün İmtahanları Dayandır
-                </button>
-                <button class="btn-save" style="background: var(--success); color: white;" onclick="toggleExamStatus(true)">
-                    <i class="fa-solid fa-play"></i> İmtahan İcazəsini Aç
-                </button>
-            </div>
         </div>
 
         <!-- SECTION 5: Nəticələr & Analitika (Statistika.html, Cavablar.html) -->
@@ -365,22 +344,14 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Tələbə</th>
-                        <th>İmtahan Modulu</th>
+                        <th>İş nömrəsi</th>
+                        <th>Kateqoriya</th>
                         <th>Topladığı Bal</th>
                         <th>Tarix</th>
-                        <th>Ətraflı</th>
+                        <th>İmtahan №</th>
                     </tr>
                 </thead>
-                <tbody id="resultsTableBody">
-                    <tr>
-                        <td>Yunis İmanov</td>
-                        <td>Modul 3: Azərbaycan Dili</td>
-                        <td>95 / 100</td>
-                        <td>2026-09-14</td>
-                        <td><button class="btn-save" style="padding: 4px 8px; font-size: 12px;">Bax</button></td>
-                    </tr>
-                </tbody>
+                <tbody id="resultsTableBody"><tr><td colspan="5">Yüklənir…</td></tr></tbody>
             </table>
         </div>
 
@@ -392,134 +363,143 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>№</th>
                         <th>Ad Soyad</th>
-                        <th>Status</th>
-                        <th>Şəxsi Kabinet</th>
+                        <th>İş nömrəsi</th>
+                        <th>İmtahan №</th>
                     </tr>
                 </thead>
-                <tbody id="usersTableBody">
-                    <tr>
-                        <td>#001</td>
-                        <td>Yunis İmanov</td>
-                        <td><span class="badge badge-success">Aktiv</span></td>
-                        <td><button class="btn-save" style="padding: 4px 8px; font-size: 12px;">Profil</button></td>
-                    </tr>
-                </tbody>
+                <tbody id="usersTableBody"><tr><td colspan="4">Yüklənir…</td></tr></tbody>
             </table>
         </div>
 
-        <!-- SECTION 7: Supabase Tənzimləmələri -->
+        <!-- SECTION 7: Mərkəzi baza əlaqəsi -->
         <div id="settings" class="panel-section">
             <div class="header-title">
-                <h2>⚙️ Supabase Verilənlər Bazası Qoşulması</h2>
+                <h2>🔌 Mərkəzi Baza Əlaqəsi</h2>
             </div>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">Bu panel saytla eyni mərkəzi bazaya (Firebase) avtomatik qoşulur — URL və açar daxil etmək lazım deyil.</p>
             <div class="form-group">
-                <label>Supabase Project URL</label>
-                <input type="text" id="supabaseUrl" placeholder="https://xyz.supabase.co">
+                <label>Status</label>
+                <div id="dbStatus" class="badge badge-success" style="display:inline-block">Yoxlanılır…</div>
             </div>
-            <div class="form-group">
-                <label>Supabase Anon Key</label>
-                <input type="password" id="supabaseKey" placeholder="eyJhYmdj..." >
-            </div>
-            <button class="btn-save" onclick="initSupabase()"><i class="fa-solid fa-plug"></i> Bazaya Qoşul</button>
+            <button class="btn-save" onclick="checkDb()"><i class="fa-solid fa-plug"></i> Əlaqəni yoxla</button>
         </div>
 
     </div>
 
     <!-- JS Məntiqi -->
     <script>
-        let dbClient = null;
+        /* Mərkəzi baza: dq-firebase.js bütün supabase.from(...) sorğularını Firebase-ə yönləndirir.
+           URL/açar sabitdir — bütün sayt və panellər eyni bazadan oxuyur/yazır. */
+        const CENTRAL_URL = "https://cpzwliqlgaplroscvduo.supabase.co";
+        const CENTRAL_KEY = "sb_publishable_1clDyHhxAiSCurwGHwMi3g_rrs17eYF";
+        const dbClient = supabase.createClient(CENTRAL_URL, CENTRAL_KEY);
+        const SETTINGS_ID = 9100001;   /* dq_v2_store → collection "merkez_settings" */
 
-        // Bölmələr arası keçid
+        function esc(v) { return String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+        function say(msg) { alert(msg); }
+        function dbErr(error) { return (error && error.message) ? error.message : "naməlum xəta"; }
+
         function showSection(sectionId, btnElement) {
             document.querySelectorAll('.panel-section').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('.nav-links button').forEach(btn => btn.classList.remove('active'));
-            
             document.getElementById(sectionId).classList.add('active');
             btnElement.classList.add('active');
+            if (sectionId === 'codes') loadCodes();
+            if (sectionId === 'stats') loadResults();
+            if (sectionId === 'users') loadUsers();
         }
 
-        // Supabase Qoşulması
-        function initSupabase() {
-            const url = document.getElementById('supabaseUrl').value;
-            const key = document.getElementById('supabaseKey').value;
-
-            if(!url || !key) {
-                alert("Zəhmət olmasa URL və Key məlumatlarını tam daxil edin.");
-                return;
-            }
-
-            dbClient = supabase.createClient(url, key);
-            alert("Supabase bazası uğurla qoşuldu!");
+        /* ---- əlaqə statusu ---- */
+        function paintStatus(s) {
+            const el = document.getElementById('dbStatus'); if (!el) return;
+            const map = { online: ["Qoşuludur ✔", "badge-success"], connecting: ["Qoşulur…", ""], degraded: ["Əlaqə zəifdir", ""], offline: ["İnternet yoxdur", ""] };
+            const m = map[s] || [s, ""];
+            el.textContent = m[0]; el.className = "badge " + m[1];
+            el.style.background = (s === "online" || s === "connecting") ? "" : (s === "offline" ? "#b45309" : "#b91c1c");
         }
+        async function checkDb() {
+            paintStatus('connecting');
+            const ok = await (window.DQDB ? DQDB.ping() : Promise.resolve(false));
+            paintStatus(ok ? 'online' : (window.DQDB ? DQDB.status() : 'degraded'));
+            if (!ok) say("Mərkəzi bazaya qoşulmaq alınmadı. İnterneti yoxlayıb yenidən cəhd edin.");
+        }
+        if (window.DQDB) { DQDB.onChange(paintStatus); paintStatus(DQDB.status()); }
 
-        // Dizayn yeniləmə funksiyası
+        /* ---- Dizayn / ümumi tənzimləmələr (dq_v2_store) ---- */
         async function saveDesign() {
-            const title = document.getElementById('siteTitle').value;
-            const themeColor = document.getElementById('themeColor').value;
-            const bgColor = document.getElementById('bgColor').value;
-            const announcement = document.getElementById('announcementText').value;
-
-            if (dbClient) {
-                const { data, error } = await dbClient.from('settings').upsert({
-                    id: 1, site_title: title, theme_color: themeColor, bg_color: bgColor, announcement: announcement
-                });
-                if (error) alert("Xəta baş verdi: " + error.message);
-                else alert("Dizayn və parametr parametrləri Supabase-də yeniləndi!");
-            } else {
-                alert("Lokal test: Dizayn parametrləri yadda saxlanıldı.");
-            }
+            const data = {
+                site_title: document.getElementById('siteTitle').value,
+                theme_color: document.getElementById('themeColor').value,
+                bg_color: document.getElementById('bgColor').value,
+                announcement: document.getElementById('announcementText').value
+            };
+            const { error } = await dbClient.from('dq_v2_store').upsert({ id: SETTINGS_ID, collection: 'merkez_settings', data }, { onConflict: 'id' });
+            say(error ? "Xəta baş verdi: " + dbErr(error) : "Tənzimləmələr mərkəzi bazada yeniləndi!");
+        }
+        async function loadDesign() {
+            const { data } = await dbClient.from('dq_v2_store').select('*').eq('id', SETTINGS_ID);
+            const d = data && data[0] && data[0].data; if (!d) return;
+            if (d.site_title != null) document.getElementById('siteTitle').value = d.site_title;
+            if (d.theme_color) document.getElementById('themeColor').value = d.theme_color;
+            if (d.bg_color) document.getElementById('bgColor').value = d.bg_color;
+            if (d.announcement != null) document.getElementById('announcementText').value = d.announcement;
         }
 
-        // Sual əlavə etmə funksiyası
+        /* ---- Sual əlavə etmə (exam_questions — saytın istifadə etdiyi real cədvəl) ---- */
         async function saveQuestion() {
-            const module = document.getElementById('moduleSelect').value;
-            const questionNo = document.getElementById('questionNo').value;
-            const text = document.getElementById('questionText').value;
-            const optA = document.getElementById('optA').value;
-            const optB = document.getElementById('optB').value;
-            const optC = document.getElementById('optC').value;
-            const optD = document.getElementById('optD').value;
-            const correct = document.getElementById('correctAnswer').value;
-
-            if (dbClient) {
-                const { error } = await dbClient.from('questions').insert({
-                    module: module, question_no: questionNo, question_text: text,
-                    option_a: optA, option_b: optB, option_c: optC, option_d: optD, correct_option: correct
-                });
-                if (error) alert("Xəta: " + error.message);
-                else alert("Sual bazaya əlavə olundu!");
-            } else {
-                alert(`Sual uğurla yaradıldı: ${module} - Sual №${questionNo}`);
-            }
+            const sel = document.getElementById('moduleSelect');
+            const examId = sel.value, subject = sel.options[sel.selectedIndex].text;
+            const qNo = parseInt(document.getElementById('questionNo').value, 10);
+            const text = document.getElementById('questionText').value.trim();
+            const options = ['optA', 'optB', 'optC', 'optD'].map(id => document.getElementById(id).value.trim());
+            const correct = ['A', 'B', 'C', 'D'].indexOf(String(document.getElementById('correctAnswer').value).trim().toUpperCase().charAt(0));
+            if (!qNo || !text || options.some(o => !o)) return say("Sual nömrəsi, mətn və 4 variantın hamısı doldurulmalıdır.");
+            if (correct < 0) return say("Düzgün cavab seçilməyib.");
+            const { error } = await dbClient.from('exam_questions').upsert([{ exam_id: examId, q_number: qNo, subject, question: text, options, correct }], { onConflict: 'exam_id,q_number' });
+            say(error ? "Xəta: " + dbErr(error) : "Sual mərkəzi bazaya əlavə olundu / yeniləndi!");
         }
 
-        // Kod Generasiyası
-        function generateCode() {
-            const randomCode = 'DQ-' + Math.floor(1000 + Math.random() * 9000);
-            document.getElementById('accessCode').value = randomCode;
-        }
-
+        /* ---- Giriş kodları (allowed_students: fin = iş nömrəsi / giriş kodu) ---- */
+        function generateCode() { document.getElementById('accessCode').value = 'DQ-' + Math.floor(1000 + Math.random() * 9000); }
         async function saveAccessCode() {
-            const code = document.getElementById('accessCode').value;
-            const student = document.getElementById('studentName').value;
-
-            if(!code) return alert("Kod daxil edin və ya generasiya edin!");
-
-            if (dbClient) {
-                const { error } = await dbClient.from('access_codes').insert({ code: code, student_name: student, is_active: true });
-                if (error) alert("Xəta: " + error.message);
-                else alert("Kod bazada aktiv edildi!");
-            } else {
-                alert(`Kod yaradıldı: ${code} (${student})`);
-            }
+            const code = document.getElementById('accessCode').value.trim().toUpperCase();
+            const name = document.getElementById('studentName').value.trim();
+            if (!code) return say("Kod daxil edin və ya generasiya edin!");
+            if (!name) return say("İştirakçının adını daxil edin!");
+            const { data: ex } = await dbClient.from('allowed_students').select('id').eq('fin', code);
+            if (ex && ex.length) return say("Bu kod artıq mövcuddur.");
+            const { error } = await dbClient.from('allowed_students').insert([{ name, fin: code }]);
+            if (error) return say("Xəta: " + dbErr(error));
+            say("Kod mərkəzi bazada aktiv edildi!");
+            document.getElementById('accessCode').value = ''; document.getElementById('studentName').value = '';
+            loadCodes();
+        }
+        async function deleteCode(fin) {
+            if (!confirm(fin + " kodu silinsin?")) return;
+            const { error } = await dbClient.from('allowed_students').delete().eq('fin', fin);
+            if (error) return say("Xəta: " + dbErr(error));
+            loadCodes(); loadUsers();
+        }
+        function setBody(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
+        async function loadCodes() {
+            const { data, error } = await dbClient.from('allowed_students').select('*').order('id', { ascending: false });
+            if (error) return setBody('codeTableBody', '<tr><td colspan="4">Yüklənmədi: ' + esc(dbErr(error)) + '</td></tr>');
+            setBody('codeTableBody', (data || []).map(r => '<tr><td>' + esc(r.fin) + '</td><td>' + esc(r.name) + '</td><td><span class="badge badge-success">Aktiv</span></td><td><button style="background:var(--danger); color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;" data-fin="' + esc(r.fin) + '" onclick="deleteCode(this.dataset.fin)">Sil</button></td></tr>').join('') || '<tr><td colspan="4">Hələ kod yoxdur</td></tr>');
+        }
+        async function loadUsers() {
+            const { data, error } = await dbClient.from('allowed_students').select('*').order('id', { ascending: false });
+            if (error) return setBody('usersTableBody', '<tr><td colspan="4">Yüklənmədi: ' + esc(dbErr(error)) + '</td></tr>');
+            setBody('usersTableBody', (data || []).map((r, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(r.name) + '</td><td>' + esc(r.fin) + '</td><td>' + esc(r.exam_no || '—') + '</td></tr>').join('') || '<tr><td colspan="4">İştirakçı yoxdur</td></tr>');
+        }
+        async function loadResults() {
+            const { data, error } = await dbClient.from('exam_results').select('*').order('id', { ascending: false }).limit(300);
+            if (error) return setBody('resultsTableBody', '<tr><td colspan="5">Yüklənmədi: ' + esc(dbErr(error)) + '</td></tr>');
+            setBody('resultsTableBody', (data || []).map(r => '<tr><td>' + esc(r.fin) + '</td><td>' + esc(r.category || '—') + '</td><td>' + esc(r.score) + ' / ' + esc(r.total_questions) + '</td><td>' + esc(String(r.created_at || '').slice(0, 10)) + '</td><td>' + esc(r.exam_no || '—') + '</td></tr>').join('') || '<tr><td colspan="5">Nəticə yoxdur</td></tr>');
         }
 
-        function toggleExamStatus(status) {
-            const msg = status ? "İmtahanlar aktiv edildi." : "Bütün canlı imtahanlar dayandırıldı.";
-            alert(msg);
-        }
+        document.addEventListener('DOMContentLoaded', () => { loadDesign(); loadCodes(); });
     </script>
 </body>
 </html>

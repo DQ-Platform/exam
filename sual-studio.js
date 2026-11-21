@@ -233,16 +233,7 @@
   }
 
   /* ---------- təmizləmə boru xətti ---------- */
-  function runsOf(ok, gap) {         // true-lar arasında "gap"-dək boşluğu körpüləyib ən uzun zolağı qaytarır
-    var best = null, s = -1, last = -1;
-    function fin() { if (s >= 0 && (!best || last + 1 - s > best.b - best.a)) best = { a: s, b: last + 1 }; }
-    for (var i = 0; i < ok.length; i++) {
-      if (!ok[i]) continue;
-      if (s < 0) s = i; else if (i - last > gap + 1) { fin(); s = i; }
-      last = i;
-    }
-    fin(); return best;
-  }
+  
   function morph(m, ws, hs, r, grow) {   // grow=1: genişlət (dilate), grow=0: daralt (erode; kənardan kənar = dolu)
     var o = new Uint8Array(ws * hs), x, y, dx, dy, hit;
     for (y = 0; y < hs; y++) for (x = 0; x < ws; x++) {
