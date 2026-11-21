@@ -1,0 +1,238 @@
+/* ==========================================================================
+   DQ Platform — Vahid UI sistemi (v1)
+   Bütün səhifələrdə ƏN SONDA yüklənir. Rəng, şrift, ölçü, düymə, forma,
+   cədvəl, tab, pəncərə (modal), bildiriş və başlıqlar eyni qaydalarla işləyir.
+   Tokenlər dq-design.css ilə uyğundur.
+   ========================================================================== */
+:root{
+  --u-navy:#0a2f7a; --u-navy-d:#071f52; --u-navy-h:#0d3a94; --u-navy-l:#e8eefb;
+  --u-gold:#c9a24b; --u-gold-d:#8a6a1c;
+  --u-ink:#14213d; --u-mut:#52607a; --u-line:#d9e1ee; --u-line-s:#e7ecf4;
+  --u-bg:#f4f6fa; --u-card:#fff;
+  --u-ok:#15803d; --u-ok-l:#e7f5ec; --u-err:#b91c1c; --u-err-l:#fdecec;
+  --u-warn:#b45309; --u-warn-l:#fdf3e3;
+  --u-r:8px; --u-r-s:6px; --u-r-l:12px;
+  --u-sh:0 1px 2px rgba(10,47,122,.06),0 6px 16px -8px rgba(10,47,122,.16);
+  --u-sh-m:0 20px 50px -12px rgba(7,31,82,.35);
+  --u-font:"Noto Sans","Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+  --u-ring:0 0 0 3px rgba(10,47,122,.18);
+}
+
+/* ---------- Əsas ---------- */
+html:root body{font-family:var(--u-font);color:var(--u-ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+html:root body{background-color:var(--u-bg)}
+html:root body :where(button,input,select,textarea,label,table,h1,h2,h3,h4,h5,h6,p,a,span,div,li,td,th,b,strong,small):not(i):not([class*="fa-"]):not(.fa):not(.fas):not(.far):not(.fab):not(.ic):not(code):not(pre):not(.monaco-editor *){font-family:var(--u-font)}
+html:root body :where(h1,h2,h3,h4){color:var(--u-navy);font-weight:700;letter-spacing:-.005em;line-height:1.3}
+html:root body :where(h1){font-size:clamp(20px,2.4vw,26px)}
+html:root body :where(h2){font-size:clamp(17px,2vw,21px)}
+html:root body :where(h3){font-size:16px}
+html:root body :where(a){color:var(--u-navy)}
+html:root body :where(hr){border:0;border-top:1px solid var(--u-line);margin:16px 0}
+html:root body ::selection{background:var(--u-navy);color:#fff}
+html:root body :focus-visible{outline:2px solid var(--u-navy);outline-offset:2px}
+
+/* ---------- Səhifə başlığı (top-bar / header) ---------- */
+html:root body :where(.top-bar,.header,.page-header,.header-title,.modules-title,.page-title){color:var(--u-navy);font-weight:700}
+html:root body .top-bar,html body .page-header{background:var(--u-card);border:1px solid var(--u-line);border-top:3px solid var(--u-navy);border-radius:var(--u-r);box-shadow:var(--u-sh);padding:14px 18px}
+html:root body .card-title,html body .section-title,html body .folder-title{color:var(--u-navy);font-weight:700;font-size:16px;border-bottom:1px solid var(--u-line-s);padding-bottom:8px}
+
+/* ---------- Kartlar / panellər ---------- */
+html:root body :where(.card,.admin-card,.card-box,.stat-card,.module-card,.panel-section,.folder-card,.admin-nav-card,.catalog-card,.catalog-item,.subject-box,.admin-module-block,.question-box,.test-preview,.container-box){
+  background:var(--u-card);border:1px solid var(--u-line);border-radius:var(--u-r-l);box-shadow:var(--u-sh);color:var(--u-ink)}
+html:root body :where(.module-card,.folder-card,.admin-nav-card,.catalog-card):hover{border-color:var(--u-navy);box-shadow:0 2px 4px rgba(10,47,122,.08),0 10px 24px -10px rgba(10,47,122,.28)}
+html:root body :where(.stat-card) :where(.num,.value,.stat-value){color:var(--u-navy);font-weight:800}
+html:root body :where(.stat-title,.stat-sub){color:var(--u-mut)}
+
+/* ---------- Düymələr ---------- */
+html:root body :where(.btn,.btn-save,.btn-action,.back-btn,.logout-btn,.delete-btn,.filter-btn,.menu-btn,.toggle-btn,.btn-sm,.tb-btn,.img-input-btn){
+  font-family:var(--u-font);font-weight:600;font-size:14px;line-height:1.2;border-radius:var(--u-r);cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s,box-shadow .15s;box-shadow:none;text-shadow:none;text-decoration:none}
+html:root body :where(.btn,.btn-save,.btn-action,.back-btn){background:var(--u-navy);color:#fff;border:1px solid var(--u-navy)}
+html:root body :where(.btn,.btn-save,.btn-action,.back-btn):hover{background:var(--u-navy-h);border-color:var(--u-navy-h);color:#fff;transform:none}
+html:root body :where(.btn,.btn-save,.btn-action,.back-btn):active{background:var(--u-navy-d)}
+html:root body :where(.btn-secondary,.btn-light,.btn-outline,.filter-btn,.toggle-btn,.menu-btn){background:#fff;color:var(--u-navy);border:1px solid var(--u-line)}
+html:root body :where(.btn-secondary,.btn-light,.btn-outline,.filter-btn,.toggle-btn,.menu-btn):hover{background:var(--u-navy-l);border-color:var(--u-navy);color:var(--u-navy)}
+html:root body :where(.filter-btn.active,.menu-btn.active,.toggle-btn.active){background:var(--u-navy);color:#fff;border-color:var(--u-navy)}
+html:root body :where(.btn-dark){background:var(--u-navy-d);border-color:var(--u-navy-d);color:#fff}
+html:root body :where(.btn-success){background:var(--u-ok);border-color:var(--u-ok);color:#fff}
+html:root body :where(.btn-success):hover{background:#116a33;border-color:#116a33}
+html:root body :where(.btn-danger,.delete-btn,.logout-btn){background:var(--u-err);border-color:var(--u-err);color:#fff}
+html:root body :where(.btn-danger,.delete-btn,.logout-btn):hover{background:#991b1b;border-color:#991b1b}
+html:root body :where(.btn-warning){background:var(--u-warn);border-color:var(--u-warn);color:#fff}
+html:root body :where(.btn-sm){font-size:12.5px;padding:6px 11px}
+html:root body :where(.btn,.btn-save,.btn-action):not(.btn-sm){padding:10px 18px}
+html:root body :where(button,.btn):disabled{opacity:.55;cursor:not-allowed}
+
+/* ---------- Formalar ---------- */
+html:root body :where(label,.form-group label,.option-label,.num-label){color:var(--u-ink);font-weight:600;font-size:13.5px}
+html:root body :where(.form-control,.select-control,.filter-select,.token-field,.code-input,.opt-input,.option-input,input[type=text],input[type=password],input[type=email],input[type=number],input[type=search],input[type=tel],input[type=date],select,textarea){
+  font-family:var(--u-font);font-size:14px;color:var(--u-ink);background:#fff;border:1px solid var(--u-line);border-radius:var(--u-r);
+  box-shadow:none;transition:border-color .15s,box-shadow .15s}
+html:root body :where(.form-control,.select-control,.filter-select,.token-field,.code-input,.opt-input,input[type=text],input[type=password],input[type=email],input[type=number],input[type=search],input[type=tel],input[type=date],select,textarea):not([type=checkbox]):not([type=radio]){padding:10px 12px}
+html:root body :where(.form-control,.select-control,.filter-select,.token-field,.code-input,.opt-input,input,select,textarea):focus{outline:0;border-color:var(--u-navy);box-shadow:var(--u-ring)}
+html:root body ::placeholder{color:#8a97ad;opacity:1}
+html:root body :where(input[type=checkbox],input[type=radio]){accent-color:var(--u-navy)}
+
+/* ---------- Cədvəllər ---------- */
+html:root body :where(table){border-collapse:collapse;width:100%;font-size:14px}
+html:root body :where(.table-wrapper,.tbl-wrap){border:1px solid var(--u-line);border-radius:var(--u-r-l);overflow:auto;background:#fff;box-shadow:var(--u-sh)}
+html:root body :where(table) :where(th){background:var(--u-navy);color:#fff;font-weight:600;text-align:left;padding:11px 14px;border:0;font-size:13px;letter-spacing:.01em}
+html:root body :where(table) :where(td){padding:10px 14px;border-bottom:1px solid var(--u-line-s);color:var(--u-ink)}
+html:root body :where(table) :where(tbody tr:nth-child(even)){background:#f8fafd}
+html:root body :where(table) :where(tbody tr):hover{background:var(--u-navy-l)}
+
+/* ---------- Nişanlar (badge / chip) ---------- */
+html:root body :where(.badge,.badge-cat,.chip,.score-badge,.question-score-badge,.qnum-badge){border-radius:999px;font-weight:600;font-size:12px;padding:3px 10px;background:var(--u-navy-l);color:var(--u-navy);border:1px solid #cfdbf3}
+html:root body :where(.badge-success,.badge-active){background:var(--u-ok-l);color:var(--u-ok);border-color:#bfe3cd}
+html:root body :where(.badge-danger,.badge-error){background:var(--u-err-l);color:var(--u-err);border-color:#f3c2c2}
+html:root body :where(.badge-warning){background:var(--u-warn-l);color:var(--u-warn);border-color:#f1d9ae}
+
+/* ---------- Tablar ---------- */
+html:root body :where(.tabs,.tab-bar,.tab-nav,.nav-tabs){display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--u-line);background:transparent}
+html:root body :where(.tab,.nav-tabs a,[class$="-tab"],[class*="-tab "]):not(.tab-content){font-family:var(--u-font);font-weight:600;font-size:14px;color:var(--u-mut);background:transparent;border:0;border-bottom:3px solid transparent;border-radius:var(--u-r-s) var(--u-r-s) 0 0;padding:10px 16px;cursor:pointer;box-shadow:none;transition:color .15s,background .15s,border-color .15s}
+html:root body :where(.tab,.nav-tabs a,[class$="-tab"],[class*="-tab "]):not(.tab-content):hover{color:var(--u-navy);background:var(--u-navy-l)}
+html:root body :where(.tab.active,.tab.on,.nav-tabs a.active,[class$="-tab"].on,[class$="-tab"].active,[class$="-tab"].act){color:var(--u-navy);background:#fff;border-bottom-color:var(--u-navy)}
+
+/* ---------- Yan menyu (sidebar) ---------- */
+html:root body :where(.sidebar){background:var(--u-navy-d);color:#e6edf8;border-right:1px solid rgba(255,255,255,.08)}
+html:root body :where(.sidebar-item,.nav-links a){color:#cfdaf3;font-weight:500;border-radius:var(--u-r);transition:background .15s,color .15s}
+html:root body :where(.sidebar-item,.nav-links a):hover{background:rgba(255,255,255,.1);color:#fff}
+html:root body :where(.sidebar-item.active,.nav-links a.active,.nav-links .active){background:#fff;color:var(--u-navy)}
+html:root body :where(.sidebar-header,.sidebar-footer){color:#fff;border-color:rgba(255,255,255,.12)}
+
+/* ---------- Pəncərələr (modal / popup / dialog) ---------- */
+html:root body :where(.modal-overlay,.dq-overlay,#bq-overlay,[class$="-overlay"],[class*="modal-bg"],[class*="-backdrop"]){background:rgba(7,31,82,.55);backdrop-filter:blur(2px)}
+html:root body :where(.modal-content,.dq-modal,.v2-modal,.pp-modal,#dqx-modal>div,#graphic-result-modal>div,[class$="-modal"]>div,[class*="modal-box"],[class*="popup"],[class*="dialog"]):not(.modal-overlay){
+  background:#fff;color:var(--u-ink);border:1px solid var(--u-line);border-radius:var(--u-r-l);box-shadow:var(--u-sh-m)}
+html:root body :where(.modal-header){background:var(--u-navy);color:#fff;border-radius:var(--u-r-l) var(--u-r-l) 0 0;padding:14px 18px;font-weight:700;border:0}
+html:root body :where(.modal-header *){color:#fff}
+html:root body :where(.modal-footer){border-top:1px solid var(--u-line-s);padding:12px 18px;display:flex;gap:8px;justify-content:flex-end}
+
+/* ---------- Bildirişlər (toast) ---------- */
+html:root body :where(.toast,.prt-toast,.yq-toast,[class$="-toast"]){background:var(--u-navy-d);color:#fff;border-radius:var(--u-r);box-shadow:var(--u-sh-m);font-weight:600;font-size:14px}
+
+/* ---------- Alt məlumat ---------- */
+html:root body :where(.footer-text,.footer-back,footer){color:var(--u-mut);font-size:13px}
+html:root body :where(.error,.err){color:var(--u-err);font-weight:600;font-size:13px}
+
+/* ---------- Sürüşdürmə zolağı ---------- */
+html:root body ::-webkit-scrollbar{width:10px;height:10px}
+html:root body ::-webkit-scrollbar-thumb{background:#c3cee3;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+html:root body ::-webkit-scrollbar-thumb:hover{background:#9fb0d0;background-clip:padding-box;border:2px solid transparent}
+html:root body ::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- Mobil ---------- */
+@media(max-width:640px){
+  html:root body :where(.btn,.btn-save,.btn-action):not(.btn-sm){padding:12px 16px}
+  html:root body :where(.form-control,input,select,textarea){font-size:16px}
+}
+@media print{html body{background:#fff}}
+
+/* ==========================================================================
+   İdarəetmə və alət səhifələri: sinifsiz elementlər də eyni görünsün
+   (body.dq-admin / body.dq-tool — ana səhifəyə toxunmur)
+   ========================================================================== */
+html:root body:is(.dq-admin,.dq-tool) .container{background:#fff;border:1px solid var(--u-line);border-radius:var(--u-r-l);box-shadow:var(--u-sh)}
+html:root body:is(.dq-admin,.dq-tool) button:not([class*="fa"]):not(.tab):not([class$="-tab"]):not(.toggle-btn):not(.filter-btn):not(.menu-btn):not(.btn-secondary):not(.close):not([class*="close"]):not([class*="sidebar"]):not(.btn-sm){
+  background:var(--u-navy);color:#fff;border:1px solid var(--u-navy);border-radius:var(--u-r);font-family:var(--u-font);font-weight:600;box-shadow:none}
+html:root body:is(.dq-admin,.dq-tool) button:not([class*="fa"]):not(.tab):not([class$="-tab"]):not(.toggle-btn):not(.filter-btn):not(.menu-btn):not(.btn-secondary):not(.close):not([class*="close"]):not([class*="sidebar"]):not(.btn-sm):hover{background:var(--u-navy-h);border-color:var(--u-navy-h)}
+html:root body:is(.dq-admin,.dq-tool) :where(.logout-btn,.delete-btn,.btn-danger){background:var(--u-err);border-color:var(--u-err);color:#fff}
+html:root body:is(.dq-admin,.dq-tool) .success{color:var(--u-ok);font-weight:600}
+html:root body:is(.dq-admin,.dq-tool) :where(ul.list,ul){border-color:var(--u-line)}
+html:root body:is(.dq-admin,.dq-tool) :where(li){border-color:var(--u-line-s)}
+html:root body:is(.dq-admin,.dq-tool) .module-card{background:#fff;color:var(--u-navy);border:1px solid var(--u-line);border-radius:var(--u-r-l);box-shadow:var(--u-sh);transform:none}
+html:root body:is(.dq-admin,.dq-tool) .module-card:hover{background:var(--u-navy);color:#fff;border-color:var(--u-navy);transform:none;box-shadow:var(--u-sh)}
+html:root body:is(.dq-admin,.dq-tool) input:focus{border-color:var(--u-navy)}
+
+/* ---------- Tünd köhnə səhifələrdən qalan mətn rəngləri ---------- */
+html:root body :where(.catalog-card,.stat-card,.card,.admin-card,.card-box,.folder-card,.admin-nav-card) :where(.title,h4,h3,.card-title,.folder-title){color:var(--u-navy)}
+html:root body :where(.catalog-card,.folder-card) :where(.path,.card-desc,.folder-desc,.card-info,p,small){color:var(--u-mut)}
+html:root body .catalog-card i{color:var(--u-navy)}
+html:root body :where(.stat-card) h4{color:var(--u-mut);font-weight:600}
+html:root body :where(.stat-card) :where(.num,.value,.stat-value){color:var(--u-navy)}
+html:root body input[type=color]{height:42px;padding:3px;width:100%;cursor:pointer}
+html:root body:is(.dq-admin) :where(.sidebar){background:var(--u-navy-d);background-image:none}
+html:root body:is(.dq-admin) :where(.sidebar) :where(a,button,li){background-image:none}
+
+/* ==========================================================================
+   Köhnə tünd/narıncı palitranın qalıqları (yalnız idarəetmə səhifələri)
+   ========================================================================== */
+html:root body.dq-admin{background:var(--u-bg)!important;color:var(--u-ink)!important}
+html:root body.dq-admin .container{background:#fff!important;color:var(--u-ink)!important;box-shadow:var(--u-sh)!important}
+html:root body.dq-admin :where(.header h2,.header h1,h1,h2,h3,h4,.modules-title,.page-title,.header-title){color:var(--u-navy)!important}
+html:root body.dq-admin .stat-card{background:#fff!important;border:1px solid var(--u-line)!important}
+html:root body.dq-admin .stat-card h4{color:var(--u-mut)!important}
+html:root body.dq-admin .stat-card .num,html:root body.dq-admin .stat-card .value{color:var(--u-navy)!important}
+html:root body.dq-admin .admin-nav-card{background:#fff!important;color:var(--u-navy)!important;border:1px solid var(--u-line)!important;border-radius:var(--u-r)!important;box-shadow:none!important}
+html:root body.dq-admin .admin-nav-card:hover,html:root body.dq-admin .admin-nav-card.active{background:var(--u-navy)!important;color:#fff!important;border-color:var(--u-navy)!important}
+html:root body.dq-admin .tab-content{background:transparent!important;color:var(--u-ink)!important;border-color:var(--u-line)!important}
+html:root body.dq-admin .form-control,html:root body.dq-admin select,html:root body.dq-admin textarea,html:root body.dq-admin input:not([type=checkbox]):not([type=radio]):not([type=color]){background:#fff!important;color:var(--u-ink)!important;border:1px solid var(--u-line)!important;border-radius:var(--u-r)!important}
+html:root body.dq-admin .form-control:focus,html:root body.dq-admin input:focus,html:root body.dq-admin select:focus,html:root body.dq-admin textarea:focus{border-color:var(--u-navy)!important;box-shadow:var(--u-ring)!important}
+html:root body.dq-admin .option-row,html:root body.dq-admin .q-opt{background:var(--u-bg)!important;border:1px solid var(--u-line)!important;color:var(--u-ink)!important}
+html:root body.dq-admin .option-label{color:var(--u-navy)!important}
+html:root body.dq-admin :where(th){background:var(--u-navy)!important;color:#fff!important}
+html:root body.dq-admin :where(td){color:var(--u-ink)!important;border-color:var(--u-line-s)!important}
+html:root body.dq-admin .btn-warning{background:var(--u-warn)!important;color:#fff!important}
+html:root body.dq-admin .filter-btn.active,html:root body.dq-admin .menu-btn.active{background:var(--u-navy)!important;color:#fff!important}
+html:root body.dq-admin .filter-btn{color:var(--u-navy)!important}
+html:root body.dq-admin .catalog-card{background:#fff!important}
+html:root body.dq-admin .catalog-card .title{color:var(--u-navy)!important;font-weight:700}
+html:root body.dq-admin .catalog-card .path,html:root body.dq-admin .catalog-card .card-info{color:var(--u-mut)!important}
+html:root body.dq-admin .catalog-card i{color:var(--u-navy)!important}
+html:root body.dq-admin .modal-content{background:#fff!important;color:var(--u-ink)!important}
+html:root body.dq-admin .btn-warning{background:#fff!important;color:var(--u-navy)!important;border:1px solid var(--u-navy)!important}
+html:root body.dq-admin .btn-warning:hover{background:var(--u-navy-l)!important}
+html:root body.dq-admin :where(.stats,.counter,.count-badge,.badge-count){background:var(--u-navy)!important;color:#fff!important}
+
+/* ==========================================================================
+   v3 — Düymə sistemi: təhlükəli (Sil), bağla (×), vəziyyətlər, toxunma sürəti
+   ========================================================================== */
+/* Toxunma gecikməsi yoxdur, boz vurğu yoxdur, mətn seçilmir */
+html:root body :where(button,a,[role=button],select,summary,label,input[type=checkbox],input[type=radio]){touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+html:root body :where(button,[role=button]){user-select:none;-webkit-user-select:none}
+
+/* Ümumi düymə davranışı: basılma, fokus, deaktiv */
+html:root body :where(button,.btn):not(:disabled):active{transform:translateY(1px)}
+html:root body :where(button,.btn):focus-visible{outline:2px solid var(--u-navy);outline-offset:2px}
+html:root body :where(button,.btn):disabled,html:root body :where(button,.btn)[aria-disabled=true]{opacity:.55;cursor:not-allowed;transform:none;pointer-events:auto}
+html:root body :where(button,.btn).is-loading{position:relative;color:transparent!important;pointer-events:none}
+html:root body :where(button,.btn).is-loading::after{content:"";position:absolute;inset:0;margin:auto;width:16px;height:16px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:dq-spin .6s linear infinite}
+@keyframes dq-spin{to{transform:rotate(360deg)}}
+
+/* SİL / LƏĞV: siyahı daxilində yığcam, eyni ölçü və eyni rəng */
+html:root body :where(.delete-btn,.dsil,.btn-del,.pu-del,.ppu-del,.qp-rm,.dqx-rm,.btn-outline-danger){
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:32px;padding:0 12px;border-radius:var(--u-r);
+  background:#fff;color:var(--u-err);border:1px solid #efc3c3;
+  font-family:var(--u-font);font-size:12.5px;font-weight:600;line-height:1;white-space:nowrap;cursor:pointer;box-shadow:none;text-shadow:none;
+  transition:background .15s,border-color .15s,color .15s}
+html:root body :where(.delete-btn,.dsil,.btn-del,.pu-del,.ppu-del,.qp-rm,.dqx-rm,.btn-outline-danger):hover{background:var(--u-err-l);border-color:var(--u-err);color:#991b1b;transform:none}
+html:root body :where(.delete-btn,.dsil,.btn-del,.pu-del,.ppu-del,.qp-rm,.dqx-rm,.btn-outline-danger):active{background:#fbd9d9}
+html:root body :where(.btn-outline-danger.btn){padding:0 14px}
+/* Təsdiq edən təhlükəli əməliyyat: dolu qırmızı */
+html:root body :where(.btn-danger){background:var(--u-err);border:1px solid var(--u-err);color:#fff}
+html:root body :where(.btn-danger):hover{background:#991b1b;border-color:#991b1b;color:#fff}
+html:root body :where(.btn-danger):active{background:#7f1616}
+html:root body :where(.logout-btn){background:#fff;color:var(--u-err);border:1px solid #efc3c3}
+html:root body :where(.logout-btn):hover{background:var(--u-err-l);border-color:var(--u-err);color:#991b1b}
+
+/* Bağla (×) düymələri: bütün pəncərələrdə eyni toxunma sahəsi və hover */
+html:root body :where(.close,.close-btn,.graphic-modal-close,.calculator-close-btn,.dqb-close,[class$="-x"],[class*="-x "]):not(.fa-x):not(i){
+  color:var(--u-mut);background:transparent;border:0;border-radius:var(--u-r-s);cursor:pointer;
+  transition:background .15s,color .15s;text-shadow:none;box-shadow:none}
+html:root body :where(.close,.close-btn,.graphic-modal-close,.calculator-close-btn,.dqb-close,[class$="-x"],[class*="-x "]):not(.fa-x):not(i):hover{background:var(--u-err-l);color:var(--u-err)}
+/* Tünd başlıqlı pəncərələrdə × ağ qalır */
+html:root body :where(.modal-header,.dlg-h,.dq-modal-h) :where(.close,.close-btn,[class$="-x"]){color:#fff}
+html:root body :where(.modal-header,.dlg-h,.dq-modal-h) :where(.close,.close-btn,[class$="-x"]):hover{background:rgba(255,255,255,.16);color:#fff}
+
+/* Kiçik / ikon düymələr: eyni hündürlük */
+html:root body :where(.btn-sm){min-height:32px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+html:root body :where(.btn):not(.btn-sm){min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+
+/* Hərəkət azaldılması seçilibsə animasiya yoxdur */
+@media(prefers-reduced-motion:reduce){html:root body *{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* Düymə ölçüsü: bütün səhifələrdə eyni (səhifə daxili böyük padding-lər üstələnir) */
+html:root body .btn:not(.btn-sm):not(.btn-outline-danger),html:root body .btn-save,html:root body .btn-action,html:root body .back-btn{padding:0 18px;min-height:40px;height:auto;font-size:14px;line-height:1.2}
+html:root body .btn.btn-sm:not(.btn-outline-danger){padding:0 12px;min-height:32px;height:auto;font-size:12.5px}
+html:root body.dq-admin .top-bar{align-items:center}

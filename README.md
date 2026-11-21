@@ -10,7 +10,7 @@ Dövlət qulluğu üzrə sınaq və fənn testləri platforması. Statik front-e
 |---|---|
 | `index.html` | Əsas tətbiq (giriş nöqtəsi). Skriptlər `?v=N` ilə çağırılır |
 | `app.js`, `dq-*.js`, `yspro.js`, `sual-studio.js`, `chatbot.js` | Tətbiq modulları (`index.html`-də yüklənmə sırası ilə) |
-| `dq-*.css` | Üslublar: `dq-premium.css`, `dq-redesign.css`, `dq-premium-pro.css`, `dq-design.css`; **`dq-gov.css` ən sonda yüklənir** və ana səhifənin rəsmi (açıq fon, tünd göy) görünüşünü təyin edir |
+| `dq-*.css` | Üslublar: `dq-premium.css`, `dq-redesign.css`, `dq-premium-pro.css`, `dq-design.css`; `dq-ui.css` (vahid UI sistemi: düymə, forma, cədvəl, tab, modal, nişan; bütün səhifələrdə ən sonda); **`dq-gov.css` ana səhifənin rəsmi görünüşünü təyin edir** və ana səhifənin rəsmi (açıq fon, tünd göy) görünüşünü təyin edir |
 | `giris.html`, `imtahan-giris.html` | İmtahana giriş səhifələri |
 | `admin.html`, `Kabinet.html`, `Operator.html`, `merkez.html`, `redakte.html`, `Idare.html`, `Kod.html`, `Kontrol.html`, `Pult.html`, `Siyaha.html`, `Statistika.html`, `Suallar.html`, `Cavablar.html`, `modul.html` | İdarəetmə səhifələri (`noindex`) |
 | `pdf-studio.html`, `pdf.html`, `fon-temizle.html`, `elan-idareetme.html`, `proysl.html` | Köməkçi alətlər |
@@ -32,3 +32,7 @@ npx wrangler deploy
 ## Yeniləmə qaydası
 
 Skript və ya üslub faylı dəyişəndə `index.html`-də həmin faylın `?v=N` nömrəsini artırın.
+
+## Keşləmə və yükləmə
+
+`_headers` hər fayl üçün tək `Cache-Control` təyin edir (JS/CSS 1 gün + 7 gün arxa fonda yenilənmə, şəkillər 30 gün, `service-worker.js` həmişə təzə yoxlanır). Fayl dəyişəndə `?v=N` nömrəsini artırın.
