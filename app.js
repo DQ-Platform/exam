@@ -4623,7 +4623,13 @@ setInterval(wrap,700);wrap();
     var v = { users: 0, exams: 0, mocks: 0, qs: 0 };
     v.qs = await count("exam_questions");
     try {
-      var regs = (await V2.list("regs")).filter(function (r) { return r.status === "approved"; }).length;
+      /* Ana səhifə statistikası üçün bütün qeydiyyatları (şəxsi məlumatlarla) yükləmək əvəzinə yalnız sayı soruşulur */
+      var regs = null;
+      try {
+        var rq = await _supabase.from("dq_v2_store").select("id", { count: "exact", head: true }).eq("collection", "regs").eq("data->>status", "approved");
+        if (rq && !rq.error && typeof rq.count === "number") regs = rq.count;
+      } catch (e) { regs = null; }
+      if (regs === null) regs = (await V2.list("regs")).filter(function (r) { return r.status === "approved"; }).length;
       v.users = Math.max(regs, await count("allowed_students"));
     } catch (e) { }
     try {

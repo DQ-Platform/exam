@@ -48,24 +48,6 @@ D.addEventListener("DOMContentLoaded",free);addEventListener("load",free);
 })();
 </script>
 
-<script id="dq-dbg">/* DIAQNOSTİKA: ?dbg=1 — sürüşmə donanda ekranda səbəbi göstərir */
-(function(){if(!/[?&]dbg=1(&|$)/.test(location.search))return;
-var D=document,H=D.documentElement,box,lx=0,ly=0,tm=0,pd=0,nc=0,lastPD="-",npd=0;
-function cs(e){return getComputedStyle(e)}
-function nm(e){if(!e)return"null";var r=e.getRootNode&&e.getRootNode(),sh=r&&r.host?"(shadow:"+(r.host.id||r.host.tagName)+")":"";return e.tagName+(e.id?"#"+e.id:"")+(typeof e.className==="string"&&e.className?"."+e.className.trim().split(/\s+/)[0].slice(0,18):"")+sh}
-function chain(x,y){var e=D.elementFromPoint(x,y),out=[],k=0;while(e&&k<7){var c=cs(e);out.push(nm(e)+" "+c.position[0]+"|ov:"+c.overflowY+"|ta:"+c.touchAction+"|pe:"+c.pointerEvents+(e.scrollHeight>e.clientHeight+4?"|sh>ch":""));e=e.parentElement||(e.getRootNode&&e.getRootNode().host)||null;k++}return out}
-function fixedBig(){var o=[],a=D.body.children;for(var i=0;i<a.length;i++){var e=a[i];if(/SCRIPT|STYLE/.test(e.tagName))continue;var c=cs(e);if(c.position==="fixed"&&c.display!=="none"&&c.visibility!=="hidden"){var r=e.getBoundingClientRect();if(r.width>innerWidth*.6&&r.height>innerHeight*.6)o.push(nm(e)+" pe:"+c.pointerEvents+" op:"+c.opacity)}}return o}
-function upd(){try{if(!box){box=D.createElement("pre");box.style.cssText="position:fixed;left:0;top:0;right:0;z-index:2147483647;margin:0;padding:4px 6px;background:rgba(0,0,0,.82);color:#7CFC00;font:10px/1.25 monospace;white-space:pre-wrap;pointer-events:none;max-height:45vh;overflow:hidden";(D.body||H).appendChild(box)}
-var b=D.body,t=["sY:"+Math.round(scrollY)+" sH:"+H.scrollHeight+" iH:"+innerHeight+" iW:"+innerWidth,
-"html ov:"+cs(H).overflowY+" ta:"+cs(H).touchAction+" cls:"+H.className,
-"body ov:"+cs(b).overflowY+" pos:"+cs(b).position+" ta:"+cs(b).touchAction+" cls:"+b.className.slice(0,40),
-"touchmove: total "+nc+" | defaultPrevented "+npd+" (son: "+lastPD+")",
-"fixed böyük: "+(fixedBig().join(" ; ")||"yoxdur"),
-"toxunuş ("+Math.round(lx)+","+Math.round(ly)+"):"].concat(chain(lx,ly));
-box.textContent=t.join("\n")}catch(e){if(box)box.textContent="dbg xəta: "+e}}
-["touchstart","touchmove","touchend"].forEach(function(n){addEventListener(n,function(e){var t=e.touches[0]||e.changedTouches[0];if(t){lx=t.clientX;ly=t.clientY}if(n==="touchmove"){nc++}},{capture:true,passive:true})});
-addEventListener("touchmove",function(e){if(e.defaultPrevented){npd++;lastPD=nm(e.target)}},{passive:true});
-setInterval(upd,400);addEventListener("scroll",upd,{passive:true})})();</script>
 <script>/* TEST: ?off=all  və ya  ?off=early,stack,corner,guard,back,qmv,imtahanpro,giris,elan,qapaq,studio,kecid,scroll */
 window.__dqOff={};try{((location.search.match(/[?&]off=([^&]*)/)||[0,""])[1]).split(",").forEach(function(k){if(k)window.__dqOff[k]=1});
 if(window.__dqOff.all)["early","back","corner","stack","guard","qmv","imtahanpro","giris","elan","qapaq","studio","kecid","scroll"].forEach(function(k){window.__dqOff[k]=1})}catch(e){}</script>
@@ -307,14 +289,13 @@ window.setInterval=function(fn,d){
 };
 })();
 </script>
-<link rel="preload" as="script" href="dq-net.js?v=1">
-<link rel="preload" as="script" href="app.js?v=49">
+<link rel="preload" as="script" href="dq-net.js?v=2">
+<link rel="preload" as="script" href="app.js?v=50">
 <link rel="preload" as="script" href="dq-qapaq.js?v=2">
 <link rel="preload" as="script" href="dq-birlesdirme.js?v=5">
 <link rel="preload" as="script" href="dq-lock.js?v=1">
 <link rel="preload" as="script" href="yspro.js?v=1">
 <link rel="preload" as="script" href="dq-core.js?v=3">
-<link rel="preload" as="script" href="dq-hero.js?v=2">
 <link rel="preload" as="script" href="dq-materials.js?v=3">
 <link rel="preload" as="script" href="dq-live.js?v=1">
 <link rel="preload" as="script" href="dq-home2.js?v=2">
@@ -453,7 +434,7 @@ window.Tesseract=T;
 window.__dqLibs=(function(o){return function(k){if(k==="ocr")return real().then(function(){});return o?o.apply(this,arguments):Promise.resolve()}})(window.__dqLibs);
 })();</script>
 <script src="dq-admin.js?v=4"></script>
-<script src="dq-net.js?v=1"></script>
+<script src="dq-net.js?v=2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
@@ -5950,7 +5931,7 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 @media(max-width:560px){#dqs-root .dqs-p{margin:0;border-radius:0;min-height:100%}#dqs-root .dqs-c{flex-direction:column;align-items:stretch}#dqs-root .dqs-pv{width:100%}}
 </style>
 <script src="dq-qapaq.js?v=2"></script>
-<script src="app.js?v=49"></script>
+<script src="app.js?v=50"></script>
 <script src="sual-studio.js?v=1"></script>
 <script src="dq-birlesdirme.js?v=5"></script>
 <script src="dq-oxuyucu.js?v=1"></script>
@@ -5961,7 +5942,6 @@ E) Lənkəran" oninput="autoParseCopyPasteText()"></textarea>
 <script src="yspro.js?v=1"></script>
 <script src="dq-core.js?v=3"></script>
 <script src="dq-qpro.js?v=5"></script>
-<script src="dq-hero.js?v=2"></script>
 <script src="dq-materials.js?v=3"></script>
 <script src="dq-live.js?v=1"></script>
 <script src="dq-home2.js?v=2"></script>
@@ -9915,7 +9895,7 @@ var ARROW='<span class="dqn-go"><svg viewBox="0 0 16 16" fill="none" stroke="#1a
 var CAP='<svg class="dqn-cap" viewBox="0 0 48 48" fill="none"><path d="M24 8 3 18l21 10 21-10L24 8Z" fill="#f2c14e"/><path d="M11 24v9c0 3 6 6 13 6s13-3 13-6v-9l-13 6-13-6Z" fill="#c8921f"/><path d="M43 19v12" stroke="#f2c14e" stroke-width="2.5" stroke-linecap="round"/></svg>';
 function norm(s){return String(s||"").replace(/\s+/g," ").trim()}
 function kind(t){t=t.toLowerCase().replace(/\u0307/g,"");if(t.indexOf("azərbaycan")>-1)return"az";if(t.indexOf("qanun")>-1)return"qa";if(t.indexOf("informatika")>-1)return"inf";if(t.indexOf("məntiq")>-1)return"mq";return"gen"}
-function origText(card){var s="";[].forEach.call(card.childNodes,function(n){if(n.nodeType===1&&n.classList.contains("dqn-face"))return;s+=" "+(n.textContent||"")});return norm(s)}
+function origText(card){var s="";[].forEach.call(card.childNodes,function(n){if(n.nodeType===1&&(n.classList.contains("dqn-face")||n.classList.contains("dqcv")))return;s+=" "+(n.textContent||"")});return norm(s)}
 function title(card,txt){var t=txt.replace(/\d+[.,]?\d*\s*AZN/ig,"").replace(/Pulsuz/ig,"").replace(/\d+\s*sual/ig,"").replace(/\d+\s*d[əe]q/ig,"").replace(/FƏNN/ig,"").replace(/Testə keç/ig,"").replace(/[→←]/g,"");return norm(t)}
 function build(card){
  var txt=origText(card),nm=title(card,txt),k=kind(txt);
@@ -10260,5 +10240,6 @@ document.addEventListener("click",function(e){var b=e.target&&e.target.closest&&
 })();
 </script>
 <link rel="stylesheet" href="dq-design.css?v=1">
+<link rel="stylesheet" href="dq-gov.css?v=3">
 </body>
 </html>

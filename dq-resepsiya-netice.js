@@ -206,12 +206,7 @@
     tr.setAttribute("data-dqx-row", "1");
   }
 
-  function properName(s) {
-    return String(s).trim().split(/\s+/).map(function (w) {
-      return w.charAt(0).toLocaleUpperCase("az") + w.slice(1).toLocaleLowerCase("az");
-    }).join(" ");
-  }
-  function fillRes(tr, rows) {
+    function fillRes(tr, rows) {
     var tds = tr.children;
     if (tds.length < 6 || tr.getAttribute("data-dqx-row")) return;
     var fin = up(tds[1].textContent);

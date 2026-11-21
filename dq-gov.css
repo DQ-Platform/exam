@@ -1,0 +1,111 @@
+/* DQ Platform — rəsmi (institusional) tema. Ən son yüklənir və tünd/qızılı dizaynı əvəz edir.
+   Palitra: tünd göy (əsas), açıq boz fon, nazik sərhədlər, düz rənglər (gradient və kölgə yoxdur). */
+:root{--gv-navy:#0b3b7a;--gv-navy-d:#082c5c;--gv-blue:#1d5fb4;--gv-soft:#eaf1fb;--gv-bg:#f3f5f9;--gv-line:#d8dee9;--gv-tx:#1b2a41;--gv-mt:#5a6b82;--gv-ok:#1a7f4b;--gv-red:#b3261e}
+html body #v3-home.dqr-on{background:var(--gv-bg)}
+html body #v3-home #dqr#dqr{--bg:var(--gv-bg);--ln:var(--gv-line);--gd:var(--gv-navy);--gd2:var(--gv-blue);--tx:var(--gv-tx);--mt:var(--gv-mt);--pn:#fff;--grad:var(--gv-navy);
+ background:var(--gv-bg);color:var(--gv-tx);font-family:"Noto Sans","Segoe UI",Roboto,Arial,sans-serif}
+/* dekorativ effektlər söndürülür */
+#dqw-glow,#dqw-cv{display:none!important}
+html body #v3-home #dqr#dqr *{text-shadow:none!important}
+/* ---- başlıq ---- */
+html body #v3-home #dqr#dqr header.hd{box-shadow:none;border-bottom:1px solid var(--gv-line);background:#fff}
+html body #v3-home #dqr#dqr .hd .h1{background:var(--gv-navy-d);color:#e6edf8}
+html body #v3-home #dqr#dqr .hd .h2{background:#fff;border-bottom:1px solid var(--gv-line)}
+html body #v3-home #dqr#dqr .hd .h2 .lg,html body #v3-home #dqr#dqr .hd .h2 .lg *{color:var(--gv-navy)!important;letter-spacing:.02em}
+html body #v3-home #dqr#dqr .hd .h2 .tb{background:#fff;border:1px solid var(--gv-line);color:var(--gv-navy);box-shadow:none;border-radius:4px}
+html body #v3-home #dqr#dqr .hd .h2 .tb:hover{background:var(--gv-soft);transform:none}
+html body #v3-home #dqr#dqr .hd .h3{background:var(--gv-navy);border-bottom:0}
+html body #v3-home #dqr#dqr .hd .h3 nav a{color:#fff;font-weight:600;text-transform:uppercase;letter-spacing:.03em;font-size:12.5px}
+html body #v3-home #dqr#dqr .hd .h3 nav a:hover{background:rgba(255,255,255,.12);color:#fff}
+html body #v3-home #dqr#dqr .hd .h3 nav a.on{background:var(--gv-navy-d);color:#fff}
+html body #v3-home #dqr#dqr .hd .h3 nav a.on:after{left:0;right:0;height:3px;border-radius:0;background:#fff}
+/* ---- düymələr ---- */
+html body #v3-home #dqr#dqr .b,html body #v3-home #dqr#dqr .cta{border-radius:4px;box-shadow:none;filter:none;transform:none}
+html body #v3-home #dqr#dqr .b{background:#fff;color:var(--gv-navy);border:1px solid var(--gv-navy)}
+html body #v3-home #dqr#dqr .b.g,html body #v3-home #dqr#dqr .cta{background:var(--gv-navy);color:#fff;border:1px solid var(--gv-navy)}
+html body #v3-home #dqr#dqr .b:hover,html body #v3-home #dqr#dqr .cta:hover{background:var(--gv-navy-d);color:#fff;transform:none;filter:none}
+html body #v3-home #dqr#dqr .cta i{background:#fff;color:var(--gv-navy)}
+/* ---- giriş bloku (hero) ---- */
+html body #v3-home #dqr#dqr .hero{background:var(--gv-navy);border-bottom:4px solid var(--gv-navy-d)}
+html body #v3-home #dqr#dqr .hero .bg{display:none}
+html body #v3-home #dqr#dqr .hero,html body #v3-home #dqr#dqr .hero h1,html body #v3-home #dqr#dqr .hero p,html body #v3-home #dqr#dqr .hero .ey{color:#fff}
+html body #v3-home #dqr#dqr .hero h1 span,html body #v3-home #dqr#dqr .hero h1 em,html body #v3-home #dqr#dqr .hero h1 b{color:#cfe0f7}
+html body #v3-home #dqr#dqr .hero .ey{letter-spacing:.14em;color:#b9cdea}
+html body #v3-home #dqr#dqr .hero .cta{background:#fff;color:var(--gv-navy);border-color:#fff}
+html body #v3-home #dqr#dqr .hero .cta i{background:var(--gv-navy);color:#fff}
+/* ---- kartlar və bölmələr ---- */
+html body #v3-home #dqr#dqr .ex,html body #v3-home #dqr#dqr .dpn,html body #v3-home #dqr#dqr .duo,html body #v3-home #dqr#dqr .feat>div,html body #v3-home #dqr#dqr .wy,html body #v3-home #dqr#dqr .an,html body #v3-home #dqr#dqr .bn,html body #v3-home #dqr#dqr .dvl,html body #v3-home #dqr#dqr .cp{background:#fff!important;color:var(--gv-tx)!important;border:1px solid var(--gv-line)!important;border-radius:6px!important;box-shadow:none!important}
+html body #v3-home #dqr#dqr .ex *,html body #v3-home #dqr#dqr .dpn *,html body #v3-home #dqr#dqr .an h2,html body #v3-home #dqr#dqr .an p,html body #v3-home #dqr#dqr .bn h2,html body #v3-home #dqr#dqr .bn p{color:inherit}
+html body #v3-home #dqr#dqr .ex:hover{border-color:var(--gv-navy)!important}
+html body #v3-home #dqr#dqr .ex .b{background:var(--gv-navy)!important;color:#fff!important;border-radius:4px;box-shadow:none}
+html body #v3-home #dqr#dqr .ex .cv,html body #v3-home #dqr#dqr .ex .wm,html body #v3-home #dqr#dqr .bn .bnimg,html body #v3-home #dqr#dqr .bn:before,html body #v3-home #dqr#dqr .an:before,html body #v3-home #dqr#dqr .dvl:after,html body #v3-home #dqr#dqr .dvp:after{display:none!important}
+html body #v3-home #dqr#dqr section h2,html body #v3-home #dqr#dqr section h3{color:var(--gv-navy)}
+html body #v3-home #dqr#dqr #dqr-st,html body #v3-home #dqr#dqr #dq-count .dqcd-in{background:var(--gv-navy)!important;border:0!important;border-radius:6px!important;color:#fff!important}
+html body #v3-home #dqr#dqr .ft,html body #v3-home #dqr#dqr .v3-ft{background:var(--gv-navy-d)}
+html body #v3-home .v3-ft{background:var(--gv-navy-d)!important;color:#dbe6f6}
+html body #v3-home .v3-ft a{color:#fff}
+/* ---- qeydiyyat zolağı, sayğaclar, statistika ---- */
+html body #v3-home #dqr#dqr #lxp-ban,html body #v3-home #dqr#dqr #lxp-ban .lxp-bi{background:var(--gv-soft)!important;background-image:none!important;border:1px solid var(--gv-line)!important;border-radius:6px!important;color:var(--gv-tx)!important;box-shadow:none!important}
+html body #v3-home #dqr#dqr #lxp-ban *{color:inherit!important}
+html body #v3-home #dqr#dqr #lxp-ban a,html body #v3-home #dqr#dqr #lxp-ban button{background:var(--gv-navy)!important;background-image:none!important;color:#fff!important;border-radius:4px!important;box-shadow:none!important}
+html body #v3-home #dqr#dqr button,html body #v3-home #dqr#dqr .dqn-btn{background-image:none}
+html body #v3-home #dqr#dqr .ex{background-image:none!important;min-height:0}
+html body #v3-home #dqr#dqr .ex,html body #v3-home #dqr#dqr .ex h3,html body #v3-home #dqr#dqr .ex p,html body #v3-home #dqr#dqr .ex small,html body #v3-home #dqr#dqr .ex .tp{color:var(--gv-tx)!important}
+html body #v3-home #dqr#dqr .ex .ci{background:var(--gv-soft)!important;background-image:none!important;color:var(--gv-navy)!important;border:1px solid var(--gv-line)}
+html body #v3-home #dqr#dqr .ex .tag{background:var(--gv-soft)!important;color:var(--gv-navy)!important;border:1px solid var(--gv-line)!important}
+html body #v3-home #dqr#dqr .ex .b,html body #v3-home #dqr#dqr .ex .b *{background-image:none!important;color:#fff!important}
+html body #v3-home #dqr#dqr .ring{background:none!important;border:6px solid var(--gv-soft);border-top-color:var(--gv-navy);border-radius:50%}
+html body #v3-home #dqr#dqr .ring b,html body #v3-home #dqr#dqr .bars{background:#fff!important;color:var(--gv-navy)!important;border:1px solid var(--gv-line)}
+html body #v3-home #dqr#dqr .an *,html body #v3-home #dqr#dqr .an small{color:var(--gv-tx)!important}
+html body #v3-home #dqr#dqr .bars s{background:var(--gv-soft)!important}
+html body #v3-home #dqr#dqr .bars s i{background:var(--gv-navy)!important}
+html body #v3-home #dqr#dqr #dq-why-stats,html body #v3-home #dqr#dqr #dq-why-stats *{color:#fff}
+html body #v3-home #dqr#dqr #dq-why-stats{background:var(--gv-navy)!important;background-image:none!important;border-radius:6px!important;box-shadow:none!important}
+html body #v3-home #dqr#dqr .bn,html body #v3-home #dqr#dqr .bn *{color:var(--gv-tx)!important}
+html body #v3-home #dqr#dqr .bn .cta{color:#fff!important}
+html body #v3-home #dqr#dqr .hero .ey,html body #v3-home #dqr#dqr .hero p,html body #v3-home #dqr#dqr .hero h1,html body #v3-home #dqr#dqr .hero h1 *{color:#fff!important}
+html body #v3-home #dqr#dqr .hero .feat>div{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.25)!important;color:#fff!important}
+html body #v3-home #dqr#dqr .hero .feat>div *{color:#fff!important}
+html body #v3-home .v3-ft{border-top:0!important}
+html body #v3-home #dqr#dqr .hd .h1,html body #v3-home #dqr#dqr .hd .h1 *{color:#e6edf8}
+/* ---- fənn kartları: dekorativ qapaq və təkrarlanan yazı götürülür ---- */
+html body #v3-home #dqr#dqr .dqcv{display:none!important}
+html body #v3-home #dqr#dqr .dqn-btn,html body #v3-home #dqr#dqr .dqn-go{background:var(--gv-navy)!important;color:#fff!important;box-shadow:none!important}
+/* ---- salamlama pəncərəsi ---- */
+html body .dqg-ov{background:rgba(11,30,60,.55)!important}
+html body .dqg-c{border-radius:6px!important;box-shadow:0 8px 30px rgba(8,44,92,.25)!important;border-top:4px solid var(--gv-navy)}
+html body .dqg-c .dqg-i,html body .dqg-c>div:first-child{background:var(--gv-navy)!important;box-shadow:none!important;border-radius:6px!important}
+html body .dqg-p{background:var(--gv-navy)!important;border-radius:4px!important;box-shadow:none!important}
+/* ---- düzəlişlər: üst zolaq, hero xüsusiyyətləri, qeydiyyat düyməsi ---- */
+html body #v3-home #dqr#dqr #lxp-ban a *,html body #v3-home #dqr#dqr #lxp-ban button *{color:#fff!important}
+html body #v3-home #dqr#dqr .hd .h1 a,html body #v3-home #dqr#dqr .hd .h1 svg{color:#e6edf8!important}
+html body #v3-home #dqr#dqr .hd .h1 .so a,html body #v3-home #dqr#dqr .hd .h1 .sc a,html body #v3-home #dqr#dqr .hd .h1 a[href*="facebook"],html body #v3-home #dqr#dqr .hd .h1 a[href*="instagram"],html body #v3-home #dqr#dqr .hd .h1 a[href*="wa.me"]{background:rgba(255,255,255,.14)!important;color:#fff!important;border-radius:4px}
+html body #v3-home #dqr#dqr .hero{min-height:0;padding-block:8px}
+html body #v3-home #dqr#dqr .hero .feat>div{align-items:center;gap:10px;padding:12px 14px}
+html body #v3-home #dqr#dqr .hero .feat>div i,html body #v3-home #dqr#dqr .hero .feat i{background:#fff!important;border:0!important;color:var(--gv-navy)!important;border-radius:4px!important;box-shadow:none!important}
+html body #v3-home #dqr#dqr .hero .feat i *{color:var(--gv-navy)!important;stroke:var(--gv-navy)!important}
+html body #v3-home #dqr#dqr #lxp-ban button[data-dqreg]{color:#fff!important;-webkit-text-fill-color:#fff!important;background:var(--gv-navy)!important;font-weight:700}
+html body #v3-home #dqr#dqr .sh:before,html body #v3-home #dqr#dqr .sh::before{background:var(--gv-navy)!important;background-image:none!important}
+html body #v3-home #dqr#dqr .sh h2 svg,html body #v3-home #dqr#dqr section h2 svg{filter:grayscale(1) brightness(.45) sepia(1) hue-rotate(190deg) saturate(3)}
+html body #v3-home #dqr#dqr .sh button,html body #v3-home #dqr#dqr .sh .ar{border-radius:4px!important;border:1px solid var(--gv-line)!important;background:#fff!important;color:var(--gv-navy)!important;box-shadow:none!important}
+/* ---- təhlil bölməsi, alt banner: oxunaqlı mətn, dekorativ şəkillər götürülür ---- */
+html body #v3-home #dqr#dqr .an h2,html body #v3-home #dqr#dqr .an p,html body #v3-home #dqr#dqr .bn h2,html body #v3-home #dqr#dqr .bn p,html body #v3-home #dqr#dqr .bn small{-webkit-text-fill-color:var(--gv-tx)!important;color:var(--gv-tx)!important;background:none!important;opacity:1!important}
+html body #v3-home #dqr#dqr .an h2,html body #v3-home #dqr#dqr .bn h2{color:var(--gv-navy)!important;-webkit-text-fill-color:var(--gv-navy)!important}
+html body #v3-home #dqr#dqr .an{grid-template-columns:1fr 1.4fr!important}
+html body #v3-home #dqr#dqr .an>*:not(:first-child):not(.rs){display:none!important}
+html body #v3-home #dqr#dqr .bn .cta,html body #v3-home #dqr#dqr .bn .cta *{-webkit-text-fill-color:#fff!important;color:#fff!important}
+html body #v3-home #dqr#dqr .bn .chp span{background:var(--gv-soft)!important;color:var(--gv-navy)!important;-webkit-text-fill-color:var(--gv-navy)!important;border:1px solid var(--gv-line)!important;border-radius:4px!important}
+html body #v3-home #dqr#dqr .bn .chp span *{color:var(--gv-navy)!important}
+html body #v3-home #dqr#dqr .ex .dqn-name{color:var(--gv-navy)!important}
+html body #v3-home #dqr#dqr #dq-why-stats{border-top:0!important}
+html body #v3-home #dqr#dqr #dq-why-stats *{border-color:rgba(255,255,255,.25)!important}
+html body #v3-home .v3-ft a,html body #v3-home .v3-ft [class*=link]{color:#fff!important}
+html body #v3-home .v3-ft{border-top:4px solid var(--gv-navy)!important}
+/* ---- son təmizləmə: qızılı detallar, ikonlar ---- */
+html body #v3-home #dqr#dqr .feat i,html body #v3-home #dqr#dqr .feat>div i{border-color:var(--gv-line)!important;background:var(--gv-soft)!important}
+html body #v3-home #dqr#dqr .bn .cta i,html body #v3-home #dqr#dqr .bn .cta i *{background:#fff!important;color:var(--gv-navy)!important;stroke:var(--gv-navy)!important}
+html body #v3-home .v3-ft svg,html body #v3-home .v3-ft [class*=soc] a,html body #v3-home .v3-ft a svg{color:#fff!important;stroke:#fff!important;fill:none}
+html body #v3-home .v3-ft .dq-fttx{color:#dbe6f6!important}
+html body #dqr .dqn-ico,html body #dqr .dqn-news,html body #dqr .dqn-cap{filter:saturate(.55) hue-rotate(-8deg)}
+html body #v3-home #dqr#dqr .hd .hs a{background:#fff!important;border-radius:4px!important;box-shadow:none!important}
+html body #v3-home #dqr#dqr .hd .hs a svg,html body #v3-home #dqr#dqr .hd .hs a svg *{color:var(--gv-navy)!important;stroke:var(--gv-navy)!important;fill:none}

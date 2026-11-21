@@ -162,3 +162,18 @@ html body #admin-panel .dqap-g .dqap-n{background:var(--dq-navy)!important;color
 html body #admin-panel .dqap-g{border-radius:var(--dq-r);box-shadow:var(--dq-sh);border-color:var(--dq-line)}
 html body #admin-panel .dqap-c .admin-nav-card{background:var(--dq-card)!important;border-color:var(--dq-line)!important;color:var(--dq-navy)}
 html body #admin-panel .dqap-c .admin-nav-card:hover{background:var(--dq-navy-l)!important}
+html body #lxp-ban,html body #lxp-ban .lxp-bi,html body #v3-home #lxp-ban .lxp-bi{background:var(--dq-navy)!important;background-image:none!important;box-shadow:none}
+html body #lxp-ban{border-radius:var(--dq-r);box-shadow:var(--dq-sh)!important}
+
+/* ---------- Xəbər/elan kartları: ağ paneldə oxunaqlı (başlıqlar əvvəl ağ idi) ---------- */
+html body #dqr .nw{background:var(--dq-card);border:1px solid var(--dq-line)}
+html body #dqr .nw h3,
+html body #dqr .it h3,
+html body #dqr .dpn .nw :where(h3,h4){color:var(--dq-navy)!important;-webkit-text-fill-color:var(--dq-navy)!important}
+html body #dqr .it{background:var(--dq-bg);border:1px solid var(--dq-line)}
+html body #dqr .it:hover{background:var(--dq-navy-l)}
+html body #dqr .it .dt{background:var(--dq-navy);color:#dbe5fb;border-radius:var(--dq-r-s)}
+html body #dqr .it .dt b{color:#fff!important;-webkit-text-fill-color:#fff!important}
+html body #dqr .it small,html body #dqr .nw small{color:var(--dq-mut)}
+html body #dqr .ddots i:not(.on){background:#c5d0e4}
+html body #dqr .nwi.ph,html body #dqr .nwi.ph .ic{color:var(--dq-gold)}

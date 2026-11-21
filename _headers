@@ -7,8 +7,6 @@
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 /dq-core.js
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400
-/dq-hero.js
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 /dq-live.js
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 /dq-lock.js
@@ -20,7 +18,5 @@
 /chatbot.js
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400
 # Service worker həmişə təzə yoxlanmalıdır
-/sw.js
-  Cache-Control: no-cache
 /service-worker.js
   Cache-Control: no-cache
